@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Striking out for data.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bowling For Data</title>
+<link href="assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/">
+<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/ray/introduction-to-ray/" type="text/html">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href=".">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right"></ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+
+    
+
+
+    
+<div class="postindex">
+    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/ray/introduction-to-ray/" class="u-url">Introduction to Ray</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/ray/introduction-to-ray/" rel="bookmark">
+            <time class="published dt-published" datetime="2021-11-11T18:30:38-08:00" itemprop="datePublished" title="2021-11-11 18:30">2021-11-11 18:30</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li>
+<a href="posts/ray/introduction-to-ray/#org276227b">A Simple Data Parallel Example</a>
+<ul>
+<li><a href="posts/ray/introduction-to-ray/#org81cee4b">The Concept for this Exercise - Remote Functions</a></li>
+<li><a href="posts/ray/introduction-to-ray/#org743be56">Imports</a></li>
+</ul>
+</li>
+<li>
+<a href="posts/ray/introduction-to-ray/#orgc046fd5">Starting Ray</a>
+<ul>
+<li><a href="posts/ray/introduction-to-ray/#org400a4d4">Exercise: Function to Remote Function</a></li>
+<li>
+<a href="posts/ray/introduction-to-ray/#org3d05a7d">Exercise: Parallel Execution</a>
+<ul>
+<li><a href="posts/ray/introduction-to-ray/#org64a4646">Verification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org276227b" class="outline-2">
+<h2 id="org276227b">A Simple Data Parallel Example</h2>
+<div class="outline-text-2" id="text-org276227b">
+<p>
+This comes from the <a href="https://github.com/ray-project/tutorial">ray-project tutorial</a> on github.
+</p>
+
+<p>
+<b><b>GOAL:</b></b> The goal of this exercise is to show how to run simple tasks in parallel.
+</p>
+
+<p>
+This script is too slow, and the computation is embarrassingly parallel. In this exercise, you will use Ray to execute the functions in parallel to speed it up.
+</p>
+</div>
+
+<div id="outline-container-org81cee4b" class="outline-3">
+<h3 id="org81cee4b">The Concept for this Exercise - Remote Functions</h3>
+<div class="outline-text-3" id="text-org81cee4b">
+<p>
+The standard way to turn a Python function into a remote function is to add the  <a href="https://docs.ray.io/en/latest/package-ref.html?highlight=ray.remote#ray.remote"><code>@ray.remote</code></a> decorator. Here is an example.
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># A regular Python function.</span>
+<span class="k">def</span> <span class="nf">regular_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="mi">1</span>
+
+<span class="c1"># A Ray remote function.</span>
+<span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
+<span class="k">def</span> <span class="nf">remote_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="mi">1</span>
+</pre></div>
+
+<p>
+The differences are the following:
+</p>
+
+<ol class="org-ol">
+<li>
+<b><b>Invocation:</b></b> The regular version is called with <code>regular_function()</code>, whereas the remote version is called with <code>remote_function.remote()</code>.</li>
+<li>
+<b><b>Return values:</b></b> <code>regular_function</code> immediately executes and returns <code>1</code>, whereas <code>remote_function</code> immediately returns an object ID (a future) and then creates a task that will be executed on a worker process. The result can be obtained with <code>ray.get</code>.</li>
+</ol>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">regular_function</span><span class="p">()</span>
+<span class="mi">1</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">remote_function</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+<span class="n">ObjectID</span><span class="p">(</span><span class="mi">1</span><span class="n">c80d6937802cd7786ad25e50caf2f023c95e350</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">remote_function</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+<span class="mi">1</span>
+</pre></div>
+
+<ol class="org-ol">
+<li>
+<b><b>Parallelism:</b></b> Invocations of <code>regular_function</code> happen <b><b>serially</b></b>, for example</li>
+</ol>
+<div class="highlight"><pre><span></span><span class="c1"># These happen serially.</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">regular_function</span><span class="p">()</span>
+</pre></div>
+
+<p>
+Whereas invocations of <code>remote_function</code> happen in <b><b>parallel</b></b>, for example
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># These happen in parallel.</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">remote_function</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org743be56" class="outline-3">
+<h3 id="org743be56">Imports</h3>
+<div class="outline-text-3" id="text-org743be56">
+<div class="highlight"><pre><span></span><span class="c1"># python standard library</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># from pypy</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="p">(</span><span class="n">be_above</span><span class="p">,</span> <span class="n">be_below</span><span class="p">,</span>
+		     <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">expect</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">ray</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc046fd5" class="outline-2">
+<h2 id="orgc046fd5">Starting Ray</h2>
+<div class="outline-text-2" id="text-orgc046fd5">
+<p>
+Start Ray. By default, Ray does not schedule more tasks concurrently than there are CPUs. This example requires four tasks to run concurrently, so we tell Ray that there are four CPUs. Usually this is not done and Ray computes the number of CPUs using <code>psutil.cpu_count()</code>. The argument <code>ignore_reinit_error=True</code> just ignores errors if the cell is run multiple times.
+</p>
+
+<p>
+The call to <a href="https://docs.ray.io/en/latest/package-ref.html?highlight=init#ray.init"><code>ray.init</code></a> starts a number of processes.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">ignore_reinit_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+
+<div id="outline-container-org400a4d4" class="outline-3">
+<h3 id="org400a4d4">Exercise: Function to Remote Function</h3>
+<div class="outline-text-3" id="text-org400a4d4">
+<p>
+The function below is slow. Turn it into a remote function using the <a href="https://docs.ray.io/en/latest/package-ref.html?highlight=ray.remote#ray.remote"><code>@ray.remote</code></a> decorator. This function is a proxy for a more interesting and computationally intensive function.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
+<span class="k">def</span> <span class="nf">slow_function</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">i</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org3d05a7d" class="outline-3">
+<h3 id="org3d05a7d">Exercise: Parallel Execution</h3>
+<div class="outline-text-3" id="text-org3d05a7d">
+<p>
+The loop below takes too long. The four function calls could be executed in parallel. Instead of four seconds, it should only take one second. Once <code>slow_function</code> has been made a remote function, execute these four tasks in parallel by calling <code>slow_function.remote()</code>. Then obtain the results by calling <a href="https://docs.ray.io/en/latest/package-ref.html?highlight=ray.get#ray.get"><code>ray.get</code></a> on a list of the resulting object IDs.
+</p>
+
+<p>
+First we'll sleep a little to improve the accuracy of the timing measurements below. We do this because workers may still be starting up in the background.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">([</span><span class="n">slow_function</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)])</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The results are </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">. This took </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> seconds. "</span>
+      <span class="s2">"Run the next cell to see "</span>
+      <span class="s2">"if the exercise was done correctly."</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+The results are [0, 1, 2, 3]. This took 1.01 seconds. Run the next cell to see if the exercise was done correctly.
+</pre>
+</div>
+
+<div id="outline-container-org64a4646" class="outline-4">
+<h4 id="org64a4646">Verification</h4>
+<div class="outline-text-4" id="text-org64a4646">
+<p>
+Run some checks to verify that the changes you made to the code were correct. Some of the checks should fail when you initially run the cells. After completing the exercises, the checks should pass.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">expect</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="mf">1.1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Success! The example took </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> seconds."</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Success! The example took 1.01 seconds.
+</pre>
+</div>
+</div>
+</div>
+</div>
+    </div>
+    </article>
+</div>
+
+
+
+
+
+
+
+        <!--End of body content-->
+
+        <footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>

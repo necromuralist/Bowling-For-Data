@@ -1,0 +1,140 @@
+#+BEGIN_COMMENT
+.. title: Introduction to Ray
+.. slug: introduction-to-ray
+.. date: 2021-11-11 18:30:38 UTC-08:00
+.. tags: ray,tutorial
+.. category: Ray
+.. link: 
+.. description: The first ray tutorial.
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-422ee6a1-8f3d-47f8-a01f-ab386f96ffae-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+# %load_ext autotime
+#+END_SRC
+* A Simple Data Parallel Example
+This comes from the [[https://github.com/ray-project/tutorial][ray-project tutorial]] on github.
+
+**GOAL:** The goal of this exercise is to show how to run simple tasks in parallel.
+
+ This script is too slow, and the computation is embarrassingly parallel. In this exercise, you will use Ray to execute the functions in parallel to speed it up.
+
+** The Concept for this Exercise - Remote Functions
+
+ The standard way to turn a Python function into a remote function is to add the  [[https://docs.ray.io/en/latest/package-ref.html?highlight=ray.remote#ray.remote][~@ray.remote~]] decorator. Here is an example.
+
+#+begin_src python
+# A regular Python function.
+def regular_function():
+    return 1
+
+# A Ray remote function.
+@ray.remote
+def remote_function():
+    return 1
+#+end_src
+
+The differences are the following:
+
+ 1. **Invocation:** The regular version is called with ~regular_function()~, whereas the remote version is called with ~remote_function.remote()~.
+ 2. **Return values:** ~regular_function~ immediately executes and returns ~1~, whereas ~remote_function~ immediately returns an object ID (a future) and then creates a task that will be executed on a worker process. The result can be obtained with ~ray.get~.
+
+#+begin_src python
+>>> regular_function()
+1
+
+>>> remote_function.remote()
+ObjectID(1c80d6937802cd7786ad25e50caf2f023c95e350)
+
+>>> ray.get(remote_function.remote())
+1
+#+end_src
+
+ 3. **Parallelism:** Invocations of ~regular_function~ happen **serially**, for example
+
+#+begin_src python
+# These happen serially.
+for _ in range(4):
+    regular_function()
+#+end_src
+
+     Whereas invocations of ~remote_function~ happen in **parallel**, for example
+
+#+begin_src python
+# These happen in parallel.
+for _ in range(4):
+    remote_function.remote()
+#+end_src
+
+** Imports
+#+begin_src python :results none
+# python standard library
+import time
+
+# from pypy
+from expects import (be_above, be_below,
+                     contain_exactly, expect)
+import ray
+#+end_src
+* Starting Ray
+ Start Ray. By default, Ray does not schedule more tasks concurrently than there are CPUs. This example requires four tasks to run concurrently, so we tell Ray that there are four CPUs. Usually this is not done and Ray computes the number of CPUs using ~psutil.cpu_count()~. The argument ~ignore_reinit_error=True~ just ignores errors if the cell is run multiple times.
+
+ The call to [[https://docs.ray.io/en/latest/package-ref.html?highlight=init#ray.init][~ray.init~]] starts a number of processes.
+
+#+begin_src python :results none
+ray.init(num_cpus=4, ignore_reinit_error=True)
+#+end_src
+
+** Exercise: Function to Remote Function
+
+The function below is slow. Turn it into a remote function using the [[https://docs.ray.io/en/latest/package-ref.html?highlight=ray.remote#ray.remote][~@ray.remote~]] decorator. This function is a proxy for a more interesting and computationally intensive function.
+
+#+begin_src python :results none
+@ray.remote
+def slow_function(i):
+    time.sleep(1)
+    return i
+#+end_src
+** Exercise: Parallel Execution
+
+The loop below takes too long. The four function calls could be executed in parallel. Instead of four seconds, it should only take one second. Once ~slow_function~ has been made a remote function, execute these four tasks in parallel by calling ~slow_function.remote()~. Then obtain the results by calling [[https://docs.ray.io/en/latest/package-ref.html?highlight=ray.get#ray.get][~ray.get~]] on a list of the resulting object IDs.
+
+First we'll sleep a little to improve the accuracy of the timing measurements below. We do this because workers may still be starting up in the background.
+
+#+begin_src python :results output :exports both
+time.sleep(2.0)
+start_time = time.time()
+
+results = ray.get([slow_function.remote(i) for i in range(4)])
+
+end_time = time.time()
+duration = end_time - start_time
+
+print(f"The results are {results}. This took {duration:0.2f} seconds. "
+      "Run the next cell to see "
+      "if the exercise was done correctly.")
+#+end_src
+
+#+RESULTS:
+: The results are [0, 1, 2, 3]. This took 1.01 seconds. Run the next cell to see if the exercise was done correctly.
+
+*** Verification
+
+Run some checks to verify that the changes you made to the code were correct. Some of the checks should fail when you initially run the cells. After completing the exercises, the checks should pass.
+
+#+begin_src python :results output :exports both
+expect(results).to(contain_exactly(0, 1, 2, 3))
+expect(duration).to(be_below(1.1))
+expect(duration).to(be_above(1))
+
+print(f"Success! The example took {duration:0.2f} seconds.")
+#+end_src
+
+#+RESULTS:
+: Success! The example took 1.01 seconds.

@@ -1,0 +1,189 @@
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org276227b">A Simple Data Parallel Example</a>
+<ul>
+<li><a href="#org81cee4b">The Concept for this Exercise - Remote Functions</a></li>
+<li><a href="#org743be56">Imports</a></li>
+</ul>
+</li>
+<li><a href="#orgc046fd5">Starting Ray</a>
+<ul>
+<li><a href="#org400a4d4">Exercise: Function to Remote Function</a></li>
+<li><a href="#org3d05a7d">Exercise: Parallel Execution</a>
+<ul>
+<li><a href="#org64a4646">Verification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org276227b" class="outline-2">
+<h2 id="org276227b">A Simple Data Parallel Example</h2>
+<div class="outline-text-2" id="text-org276227b">
+<p>
+This comes from the <a href="https://github.com/ray-project/tutorial">ray-project tutorial</a> on github.
+</p>
+
+<p>
+<b><b>GOAL:</b></b> The goal of this exercise is to show how to run simple tasks in parallel.
+</p>
+
+<p>
+This script is too slow, and the computation is embarrassingly parallel. In this exercise, you will use Ray to execute the functions in parallel to speed it up.
+</p>
+</div>
+
+<div id="outline-container-org81cee4b" class="outline-3">
+<h3 id="org81cee4b">The Concept for this Exercise - Remote Functions</h3>
+<div class="outline-text-3" id="text-org81cee4b">
+<p>
+The standard way to turn a Python function into a remote function is to add the  <a href="https://docs.ray.io/en/latest/package-ref.html?highlight=ray.remote#ray.remote"><code>@ray.remote</code></a> decorator. Here is an example.
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># A regular Python function.</span>
+<span class="k">def</span> <span class="nf">regular_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="mi">1</span>
+
+<span class="c1"># A Ray remote function.</span>
+<span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
+<span class="k">def</span> <span class="nf">remote_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="mi">1</span>
+</pre></div>
+
+<p>
+The differences are the following:
+</p>
+
+<ol class="org-ol">
+<li><b><b>Invocation:</b></b> The regular version is called with <code>regular_function()</code>, whereas the remote version is called with <code>remote_function.remote()</code>.</li>
+<li><b><b>Return values:</b></b> <code>regular_function</code> immediately executes and returns <code>1</code>, whereas <code>remote_function</code> immediately returns an object ID (a future) and then creates a task that will be executed on a worker process. The result can be obtained with <code>ray.get</code>.</li>
+</ol>
+
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">regular_function</span><span class="p">()</span>
+<span class="mi">1</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">remote_function</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+<span class="n">ObjectID</span><span class="p">(</span><span class="mi">1</span><span class="n">c80d6937802cd7786ad25e50caf2f023c95e350</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">remote_function</span><span class="o">.</span><span class="n">remote</span><span class="p">())</span>
+<span class="mi">1</span>
+</pre></div>
+
+<ol class="org-ol">
+<li><b><b>Parallelism:</b></b> Invocations of <code>regular_function</code> happen <b><b>serially</b></b>, for example</li>
+</ol>
+
+<div class="highlight"><pre><span></span><span class="c1"># These happen serially.</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">regular_function</span><span class="p">()</span>
+</pre></div>
+
+<p>
+Whereas invocations of <code>remote_function</code> happen in <b><b>parallel</b></b>, for example
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># These happen in parallel.</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">remote_function</span><span class="o">.</span><span class="n">remote</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org743be56" class="outline-3">
+<h3 id="org743be56">Imports</h3>
+<div class="outline-text-3" id="text-org743be56">
+<div class="highlight"><pre><span></span><span class="c1"># python standard library</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># from pypy</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="p">(</span><span class="n">be_above</span><span class="p">,</span> <span class="n">be_below</span><span class="p">,</span>
+		     <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">expect</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">ray</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc046fd5" class="outline-2">
+<h2 id="orgc046fd5">Starting Ray</h2>
+<div class="outline-text-2" id="text-orgc046fd5">
+<p>
+Start Ray. By default, Ray does not schedule more tasks concurrently than there are CPUs. This example requires four tasks to run concurrently, so we tell Ray that there are four CPUs. Usually this is not done and Ray computes the number of CPUs using <code>psutil.cpu_count()</code>. The argument <code>ignore_reinit_error=True</code> just ignores errors if the cell is run multiple times.
+</p>
+
+<p>
+The call to <a href="https://docs.ray.io/en/latest/package-ref.html?highlight=init#ray.init"><code>ray.init</code></a> starts a number of processes.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">ray</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">num_cpus</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">ignore_reinit_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+
+<div id="outline-container-org400a4d4" class="outline-3">
+<h3 id="org400a4d4">Exercise: Function to Remote Function</h3>
+<div class="outline-text-3" id="text-org400a4d4">
+<p>
+The function below is slow. Turn it into a remote function using the <a href="https://docs.ray.io/en/latest/package-ref.html?highlight=ray.remote#ray.remote"><code>@ray.remote</code></a> decorator. This function is a proxy for a more interesting and computationally intensive function.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nd">@ray</span><span class="o">.</span><span class="n">remote</span>
+<span class="k">def</span> <span class="nf">slow_function</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">i</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org3d05a7d" class="outline-3">
+<h3 id="org3d05a7d">Exercise: Parallel Execution</h3>
+<div class="outline-text-3" id="text-org3d05a7d">
+<p>
+The loop below takes too long. The four function calls could be executed in parallel. Instead of four seconds, it should only take one second. Once <code>slow_function</code> has been made a remote function, execute these four tasks in parallel by calling <code>slow_function.remote()</code>. Then obtain the results by calling <a href="https://docs.ray.io/en/latest/package-ref.html?highlight=ray.get#ray.get"><code>ray.get</code></a> on a list of the resulting object IDs.
+</p>
+
+<p>
+First we'll sleep a little to improve the accuracy of the timing measurements below. We do this because workers may still be starting up in the background.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">ray</span><span class="o">.</span><span class="n">get</span><span class="p">([</span><span class="n">slow_function</span><span class="o">.</span><span class="n">remote</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)])</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The results are </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">. This took </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> seconds. &quot;</span>
+      <span class="s2">&quot;Run the next cell to see &quot;</span>
+      <span class="s2">&quot;if the exercise was done correctly.&quot;</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+The results are [0, 1, 2, 3]. This took 1.01 seconds. Run the next cell to see if the exercise was done correctly.
+</pre>
+</div>
+
+<div id="outline-container-org64a4646" class="outline-4">
+<h4 id="org64a4646">Verification</h4>
+<div class="outline-text-4" id="text-org64a4646">
+<p>
+Run some checks to verify that the changes you made to the code were correct. Some of the checks should fail when you initially run the cells. After completing the exercises, the checks should pass.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">expect</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="mf">1.1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Success! The example took </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Success! The example took 1.01 seconds.
+</pre>
+</div>
+</div>
+</div>
+</div>
