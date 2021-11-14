@@ -1,0 +1,145 @@
+#+BEGIN_COMMENT
+.. title: Ray: Task Dependencies
+.. slug: ray-task-dependencies
+.. date: 2021-11-12 18:52:00 UTC-08:00
+.. tags: ray,tutorial
+.. category: Ray
+.. link: 
+.. description: 
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-1b045b1f-49ef-48e2-ab0c-557f2fa9a24e-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+# %load_ext autotime
+#+END_SRC
+* Parallel Data Processing with Task Dependencies
+
+  This is the second exercise from the [[https://github.com/ray-project/tutorial][ray tutorials]], it shows how to pass object IDs for remote functions to other remote functions. We're going to create functions that rely on each other (and thus have to proceed in series) but where the multiple instances of the series can be run in parallel.
+
+* Imports
+
+#+begin_src python :results none
+# python
+import time
+
+# pypi
+from expects import (
+    be_below, be_above, be_below_or_equal, be_true,
+    equal, expect,
+    have_property)
+import numpy
+import ray
+#+end_src
+* Initialize Ray
+  As before, although you would normally let ray pick all the CPUs, here we'll limit it to the amount we actually need to use.
+
+#+begin_src python :results none
+PARALLEL_PROCESSES = 5
+ray.init(num_cpus=PARALLEL_PROCESSES)
+#+end_src
+
+* Helpers
+
+We're going to mimic a data pipeline by creating a series of functions that depend on each other. The output of each function will be used as the input of the next function below it, so each function further down the line has to wait for the prior function to finish before it executes.
+
+#+begin_src python :results none
+SLEEP_TIME = 0.1
+PIPELINE_LENGTH = 4
+#+end_src
+
+#+begin_src python :results none
+@ray.remote
+def load_data(filename):
+    time.sleep(SLEEP_TIME)
+    return numpy.ones((1000, 100))
+#+end_src
+
+#+begin_src python :results none
+@ray.remote
+def normalize_data(data):
+    time.sleep(SLEEP_TIME)
+    return data - numpy.mean(data, axis=0)
+#+end_src
+
+#+begin_src python :results none
+@ray.remote
+def extract_features(normalized_data):
+    time.sleep(SLEEP_TIME)
+    return numpy.hstack([normalized_data, normalized_data ** 2])
+#+end_src
+
+#+begin_src python :results none
+@ray.remote
+def compute_loss(features):
+    num_data, dim = features.shape
+    time.sleep(SLEEP_TIME)
+    return numpy.sum((numpy.dot(features, numpy.ones(dim)) - numpy.ones(num_data)) ** 2)
+#+end_src
+
+Now we'll just make sure that all the functions are ray remotes.
+
+#+begin_src python :results none
+for to_check in (load_data, normalize_data, extract_features, compute_loss):
+    expect(to_check).to(have_property("remote"))
+#+end_src
+
+* Parallelize It
+  We're going to simulate running four pipelines in parallel. Each time we call a function after the first function, we'll pass it the Object ID of the previously called function (even though it looks like we're passing in the actual arguments that the function is expecting) then when the function whose object ID is passed in as an argument is done, it will pass the data to the called function. Anyway, take a look it's not so bad in code.
+
+#+begin_src python :results output :exports both
+# once again the pattern is to sleep in case the workers aren't ready yet
+time.sleep(2.0)
+start_time = time.time()
+
+losses = []
+
+names = (f"file{index}" for index in range(PARALLEL_PROCESSES))
+OVERHEAD_TOLERANCE = 0.1
+
+for filename in names:
+    inner_start = time.time()
+
+    data = load_data.remote(filename)
+    normalized_data = normalize_data.remote(data)
+    features = extract_features.remote(normalized_data)
+    loss = compute_loss.remote(features)
+
+    # despite the appearance, loss is an Object ID
+    losses.append(loss)
+
+    inner_end = time.time()
+    
+    expect(inner_end - inner_start).to(be_below_or_equal(OVERHEAD_TOLERANCE))
+
+# we pass the Object Ids for loss to ray.get and get back the list of outputs
+# from the function
+losses = ray.get(losses)
+print(f"The losses are {losses}.")
+loss = sum(losses)
+
+end_time = time.time()
+duration = end_time - start_time
+
+print(f"The total loss is {loss}. This took {duration:0.3f} seconds.")
+WITHOUT_OVERHEAD = SLEEP_TIME * PIPELINE_LENGTH
+UPPER_LIMIT = WITHOUT_OVERHEAD + (OVERHEAD_TOLERANCE * PARALLEL_PROCESSES)
+
+expect(loss).to(equal(1000 * PARALLEL_PROCESSES))
+expect(duration).to(be_below(UPPER_LIMIT))
+expect(duration).to(be_above(WITHOUT_OVERHEAD))
+#+end_src
+
+#+RESULTS:
+: The losses are [1000.0, 1000.0, 1000.0, 1000.0, 1000.0].
+: The total loss is 5000.0. This took 0.441 seconds.
+
+An important thing to note here is where ~ray.get~ is called. ~get~ is a blocking call that waits for the output of the remote, so in order to have them run in parallel you have to collect the Object IDs of the end of each pipeline and then pass them to ~get~ all at once. If you do a get on each pipeline separately then each pipeline instance will have to finish before the next one starts.
+
+**Note:** The original tutorial showed an application of this that used webscraping several pages in parallel, but it looks like the pages have changed and it didn't seem like it was worth it to try and fix the web-scraping.
+  
