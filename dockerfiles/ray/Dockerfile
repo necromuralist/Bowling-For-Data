@@ -1,5 +1,7 @@
-# ray currently only supports python up to 3.7 (November 2, 2021)
+# ray currently only supports python up to 3.8 (November 2, 2021)
 # bullseye is the current stable version of Debian
+# if you try to run a ray cluster it won't work unless the nodes
+# have the same python version (and ray version) so make sure to specify it
 
 ARG IMAGE_NAME=python
 ARG TAG=3.8-slim-bullseye
@@ -16,7 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-server && \
     useradd --create-home --shell /bin/bash bravo
 
-# this requires docker-buildkit (the cache won't keep downloading dependencies)
+# this requires docker-buildkit (it makes it so the cache will only download
+# new dependencies added to this file)
 # unless there's a change
 RUN --mount=type=cache,target=/root/.cache \
     pip install --upgrade pip
