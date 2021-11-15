@@ -2,7 +2,7 @@
 # bullseye is the current stable version of Debian
 
 ARG IMAGE_NAME=python
-ARG TAG=3.7-slim-bullseye
+ARG TAG=3.8-slim-bullseye
 FROM ${IMAGE_NAME}:${TAG}
 
 # first do the stuff that you need to be root to do
