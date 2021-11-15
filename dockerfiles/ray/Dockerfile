@@ -1,53 +1,91 @@
-# ray currently only supports python up to 3.8 (November 2, 2021)
-# bullseye is the current stable version of Debian
-# if you try to run a ray cluster it won't work unless the nodes
-# have the same python version (and ray version) so make sure to specify it
+# The base-deps Docker image installs main libraries needed to run Ray
 
-ARG IMAGE_NAME=python
-ARG TAG=3.8-slim-bullseye
-FROM ${IMAGE_NAME}:${TAG}
+# The GPU options are NVIDIA CUDA developer images.
+ARG BASE_IMAGE="ubuntu:focal"
+FROM ${BASE_IMAGE}
+# FROM directive resets ARG
+ARG BASE_IMAGE
+# If this arg is not "autoscaler" then no autoscaler requirements will be included
+ARG AUTOSCALER="autoscaler"
+ENV TZ=America/Los_Angeles
+# TODO(ilr) $HOME seems to point to result in "" instead of "/home/ray"
+ENV PATH "/home/ray/anaconda3/bin:$PATH"
+ARG DEBIAN_FRONTEND=noninteractive
+ARG PYTHON_VERSION=3.7.7
 
-# first do the stuff that you need to be root to do
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    rsync \
-    zile \
-    screen \
-    byobu \
-    virtualenv \
-    openssh-server && \
-    useradd --create-home --shell /bin/bash bravo
+ARG RAY_UID=1000
+ARG RAY_GID=100
+ARG USERNAME=bravo
 
-# this requires docker-buildkit (it makes it so the cache will only download
-# new dependencies added to this file)
-# unless there's a change
-RUN --mount=type=cache,target=/root/.cache \
-    pip install --upgrade pip
+RUN apt-get update -y \
+    && apt-get install -y sudo tzdata \
+    && useradd -ms /bin/bash -d /home/$USERNAME $USERNAME --uid $RAY_UID --gid $RAY_GID \
+    && usermod -aG sudo $USERNAME \
+    && echo 'bravo ALL=NOPASSWD: ALL' >> /etc/sudoers \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# switch from root to bravo
-USER bravo
-WORKDIR /home/bravo
+USER $USERNAME
+ENV HOME=/home/$USERNAME
+
+RUN sudo apt-get update -y && sudo apt-get upgrade -y \
+    && sudo apt-get install -y \
+        git \
+        wget \
+        cmake \
+        g++ \ 
+        zlib1g-dev \
+        $(if [ "$AUTOSCALER" = "autoscaler" ]; then echo \
+        byobu \
+        screen \
+        rsync \
+        zile \
+        openssh-client \
+        openssh-server \
+        gnupg; fi) \
+    && wget \
+        --quiet "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh" \
+        -O /tmp/miniconda.sh \
+    && /bin/bash /tmp/miniconda.sh -b -u -p $HOME/anaconda3 \
+    && $HOME/anaconda3/bin/conda init \ 
+    && echo 'export PATH=$HOME/anaconda3/bin:$PATH' >> $HOME/.bashrc \
+    && rm /tmp/miniconda.sh \
+    && $HOME/anaconda3/bin/conda install -y \
+        libgcc python=$PYTHON_VERSION \
+    && $HOME/anaconda3/bin/conda clean -y --all \
+    && $HOME/anaconda3/bin/pip install --no-cache-dir \
+        flatbuffers \
+        cython==0.29.23 \
+        numpy==1.19.5 \
+        psutil \
+        blist \ 
+    # blist is needed for numpy (which is re-installed when ray is installed)
+    # To avoid the following error on Jenkins:
+    # AttributeError: 'numpy.ufunc' object has no attribute '__module__'
+    && $HOME/anaconda3/bin/pip uninstall -y dask \ 
+    # We install cmake temporarily to get psutil, blist
+    && sudo apt-get autoremove -y cmake zlib1g-dev \
+        # We keep g++ on GPU images, because uninstalling removes CUDA Devel tooling
+        $(if [ "$BASE_IMAGE" = "ubuntu:focal" ]; then echo \
+        g++; fi) \
+    # Either install kubectl or remove wget 
+    && (if [ "$AUTOSCALER" = "autoscaler" ]; \
+        then wget -O - -q https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add - \
+        && sudo touch /etc/apt/sources.list.d/kubernetes.list \
+        && echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list \
+        && sudo apt-get update \
+        && sudo apt-get install kubectl; \
+    else sudo apt-get autoremove -y wget; \
+    fi;) \
+    && sudo rm -rf /var/lib/apt/lists/* \
+    && sudo apt-get clean
+
+WORKDIR $HOME
 
 COPY --chown=bravo:bravo authorized_keys .ssh/authorized_keys
 COPY --chown=bravo:bravo requirements.txt .
 
-# define our virtualenv paths
-ENV VIRTUALENVS=.virtualenvs
-ENV VIRTUALENV=$VIRTUALENVS/Bowling-For-Data
+RUN --mount=type=cache,target=/root/.cache \
+     $HOME/anaconda3/bin/pip install -r requirements.txt
 
-# setup the virtualenv
-RUN mkdir $VIRTUALENVS
-RUN python -m venv $VIRTUALENV
-ENV PATH="$VIRTUALENV/bin:$PATH"
-
-# use the virtualenv
-RUN pip install -r requirements.txt
-
-# setup the bashrc for logging in
-RUN echo 'source ~/.virtualenvs/Bowling-For-Data/bin/activate' >> .bashrc
-RUN echo  'export PATH=$PATH:$HOME/.local/bin' >> .bashrc
-
-USER root
-WORKDIR /
-ENTRYPOINT service ssh restart && bash
-
+ENTRYPOINT sudo service ssh restart && bash
