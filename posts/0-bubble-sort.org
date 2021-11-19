@@ -1,0 +1,439 @@
+#+BEGIN_COMMENT
+.. title: Bubble Sort
+.. slug: bubble-sort
+.. date: 2021-11-17 16:06:51 UTC-07:00
+.. tags: brute-force,sorting,algorithms
+.. category: Sorting
+.. link: 
+.. description: The Bubble Sort algorithm.
+.. type: text
+.. template: pseudocode.tmpl
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-4e3d8931-51f5-4b2c-a531-66f20bb941e4-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* Some Setup
+** Imports
+#+begin_src python :results none
+# python
+from functools import partial
+
+# pypy
+from bokeh.models import HoverTool
+from expects import contain_exactly, equal, expect
+from joblib import Parallel, delayed
+
+import hvplot.pandas
+import pandas
+
+# my stuff
+from graeae import EmbedHoloviews, Timer
+#+end_src
+** Setup
+#+begin_src python :results none
+Embed = partial(EmbedHoloviews, folder_path="files/posts/bubble-sort")
+TIMER = Timer()
+#+end_src
+* Bubble Sort
+** The Algorithm  
+  The Bubble Sort algorithm is a Brute-Force sort which works by repeatedly traversing the input array, checking adjacent values and swapping them if they are out of order. This has the effect of "bubbling-up" the largest unsorted value, thus the name (probably). Here's the algorithm.
+
+#+begin_export html
+<pre id="bubblesort" style="display:hidden;">
+\begin{algorithm}
+\caption{BubbleSort}
+\begin{algorithmic}
+\INPUT An array of orderable items
+\OUTPUT The array sorted in ascending order
+\PROCEDURE{BubbleSort}{$A$}
+  \FOR{$i \gets 0$ to $n - 2$}
+    \FOR{$j \gets 0$ to $n - 2 - i$}
+      \IF{$A[j+1] < A[j]$}
+        \STATE swap $A[j]$ and $A[j+1]$
+      \ENDIF
+    \ENDFOR
+  \ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+If you squint a little you'll see that there's only really four lines of code, two for-loops, an if-then conditional, and a "swap", the rest is noise from the algorithmic formatting.
+** The Implementation
+   Here's a straight-forward translation of the pseudocode to python.
+
+#+begin_src python :results none
+def bubble_sort_of(unsorted: list) -> list:
+    """Sorts the unsorted
+
+    Args:
+     unsorted: mutable collect of orderable items
+
+    Returns:
+     original list sorted in ascending order
+    """
+    all_but_one = len(unsorted) - 1
+    for items_bubbled_up in range(all_but_one):
+        for left_hand in range(all_but_one - items_bubbled_up):
+            right_hand = left_hand + 1
+            if unsorted[right_hand] < unsorted[left_hand]:
+                (unsorted[left_hand],
+                 unsorted[right_hand]) = (unsorted[right_hand],
+                                          unsorted[left_hand])
+    return unsorted
+#+end_src
+** Try It Out
+
+#+begin_src python :results none
+inputs = [6, 3, 4, 5, 0]
+expect(bubble_sort_of(inputs)).to(contain_exactly(0, 3, 4, 5, 6))
+#+end_src
+
+** Assessing the Damage
+Although it's nice to know that the sort works we're really not as concerned about how correct it is, as much as we are interested in how it performs. There's two things we can count:
+
+ 1. The Number of comparisons
+ 2. The Number of swaps.
+
+The fact that you have those two loops makes it pretty likely that it's going to be \(\Theta(n^2)\) but since Bubble Sort is mostly an academic example let's work it out.
+
+*** Comparisons
+    The number of comparisons is equal to the number of times the loops run, so we have something like this.
+
+\begin{align}
+C(n) &= \sum_{i=0}^{n-2} \sum_{j=0}^{n - 2 - i} 1\\
+     &= \sum_{i=0}^{n-2}  (n - 2 - i)  - 0 + 1\\
+     &= \sum_{i=0}^{n-2} n - 1 - i\\
+     &= n \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} i\\
+     &= (n^2 - n) - (n - 1) - \left(\frac{n^2 - 3n +2}{2}\right)\\
+     &= \frac{n^2 - n}{2} \in \Theta(n^2)
+\end{align}
+
+*** Swaps
+    The number of swaps will depend on how the inputs are arranged, but in the worst case where the array is sorted backwards, every comparison will produce a swap so you'll end up with the same bounds as the comparisons.
+
+\begin{align}
+S_{worst-case} &= C(n)\\
+               &= \frac{n^2 - n}{2} \in \Theta(n^2)
+\end{align}
+
+* An Empirical Look
+    The math is nice and all, but let's do some counting. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps. In this case we could calculate the comparisons pretty easily, but to make sure I don't mess up the math I'll just grab it.
+** A Counter
+
+#+begin_src python :tangle ../bowling/sort/bubble.py :exports none
+<<bubble-counter>>
+
+    <<counter-count>>
+
+    <<counter-call>>
+
+<<bubble-tracker>>
+
+    <<tracker-swaps>>
+
+    <<tracker-call>>
+#+end_src
+
+** Testing the Counter
+#+begin_src python :results none
+# python
+import random
+
+# software under test
+from bowling.sort.bubble import BubbleCounter
+
+inputs = [6, 3, 4, 1]
+
+counter = BubbleCounter(elements=inputs)
+counter()
+expected = list(sorted(inputs))
+expect(counter.elements).to(contain_exactly(*expected))
+
+n = len(inputs)
+expected = (n * (n - 1))/2
+expect(counter.comparisons).to(equal(expected))
+
+inputs = [random.randrange(20) for item in range(20)]
+expected = list(sorted(inputs))
+counter.elements = inputs
+counter()
+expect(counter.elements).to(contain_exactly(*expected))
+#+end_src
+
+
+** The Counter Class
+#+begin_src python  :noweb-ref bubble-counter
+class BubbleCounter:
+    """Keeps track of counts during the bubble-sort
+
+    Args:
+     elements: of (in-place) sortable elements
+    """
+    def __init__(self, elements: list):
+        self.elements = elements
+        self.comparisons = 0
+        self.swaps = 0
+        return
+#+end_src
+*** The Counter Call
+#+begin_src python :noweb-ref counter-call
+def __call__(self) -> None:
+    """Sorts the list in place
+
+    Postcondition:
+     - elements list is in sorted order
+    """
+    all_but_one = len(self.elements) - 1
+    for items_bubbled_up in range(all_but_one):
+        for left_hand in range(all_but_one - items_bubbled_up):
+            self.comparisons += 1
+            right_hand = left_hand + 1
+            if self.elements[right_hand] < self.elements[left_hand]:
+                (self.elements[left_hand],
+                 self.elements[right_hand]) = (self.elements[right_hand],
+                                               self.elements[left_hand])
+                self.swaps += 1
+    return
+#+end_src
+** The Tracker
+#+begin_src python :results none
+from bowling.sort.bubble import BubbleTracker
+
+inputs = [6, 3, 4, 1]
+
+tracker = BubbleTracker(elements=inputs)
+
+expect(len(tracker.swaps)).to(equal(len(inputs)))
+
+inputs = [random.randrange(20) for item in range(20)]
+expected = list(sorted(inputs))
+
+tracker = BubbleTracker(elements=inputs)
+tracker()
+expect(tracker.elements).to(contain_exactly(*expected))
+#+end_src
+
+*** Bubble Tracker
+    The counter was for counting swaps and comparisons, this is for keeping track of the elements when things get swapped so we can plot the lists as they are being sorted.
+#+begin_src python :noweb-ref bubble-tracker
+class BubbleTracker:
+    """Keeps track of locations of elements during the sort
+
+    Args:
+     elements: list of sortable items
+    """
+    def __init__(self, elements: list):
+        self.elements = elements
+        self._swaps = None
+        return
+#+end_src
+**** The Comparisons
+#+begin_src python :noweb-ref tracker-swaps
+@property
+def swaps(self) -> dict:
+    """The location of each element when a swap is made"""
+    if self._swaps is None:
+        self._swaps = {
+            element: [index] for index, element in enumerate(self.elements)}
+    return self._swaps
+#+end_src
+**** The Call
+#+begin_src python :noweb-ref tracker-call
+def __call__(self):
+    """Does the bubble-sort and tracks the locations"""
+    all_but_one = len(self.elements) - 1
+    # hack to initialize the swaps
+    self.swaps
+    for items_bubbled_up in range(all_but_one):
+        for left_hand in range(all_but_one - items_bubbled_up):
+            right_hand = left_hand + 1            
+            if self.elements[right_hand] < self.elements[left_hand]:
+                (self.elements[left_hand],
+                 self.elements[right_hand]) = (self.elements[right_hand],
+                                               self.elements[left_hand])
+                for index, element in enumerate(self.elements):
+                    self.swaps[element].append(index)
+    return
+#+end_src
+
+** Try Them Out
+*** Comparisons
+#+begin_src python :results output :exports both
+runs = {}
+
+def counter(count: int) -> tuple:
+    """Runs the bubble sort
+
+    This is just so I can pass it to Joblib
+
+    Args:
+     count: size of the input
+
+    Returns:
+     (count, counter.comparisons, counter.swaps)
+    """
+    elements = random.choices(list(range(count)), k=count)
+    counter = BubbleCounter(elements=elements)
+    counter()
+    return (count, counter.comparisons, counter.swaps)
+with TIMER:
+    comparisons_and_swaps = Parallel(n_jobs=-2)(
+        delayed(counter)(count)
+        for count in range(1, 10**5+ 1, 1000))
+#+end_src
+
+#+RESULTS:
+: Started: 2021-11-19 06:07:09.215991
+: Ended: 2021-11-19 06:12:06.084137
+: Elapsed: 0:04:56.868146
+
+That was quite a speedup, the pre-parallel version took 21 minutes.
+
+
+#+begin_src python :results none
+SIZE, COMPARISONS, SWAPS = 0, 1, 2
+unzipped = list(zip(*comparisons_and_swaps))
+bubba_frame = pandas.DataFrame({"Elements": unzipped[SIZE],
+                                "Comparisons": unzipped[COMPARISONS],
+                                "Swaps": unzipped[SWAPS]})
+bubba_frame["n^2"] = bubba_frame["Elements"]**2
+tooltips_comparisons = [
+    ("Elements", "@Elements{0,}"),
+    ("Comparisons", "@Comparisons{0,}")
+]
+
+tooltips_swaps = [
+    ("Elements", "@Elements{0,}"),
+    ("Swaps", "@Swaps{0,}")
+]
+
+tooltips_n2 = [
+    ("Elements", "@Elements{0,}"),
+    ("n^2", "@{n^2}{0,}")
+]
+
+hover_comparisons = HoverTool(tooltips=tooltips_comparisons)
+hover_swaps = HoverTool(tooltips=tooltips_swaps)
+hover_n2 = HoverTool(tooltips=tooltips_n2)
+
+swap_plots = bubba_frame.hvplot(x="Elements", y="Swaps").opts(
+    tools=[hover_swaps])
+comparison_plots = bubba_frame.hvplot(x="Elements", y="Comparisons").opts(
+    tools=[hover_comparisons])
+n_squared_plot = bubba_frame.hvplot(x="Elements", y="n^2").opts(
+    tools=[hover_n2])
+
+plot = (swap_plots * comparison_plots * n_squared_plot).opts(
+    title="Comparisons, Swaps and n-squared Counts",
+    height=700, width=800)
+output = Embed(plot=plot, file_name="bubble_sort_comparisons")()
+#+end_src
+
+#+begin_src python :results output html :exports output
+print(output)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="bubble_sort_comparisons.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+If you hover over the lines you can see that each line is roughly double the one below it - there are twice as many comparisons as swaps for a given input and \(n^2\) is twice as big as the comparison count for a given input.
+** Swaps
+#+begin_src python :results none
+COUNT = 20
+inputs = random.sample(list(range(COUNT)), k=COUNT)
+tracker = BubbleTracker(elements = inputs)
+tracker()
+
+# swaps = {str(key): value for key, value in tracker.swaps.items()}
+track_frame = pandas.DataFrame(tracker.swaps)
+re_indexed = track_frame.reset_index().rename(columns={"index": "Swap"})
+melted = re_indexed.melt(var_name="Value To Sort", value_name="Location In Array", id_vars="Swap")
+
+tooltips = [
+    ("Item to Sort", "@{Value To Sort}"),
+    ("Swap", "@{Swap}"),
+    ("Current Location", "@{Location In Array}")
+]
+
+hover = HoverTool(tooltips=tooltips)
+
+ticks = [(index, index) for index in range(COUNT)]
+plot = melted.hvplot(x="Swap", y="Location In Array",
+                     by="Value To Sort").opts(tools=[hover],
+                                              show_legend=False,
+                     width=800, height=700, yticks=ticks,
+                            title="Bubble Sort Swaps",)
+
+
+output = Embed(plot=plot, file_name="bubble_sort_swaps")()
+#+end_src
+
+#+begin_src python :results output html :exports output
+print(output)
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="bubble_sort_swaps.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+HoloViews seems to not let you set the Tooltips if you use multiple columns, which is why I went through all the rigamarole of melting it. If you just plot it as the DataFrame with each column being one of the tracked locations for a sort value (e.g. the column name is '1' and the rows are the positions in the array at each swap) then the plot comes out okay, but the labels are kind of confusing.
+
+Looking at the plot, though, this does seem to be a useful way to figure out what's going on. If you look at the largest unsorted values (18 and lower) you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (0 and 1) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down and being adjacent so they would be swapped to get into the correct order.
+*** Worst Case
+
+The random-input gives an interesting view of how the algorithm might work in practice, but let's look at the worst-case input where the values are in the opposite of the sorted order.
+
+#+begin_src python :results none
+COUNT = 20
+inputs = list(reversed(range(COUNT)))
+tracker = BubbleTracker(elements = inputs)
+tracker()
+
+track_frame = pandas.DataFrame(tracker.swaps)
+re_indexed = track_frame.reset_index().rename(columns={"index": "Swap"})
+melted = re_indexed.melt(var_name="Value To Sort", value_name="Location In Array", id_vars="Swap")
+
+
+ticks = [(index, index) for index in range(COUNT)]
+plot = melted.hvplot(x="Swap", y="Location In Array", cmap="blues",
+                     by="Value To Sort").opts(show_legend=False,
+                     width=800, height=700, yticks=ticks,
+                            title="Bubble Sort Swaps (Worst Case)",)
+
+
+output = Embed(plot=plot, file_name="bubble_sort_worst_swaps")()
+#+end_src
+
+#+begin_src python :results output html :exports output
+print(output)
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="bubble_sort_worst_swaps.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+This image gives an even better sense of the way that the bubble sort works. Since it emphasizes left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
+
+
+* Source
+The main algorithm came from Anany Levitin's book {{% lancelot title="Introduction to the Design & Analysis of Algorithms" %}}itdaa{{% /lancelot %}}.
+
+#+begin_export html
+<script>
+    pseudocode.renderElement(document.getElementById("bubblesort"));
+</script>
+#+end_export
