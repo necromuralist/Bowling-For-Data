@@ -43,7 +43,7 @@ class Plugin(ShortcodePlugin):
                     ('More than one post with the same slug. '
                      f'Using "{permalink}" '
                      'for lancelot shortcode'))
-                output = f'<a href="{permalink}">{title}</a>'
+            output = f'<a href="{permalink}">{title}</a>'
         else:
             LOGGER.error(
                 f'"{slug}" slug doesn\'t exist.')
