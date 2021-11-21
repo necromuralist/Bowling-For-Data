@@ -1,9 +1,17 @@
+# python
+from typing import List
+
+
 class BubbleCounter:
     """Keeps track of counts during the bubble-sort
 
     Args:
      elements: of (in-place) sortable elements
     """
+    elements: List[int]
+    comparisons: int
+    swaps: int
+
     def __init__(self, elements: list):
         self.elements = elements
         self.comparisons = 0

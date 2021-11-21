@@ -7,11 +7,11 @@
 .. link: 
 .. description: The Bubble Sort algorithm.
 .. type: text
-.. template: pseudocode.tmpl
+.. has_pseudocode: Yes siree, you betcha.
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-fd453e8f-bc47-4796-a4a3-715afa44cbd2-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-4e3d8931-51f5-4b2c-a531-66f20bb941e4-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -31,11 +31,12 @@ import hvplot.pandas
 import pandas
 
 # my stuff
-from graeae import EmbedHoloviews
+from graeae import EmbedHoloviews, Timer
 #+end_src
 ** Setup
 #+begin_src python :results none
 Embed = partial(EmbedHoloviews, folder_path="files/posts/bubble-sort")
+TIMER = Timer()
 #+end_src
 * Bubble Sort
 ** The Algorithm  
@@ -126,6 +127,9 @@ S_{worst-case} &= C(n)\\
 ** A Counter
 
 #+begin_src python :tangle ../bowling/sort/bubble.py :exports none
+<<imports>>
+
+
 <<bubble-counter>>
 
     <<counter-count>>
@@ -140,7 +144,7 @@ S_{worst-case} &= C(n)\\
 #+end_src
 
 ** Testing the Counter
-#+begin_src python :results output :exports both
+#+begin_src python :results none
 # python
 import random
 
@@ -156,7 +160,8 @@ expect(counter.elements).to(contain_exactly(*expected))
 
 n = len(inputs)
 expected = (n * (n - 1))/2
-expect(counter.count).to(equal(expected))
+
+expect(counter.comparisons).to(equal(expected))
 
 inputs = [random.randrange(20) for item in range(20)]
 expected = list(sorted(inputs))
@@ -164,22 +169,11 @@ counter.elements = inputs
 counter()
 expect(counter.elements).to(contain_exactly(*expected))
 #+end_src
-
-#+RESULTS:
-:RESULTS:
-# [goto error]
-: ---------------------------------------------------------------------------
-: ModuleNotFoundError                       Traceback (most recent call last)
-: /tmp/ipykernel_69/864119062.py in <module>
-:       3 
-:       4 # software under test
-: ----> 5 from bowling.sort.bubble import BubbleCounter
-:       6 
-:       7 inputs = [6, 3, 4, 1]
-: 
-: ModuleNotFoundError: No module named 'bowling'
-:END:
-
+** Imports
+#+begin_src python  :noweb-ref imports
+# python
+from typing import List
+#+end_src
 ** The Counter Class
 #+begin_src python  :noweb-ref bubble-counter
 class BubbleCounter:
@@ -188,6 +182,10 @@ class BubbleCounter:
     Args:
      elements: of (in-place) sortable elements
     """
+    elements: List[int]
+    comparisons: int
+    swaps: int
+
     def __init__(self, elements: list):
         self.elements = elements
         self.comparisons = 0
@@ -215,7 +213,8 @@ def __call__(self) -> None:
     return
 #+end_src
 ** The Tracker
-#+begin_src python :results output :exports both
+
+#+begin_src python :results none
 from bowling.sort.bubble import BubbleTracker
 
 inputs = [6, 3, 4, 1]
@@ -232,10 +231,9 @@ tracker()
 expect(tracker.elements).to(contain_exactly(*expected))
 #+end_src
 
-#+RESULTS:
-: time: 11.2 ms (started: 2021-11-02 20:01:46 +00:00)
-
 *** Bubble Tracker
+    The counter was for counting swaps and comparisons, this is for keeping track of the elements when things get swapped so we can plot the lists as they are being sorted.
+
 #+begin_src python :noweb-ref bubble-tracker
 class BubbleTracker:
     """Keeps track of locations of elements during the sort
@@ -298,13 +296,16 @@ def counter(count: int) -> tuple:
     counter()
     return (count, counter.comparisons, counter.swaps)
 
-comparisons_and_swaps = Parallel(n_jobs=-2)(
-    delayed(counter)(count)
-    for count in range(1, 10**5+ 1, 1000))
+with TIMER:
+    comparisons_and_swaps = Parallel(n_jobs=-2)(
+        delayed(counter)(count)
+        for count in range(1, 10**5+ 1, 1000))
 #+end_src
 
 #+RESULTS:
-: time: 5min 10s (started: 2021-11-02 20:02:14 +00:00)
+: Started: 2021-11-19 06:07:09.215991
+: Ended: 2021-11-19 06:12:06.084137
+: Elapsed: 0:04:56.868146
 
 That was quite a speedup, the pre-parallel version took 21 minutes.
 
@@ -359,8 +360,8 @@ print(output)
 </object>
 #+end_export
 
-If you hover over the lines you can see that they differ by about a factor of 2 - there are twice as many comparisons as swaps for a given input and \(n^2\) is twice as big as the comparison count for a given input.
-** Swaps
+If you hover over the lines you can see that each line is roughly double the one below it - there are twice as many comparisons as swaps for a given input and \(n^2\) is twice as big as the comparison count for a given input.
+*** Swaps
 #+begin_src python :results none
 COUNT = 20
 inputs = random.sample(list(range(COUNT)), k=COUNT)
@@ -441,12 +442,13 @@ print(output)
 
 This image gives an even better sense of the way that the bubble sort works. Since it emphasizes left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
 
-
 * Source
-The main algorithm came from Anany Levitin's book {{% lancelot title="Introduction to the Design & Analysis of Algorithms" %}}itdaa{{% /lancelot %}}.
+The main algorithm came from Anany Levitin's book {{% lancelot title="Introduction to the Design & Analysis of Algorithms" %}}itdaa{{% /lancelot %}}, although all the versions look pretty much the same.
 
 #+begin_export html
 <script>
+window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("bubblesort"));
+});
 </script>
 #+end_export
