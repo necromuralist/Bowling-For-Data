@@ -1,0 +1,87 @@
+#+BEGIN_COMMENT
+.. title: Selection Sort
+.. slug: selection-sort
+.. date: 2021-11-23 15:17:43 UTC-08:00
+.. tags: sorting,algorithms,brute-force,iterative,more of the output
+.. category: Sorting
+.. link: 
+.. description: A look at the Selection Sort algorithm.
+.. type: text
+.. has_pseudocode: You betcha.
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-4e3d8931-51f5-4b2c-a531-66f20bb941e4-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* Umm... Selection Sort?
+  Yes, this continues the look at Brute-Force Sorting, begun with the {{% doc %}}bubble-sort{{% /doc %}}. With the selection sort you repeatedly pick the smallest item in the unsorted section of the data and place it at the end of the sorted data until you have sorted all the items. {{% doc %}}bibliography-how-to-think-about-algorithms{{% /doc %}} classifies it as a {{% doc %}}More of the Output{{% /doc %}} algorithm, one of the types of {{% doc %}}iterative-algorithms{{% /doc %}}, while {{% doc %}}itdaa{{% /doc %}} classifies it as a *Brute Force* algorithm.
+* Parts of the Algorithm
+** What is the Specification?
+   This is a {{% lancelot "Sorting Problem" %}}the-sorting-problem{{% /lancelot %}}.
+** What are the Basic Steps?
+   We're going to repeatedly select the smallest item in the unselected.
+** How do we measure progress?
+   We'll know we're progressing by the number of elements we've selected (/k/).
+** What is the Loop Invariant?
+   None of the selected elements is larger than any element in the unselected and the selected items are in sorted order. The unselected items contain the largest elements in the list.
+** What are the Main Steps?
+   1. Find the smallest element
+   2. Put the selected element at the end of the previously selected element(s)
+** Will we always be making progress?
+   The number of selected items (/k/) always goes up after each loop.
+** Are we maintaining the Loop Invariant?
+   - The previous Loop Invariant tells us that all the unselected items were at least as large or larger than the largest of the selected items.
+   - We chose the largest item of the unselected so its as big or bigger than the biggest selected item.
+   - Putting the selected item at the end of the previously selected items maintains the Loop Invariant.
+** Is the Loop Invariant true before the loop?
+   At the start, no items have been selected so the Loop Invariant is vacuously true.
+** What is the Exit-Condition?
+   We stop when all the items have been selected.
+** Did we end right?
+   - /Exit-Condition/: All items have been selected
+   - /Loop Invariant/: All selected are sorted.
+   - So our output has all the original items and they are now sorted, satisfying the /Postconditions/.
+** What's the Running Time?
+\begin{align}
+C(n) &= \sum_{i=0}^{n-2} \sum_{j=i+1}^{n-1} I\\
+     &= \frac{n(n-1)}{2} \in \Theta{n^2}     
+\end{align}
+* The Pseudocode
+
+#+begin_export html
+<pre id="selectionsort" style="display:hidden;">
+\begin{algorithm}
+\caption{SelectionSort}
+\begin{algorithmic}
+\INPUT An array of orderable items
+\OUTPUT The array sorted in ascending order
+\PROCEDURE{SelectionSort}{$A$}
+  \FOR{$i \gets 0$ to $n - 2$}
+    \STATE $min \gets i$
+    \FOR{$j \gets i + 1 to $n - 1}
+      \IF{$A[j] < A[min]$}
+       \STATE $min \gets j$
+      \ENDIF
+    \ENDFOR
+    \STATE Swap $A[i]$ and $A[min]$
+  \ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+* Sources
+ - {{% doc %}}HTTAA{{% /doc %}}
+ - {{% doc %}}itdaa{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("selectionsort"));
+});
+</script>
+#+end_export
