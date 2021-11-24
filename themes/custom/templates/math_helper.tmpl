@@ -50,7 +50,7 @@
             % endif # mathjax_config
             %endif # use_katex
         </%def> # end of math_scripts
-        
+
         <%def name="pseudocode()">
             <script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script>
             </%def>
@@ -65,15 +65,15 @@
             % endif
             </%def>
 
-            <%doc>
-            This first section is used when an individual post is loaded,
-            not for the front page where you have multiple posts loaded.
-            <%/doc>
+
+            # This first section is used when an individual post is loaded,
+            # not for the front page where you have multiple posts loaded.
+
             <%def name="math_scripts_ifpost(post)">
             % if post.meta("has_pseudocode"):
             ${math_scripts()}
             ${pseudocode()}
-            
+
             % elif post.has_math:
             ${math_scripts()}
             % endif
@@ -88,18 +88,17 @@
             %endif
             </%def> # math_styles_ifpost
 
-            <%doc>
-            The next section is for the main posts page with multiple posts
-            displayed.
-            Since the pseudocode blocks are supersets of the math blocks, you
-            need to give them priority over the mathblocks when setting up the
-            conditonal or they won't be used.
-            <%/doc>
+            # The next section is for the main posts page with multiple posts
+            # displayed.
+            # Since the pseudocode blocks are supersets of the math blocks, you
+            # need to give them priority over the mathblocks when setting up the
+            # conditonal or they won't be used.
+
             <%def name="math_scripts_ifposts(posts)">
             % if any(post.meta("has_pseudocode") for post in posts):
             ${math_scripts()}
             ${pseudocode()}
-            
+
             % elif any(post.has_math for post in posts):
             ${math_scripts()}
             % endif
@@ -109,7 +108,7 @@
         <%def name="math_styles_ifposts(posts)">
             % if any(post.meta("has_pseudocode") for post in posts):
             ${math_styles()}
-            ${code_styles()}            
+            ${code_styles()}
             % elif any(post.has_math for post in posts):
             ${math_styles()}
             % endif
