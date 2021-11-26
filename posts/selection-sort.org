@@ -11,42 +11,64 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-4e3d8931-51f5-4b2c-a531-66f20bb941e4-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-a7aef5e7-7fca-483f-80fd-25c7e881cffd-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
 * Umm... Selection Sort?
   Yes, this continues the look at Brute-Force Sorting, begun with the {{% doc %}}bubble-sort{{% /doc %}}. With the selection sort you repeatedly pick the smallest item in the unsorted section of the data and place it at the end of the sorted data until you have sorted all the items. {{% doc %}}bibliography-how-to-think-about-algorithms{{% /doc %}} classifies it as a {{% doc %}}More of the Output{{% /doc %}} algorithm, one of the types of {{% doc %}}iterative-algorithms{{% /doc %}}, while {{% doc %}}itdaa{{% /doc %}} classifies it as a *Brute Force* algorithm.
+
+** Imports
+#+begin_src python :results none
+# python
+from functools import partial
+from random import shuffle
+
+# pypi
+from numba import njit
+from bokeh.models import HoverTool
+from expects import contain_exactly, equal, expect
+from joblib import Parallel, delayed
+from numpy.random import default_rng
+
+import hvplot.pandas
+import numpy
+import pandas
+
+# my stuff
+from graeae import EmbedHoloviews, Timer
+#+end_src
+** Set Up
+#+begin_src python :results none
+random = default_rng(2021)
+TIMER = Timer()
+
+Embed = partial(EmbedHoloviews, folder_path="files/posts/selection-sort")
+#+end_src
 * Parts of the Algorithm
-** What is the Specification?
-   This is a {{% lancelot "Sorting Problem" %}}the-sorting-problem{{% /lancelot %}}.
-** What are the Basic Steps?
-   We're going to repeatedly select the smallest item in the unselected.
-** How do we measure progress?
-   We'll know we're progressing by the number of elements we've selected (/k/).
-** What is the Loop Invariant?
-   None of the selected elements is larger than any element in the unselected and the selected items are in sorted order. The unselected items contain the largest elements in the list.
-** What are the Main Steps?
-   1. Find the smallest element
-   2. Put the selected element at the end of the previously selected element(s)
-** Will we always be making progress?
-   The number of selected items (/k/) always goes up after each loop.
-** Are we maintaining the Loop Invariant?
-   - The previous Loop Invariant tells us that all the unselected items were at least as large or larger than the largest of the selected items.
-   - We chose the largest item of the unselected so its as big or bigger than the biggest selected item.
-   - Putting the selected item at the end of the previously selected items maintains the Loop Invariant.
-** Is the Loop Invariant true before the loop?
-   At the start, no items have been selected so the Loop Invariant is vacuously true.
-** What is the Exit-Condition?
-   We stop when all the items have been selected.
-** Did we end right?
-   - /Exit-Condition/: All items have been selected
-   - /Loop Invariant/: All selected are sorted.
-   - So our output has all the original items and they are now sorted, satisfying the /Postconditions/.
-** What's the Running Time?
+| Item | Answer |
+|------+--------|
+| *Specification* | This is a {{% lancelot "Sorting Problem" %}}the-sorting-problem{{% /lancelot %}}. |
+| *Basic Steps* |    We're going to repeatedly select the smallest item in the unselected. |
+| *Measure Progress* |   We'll know we're progressing by the number of elements we've selected (/k/).|
+| *Loop Invariant* |None of the selected elements is larger than any element in the unselected and the selected items are in sorted order. The unselected items contain the largest elements in the list.|
+|What are the Main Steps?|   1. Find the smallest element|
+||   2. Put the selected element at the end of the previously selected element(s)|
+|*Making Progress* |   The number of selected items (/k/) always goes up after each loop.|
+|*Loop Invariant Maintenance* |   - The previous Loop Invariant tells us that all the unselected items were at least as large or larger than the largest of the selected items.|
+||   - We chose the largest item of the unselected so its as big or bigger than the biggest selected item.|
+||   - Putting the selected item at the end of the previously selected items maintains the Loop Invariant.|
+|*Establish the Loop Invariant*|   At the start, no items have been selected so the Loop Invariant is vacuously true.|
+|*Exit-Condition*|    We stop when all the items have been selected.|
+| *Ending*|   - /Exit-Condition/: All items have been selected |
+||   - /Loop Invariant/: All selected are sorted.|
+||   - So our output has all the original items and they are now sorted, satisfying the /Postconditions/.|
+
+*Running Time*
+
 \begin{align}
-C(n) &= \sum_{i=0}^{n-2} \sum_{j=i+1}^{n-1} I\\
+C(n) &= \sum_{i=0}^{n-2} \sum_{j=i+1}^{n-1} 1\\
      &= \frac{n(n-1)}{2} \in \Theta{n^2}     
 \end{align}
 * The Pseudocode
@@ -61,7 +83,7 @@ C(n) &= \sum_{i=0}^{n-2} \sum_{j=i+1}^{n-1} I\\
 \PROCEDURE{SelectionSort}{$A$}
   \FOR{$i \gets 0$ to $n - 2$}
     \STATE $min \gets i$
-    \FOR{$j \gets i + 1 to $n - 1}
+    \FOR{$j \gets i + 1$ to $n - 1$}
       \IF{$A[j] < A[min]$}
        \STATE $min \gets j$
       \ENDIF
@@ -74,9 +96,343 @@ C(n) &= \sum_{i=0}^{n-2} \sum_{j=i+1}^{n-1} I\\
 </pre>
 #+end_export
 
+* The Implementations
+** Selection Sort
+   This will be a straight translation of the pseudocode (or straight-ish). I'm still holding out using pypy or something other than numba sometimes so I won't add the decorator directly.
+
+#+begin_src python :tangle ../bowling/sort/selection/selection.py :exports none
+<<imports>>
+
+<<return-type>>
+
+<<selection-counter>>
+
+<<selection-swaps>>
+#+end_src
+
+#+begin_src python :noweb-ref return-type
+from collections.abc import MutableSequence
+from typing import Any, Dict
+#+end_src
+
+#+begin_src python :noweb-ref return-type
+Counts = tuple[int, int, int]
+Swaps = Dict[int, list[int]]
+Sortable = MutableSequence[Any]
+#+end_src
+
+
+#+begin_src python :noweb-ref selection-counter
+def selection_counter(elements: Sortable) -> Counts:
+    """Does the selection sort on the elements
+
+    Args:
+     elements: list of orderable objects
+
+    Returns:
+     (number of elements, comparisons, swaps)
+    """
+    number_of_elements = len(elements)
+    comparisons = swaps = 0
+    
+    for start_of_unselected in range(number_of_elements - 1):
+        smallest_unselected = start_of_unselected
+        for next_unselected in range(start_of_unselected + 1,
+                                     number_of_elements):
+            comparisons += 1
+            if elements[next_unselected] < elements[smallest_unselected]:
+                smallest_unselected = next_unselected
+        swaps += 1
+        elements[start_of_unselected], elements[smallest_unselected] = (
+            elements[smallest_unselected], elements[start_of_unselected]
+        )
+    return (number_of_elements, comparisons, swaps)
+#+end_src
+
+*** Some Checks
+#+begin_src python :results none
+from bowling.sort.selection.selection import selection_counter
+
+def check(collection: list, n: int, comparisons: int, swaps: int) -> None:
+    """Check that the sort worked
+
+    Args:
+     collection: the sorted collection
+     n: number of elements in the collection
+     comparisons: number of comparisons made
+     swaps: number of swaps made
+
+    Raises:
+     AssertionError: some check didn't match
+    """
+    expect(n).to(equal(len(collection)))
+    runtime = (n * (n - 1))/2
+    expect(comparisons).to(equal(runtime))
+    expect(swaps).to(equal(n - 1))
+    expect(list(collection)).to(contain_exactly(*list(sorted(collection))))
+    return
+    
+test = [1, 2, 3]
+n, comparisons, swaps = selection_sort(test)
+check(test, n, comparisons, swaps)
+
+test = [4, 3, 2, 1]
+n, comparisons, swaps = selection_sort(test)
+check(test, n, comparisons, swaps)
+
+COUNT = 1000
+test = random.integers(low=0, high=COUNT, size=COUNT)
+n, comparisons, swaps = selection_sort(test)
+check(test, n, comparisons, swaps)
+#+end_src
+** Run It
+   So, let's see how it does. We'll set the selection sort up as a numba function and set up the things to sort so that we can compare it to the bubble sort.
+
+#+begin_src python :results none
+numba_selection = njit(selection_counter)
+things_to_sort = [random.integers(low=0, high=count, size=count)
+                  for count in range(1, 10**5 + 1, 1000)]
+#+end_src
+
+#+begin_src python :results output :exports both
+with TIMER:
+    elements_comparisons_and_swaps = Parallel(n_jobs=-1)(
+        delayed(numba_selection)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+begin_src python :results none
+SIZE, COMPARISONS, SWAPS = 0, 1, 2
+unzipped = list(zip(*elements_comparisons_and_swaps))
+bubba_frame = pandas.DataFrame({"Elements": unzipped[SIZE],
+                                "Selection Comparisons": unzipped[COMPARISONS],
+                                "Selection Swaps": unzipped[SWAPS]})
+tooltips_comparisons = [
+    ("Elements", "@Elements{0,}"),
+    ("Comparisons", "@Comparisons{0,}")
+]
+
+tooltips_swaps = [
+    ("Elements", "@Elements{0,}"),
+    ("Swaps", "@Swaps{0,}")
+]
+
+hover_comparisons = HoverTool(tooltips=tooltips_comparisons)
+hover_swaps = HoverTool(tooltips=tooltips_swaps)
+
+swap_plots = bubba_frame.hvplot(x="Elements", y="Swaps").opts(
+    tools=[hover_swaps])
+comparison_plots = bubba_frame.hvplot(x="Elements", y="Comparisons").opts(
+    tools=[hover_comparisons])
+
+plot = (swap_plots * comparison_plots).opts(
+    title="Comparisons, Swaps and n-squared Counts (Selection Sort)",
+    height=700, width=800)
+output = Embed(plot=plot, file_name="selection_sort_comparisons")()
+#+end_src
+
+#+begin_src python :results output html :exports output
+print(output)
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="selection_sort_comparisons.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+** Compared To Bubble Sort
+   I didn't add the counting of the swaps when I implemented this so I'm going to have to re-do it again.
+#+begin_src python :tangle ../bowling/sort/bubble/bubble_2.py :exports none
+<<bubble-return-type>>
+
+<<bubble-sort>>
+#+end_src
+
+#+begin_src python :noweb-ref bubblereturn-type
+Counts = tuple[int, int, int]
+#+end_src
+
+
+#+begin_src python :noweb-ref bubble-sort
+def bubble(elements) -> Counts:
+    """Sorts the list in place
+
+    Args:
+     elements: list of (in-place) sortable elements
+
+    Returns:
+     number of elements, count of comparisons, count of swaps
+    """
+    all_but_one = len(elements) - 1
+    comparisons = swaps = 0
+    for items_bubbled_up in range(all_but_one):
+        swapped_at_least_once = False
+        for left_hand in range(all_but_one - items_bubbled_up):
+            comparisons += 1
+            right_hand = left_hand + 1
+            if elements[right_hand] < elements[left_hand]:
+                (elements[left_hand],
+                 elements[right_hand]) = (elements[right_hand],
+                                          elements[left_hand])
+                swaps += 1
+                swapped_at_least_once = True
+        if not swapped_at_least_once:
+            break
+    return (len(elements), comparisons, swaps)
+#+end_src
+
+#+begin_src python :results none
+from bowling.sort.bubble.bubble_2 import bubble
+
+numba_bubble = njit(bubble)
+#+end_src
+
+#+begin_src python :results output :exports both
+with TIMER:
+    bubble_elements_comparisons_and_swaps = Parallel(n_jobs=-1)(
+        delayed(numba_bubble)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2021-11-25 06:34:47.916186
+: Ended: 2021-11-25 06:36:25.527382
+: Elapsed: 0:01:37.611196
+
+#+begin_src python :results none
+SIZE, COMPARISONS, SWAPS = 0, 1, 2
+unzipped = list(zip(*bubble_elements_comparisons_and_swaps))
+bubba_frame["Bubble Comparisons"] =  unzipped[COMPARISONS]
+bubba_frame["Bubble Swaps"] = unzipped[SWAPS]
+
+tooltips_bubba = [
+    ("Elements", "@Elements{0,}"),
+    ("Bubble Swaps", "@{Bubble Swaps}{0,}"),
+]
+
+tooltips_selection = [
+    ("Elements", "@Elements{0,}"),
+    ("Selection Swaps", "@{Selection Swaps}{0,}"),
+]
+
+hover_bubba = HoverTool(tooltips=tooltips_bubba)
+hover_selection = HoverTool(tooltips=tooltips_selection)
+
+bubba_swap_plots = bubba_frame.hvplot(x="Elements", y="Bubble Swaps").opts(
+    tools=[hover_bubba])
+selection_swap_plots = bubba_frame.hvplot(x="Elements", y="Selection Swaps").opts(
+    tools=[hover_selection]
+)
+
+
+plot = (bubba_swap_plots * selection_swap_plots).opts(
+    ylabel="Swaps",
+    title="Bubble Vs Selection Sort Swaps",
+    height=700, width=800)
+output = Embed(plot=plot, file_name="bubble_vs_selection_sort_swaps")()
+#+end_src
+
+#+begin_src python :results output html :exports output
+print(output)
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="bubble_vs_selection_sort_swaps.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+In retrospect, I guess this wasn't really necessary, since the number of Selection Sort swaps is always done in the outer loop so it's always /number of elements - 1/. But I guess there's no harm in double checking.
+
+An interesting question that I haven't seen addressed is that if we're using the \(\Theta\) as the way to compare algorithms and they're the same for Bubble Sort and Selection Sort, then how do you characterize the fact that Bubble Sort is a "worse" algorithm that, according to Donald Knuth, shouldn't even be taught [[BSAAA][(Astrachan 2003]])? Anyway, we don't use either one so I guess the point is moot.
+
+* Looking at the Swaps
+  Here's where it might be a little more interesting. We can do the same exercise we did with the bubble sort and plot the actual swaps to see if we can see the sorting in action.
+
+#+begin_src python :noweb-ref selection-swaps
+def selection_swaps(elements: Sortable) -> Swaps:
+    """Keeps track of the element indexes as they are swapped
+
+    Args:
+     elements: list of orderable elements
+
+    Returns:
+     dict mapping element to list of indices where it was in the elements list
+    """
+    swaps = {element: [index] for index, element in enumerate(elements)}
+
+    number_of_elements = len(elements)
+
+    for start_of_unselected in range(number_of_elements - 1):
+        smallest_unselected = start_of_unselected
+
+        for next_unselected in range(start_of_unselected + 1,
+                                     number_of_elements):
+            if elements[next_unselected] < elements[smallest_unselected]:
+                smallest_unselected = next_unselected
+        
+        elements[start_of_unselected], elements[smallest_unselected] = (
+            elements[smallest_unselected], elements[start_of_unselected]
+        )
+
+        # record the location of the elements
+        for index, element in enumerate(elements):
+            swaps[element].append(index)
+    return swaps
+#+end_src
+
+#+begin_src python :results none
+from bowling.sort.selection.selection import selection_swaps
+COUNT = 50
+
+# because we're tracking the swaps with a dict there can't be any 
+# repetitions in the inputs, so I'll use python instead of numpy
+# since it seems easier
+inputs = list(range(COUNT))
+shuffle(inputs)
+swaps = selection_swaps(inputs)
+
+track_frame = pandas.DataFrame(swaps)
+re_indexed = track_frame.reset_index().rename(columns={"index": "Swap"})
+melted = re_indexed.melt(var_name="Value To Sort",
+                         value_name="Location In Array", id_vars="Swap")
+
+tooltips = [
+    ("Item to Sort", "@{Value To Sort}"),
+    ("Swap", "@{Swap}"),
+    ("Current Location", "@{Location In Array}")
+]
+
+hover = HoverTool(tooltips=tooltips)
+
+ticks = [(index, index) for index in range(COUNT)]
+plot = melted.hvplot(x="Swap", y="Location In Array",
+                     by="Value To Sort").opts(tools=[hover],
+                                              show_legend=False,
+                     width=800, height=700, yticks=ticks,
+                            title="Selection Sort Swaps",)
+
+
+output = Embed(plot=plot, file_name="Selection_sort_swaps")()
+#+end_src
+
+#+begin_src python :results output html :exports output
+print(output)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="Selection_sort_swaps.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Since I put in more inputs than I did with the Bubble Sort, the actual swaps aren't so easy to see, here, but the point of this plot is to show the (imaginary) diagonal line running from the bottom left corner up te the upper right. This shows why it's called a "More of the Output" algorithm - with each loop one more sorted item is added to the beginning of the list until you end up with a sorted list in the end.
 * Sources
  - {{% doc %}}HTTAA{{% /doc %}}
  - {{% doc %}}itdaa{{% /doc %}}
+ - <<BSAAA>> (Astrachan 2003) {{% doc %}}bubble-sort-an-archeological-algorithmic-analysis{{% /doc %}}
 
 #+begin_export html
 <script>
