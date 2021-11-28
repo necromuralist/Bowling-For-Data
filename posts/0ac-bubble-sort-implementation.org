@@ -1,0 +1,74 @@
+#+BEGIN_COMMENT
+.. title: Bubble Sort: The Implementation
+.. slug: bubble-sort-the-implementation
+.. date: 2021-11-17 16:06:51 UTC-07:00
+.. tags: brute-force,sorting,algorithms
+.. category: Sorting
+.. link: 
+.. description: The Bubble Sort algorithm.
+.. type: text
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-4e3d8931-51f5-4b2c-a531-66f20bb941e4-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+This is part of a {{% lancelot "series on Bubble Sort" %}}the-bubble-sort{{% /lancelot %}} that began with a look at {{% lancelot "the Bubble Sort Algorithm" %}}bubble-sort-the-algorithm{{% /lancelot %}} and continues now with a python translation of the algorithm.
+* Some Setup
+** Imports
+#+begin_src python :results none
+# python
+from functools import partial
+
+# pypy
+from bokeh.models import HoverTool
+from expects import contain_exactly, equal, expect
+from joblib import Parallel, delayed
+
+import hvplot.pandas
+import pandas
+
+# my stuff
+from graeae import EmbedHoloviews, Timer
+#+end_src
+** Setup
+#+begin_src python :results none
+Embed = partial(EmbedHoloviews, folder_path="files/posts/bubble-sort")
+TIMER = Timer()
+#+end_src
+* Bubble Sort
+** The Implementation
+   Here's a straight-forward translation of the pseudocode to python.
+
+#+begin_src python :results none
+def bubble_sort_of(unsorted: list) -> list:
+    """Sorts the unsorted
+
+    Args:
+     unsorted: mutable collect of orderable items
+
+    Returns:
+     original list sorted in ascending order
+    """
+    all_but_one = len(unsorted) - 1
+    for items_bubbled_up in range(all_but_one):
+        for left_hand in range(all_but_one - items_bubbled_up):
+            right_hand = left_hand + 1
+            if unsorted[right_hand] < unsorted[left_hand]:
+                (unsorted[left_hand],
+                 unsorted[right_hand]) = (unsorted[right_hand],
+                                          unsorted[left_hand])
+    return unsorted
+#+end_src
+** Try It Out
+
+#+begin_src python :results none
+inputs = [6, 3, 4, 5, 0]
+expect(bubble_sort_of(inputs)).to(contain_exactly(0, 3, 4, 5, 6))
+#+end_src
+
+* Up Next
+  In the {{% lancelot "next post" %}}bubble-sort-an-empirical-look{{% /lancelot %}} I'll run the function over some inputs to see how it performs.

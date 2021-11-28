@@ -1,0 +1,71 @@
+#+BEGIN_COMMENT
+.. title: Bubble Sort: The Algorithm
+.. slug: bubble-sort-the-algorithm
+.. date: 2021-11-27 14:45:55 UTC-08:00
+.. tags: brute-force,sorting,algorithms
+.. category: Sorting
+.. link: 
+.. description: The Bubble Sort Algorithm.
+.. type: text
+.. has_pseudocode: Boy, and how!
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+This is part of a {{% lancelot "series on the Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}. We'll look at the algorithm without worrying about implementation details here.
+
+* The Algorithm  
+  The Bubble Sort algorithm is a Brute-Force sort which works by repeatedly traversing the input array, checking adjacent values and swapping them if they are out of order. This has the effect of "bubbling-up" the largest unsorted value, thus the name, probably (see {{% lancelot "Astrachan, 2003" %}}bubble-sort-an-archeological-algorithmic-analysis{{% /lancelot %}} for some history on it). Here's the algorithm in pseudocode.
+
+#+begin_export html
+<pre id="bubblesort" style="display:hidden;">
+\begin{algorithm}
+\caption{BubbleSort}
+\begin{algorithmic}
+\INPUT An array of orderable items
+\OUTPUT The array sorted in ascending order
+\PROCEDURE{BubbleSort}{$A$}
+  \FOR{$i \gets 0$ to $n - 2$}
+    \FOR{$j \gets 0$ to $n - 2 - i$}
+      \IF{$A[j+1] < A[j]$}
+        \STATE swap $A[j]$ and $A[j+1]$
+      \ENDIF
+    \ENDFOR
+  \ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+If you squint a little you'll see that there's only really four lines of code, two for-loops, an if-then conditional, and a "swap", the rest is noise from the algorithmic formatting.
+* Assessing the Damage
+Although it's nice to know that the sort works we're really not as concerned about how correct it is, as much as we are interested in how it performs. There's two things we can count:
+
+ 1. The Number of comparisons
+ 2. The Number of swaps.
+
+The fact that you have those two loops makes it pretty likely that it's going to be \(\Theta(n^2)\) but since Bubble Sort is mostly an academic example let's work it out.
+
+*** Comparisons
+    The number of comparisons is equal to the number of times the loops run, so we get \(\Theta(n^2)\). I made some notes on how I got that in {{% lancelot "this post" %}}bubble-sort-runtime-explained{{% /lancelot %}}.
+
+*** Swaps
+    The number of swaps will depend on how the inputs are arranged, but in the worst case where the array is sorted backwards, every comparison will produce a swap so you'll end up with the same bounds as the comparisons.
+
+\begin{align}
+S_{worst-case} &= C(n)\\
+               &= \frac{n^2 - n}{2} \in \Theta(n^2)
+\end{align}
+
+* Onward
+  The {{% lancelot "next post" %}}bubble-sort-the-implementation{{% /lancelot %}} will look at translating the algorithm to python.
+* Sources
+ - (Levitin, 2007) {{% doc %}}itdaa{{% /doc %}}
+ - <<BSAAAA>> (Astrachan, 2003) {{% doc %}}bubble-sort-an-archeological-algorithmic-analysis{{% /doc %}}
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("bubblesort"));
+});
+</script>
+#+end_export

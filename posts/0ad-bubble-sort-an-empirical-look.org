@@ -1,13 +1,13 @@
 #+BEGIN_COMMENT
-.. title: Bubble Sort
-.. slug: bubble-sort
-.. date: 2021-11-17 16:06:51 UTC-07:00
+.. title: Bubble Sort: An Empirical Look
+.. slug: bubble-sort-an-empirical-look
+.. date: 2021-11-27 14:57:02 UTC-08:00
 .. tags: brute-force,sorting,algorithms
 .. category: Sorting
 .. link: 
-.. description: The Bubble Sort algorithm.
+.. description: Running and plotting the Bubble Sort's performance.
 .. type: text
-.. has_pseudocode: True
+
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
@@ -16,163 +16,7 @@
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
-* Some Setup
-** Imports
-#+begin_src python :results none
-# python
-from functools import partial
-
-# pypy
-from bokeh.models import HoverTool
-from expects import contain_exactly, equal, expect
-from joblib import Parallel, delayed
-
-import hvplot.pandas
-import pandas
-
-# my stuff
-from graeae import EmbedHoloviews, Timer
-#+end_src
-** Setup
-#+begin_src python :results none
-Embed = partial(EmbedHoloviews, folder_path="files/posts/bubble-sort")
-TIMER = Timer()
-#+end_src
-* Bubble Sort
-** The Algorithm  
-  The Bubble Sort algorithm is a Brute-Force sort which works by repeatedly traversing the input array, checking adjacent values and swapping them if they are out of order. This has the effect of "bubbling-up" the largest unsorted value, thus the name (probably). Here's the algorithm.
-
-#+begin_export html
-<pre id="bubblesort" style="display:hidden;">
-\begin{algorithm}
-\caption{BubbleSort}
-\begin{algorithmic}
-\INPUT An array of orderable items
-\OUTPUT The array sorted in ascending order
-\PROCEDURE{BubbleSort}{$A$}
-  \FOR{$i \gets 0$ to $n - 2$}
-    \FOR{$j \gets 0$ to $n - 2 - i$}
-      \IF{$A[j+1] < A[j]$}
-        \STATE swap $A[j]$ and $A[j+1]$
-      \ENDIF
-    \ENDFOR
-  \ENDFOR
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-#+end_export
-
-If you squint a little you'll see that there's only really four lines of code, two for-loops, an if-then conditional, and a "swap", the rest is noise from the algorithmic formatting.
-** The Implementation
-   Here's a straight-forward translation of the pseudocode to python.
-
-#+begin_src python :results none
-def bubble_sort_of(unsorted: list) -> list:
-    """Sorts the unsorted
-
-    Args:
-     unsorted: mutable collect of orderable items
-
-    Returns:
-     original list sorted in ascending order
-    """
-    all_but_one = len(unsorted) - 1
-    for items_bubbled_up in range(all_but_one):
-        for left_hand in range(all_but_one - items_bubbled_up):
-            right_hand = left_hand + 1
-            if unsorted[right_hand] < unsorted[left_hand]:
-                (unsorted[left_hand],
-                 unsorted[right_hand]) = (unsorted[right_hand],
-                                          unsorted[left_hand])
-    return unsorted
-#+end_src
-** Try It Out
-
-#+begin_src python :results none
-inputs = [6, 3, 4, 5, 0]
-expect(bubble_sort_of(inputs)).to(contain_exactly(0, 3, 4, 5, 6))
-#+end_src
-
-** Assessing the Damage
-Although it's nice to know that the sort works we're really not as concerned about how correct it is, as much as we are interested in how it performs. There's two things we can count:
-
- 1. The Number of comparisons
- 2. The Number of swaps.
-
-The fact that you have those two loops makes it pretty likely that it's going to be \(\Theta(n^2)\) but since Bubble Sort is mostly an academic example let's work it out.
-
-*** Comparisons
-    The number of comparisons is equal to the number of times the loops run, so we get \(\Theta(n^2)\).
-
-I originally only did a truncated version of showing how you get \(n^2\) but then I had to struggle a little to remember what was going on when I looked back at it so I'm going to break this one down more.
-**** Start With the Loops
-     We have an outer loop that runs from \(0\ldots n-2\) and an inner loop that goes from \(0 \dots n - 2 - i \) giving us a summation that looks like this
-
-\[
-C(n) = \sum_{i=0}^{n-2} \sum_{j=0}^{n - 2 - i} 1
-\]
-
-**** Decompose the Inner Sum
-     So first we have to recognize that since we're summing 1 (the comparison) what we're doing is counting how many numbers there are from \(0\) to \(n - 2 - i\). When you have a sequence of integers (say 5, 6, 7, 8) the way to count the number there are in the sequence is \(\textit{last} - \textit{first} + 1\). So for 5, 6, 7, 8 we have \(8 - 5 + 1 = 4\) numbers in the sequence. If we apply that to the sequence created by the inner summation we get this
-
-\begin{align}
-C(n) &= \sum_{i=0}^{n-2} \sum_{j=0}^{n - 2 - i} 1\\
-     &= \sum_{i=0}^{n-2}  (n - 2 - i)  - 0 + 1\\
-     &= \sum_{i=0}^{n-2} n - 1 - i\\
-\end{align}
-**** Break Apart the Polynomial
-     With summations, if you are summing a polynomial, then you can break additions and subtrations apart into separate summations. Additionally, any multiplications can be moved outside of the summation. So now we get
-
-\begin{align}
-C(n) &= \sum_{i=0}^{n-2} n - 1 - i\\
-     &= n \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} i\\
-\end{align}
-
-**** That Last Term
-     If you squint at the first two terms of that last line you can see that we're summing up \(1\) just like we did with the inner loop so it's going to be a similar outcome just with different starting and ending points (and multiplying by /n/ for the first term). But that last one is a little trickier. It's a summation of /i/ rather than \(1\) so it'll be \(0 + 1 + \cdots + (n-1) + (n-2)\). This is a sequence that happens often enough that if you do this sort of thing a lot you'll just remember it, but I don't do it a lot and I'm rather of a forgetful bent anyway so I'll show how I remember to get it. 
-     First you have to remember that the sum of terms is the same no matter the order you put the terms in, so the summation comes out the same even when it's reversed. If we add the sequence with its reverse term by term we get something like this
-
-\begin{array}{ccccccccc}
-& 0 & + & 1 & + & \cdots & + & (n - 3) & + & (n - 2) \\
-+ & (n - 2) & + & (n - 3) & + & \cdots & + & 1 & + & 0 \\
-\hline
-& (n - 2) & + & (n - 2) & + & \cdots & + & (n - 2) & + & (n - 2)\\
-\end{array}
-
-And using our counting equation we have
-\begin{align}
-end - start + 1 &= n - 2 - 0 + 1 \\
-&= n - 1
-\end{align}
-
-So we have \(n - 1\) terms in that sum we got by adding the reverse, but since we added the sequence with its reverse it's now twice as big as it should be so we need to halve it, and our third term becomes
-
-\[
-\frac{(n - 1)(n - 2)}{2}
-\]
-
-Now, if we do the expansion of the first two terms and add the third, we get this
-
-\begin{align}
-C(n)   &= n \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} i\\
-&= n(n - 2 - 0 + 1) - (n - 2 - 0 + 1) - \frac{(n - 1)(n - 2)}{2}\\
-&= n(n - 1) - (n - 1)- \frac{n^2 -2n - n + 2}{2}\\
-&= (n^2 - n) - (n - 1)  - \frac{n^2 - 3n + 2}{2}\\
-&= \frac{2(n^2 - n)}{2} - \frac{2(n - 1)}{2} - \frac{n^2 - 3n + 2}{2}\\
-&= \frac{2 n^2 - 2n - 2n + 2 - n^2 + 3n -2}{2}\\
-&= \frac{n^2 - n}{2} \in \Theta(n^2)
-\end{align}
-
-Oy. Now don't forget next time.
-*** Swaps
-    The number of swaps will depend on how the inputs are arranged, but in the worst case where the array is sorted backwards, every comparison will produce a swap so you'll end up with the same bounds as the comparisons.
-
-\begin{align}
-S_{worst-case} &= C(n)\\
-               &= \frac{n^2 - n}{2} \in \Theta(n^2)
-\end{align}
-
+This is a continuation of a {{% lancelot "series on the Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}. In the {{% lancelot "previous post" %}}bubble-sort-the-implementation{{% /lancelot %}} I made an implementation of the Bubble Sort in python. In this post I'll run it with inputs of varying sizes to see how its runtime changes as well as do a plot to get a sense of how it rearranges the items its sorting as it works.
 * An Empirical Look
     The math is nice and all, but let's do some counting. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps. In this case we could calculate the comparisons pretty easily, but to make sure I don't mess up the math I'll just grab it.
 ** A Counter
@@ -482,13 +326,5 @@ print(output)
 
 This image gives an even better sense of the way that the bubble sort works. Since it emphasizes left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
 
-* Source
-The main algorithm came from Anany Levitin's book {{% lancelot title="Introduction to the Design & Analysis of Algorithms" %}}itdaa{{% /lancelot %}}, although all the versions look pretty much the same.
-
-#+begin_export html
-<script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("bubblesort"));
-});
-</script>
-#+end_export
+* Onward
+  The {{% lancelot "final post in this series" %}}double-bubble-sort{{% /lancelot %}} (maybe) will look at a variation on the Bubble Sort that can improve the performance in special cases.

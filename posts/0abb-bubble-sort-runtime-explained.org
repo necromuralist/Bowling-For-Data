@@ -1,0 +1,78 @@
+#+BEGIN_COMMENT
+.. title: Bubble Sort: Runtime Explained
+.. slug: bubble-sort-runtime-explained
+.. date: 2021-11-27 15:45:35 UTC-08:00
+.. tags: brute-force,sorting,algorithms
+.. category: Sorting
+.. link: 
+.. description: Showing the Runtime Calculation for Bubble Sort.
+.. type: text
+.. has_math: True
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+* What This Is
+  The number of comparisons for the Bubble Sort is equal to the number of times the loops run, so we get \(\Theta(n^2)\). I originally only did a truncated version of showing how you get \(n^2\) but then I had to struggle a little to remember what was going on when I looked back at it so I'm going to break it down more here.
+** Start With the Loops
+     We have an outer loop that runs from \(0\ldots n-2\) and an inner loop that goes from \(0 \dots n - 2 - i \) giving us a summation that looks like this
+
+\[
+C(n) = \sum_{i=0}^{n-2} \sum_{j=0}^{n - 2 - i} 1
+\]
+
+It's summing \(1\) because there's one comparison in each of the loops.
+** Decompose the Inner Sum
+     So first we have to recognize that since we're summing \(1\) (the comparison) what we're doing is adding \(1\) for every item in the summation which is the equivalent of counting how many numbers there are from \(0\) to \(n - 2 - i\). When you have a sequence of consecutive integers (say 5, 6, 7, 8) the way to count the number there are in the sequence is \(\textit{last} - \textit{first} + 1\). So for 5, 6, 7, 8 we have \(8 - 5 + 1 = 4\) so there are four numbers in the sequence. If we apply that to the sequence created by the inner summation we get this
+
+\begin{align}
+C(n) &= \sum_{i=0}^{n-2} \sum_{j=0}^{n - 2 - i} 1\\
+     &= \sum_{i=0}^{n-2}  (n - 2 - i)  - 0 + 1\\
+     &= \sum_{i=0}^{n-2} n - 1 - i\\
+\end{align}
+** Break Apart the Polynomial
+     With summations, if you are summing a polynomial, then you can break additions and subtractions apart into separate summations. Additionally, any multiplications can be moved outside of the summation. So now we get
+
+\begin{align}
+C(n) &= \sum_{i=0}^{n-2} n - 1 - i\\
+     &= n \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} i\\
+\end{align}
+
+** That Last Term
+     If you squint at the first two terms of that last line you can see that we're summing up \(1\) just like we did with the inner loop so it's going to be a similar outcome just with a different ending point (and we'll also multiply by /n/ for the first term). But that last one is a little trickier. It's a summation of /i/ rather than \(1\) so it'll be \(0 + 1 + \cdots + (n-1) + (n-2)\). This is a sequence that happens often enough that if you do this sort of thing a lot you'll just remember it, but I don't do it a lot and I'm rather of a forgetful bent anyway so I'll show how I remember to get it. 
+     First you have to remember that the sum of terms is the same no matter the order you put the terms in, so the summation comes out the same even when it's reversed. What we'll do is add the sequence with its reverse term by term we to get something like this
+
+\begin{array}{ccccccccc}
+& 0 & + & 1 & + & \cdots & + & (n - 3) & + & (n - 2) \\
++ & (n - 2) & + & (n - 3) & + & \cdots & + & 1 & + & 0 \\
+\hline
+& (n - 2) & + & (n - 2) & + & \cdots & + & (n - 2) & + & (n - 2)\\
+\end{array}
+
+And using our counting equation we have
+\begin{align}
+end - start + 1 &= n - 2 - 0 + 1 \\
+&= n - 1
+\end{align}
+
+So we have \(n - 1\) terms in that sum we got by adding the reverse (each term being \(n - 2\)), but since we added the sequence with its reverse it's now twice as big as it should be so we need to halve it, and our third term becomes
+
+\[
+\frac{(n - 1)(n - 2)}{2}
+\]
+
+** Put the Three Terms Back Together
+Now, going back to where we were in the summation, if we do the expansion of the first two terms using the counting equation and add the third term from the previous section, we get this
+
+\begin{align}
+C(n)   &= n \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} 1 - \sum_{i=0}^{n-2} i\\
+&= n(n - 2 - 0 + 1) - (n - 2 - 0 + 1) - \frac{(n - 1)(n - 2)}{2}\\
+&= n(n - 1) - (n - 1)- \frac{n^2 -2n - n + 2}{2}\\
+&= (n^2 - n) - (n - 1)  - \frac{n^2 - 3n + 2}{2}\\
+&= \frac{2(n^2 - n)}{2} - \frac{2(n - 1)}{2} - \frac{n^2 - 3n + 2}{2}\\
+&= \frac{2 n^2 - 2n - 2n + 2 - n^2 + 3n -2}{2}\\
+&= \frac{n^2 - n}{2} \in \Theta(n^2)
+\end{align}
+
+Oy. Now don't forget next time.
+* Re-Orienting
+  This is part of a {{% lancelot "series on Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}. More specifically, it expands on the post {{% lancelot "looking at the Bubble Sort Algorithms" %}}bubble-sort-the-algorithm{{% /lancelot %}}.
