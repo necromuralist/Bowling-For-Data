@@ -1,6 +1,30 @@
+#+TITLE: The Bubble Sort Functions
+These are the bubble-sort functions that were created in the posts but now as a literate document so I don't have to go hunting through the posts for documentation.
+
+#+begin_src python :tangle bubble.py
+<<imports>>
+
+<<types>>
+
+
+<<bubba>>
+
+
+<<bubble>>
+
+
+<<tracker>>
+#+end_src
+
+* Imports
+#+begin_src python :noweb-ref imports
 # python standard library
 from collections.abc import MutableSequence
+#+end_src
+* Types
+  Some type-hinting help.
 
+#+begin_src python :noweb-ref types
 ElementCount = int
 ComparisonCount = int
 SwapCount = int
@@ -12,8 +36,11 @@ IndexHistory = list[int]
 ElementValue = int
 
 Swaps = dict[ElementValue, IndexHistory]
+#+end_src
+* Bubba the Short Circuiter
+  This is the version of the bubba-sort that quits if there were no swaps
 
-
+#+begin_src python :noweb-ref bubba
 def bubba(elements: MutableSequence) -> Counts:
     """Sorts the list in place and tracks the number of comparisons
 
@@ -36,17 +63,20 @@ def bubba(elements: MutableSequence) -> Counts:
             comparisons += 1
             right_hand = left_hand + 1
             if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand], elements[right_hand]) = (
-                    elements[right_hand],
-                    elements[left_hand],
-                )
+                (elements[left_hand],
+                 elements[right_hand]) = (elements[right_hand],
+                                          elements[left_hand])
                 swaps += 1
                 swapped_at_least_once = True
         if not swapped_at_least_once:
             break
     return (len(elements), comparisons, swaps, elements)
+#+end_src
 
+* Original Bubble
+  This is the bubble-sort that just keeps going.
 
+#+begin_src python :noweb-ref bubble
 def bubble(elements: MutableSequence) -> Counts:
     """Sorts the list in place
 
@@ -63,14 +93,19 @@ def bubble(elements: MutableSequence) -> Counts:
             comparisons += 1
             right_hand = left_hand + 1
             if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand], elements[right_hand]) = (
-                    elements[right_hand],
-                    elements[left_hand],
-                )
+                (elements[left_hand],
+                 elements[right_hand]) = (elements[right_hand],
+                                          elements[left_hand])
                 swaps += 1
     return (len(elements), comparisons, swaps, elements)
+#+end_src
 
+* Swap Tracker
+  This builds up a dictionary to keep track of the swaps. The keys are the element values and each element value is mapped to a list of the index that the element was at after each swap.
 
+**Warning:** Because this is using a dictionary you can't pass in a list of elements that has repeated values. Well, you can but then there will only be one key for multiple values in the returned dictionary. The symptom for this will be that the lists will be of different sizes (because you're combining the index lists of multiple elements).
+
+#+begin_src python :noweb-ref tracker
 def swap_tracker(elements: MutableSequence) -> Swaps:
     """Does the bubble-sort and tracks the locations
 
@@ -88,10 +123,10 @@ def swap_tracker(elements: MutableSequence) -> Swaps:
         for left_hand in range(all_but_one - items_bubbled_up):
             right_hand = left_hand + 1
             if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand], elements[right_hand]) = (
-                    elements[right_hand],
-                    elements[left_hand],
-                )
+                (elements[left_hand],
+                 elements[right_hand]) = (elements[right_hand],
+                                          elements[left_hand])
                 for index, element in enumerate(elements):
                     swaps[element].append(index)
     return swaps
+#+end_src
