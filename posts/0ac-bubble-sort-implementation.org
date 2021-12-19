@@ -10,7 +10,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-4e3d8931-51f5-4b2c-a531-66f20bb941e4-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-d3bf4ae1-fd33-431a-9a33-c3729e48faae-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -21,30 +21,17 @@ This is part of a {{% lancelot "series on Bubble Sort" %}}the-bubble-sort{{% /la
 ** Imports
 #+begin_src python :results none
 # python
-from functools import partial
+from random import choices
 
-# pypy
-from bokeh.models import HoverTool
+# pypi
 from expects import contain_exactly, equal, expect
-from joblib import Parallel, delayed
-
-import hvplot.pandas
-import pandas
-
-# my stuff
-from graeae import EmbedHoloviews, Timer
-#+end_src
-** Setup
-#+begin_src python :results none
-Embed = partial(EmbedHoloviews, folder_path="files/posts/bubble-sort")
-TIMER = Timer()
 #+end_src
 * Bubble Sort
 ** The Implementation
    Here's a straight-forward translation of the pseudocode to python.
 
 #+begin_src python :results none
-def bubble_sort_of(unsorted: list) -> list:
+def bubble_sort(unsorted: list) -> list:
     """Sorts the unsorted
 
     Args:
@@ -67,8 +54,14 @@ def bubble_sort_of(unsorted: list) -> list:
 
 #+begin_src python :results none
 inputs = [6, 3, 4, 5, 0]
-expect(bubble_sort_of(inputs)).to(contain_exactly(0, 3, 4, 5, 6))
+expect(bubble_sort(inputs)).to(contain_exactly(0, 3, 4, 5, 6))
+
+population = list(range(1000))
+scrambled = choices(expected, k=1000)
+expect(bubble_sort(scrambled)).to(contain_exactly(*list(sorted(scrambled))))
 #+end_src
+
+Well, that wasn't so exciting, but that's because I'm going to look more at how the sort performs in the {{% lancelot "next post" %}}bubble-sort-an-empirical-look{{% /lancelot %}}.
 
 * Up Next
   In the {{% lancelot "next post" %}}bubble-sort-an-empirical-look{{% /lancelot %}} I'll run the function over some inputs to see how it performs.
