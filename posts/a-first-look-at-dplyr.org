@@ -35,29 +35,47 @@ library(nycflights13)
 library(tidyverse)
 #+end_src
 
-And now some optionns for the packages.
+**Note:** The stuff in the tidyverse tends to clobber built-in functions, which can make it hard to understand sometimes when things go wrong. If you forget to load ~dplyer~, for instance, there's already a ~filter~ function, but it doesn't do the same thing as the one you load with ~dplyr~ so you'll get weird error messages if you try to use it. Notably I was getting this message:
+
+#+begin_src R
+Error in filter(airlines, carrier == "US") : object 'carrier' not found
+#+end_src
+
+Anyway, now some options for the packages.
 
 #+begin_src R :results none
 options(asciiType="org")
 theme_set(theme_minimal(base_family="Palatino"))
 #+end_src
 
-And a helper to print (the ~tibble~ objects dump weird characters into the org-mode output).
+And a couple of helpers to print (the ~tibble~ objects dump weird characters into the org-mode output).
 
 #+begin_src R :results none
 khead <- function(data) {
+  #' Prints a table of the first lines of the dataframe
+  #'
+  #' @param data The data to print
   table <- kable(head(data))
   table[2] <- gsub(":", "-", table[2])
   table
 }
 
 okable <- function(data) {
+  #' Prints data as an org-mode table
+  #'
+  #' @param data The data to print
   table <- kable(data)
   table[2] <- gsub(":", "-", table[2])
   table
 }
-#+end_src
 
+got_all_your_data <- function(data) {
+  #' Checks if there's any missing values
+  #'
+  #' @param data The vector of data to check
+  see_if(noNA(data))
+}
+#+end_src
 
 * The Data
   We're going to look at the ~flights~ dataframe loaded by the [[https://www.rdocumentation.org/packages/nycflights13/versions/1.0.1][~nycflights13~]] package (which, curiously, R loads using the ~library~ function).
@@ -161,40 +179,42 @@ ggsave("christmas_new_years_delay.png")
 * Arrange
   ~arrange~ is a function to sort the rows. By default it sorts then in non-decreasing (ascending) order using a column you give it. You can givie it multiple columns in which case whenever there's a tie it will look in the next column you gave it to see if it can break it (the tie, I mean).
 
-** [#C] Ascending Order
+** Ascending Order
 What are the shortest flights?
 
 #+begin_src R :results output raw :exports both
-kable(head(arrange(flights, distance)))
+khead(arrange(flights, distance))
 #+end_src
 
 #+RESULTS:
 
 
-| year| month| day| dep_time| sched_dep_time| dep_delay| arr_time| sched_arr_time| arr_delay|carrier | flight|tailnum |origin |dest | air_time| distance| hour| minute|time_hour           |
-|-----|------|----|---------|---------------|----------|---------|---------------|----------|--------|-------|--------|-------|-----|---------|---------|-----|-------|--------------------|
-| 2013|     7|  27|       NA|            106|        NA|       NA|            245|        NA|US      |   1632|NA      |EWR    |LGA  |       NA|       17|    1|      6|2013-07-27 01:00:00 |
-| 2013|     1|   3|     2127|           2129|        -2|     2222|           2224|        -2|EV      |   3833|N13989  |EWR    |PHL  |       30|       80|   21|     29|2013-01-03 21:00:00 |
-| 2013|     1|   4|     1240|           1200|        40|     1333|           1306|        27|EV      |   4193|N14972  |EWR    |PHL  |       30|       80|   12|      0|2013-01-04 12:00:00 |
-| 2013|     1|   4|     1829|           1615|       134|     1937|           1721|       136|EV      |   4502|N15983  |EWR    |PHL  |       28|       80|   16|     15|2013-01-04 16:00:00 |
-| 2013|     1|   4|     2128|           2129|        -1|     2218|           2224|        -6|EV      |   4645|N27962  |EWR    |PHL  |       32|       80|   21|     29|2013-01-04 21:00:00 |
-| 2013|     1|   5|     1155|           1200|        -5|     1241|           1306|       -25|EV      |   4193|N14902  |EWR    |PHL  |       29|       80|   12|      0|2013-01-05 12:00:00 |
+| year| month| day| dep_time| sched_dep_time| dep_delay| arr_time| sched_arr_time| arr_delay|carrier | flight|tailnum |origin |destination | air_time| distance| hour| minute|time_hour           |
+|-----|------|----|---------|---------------|----------|---------|---------------|----------|--------|-------|--------|-------|------------|---------|---------|-----|-------|--------------------|
+| 2013|     7|  27|       NA|            106|        NA|       NA|            245|        NA|US      |   1632|NA      |EWR    |LGA         |       NA|       17|    1|      6|2013-07-27 01:00:00 |
+| 2013|     1|   3|     2127|           2129|        -2|     2222|           2224|        -2|EV      |   3833|N13989  |EWR    |PHL         |       30|       80|   21|     29|2013-01-03 21:00:00 |
+| 2013|     1|   4|     1240|           1200|        40|     1333|           1306|        27|EV      |   4193|N14972  |EWR    |PHL         |       30|       80|   12|      0|2013-01-04 12:00:00 |
+| 2013|     1|   4|     1829|           1615|       134|     1937|           1721|       136|EV      |   4502|N15983  |EWR    |PHL         |       28|       80|   16|     15|2013-01-04 16:00:00 |
+| 2013|     1|   4|     2128|           2129|        -1|     2218|           2224|        -6|EV      |   4645|N27962  |EWR    |PHL         |       32|       80|   21|     29|2013-01-04 21:00:00 |
+| 2013|     1|   5|     1155|           1200|        -5|     1241|           1306|       -25|EV      |   4193|N14902  |EWR    |PHL         |       29|       80|   12|      0|2013-01-05 12:00:00 |
+
+The data uses the three-letter airport codes, but there's another dataframe loaded with ~ggplot2~ named ~airports~ that we can use to translate them to airport names.
 
 #+begin_src R :results output raw :exports both
-kable(filter(airports, faa %in% c("PHL", "LGA", "EWR")))
+okable(filter(airports, faa %in% c("PHL", "LGA", "EWR")))
 #+end_src
 
 #+RESULTS:
 
 
 |faa |name                |      lat|       lon| alt| tz|dst |tzone            |
-|:---|:-------------------|--------:|---------:|---:|--:|:---|:----------------|
+|----|--------------------|---------|----------|----|---|----|-----------------|
 |EWR |Newark Liberty Intl | 40.69250| -74.16867|  18| -5|A   |America/New_York |
 |LGA |La Guardia          | 40.77725| -73.87261|  22| -5|A   |America/New_York |
 |PHL |Philadelphia Intl   | 39.87194| -75.24114|  36| -5|A   |America/New_York |
 
 
-So the shortest flights are from Newark Liberty International to La Guardia airport (in New York City) and the Philadelphia International Airport.
+So the shortest flights are from Newark Liberty International to La Guardia airport and the Philadelphia International Airport. I wonder why someone would take a plane to go 17 miles? I guess the traffic must be really bad, or some people just have money (and jet fuel) to burn.
 
 ** Descending Order
    To get the data to sort in descending order you have to pass in another function call (~desc~). Weird.
@@ -202,30 +222,33 @@ So the shortest flights are from Newark Liberty International to La Guardia airp
    What are the longest flights?
 
 #+begin_src R :results output raw :exports both
-kable(head(arrange(flights, desc(distance))))
+khead(arrange(flights, desc(distance)))
 #+end_src
 
 #+RESULTS:
 
 
-| year| month| day| dep_time| sched_dep_time| dep_delay| arr_time| sched_arr_time| arr_delay|carrier | flight|tailnum |origin |dest | air_time| distance| hour| minute|time_hour           |
-|-----|------|----|---------|---------------|----------|---------|---------------|----------|--------|-------|--------|-------|-----|---------|---------|-----|-------|--------------------|
-| 2013|     1|   1|      857|            900|        -3|     1516|           1530|       -14|HA      |     51|N380HA  |JFK    |HNL  |      659|     4983|    9|      0|2013-01-01 09:00:00 |
-| 2013|     1|   2|      909|            900|         9|     1525|           1530|        -5|HA      |     51|N380HA  |JFK    |HNL  |      638|     4983|    9|      0|2013-01-02 09:00:00 |
-| 2013|     1|   3|      914|            900|        14|     1504|           1530|       -26|HA      |     51|N380HA  |JFK    |HNL  |      616|     4983|    9|      0|2013-01-03 09:00:00 |
-| 2013|     1|   4|      900|            900|         0|     1516|           1530|       -14|HA      |     51|N384HA  |JFK    |HNL  |      639|     4983|    9|      0|2013-01-04 09:00:00 |
-| 2013|     1|   5|      858|            900|        -2|     1519|           1530|       -11|HA      |     51|N381HA  |JFK    |HNL  |      635|     4983|    9|      0|2013-01-05 09:00:00 |
-| 2013|     1|   6|     1019|            900|        79|     1558|           1530|        28|HA      |     51|N385HA  |JFK    |HNL  |      611|     4983|    9|      0|2013-01-06 09:00:00 |
+| year| month| day| dep_time| sched_dep_time| dep_delay| arr_time| sched_arr_time| arr_delay|carrier | flight|tailnum |origin |destination | air_time| distance| hour| minute|time_hour           |
+|-----|------|----|---------|---------------|----------|---------|---------------|----------|--------|-------|--------|-------|------------|---------|---------|-----|-------|--------------------|
+| 2013|     1|   1|      857|            900|        -3|     1516|           1530|       -14|HA      |     51|N380HA  |JFK    |HNL         |      659|     4983|    9|      0|2013-01-01 09:00:00 |
+| 2013|     1|   2|      909|            900|         9|     1525|           1530|        -5|HA      |     51|N380HA  |JFK    |HNL         |      638|     4983|    9|      0|2013-01-02 09:00:00 |
+| 2013|     1|   3|      914|            900|        14|     1504|           1530|       -26|HA      |     51|N380HA  |JFK    |HNL         |      616|     4983|    9|      0|2013-01-03 09:00:00 |
+| 2013|     1|   4|      900|            900|         0|     1516|           1530|       -14|HA      |     51|N384HA  |JFK    |HNL         |      639|     4983|    9|      0|2013-01-04 09:00:00 |
+| 2013|     1|   5|      858|            900|        -2|     1519|           1530|       -11|HA      |     51|N381HA  |JFK    |HNL         |      635|     4983|    9|      0|2013-01-05 09:00:00 |
+| 2013|     1|   6|     1019|            900|        79|     1558|           1530|        28|HA      |     51|N385HA  |JFK    |HNL         |      611|     4983|    9|      0|2013-01-06 09:00:00 |
+
+
+You can probably guess the airports from the codes, but we'll look them up anyway.
 
 #+begin_src R :results output raw :exports both
-kable(filter(airports, faa %in% c("JFK", "HNL")))
+okable(filter(airports, faa %in% c("JFK", "HNL")))
 #+end_src
 
 #+RESULTS:
 
 
 |faa |name                |      lat|        lon| alt|  tz|dst |tzone            |
-|:---|:-------------------|--------:|----------:|---:|---:|:---|:----------------|
+|----|--------------------|---------|-----------|----|----|----|-----------------|
 |HNL |Honolulu Intl       | 21.31868| -157.92243|  13| -10|N   |Pacific/Honolulu |
 |JFK |John F Kennedy Intl | 40.63975|  -73.77893|  13|  -5|A   |America/New_York |
 
@@ -288,7 +311,7 @@ khead(select(flights, dep_time:arr_time))
 | ~any_of(<vector>)~                      | Same as ~all_of~ but ignores non-existent columns in the vector         |
 | ~where(<function>)~                     | Applies the function to the columns and picks the ones that return true |
 
-You can also use logical AND and OR operators or a vector to combine the selections.
+You can also use logical AND and OR operators or a vector to combine the selections, but we'll just do a basic one-function call. Let's grab all the columns with an underscore in their name.
 
 #+begin_src R :results output raw :exports both
 khead(select(flights, contains("_")))
@@ -306,7 +329,7 @@ khead(select(flights, contains("_")))
 |      554|            600|        -6|      812|            837|       -25|      116|2013-01-01 06:00:00 |
 |      554|            558|        -4|      740|            728|        12|      150|2013-01-01 05:00:00 |
 
-You can also negate the selections using an exclamation point (~!~).
+You can also negate the selections using an exclamation point (~!~), so we can grab all the columns that don't have an underscore in their name like this.
 
 #+begin_src R :results output raw :exports both
 khead(select(flights, !contains("_")))
@@ -325,7 +348,7 @@ khead(select(flights, !contains("_")))
 | 2013|     1|   1|UA      |   1696|N39463  |EWR    |ORD  |      719|    5|     58|
 
 * Renaming
-  The book mentions renaming under the ~select~ section because it says that it is a special case of selection, but it has a dedicated function to do that named ~rename~
+  The book mentions renaming under the ~select~ section because it says that it is a special case of selection, but it has a dedicated function to do that named ~rename~ that you should use instead. Let's rename the first column (~year~).
 
 #+begin_src R :results output raw :exports both
 khead(rename(flights, Jahr=year))
@@ -344,10 +367,17 @@ khead(rename(flights, Jahr=year))
 | 2013|     1|   1|      554|            558|        -4|      740|            728|        12|UA      |   1696|N39463  |EWR    |ORD  |      150|      719|    5|     58|2013-01-01 05:00:00 |
 
 **Note:** Pay attention to the funky syntax - the new name comes first and the original name comes after the equal sign.
+
+*** Some More Useful Renaming
+    That wasn't really helpful, so how about we rename some other columns?
+
+#+begin_src R :results none
+flights <- rename(flights, destination=dest)
+#+end_src
 * Mutate
   The ~mutate~ function adds a column (or columns) to the end of the dataframe based on things you tell it to do to one or more other columns. 
 
-First, get a subset of columns to make this easier to see.
+First, we'll grabs a subset of columns to make this easier to see.
 
 #+begin_src R :results output raw :exports both
 subset = select(flights, ends_with("delay"), air_time, distance)
@@ -366,7 +396,7 @@ khead(subset)
 |        -6|       -25|      116|      762|
 |        -4|        12|      150|      719|
 
-Now add a couple of columns giving the difference between how late they arrived and how late they left and the average speed.
+Now to add a couple of columns giving the difference between how late they arrived and how late they left and the average speed.
 
 #+begin_src R :results output raw :exports both
 khead(mutate(subset,
@@ -413,13 +443,13 @@ khead(transmute(subset,
   ~summarize~ reduces a collection of numbers to a single summary statistic. As an example we can look at the median departure delay. First, let's check if it has any missing values.
 
 #+begin_src R :results output :exports both
-see_if(noNA(flights$dep_delay))
+got_all_your_data(flights$dep_delay)
 #+end_src
 
 #+RESULTS:
 : [1] FALSE
 : attr(,"msg")
-: [1] "flights$dep_delay contains 8255 missing values"
+: [1] "data contains 8255 missing values"
 
 Okay, so we'll just tell ~median~ to ignore it.
 
@@ -435,6 +465,21 @@ okable(summarize(flights, median_departure_delay=median(dep_delay, na.rm=TRUE)))
 |                     -2|
 
 
+What if we hadn't ignored the missing?
+
+#+begin_src R :results output raw :exports both
+okable(summarize(flights, median_departure_delay=median(dep_delay)))
+#+end_src
+
+#+RESULTS:
+
+
+| median_departure_delay|
+|-----------------------|
+|                     NA|
+
+The R summary functions like ~median~ and ~mean~ consider any missing data invalid unless you tell it to ignore the missing. How is this use of ~summarize~ different from just calling ~median~?
+
 #+begin_src R :results output :exports both
 median(flights$dep_delay, na.rm=TRUE)
 #+end_src
@@ -442,7 +487,7 @@ median(flights$dep_delay, na.rm=TRUE)
 #+RESULTS:
 : [1] -2
 
-So, you might think, well, all we did was add a columns name, was that useful?
+Well, it doesn't look quite as nice. So, you might think, well, all we did was add a columns name, was that useful?
 
 ** Grouping
    The reason for ~summarize~ is that it works in tandem with groups. Instead of finding the median for the whole column, we can find the median by group.
@@ -471,6 +516,8 @@ okable(summarize(by_month, median_monthly_delay=median(dep_delay, na.rm=TRUE)))
 |    11|                   -3|
 |    12|                    0|
 
+Is that right? Let's look at a boxplot of the dataset and check.
+
 #+begin_src R :results none
 plot = ggplot(data=by_month) +
   geom_boxplot(
@@ -488,6 +535,76 @@ ggsave("monthly_delay_boxplot.png")
 
 [[img-url:monthly_delay_boxplot.png]]
 
+So, that isn't so exciting, but it does show that the median values tend to be negative (meaning they left early) like our summary said.
+
+** Hitting the Pipe
+   ~dplyr~ adds an operator called the "pipe" (~%>%~) that works like a unix pipe does, sending the output of one function to another, allowing you to save some keystrokes adding temporary variables or nesting function calls.
+
+So, here's what we're going to do. 
+
+ - We're going to pass the ~flights~ dataset to the ~group_by~ function and group the data by destination
+ - Then we're going to pass that output to the ~summarize~ function and summarize by:
+    + the counts
+    + mean distance of the flight
+    + and the mean arrival delay of each group
+ - Then we're going to pass the summarized data to ~filter~ to get the top 20 that didn't go to Honolulu.
+
+First let's do a check for missing values.
+
+#+begin_src R :results output :exports both
+got_all_your_data(flights$arr_delay)
+got_all_your_data(flights$distance)
+#+end_src
+
+#+RESULTS:
+: [1] FALSE
+: attr(,"msg")
+: [1] "data contains 9430 missing values"
+: [1] TRUE
+
+There's no missing distances but there are missing arrival delays.
+
+#+begin_src R :results output raw :exports both
+delays_vs_distance <- flights %>%
+  group_by(destination) %>%
+  summarize(
+    count = n(),
+    distance = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) %>%
+  filter(count > 20, destination != "HNL")
+
+khead(delays_vs_distance)
+#+end_src
+
+#+RESULTS:
+
+
+|destination | count|  distance|     delay|
+|------------|------|----------|----------|
+|ABQ         |   254| 1826.0000|  4.381890|
+|ACK         |   265|  199.0000|  4.852273|
+|ALB         |   439|  143.0000| 14.397129|
+|ATL         | 17215|  757.1082| 11.300113|
+|AUS         |  2439| 1514.2530|  6.019909|
+|AVL         |   275|  583.5818|  8.003831|
+
+
+Note that we're using the mean here, not the median, so there's going to be more variation because of all the outliers. Also, because there are some missing values we had to tell the ~mean~ function to ignore them - otherwise the default is to return ~NA~ if any values are missing. There weren't any missing ~distance~ rows, but passing that argument in doesn't do any harm, I don't think. Now let's plot it.
+
+#+begin_src R :results none
+plot = ggplot(data=delays_vs_distance, mapping=aes(x=distance, y=delay)) +
+  geom_point(aes(size=count), alpha=0.4) +
+  geom_smooth(se=FALSE) +
+  labs(title="Distance Traveled vs Arrival Delay", x="Distance (Miles)",
+       y="Delay (Minutes)")
+
+ggsave("distance_vs_delay.png")
+#+end_src
+
+[[img-url:distance_vs_delay.png]]
+
+It looks like up to a point the further you travel the worse the delay, and then it starts going in the opposite direction, with longer flights having shorter delays in their arrival times.
 * Link Collection
   - [[https://cran.r-project.org/web/packages/ascii/index.html][ascii]]: The R package to help change R-output to work better with org-mode.
   - [[https://github.com/hadley/assertthat][assertthat]]: R assertions.
