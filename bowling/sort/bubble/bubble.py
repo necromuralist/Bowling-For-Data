@@ -1,5 +1,6 @@
 # python standard library
 from collections.abc import MutableSequence
+from collections import namedtuple
 
 ElementCount = int
 ComparisonCount = int
@@ -12,6 +13,11 @@ IndexHistory = list[int]
 ElementValue = int
 
 Swaps = dict[ElementValue, IndexHistory]
+BubbleOutput = namedtuple("BubbleOutput",
+                          [
+                              "element_count", "comparisons",
+                              "swaps",
+                              "elements"])
 
 
 def bubba(elements: MutableSequence) -> Counts:
@@ -36,10 +42,9 @@ def bubba(elements: MutableSequence) -> Counts:
             comparisons += 1
             right_hand = left_hand + 1
             if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand], elements[right_hand]) = (
-                    elements[right_hand],
-                    elements[left_hand],
-                )
+                (elements[left_hand],
+                 elements[right_hand]) = (elements[right_hand],
+                                          elements[left_hand])
                 swaps += 1
                 swapped_at_least_once = True
         if not swapped_at_least_once:
@@ -63,12 +68,11 @@ def bubble(elements: MutableSequence) -> Counts:
             comparisons += 1
             right_hand = left_hand + 1
             if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand], elements[right_hand]) = (
-                    elements[right_hand],
-                    elements[left_hand],
-                )
+                (elements[left_hand],
+                 elements[right_hand]) = (elements[right_hand],
+                                          elements[left_hand])
                 swaps += 1
-    return (len(elements), comparisons, swaps, elements)
+    return BubbleOutput(len(elements), comparisons, swaps, elements)
 
 
 def swap_tracker(elements: MutableSequence) -> Swaps:
@@ -88,10 +92,9 @@ def swap_tracker(elements: MutableSequence) -> Swaps:
         for left_hand in range(all_but_one - items_bubbled_up):
             right_hand = left_hand + 1
             if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand], elements[right_hand]) = (
-                    elements[right_hand],
-                    elements[left_hand],
-                )
+                (elements[left_hand],
+                 elements[right_hand]) = (elements[right_hand],
+                                          elements[left_hand])
                 for index, element in enumerate(elements):
                     swaps[element].append(index)
     return swaps
