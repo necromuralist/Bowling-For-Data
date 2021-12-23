@@ -1,0 +1,105 @@
+#+BEGIN_COMMENT
+.. title: Altair: Testing, Testing
+.. slug: altair-testing-testing
+.. date: 2021-12-22 16:19:19 UTC-08:00
+.. tags: altair,visualization,python
+.. category: Visualization
+.. link: 
+.. description: A first test of altair.
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-26eeb428-8317-42c0-94b6-ae713b9c3838-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* What This Is
+  This is a (partial) replication of the [[https://altair-viz.github.io/getting_started/starting.html][Basic Statistical Visualization]] section of the [[https://altair-viz.github.io/index.html][altair]] documentation - mostly to see if I can see if it works.
+* Set Up
+** Imports
+#+begin_src python :results none
+# pypi
+from tabulate import tabulate
+from vega_datasets import data
+
+import altair
+import pandas
+#+end_src
+* The Data
+  
+  To keep it simple we're going to set up a very small pandas DataFrame as our data.
+
+#+begin_src python :results output raw :exports both
+fake_data = pandas.DataFrame({"a": list("CCCDDDEEE"),
+                              "b": [2, 7, 4, 1, 2, 6, 8, 4, 7]})
+
+print(tabulate(fake_data, tablefmt="orgtbl", headers="keys", showindex=False))
+#+end_src
+
+| a   |   b |
+|-----+-----|
+| C   |   2 |
+| C   |   7 |
+| C   |   4 |
+| D   |   1 |
+| D   |   2 |
+| D   |   6 |
+| E   |   8 |
+| E   |   4 |
+| E   |   7 |
+
+Exciting.
+
+* A Bar Plot
+  To plot with ~altair~ you pass the dataframe to the ~Chart~ constructor and call some chained methods. To plot a bar plot you call the chart's ~mark_bar~ method and on the object that it returns you call the ~encode~ method where you pass in the information on what from the data to plot. It uses a silghtly funky string argument to tell altair to call a function (we're going to call average). This is only a shortcut, though, you can call the functions too. But that's getting ahead of things. Let's just make the plot.
+
+#+begin_src python :results none
+bar_chart = altair.Chart(fake_data).mark_bar(color="firebrick").encode(
+    y="a",
+    x="average(b)",
+    tooltip=["a", "average(b)"],
+).properties(
+    width=800,
+    height=600,
+).interactive()
+#+end_src
+
+**Note:** Setting ~y~ to the categorical value will make altair rotate the plot. Also the default plot is tiny so I went back and set the size to something bigger.
+
+* Save the Plot
+#+begin_src python :results none
+SLUG = "altair-testing-testing"
+PATH = f"files/posts/{SLUG}/"
+bar_chart.save(f"{PATH}test-bar-plot.html")
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="test-bar-plot.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+* A Scatter Plot
+#+begin_src python :results none
+source = data.cars()
+
+chart = altair.Chart(source).mark_circle(size=60).encode(
+    x='Horsepower',
+    y='Miles_per_Gallon',
+    color='Origin',
+    tooltip=['Name', 'Origin', 'Horsepower', 'Miles_per_Gallon']
+).interactive()
+
+chart.save(f"{PATH}cars_scatter.html")
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="cars_scatter.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+* The End
+  Well, I'll leave it there and say it works, but I'm not sure I'll be switching from HoloViews just yet. I couldn't figure out how to get the tooltips working (which is kind of the point of not doing this as a static figure) and trying to navigate the documentation didn't leave me with a good feeling about trying to find stuff on the site. What examples I saw looked like promising, though, so I'll keep it in mind and maybe play around with it more later.
