@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-This is part of a {{% lancelot "series on the Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}. We'll look at the algorithm without worrying about implementation details here.
+This is part of a {{% lancelot "series on the Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}. In this post we'll look at the algorithm without worrying about the implementation details.
 
 #+begin_comment
 Adding a SmallCaps command.
@@ -20,11 +20,11 @@ From https://stackoverflow.com/questions/11576237/mathjax-textsc
 \(\def\sc#1{\dosc#1\csod} \def\dosc#1#2\csod{{\rm #1{\small #2}}}\)
 
 * The Parts
-  - **Specification:** This is {{% doc %}}the-sorting-problem{{% /doc %}}.
+  - **Specification:** This is an instance of {{% doc %}}the-sorting-problem{{% /doc %}}.
   - **Basic Steps:** Swap adjacent elements that are out of order.
   - **Measure of Progress:** The number of items sorted so far.
-  - **The Loop Invariant:** The /k/ elements at the end of the items are the largest elements in sorted order.
-  - **Main Steps:** Swap adjacent items that are out of order until the largest unsorted item is at the beginning of the sorted items.
+  - **The Loop Invariant:** The number of times the loop has been performed (/k/) is the number of elements at the end of the items which are the largest elements in sorted order.
+  - **Main Steps:** Move from the start of the list swapping adjacent items that are out of order until the largest unsorted item is at the beginning of the sorted items.
   - **Make Progress:** The main step reduces the unsorted by 1.
   - **Maintain the Loop Invariant:**
     + \(\langle Loop-Invariant \rangle\): /k/ items at the end of the list are sorted.
@@ -61,6 +61,8 @@ From https://stackoverflow.com/questions/11576237/mathjax-textsc
 #+end_export
 
 If you squint a little you'll see that there's only really four lines of code, two for-loops, an if-then conditional, and a "swap", the rest is noise from the algorithmic formatting.
+
+In translation, the $i$ variable holds the amount of items at the end of the list that have been sorted so far, and the $j$ variable moves from the start of the list up to the end of the unsorted (since the outer loop goes up by one each time and the inner loop is subtracting the outer loop's value when finding where to stop it goes up one less entry with each loop). Then the conditional says that if the item to the right of where we currently are is smaller than the item in front of us, swap the two items so that the bigger item is on the right.
 * Assessing the Damage
 Although it's nice to know that the sort works we're really not as concerned about how correct it is, as much as we are interested in how it performs. There's two things we can count:
 

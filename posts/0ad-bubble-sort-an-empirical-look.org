@@ -72,6 +72,7 @@ BubbleOutput = namedtuple("BubbleOutput",
                               "elements"])
 #+end_src
 
+*** The Sorting Function (With Counts)
 #+begin_src python :results none
 def bubble(elements: MutableSequence) -> Counts:
     """Sorts the list in place
@@ -84,17 +85,19 @@ def bubble(elements: MutableSequence) -> Counts:
     """
     all_but_one = len(elements) - 1
     comparisons = swaps = 0
-    for items_bubbled_up in range(all_but_one):
-        for left_hand in range(all_but_one - items_bubbled_up):
+    for items_sorted in range(all_but_one):
+        for in_front_of_us in range(all_but_one - items_sorted):
             comparisons += 1
-            right_hand = left_hand + 1
-            if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand],
-                 elements[right_hand]) = (elements[right_hand],
-                                          elements[left_hand])
+            to_the_right = in_front_of_us + 1
+            if elements[to_the_right] < elements[in_front_of_us]:
+                (elements[in_front_of_us],
+                 elements[to_the_right]) = (elements[to_the_right],
+                                          elements[in_front_of_us])
                 swaps += 1
     return BubbleOutput(len(elements), comparisons, swaps, elements)
 #+end_src
+
+One thing to note is that in the algorithm the outer loop stops at $n-2$, which it also does here, but since the ~range~ function doesn't include the last number our argument is only $n-1$, which might look confusing at first, and might sound even more confusing when you read this, but the point is they're the same even though they might not look exactly the same.
 ** Testing the Counter
 #+begin_src python :results none
 def check_non_decreasing(elements: list) -> None:
@@ -115,6 +118,8 @@ def check_non_decreasing(elements: list) -> None:
 #+end_src
 
 *** A Random Input
+    Because we aren't using any kind of short-circuiting to stop once the data is sorted, it will always loop $\Omega(n^2)$, but the number of swaps will depend on the input.
+
 #+begin_src python :results none
 n = 1000
 inputs = random.choices(list(range(n)), k=n)
@@ -124,18 +129,22 @@ output = bubble(inputs)
 sorted_elements = output.elements
 check_non_decreasing(sorted_elements)
     
-expected_runtime = (n * (n - 1))/2
+expected_runtime = expected_swaps = (n * (n - 1))/2
 expect(output.comparisons).to(equal(expected_runtime))
 #+end_src
 *** The Worst Case
+    In the worst case where it's in the exact opposite sorted order (non-increasing instead of non-decreasing) the number of comparisons should equaly the number of swaps.
+
 #+begin_src python :results none
 output = bubble(list(reversed(list(range(n)))))
 check_non_decreasing(output.elements)
 expect(output.comparisons).to(equal(expected_runtime))
-expect(output.swaps).to(equal(expected_runtime))
+expect(output.swaps).to(equal(expected_swaps))
 #+end_src
 
 ** The Tracker
+   To visualize what the sort is doing I'm going to update the bubble sort to keep track of the order of the items as it's being sorted. I'm using a dictionary to map the list values to their locations so we can't use inputs where there are repeated elements or more than one list of locations will be mapped to a element value.
+
 #+begin_src python :results none
 IndexHistory = list[int]
 ElementValue = int
@@ -156,17 +165,19 @@ def swap_tracker(elements: MutableSequence) -> Swaps:
 
     swaps = {element: [index] for index, element in enumerate(elements)}
 
-    for items_bubbled_up in range(all_but_one):
-        for left_hand in range(all_but_one - items_bubbled_up):
-            right_hand = left_hand + 1
-            if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand],
-                 elements[right_hand]) = (elements[right_hand],
-                                          elements[left_hand])
+    for items_sorted in range(all_but_one):
+        for in_front_of_us in range(all_but_one - items_sorted):
+            to_the_right = in_front_of_us + 1
+            if elements[to_the_right] < elements[in_front_of_us]:
+                (elements[in_front_of_us],
+                 elements[to_the_right]) = (elements[to_the_right],
+                                          elements[in_front_of_us])
                 for index, element in enumerate(elements):
                     swaps[element].append(index)
     return swaps
 #+end_src
+
+First a little sanity check just to make sure it still works.
 
 #+begin_src python :results none
 inputs = [6, 3, 4, 1]
@@ -189,7 +200,7 @@ check_non_decreasing(inputs)
 
 ** Try Them Out
 *** Comparisons
-    To speed this up I'm going to run the sort in numba.
+    Let's look at how the comparisons and swaps change as the input gets bigger. To speed this up I'm going to run the sort in numba.
 
 #+begin_src python :results none
 numba_bubble = njit(bubble)
@@ -212,6 +223,7 @@ with TIMER:
 : Elapsed: 0:01:32.481587
 
 
+Now we'll plot it.
 
 #+begin_src python :results none
 SIZE, COMPARISONS, SWAPS, ELEMENTS = 0, 1, 2, 3
@@ -252,7 +264,7 @@ plot = (swap_plots * comparison_plots * n_squared_plot).opts(
 output = Embed(plot=plot, file_name="bubble_sort_comparisons")()
 #+end_src
 
-#+begin_src python :results output html :exports output
+#+begin_src python :results output html :exports results
 print(output)
 #+end_src
 
@@ -263,8 +275,11 @@ print(output)
 </object>
 #+end_export
 
-If you hover over the lines you can see that each line is roughly double the one below it - there are twice as many comparisons as swaps for a given input and \(n^2\) is twice as big as the comparison count for a given input.
+The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of swaps, and the bottom line (blue) is the number of comparisons. If you hover over the lines you can see that each line is roughly double the one below it - there are twice as many comparisons as swaps for a given input and \(n^2\) is twice as big as the comparison count for a given input.
 ** Swaps
+
+   The comparisons and swaps are pretty much what we expected to see, they just confirm the theoretical assessment, but now let's look at plotting the swaps as they occur to see if we can understand what the bubble sort is doing.
+   
 #+begin_src python :results none
 COUNT = 20
 inputs = random.sample(list(range(COUNT)), k=COUNT)
@@ -294,7 +309,7 @@ plot = melted.hvplot(x="Swap", y="Location In Array",
 output = Embed(plot=plot, file_name="bubble_sort_swaps")()
 #+end_src
 
-#+begin_src python :results output html :exports output
+#+begin_src python :results output html :exports results
 print(output)
 #+end_src
 
@@ -303,6 +318,8 @@ print(output)
   <p>Figure Missing</p>
 </object>
 #+end_export
+
+**Aside:**
 
 HoloViews seems to not let you set the Tooltips if you use multiple columns, which is why I went through all the rigamarole of melting it. If you just plot it as the DataFrame with each column being one of the tracked locations for a sort value (e.g. the column name is '1' and the rows are the positions in the array at each swap) then the plot comes out okay, but the labels are kind of confusing.
 
@@ -331,7 +348,7 @@ plot = melted.hvplot(x="Swap", y="Location In Array", cmap="blues",
 output = Embed(plot=plot, file_name="bubble_sort_worst_swaps")()
 #+end_src
 
-#+begin_src python :results output html :exports output
+#+begin_src python :results output html :exports results
 print(output)
 #+end_src
 

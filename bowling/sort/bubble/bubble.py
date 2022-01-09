@@ -36,15 +36,15 @@ def bubba(elements: MutableSequence) -> Counts:
     """
     all_but_one = len(elements) - 1
     comparisons = swaps = 0
-    for items_bubbled_up in range(all_but_one):
+    for items_sorted in range(all_but_one):
         swapped_at_least_once = False
-        for left_hand in range(all_but_one - items_bubbled_up):
+        for in_front_of_us in range(all_but_one - items_sorted):
             comparisons += 1
-            right_hand = left_hand + 1
-            if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand],
-                 elements[right_hand]) = (elements[right_hand],
-                                          elements[left_hand])
+            to_the_right = in_front_of_us + 1
+            if elements[to_the_right] < elements[in_front_of_us]:
+                (elements[in_front_of_us],
+                 elements[to_the_right]) = (elements[to_the_right],
+                                          elements[in_front_of_us])
                 swaps += 1
                 swapped_at_least_once = True
         if not swapped_at_least_once:
@@ -63,14 +63,14 @@ def bubble(elements: MutableSequence) -> Counts:
     """
     all_but_one = len(elements) - 1
     comparisons = swaps = 0
-    for items_bubbled_up in range(all_but_one):
-        for left_hand in range(all_but_one - items_bubbled_up):
+    for items_sorted in range(all_but_one):
+        for in_front_of_us in range(all_but_one - items_sorted):
             comparisons += 1
-            right_hand = left_hand + 1
-            if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand],
-                 elements[right_hand]) = (elements[right_hand],
-                                          elements[left_hand])
+            to_the_right = in_front_of_us + 1
+            if elements[to_the_right] < elements[in_front_of_us]:
+                (elements[in_front_of_us],
+                 elements[to_the_right]) = (elements[to_the_right],
+                                          elements[in_front_of_us])
                 swaps += 1
     return BubbleOutput(len(elements), comparisons, swaps, elements)
 
@@ -88,13 +88,13 @@ def swap_tracker(elements: MutableSequence) -> Swaps:
 
     swaps = {element: [index] for index, element in enumerate(elements)}
 
-    for items_bubbled_up in range(all_but_one):
-        for left_hand in range(all_but_one - items_bubbled_up):
-            right_hand = left_hand + 1
-            if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand],
-                 elements[right_hand]) = (elements[right_hand],
-                                          elements[left_hand])
+    for items_sorted in range(all_but_one):
+        for in_front_of_us in range(all_but_one - items_sorted):
+            to_the_right = in_front_of_us + 1
+            if elements[to_the_right] < elements[in_front_of_us]:
+                (elements[in_front_of_us],
+                 elements[to_the_right]) = (elements[to_the_right],
+                                          elements[in_front_of_us])
                 for index, element in enumerate(elements):
                     swaps[element].append(index)
     return swaps
