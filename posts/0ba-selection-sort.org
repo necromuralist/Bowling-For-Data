@@ -53,11 +53,11 @@ Embed = partial(EmbedHoloviews, folder_path="files/posts/selection-sort")
 | *Basic Steps* |    We're going to repeatedly select the smallest item in the unselected. |
 | *Measure Progress* |   We'll know we're progressing by the number of elements we've selected (/k/).|
 | *Loop Invariant* |None of the selected elements is larger than any element in the unselected and the selected items are in sorted order. The unselected items contain the largest elements in the list.|
-|What are the Main Steps?|   1. Find the smallest element|
+|What are the Main Steps?|   1. Find the smallest unsorted element|
 ||   2. Put the selected element at the end of the previously selected element(s)|
 |*Making Progress* |   The number of selected items (/k/) always goes up after each loop.|
 |*Loop Invariant Maintenance* |   - The previous Loop Invariant tells us that all the unselected items were at least as large or larger than the largest of the selected items.|
-||   - We chose the largest item of the unselected so its as big or bigger than the biggest selected item.|
+||   - We chose the largest item of the unselected so it's as big or bigger than the biggest selected item.|
 ||   - Putting the selected item at the end of the previously selected items maintains the Loop Invariant.|
 |*Establish the Loop Invariant*|   At the start, no items have been selected so the Loop Invariant is vacuously true.|
 |*Exit-Condition*|    We stop when all the items have been selected.|
@@ -96,9 +96,11 @@ C(n) &= \sum_{i=0}^{n-2} \sum_{j=i+1}^{n-1} 1\\
 </pre>
 #+end_export
 
+The outer loop (where /i/ is set) tracks the number of items selected so far (which is the same thing as the size of the sorted section at the beginning of the list). The inner loop goes over the remaining, previously unselected, items in the list and looks for the index of the smallest item, it then puts that smallest item at the beginning of the unselected items and moves what was at the beginning to where the smallest item was. Once the swap is done, the sub-list on the left-side of the list is now bigger by one so the outer loop increments and then we search for the next smallest item, and so on until all the items have been selected (except for the last item) and the list is sorted.
+
 * The Implementations
 ** Selection Sort
-   This will be a straight translation of the pseudocode (or straight-ish). I'm still holding out using pypy or something other than numba sometimes so I won't add the decorator directly.
+   This will be a straight translation of the pseudocode (or straight-ish).
 
 #+begin_src python :tangle ../bowling/sort/selection/selection.py :exports none
 <<imports>>
@@ -112,18 +114,23 @@ C(n) &= \sum_{i=0}^{n-2} \sum_{j=i+1}^{n-1} 1\\
 
 #+begin_src python :noweb-ref return-type
 from collections.abc import MutableSequence
+from collections import namedtuple
 from typing import Any, Dict
 #+end_src
 
 #+begin_src python :noweb-ref return-type
-Counts = tuple[int, int, int]
+SelectionOutput = namedtuple("SelectionOutput",
+                             ["element_count",
+                              "comparisons",
+                              "swaps",
+                              "elements"]))
 Swaps = Dict[int, list[int]]
 Sortable = MutableSequence[Any]
 #+end_src
 
 
 #+begin_src python :noweb-ref selection-counter
-def selection_counter(elements: Sortable) -> Counts:
+def selection_counter(elements: Sortable) -> SelectionOutput:
     """Does the selection sort on the elements
 
     Args:
@@ -146,7 +153,9 @@ def selection_counter(elements: Sortable) -> Counts:
         elements[start_of_unselected], elements[smallest_unselected] = (
             elements[smallest_unselected], elements[start_of_unselected]
         )
-    return (number_of_elements, comparisons, swaps)
+    return SelectionOutput(element_count=number_of_elements,
+                           comparisons=comparisons,
+                           swaps=swaps, elements=elements)
 #+end_src
 
 *** Some Checks
