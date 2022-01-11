@@ -1,10 +1,15 @@
 from collections.abc import MutableSequence
+from collections import namedtuple
 from typing import Any, Dict
-Counts = tuple[int, int, int]
+SelectionOutput = namedtuple("SelectionOutput",
+                             ["element_count",
+                              "comparisons",
+                              "swaps",
+                              "elements"])
 Swaps = Dict[int, list[int]]
 Sortable = MutableSequence[Any]
 
-def selection_counter(elements: Sortable) -> Counts:
+def selection_counter(elements: Sortable) -> SelectionOutput:
     """Does the selection sort on the elements
 
     Args:
@@ -27,7 +32,10 @@ def selection_counter(elements: Sortable) -> Counts:
         elements[start_of_unselected], elements[smallest_unselected] = (
             elements[smallest_unselected], elements[start_of_unselected]
         )
-    return (number_of_elements, comparisons, swaps)
+    return SelectionOutput(element_count=number_of_elements,
+                           comparisons=comparisons,
+                           swaps=swaps,
+                           elements=elements)
 
 def selection_swaps(elements: Sortable) -> Swaps:
     """Keeps track of the element indexes as they are swapped

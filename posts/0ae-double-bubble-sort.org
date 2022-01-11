@@ -1,5 +1,5 @@
 #+BEGIN_COMMENT
-.. title: Double-Bubble-Sort
+.. title: Bubble-Sort Revisited
 .. slug: double-bubble-sort
 .. date: 2021-11-19 17:14:43 UTC-08:00
 .. tags: brute-force,sorting,algorithms
@@ -10,7 +10,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-91e86b79-4fd4-432d-8dcd-b498893d14cd-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-764f7848-2911-4a33-a245-7b58dacdf497-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -19,48 +19,50 @@
 This is a continuation of a {{% lancelot "series on the Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}.
 * In the Beginning
   In the {{% lancelot "previous bubble sort post" %}}bubble-sort-an-empirical-look{{% /lancelot %}} I implemented the basic bubble sort, but there is a variation of it where you short-circuit the search if the collection is already sorted which is what I'll look at here. The short-circuiting means that the bubble sort can sometimes do better than other methods, but only when the data is mostly sorted so it's still not a practical algorithm.
-  Why do this, then? And why Double-Bubble-Sort?
-  I'll address the second first - I called it Double Bubble because I don't know if there's a commonly used name for this variation and I liked the sound of Double-Bubble-Sort (which hopefully isn't a copyrighted thing). Why do this? Partly just for completeness, but also because I spent a few days wrestling with getting a cluster working, and although I couldn't do it with pypy like I'd hoped, I did get it working with numba, so I figured this would give me a chance to try it out and see if getting it to work was worth the effort (probably not, but you don't know until you do).
+  Why do this, then? Eh,  Why not?
 ** Some Setup
 *** Imports
 #+begin_src python :results none
 # python
 from functools import partial
 
-import random
-
 # pypi
-from bokeh.models import HoverTool
+# from bokeh.models import HoverTool
 from expects import be_below, contain_exactly, equal, expect
 from joblib import Parallel, delayed
+from numba import njit
+from numba.typed import List
+from numpy.random import default_rng
 
+import altair
 import hvplot.pandas
 import numpy
 import pandas
 
-# my stuff
-from graeae import EmbedHoloviews, Timer
+# this project
+from bowling.plotting.altair_helpers import output_path, save_chart
+from bowling.sort.bubble import bubble, BubbleOutput
+
+# my other stuff
+from graeae import Timer
 #+end_src
 
 *** Stuff For Later
 #+begin_src python :results none
 TIMER = Timer()
-PATH = "files/posts/double-bubble-sort/"
-Embed = partial(EmbedHoloviews, folder_path=PATH)
+SLUG = "double-bubble-sort"
+OUTPUT_PATH = output_path(SLUG)
+random = default_rng(2021)
 #+end_src
 * The Sorters
-  I originally did this as class-based, because pypy is fine with it, but ~numba~ doesn't work so well once you do too much pythony stuff. Theres an "experimental" ~jitclass~ decorator but dask didn't like it, and since the algorithms themselves are self-contained, maybe going back to a function-oriented style will work better.
 ** Bubba Sort
-   This will be the short-circuiting version
+   This will be the short-circuiting version of the bubble sort.
 
-#+begin_src python :tangle ../bowling/sort/bubba.py :exports none
-<<bubba>>
-
-<<bubble>>
-#+end_src
 *** Bubba
-#+begin_src python :noweb-ref bubba
-def bubba(elements) -> tuple:
+    This is the short-circuiter. It works pretty much the same way with just an extra if-statement to break out of the loop if nothing was swapped.
+
+#+begin_src python :results none
+def bubba(elements) -> BubbleOutput:
     """Sorts the list in place
 
     Args:
@@ -70,108 +72,96 @@ def bubba(elements) -> tuple:
      number of elements, count of comparisons
     """
     all_but_one = len(elements) - 1
-    comparisons = 0
-    for items_bubbled_up in range(all_but_one):
+    comparisons = swaps = 0
+    for items_sorted in range(all_but_one):
         swapped_at_least_once = False
-        for left_hand in range(all_but_one - items_bubbled_up):
+        for in_front_of_us in range(all_but_one - items_sorted):
             comparisons += 1
-            right_hand = left_hand + 1
-            if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand],
-                 elements[right_hand]) = (elements[right_hand],
-                                          elements[left_hand])
+            to_the_right = in_front_of_us + 1
+            if elements[to_the_right] < elements[in_front_of_us]:
+                (elements[in_front_of_us],
+                 elements[to_the_right]) = (elements[to_the_right],
+                                          elements[in_front_of_us])
                 swapped_at_least_once = True
+                swaps += 1
         if not swapped_at_least_once:
             break
-    return (len(elements), comparisons)
+    return BubbleOutput(len(elements), comparisons, swaps, elements)
 #+end_src
 *** Bubble
-#+begin_src python :noweb-ref bubble
-def bubble(elements) -> tuple:
-    """Sorts the list in place
-
-    Args:
-     elements: list of (in-place) sortable elements
-
-    Returns:
-     number elements, count of comparisons
-    """
-    all_but_one = len(elements) - 1
-    comparisons = 0
-    for items_bubbled_up in range(all_but_one):
-        for left_hand in range(all_but_one - items_bubbled_up):
-            comparisons += 1
-            right_hand = left_hand + 1
-            if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand],
-                 elements[right_hand]) = (elements[right_hand],
-                                          elements[left_hand])
-    return (len(elements), comparisons)
-#+end_src
-
+    I showed how I implement the bubble sort in the {{% lancelot "previous bubble sort post" %}}bubble-sort-an-empirical-look{{% /lancelot %}} so, since I imported it up above, I'm just going to run it.
 *** Test It Out
+    Once again, let's just make sure everything works.
 
 #+begin_src python :results none
-from bowling.sort.bubba import bubba, bubble
-
 inputs = [1, 2, 3, 4, 7, 6, 5]
 
 expected = list(sorted(inputs))
 
 test_1, test_2 = inputs.copy(), inputs.copy()
 
-size_bubba, comparisons_bubba = bubba(test_1)
-size_bubble, comparisons_bubble = bubble(test_2)
+bubba_output = bubba(test_1)
+original_output = bubble(test_2)
 
 expect(test_1).to(contain_exactly(*expected))
 expect(test_2).to(contain_exactly(*expected))
 
 n = len(inputs)
 worst = (n * (n - 1))/2
-expect(comparisons_bubba).to(be_below(worst))
-expect(comparisons_bubba).to(equal(15))
+expect(bubba_output.comparisons).to(be_below(worst))
+expect(bubba_output.comparisons).to(equal(15))
 
-expect(comparisons_bubble).to(equal(worst))
+expect(bubba_output.swaps).to(equal(original_output.swaps))
+expect(original_output.comparisons).to(equal(worst))
 
 # try a bigger input
-inputs = random.choices(list(range(100)), k=100)
+inputs = random.choice(list(range(100)), size=100)
 expected = list(sorted(inputs))
 
 test_1, test_2 = inputs.copy(), inputs.copy()
 
-size_bubba, comparisons_bubba = bubba(test_1)
-size_bubble, comparisons_bubble = bubble(test_2)
+bubba_output = bubba(test_1)
+original_output = bubble(test_2)
 
-expect(test_1).to(contain_exactly(*expected))
-expect(test_2).to(contain_exactly(*expected))
+expect(list(test_1)).to(contain_exactly(*expected))
+expect(list(test_2)).to(contain_exactly(*expected))
 
 n = len(inputs)
 worst = (n * (n - 1))/2
-expect(comparisons_bubba).to(be_below(worst))
-expect(comparisons_bubble).to(equal(worst))
+expect(bubba_output.comparisons).to(be_below(worst))
+expect(original_output.comparisons).to(equal(worst))
+
+expect(bubba_output.swaps).to(equal(original_output.swaps))
+expect(original_output.comparisons).to(equal(worst))
 #+end_src
+
 * Counting Comparisons
-    Since the actual method of sorting is the same the swaps should be the same in either case so I'll just look at the comparisons and see if it made any real difference.
+
+    Since the actual method of sorting is the same the swaps should be the same in either case (since the new version doesn't quit until there's no more swaps to be done) so I'll just look at the comparisons and see if it made any real difference.
+
+** Set Up Numba
+
+#+begin_src python :results none
+bubba = njit(bubba, nogil=True)
+bubble = njit(bubble, nogil=True)
+#+end_src
 
 ** Run The Bubble Counter
-   numba doesn't like python lists so since I'm going to compare the times I was going to use numpy arrays for both the pypy and numba version, but numpy runs really slow in pypy (as noted in their [[https://doc.pypy.org/en/latest/faq.html#what-about-numpy-numpypy-micronumpy][Frequently Asked Questions]]) so I'll use lists for pypy.
-
-**Note:** I was originally going to double-check the sorted lists after running joblib, but as the [[https://joblib.readthedocs.io/en/latest/parallel.html][joblib documentation]] notes, since they are running in different processes, they can't mutate the original list (unless you tell joblib to let them, but then it will run slower) so the inputs don't change after the functions run. If you really needed them to be sorted and passed through joblib you'd maybe be better off returning the sorted list from the function.
 
 #+begin_src python :results output :exports both
-things_to_sort = [random.choices(list(range(count)), k=count)
+things_to_sort = [random.choice(list(range(count)), size=count)
                   for count in range(1, 10**5+ 1, 1000)]
 
 with TIMER:
-    bubbles_counts_and_comparisons = Parallel(n_jobs=-2)(
+    bubbles_counts_and_comparisons = Parallel(n_jobs=-1)(
         delayed(bubble)(thing_to_sort)
-        for thing_to_sort in bubbles_things_to_sort)
+        for thing_to_sort in things_to_sort)
 #+end_src
 
 #+RESULTS:
-: Started: 2021-11-20 22:41:23.270165
-: Ended: 2021-11-20 22:44:50.815616
-: Elapsed: 0:03:27.545451
+: Started: 2022-01-09 02:12:14.054946
+: Ended: 2022-01-09 02:13:46.223005
+: Elapsed: 0:01:32.168059
 
 ** Run the Bubba Counter
 #+begin_src python :results output :exports both
@@ -182,9 +172,9 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2021-11-20 21:59:54.909623
-: Ended: 2021-11-20 22:03:39.318075
-: Elapsed: 0:03:44.408452
+: Started: 2022-01-09 02:30:24.228930
+: Ended: 2022-01-09 02:32:04.837461
+: Elapsed: 0:01:40.608531
 
 Time-wise it seems to have done about the same as the original bubble sort.
 
@@ -194,202 +184,92 @@ SIZE, COMPARISONS = 0, 1
 bubble_unzipped = list(zip(*bubbles_counts_and_comparisons))
 bubba_unzipped = list(zip(*bubbas_counts_and_comparisons))
 bubba_frame = pandas.DataFrame({"Elements": bubble_unzipped[SIZE],
-                                "Bubble Comparisons": bubble_unzipped[COMPARISONS],
-                                "Bubba Comparisons": bubba_unzipped[COMPARISONS]})
-bubba_comparisons = [
-    ("Elements", "@Elements{0,}"),
-    ("Bubba's Comparisons", "@{Bubba_Comparisons}{0,}"),
-]
-bubble_comparisons = [
-    ("Elements", "@Elements{0,}"),
-    ("Bubble's Comparisons", "@{Bubble_Comparisons}{0,}")
-]
+                                "Bubble": bubble_unzipped[COMPARISONS],
+                                "Bubba": bubba_unzipped[COMPARISONS]})
 
-bubba_hover = HoverTool(tooltips=bubba_comparisons)
-bubble_hover = HoverTool(tooltips=bubble_comparisons)
-
-bubba_plot = bubba_frame.hvplot(x="Elements", y="Bubba Comparisons", label="Bubba").opts(
-    tools=[bubba_hover])
-bubble_plot = bubba_frame.hvplot(x="Elements", y="Bubble Comparisons", label="Bubble").opts(
-    tools=[bubble_hover])
-
-plot = (bubba_plot * bubble_plot).opts(
-    title="Bubba vs Bubble Comparisons",
-    height=700, width=800)
-output = Embed(plot=plot, file_name="bubba_vs_bubble")()
+melted = bubba_frame.melt(id_vars=["Elements"],
+                          var_name="Sorter",
+                          value_name="Comparisons")
 #+end_src
 
-#+begin_src python :results output html :exports output
-print(output)
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_point().encode(
+    x="Elements",
+    y="Comparisons",
+    color="Sorter",
+    tooltip=[altair.Tooltip("Elements", format=","), "Sorter",
+             altair.Tooltip("Comparisons", format=",")]
+).properties(
+    title="Bubble Sort Comparisons (with and without short-circuiting)",
+    width=900,
+).interactive()
+
+save_chart(chart, "bubble_comparisons", output_path=OUTPUT_PATH, height=400)
 #+end_src
+
 
 #+begin_export html
-<object type="text/html" data="bubba_vs_bubble.html" style="width:100%" height=800>
+<object type="text/html" data="bubble_comparisons.html" style="width:100%" height=400>
   <p>Figure Missing</p>
 </object>
 #+end_export
 
-Well, it looks like they did the same amount of comparisons...
+At first glance it looks like there's only one grey set of points, but if you zoom in (using the mouse's scroll wheel) you'll see that the grey points are actually (sometimes) created by adjacent points with the short-circuiting version's point (the blue point) slightly lower than the non-short-ciruiting orange point. So there is a difference, but it's small enough that it isn't easy to see.
 
+Let's see if it becomes more obvious using the difference between the points instead.
 #+begin_src python :results none
-bubba_frame["Difference"] = (bubba_frame["Bubble Comparisons"] -
-                             bubba_frame["Bubba Comparisons"])
-
-difference_tooltips = [
-    ("Elements", "@Elements{0,}"),
-    ("Difference", "@{Difference}{0,}"),
-]
-
-difference_hover = HoverTool(tooltips=difference_tooltips)
-
-plot = bubba_frame.hvplot(x="Elements", y="Difference").opts(
-    tools=[difference_hover],
-    title="Bubble - Bubba Comparisons",
-    height=700, width=800)
-output = Embed(plot=plot, file_name="comparison_differences")()
+bubba_frame["Difference"] = (bubba_frame["Bubble"] -
+                             bubba_frame["Bubba"])
 #+end_src
 
-#+begin_src python :results output html :exports output
-print(output)
+#+begin_src python :results output :exports both
+chart = altair.Chart(bubba_frame).mark_trail().encode(
+    x="Elements:O",
+    y="Difference:Q",
+    size="Difference:Q",
+    tooltip=[altair.Tooltip("Elements", format=","),
+             altair.Tooltip("Difference", format=","),
+             altair.Tooltip("Bubble", format=","),
+             altair.Tooltip("Bubba", format=",")]
+).properties(title="Difference In Comparisons Between the Bubble Sorts",
+             height=500,
+             width=900).interactive()
+
+save_chart(chart, "bubble_differences", output_path=OUTPUT_PATH, height=600)
 #+end_src
 
 #+begin_export html
-<object type="text/html" data="comparison_differences.html" style="width:100%" height=800>
+<object type="text/html" data="bubble_differences.html" style="width:100%" height=600>
   <p>Figure Missing</p>
 </object>
 #+end_export
 
-So, it looks like it did make a difference sometimes. In fact if you zoom /way, way/ in to the previous plot you can see that Bubba's line is slightly lower than the original Bubble Sort's line, it's just that the number of comparisons is so large that their difference is hard to see.
-* Now For The Numba
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-3a32fdde-7d75-46dd-8ec7-46b3028d93ad-ssh.json
-#+BEGIN_SRC python :results none :exports none
-%load_ext autoreload
-%autoreload 2
-#+END_SRC
-And now for something a little different. I'm going to see if I can get the same code to run in numba and maybe dask.
-** Some Imports
-#+begin_src python :results none
-# python
-from functools import partial
-
-# pypi
-from bokeh.models import HoverTool
-from dask.distributed import Client
-from expects import be_below, contain_exactly, equal, expect
-from joblib import Parallel, delayed
-from numba import njit
-from numba.typed import List
-from numpy.random import default_rng
-
-import numpy
-
-# my stuff
-from bowling.sort.bubba import bubba, bubble
-from graeae import Timer
-#+end_src
-
-#+begin_src python :results none
-random = default_rng(2021)
-TIMER = Timer()
-#+end_src
-
-Now to make the functions into numba functions
-
-#+begin_src python :results none
-bubba = njit(bubba, nogil=True)
-bubble = njit(bubble, nogil=True)
-#+end_src
-
-And build stuff to sort.
-
-#+begin_src python :results none
-things_to_sort = [random.integers(low=0, high=count, size=count)
-                  for count in range(1, 10**5+ 1, 1000)]
-#+end_src
-
-** Joblib Version
-   To make a closer comparison with the pypy versions let's start with running the functions with joblib.
-
-*** Bubba
-#+begin_src python :results output :exports both
-with TIMER:
-    size_and_comparisons = Parallel(n_jobs=-2)(
-        delayed(bubba)(thing_to_sort)
-        for thing_to_sort in things_to_sort)
-#+end_src
-
-#+RESULTS:
-: Started: 2021-11-21 01:07:18.260762
-: Ended: 2021-11-21 01:09:03.565290
-: Elapsed: 0:01:45.304528
-
-So, this seems much faster, but is it numba or numpy? And even if it is faster, it seems wrong somehow - but I don't know why, I think I just like pypy.
-
-*** Bubble
-#+begin_src python :results output :exports both
-with TIMER:
-    size_and_comparisons = Parallel(n_jobs=-2)(
-        delayed(bubba)(thing_to_sort)
-        for thing_to_sort in things_to_sort)
-#+end_src
-
-#+RESULTS:
-: Started: 2021-11-20 23:00:58.111557
-: Ended: 2021-11-20 23:02:40.905845
-: Elapsed: 0:01:42.794288
-
-I ran the joblib stuff twice - once with the [[https://wiki.python.org/moin/GlobalInterpreterLock][Global Interpreter Lock]] (GIL) turned off and once with it not turned off and it took the same amount of time, which makes sense since it's using multiple python processes, not threading.
-
-** Try it with dask
-   I'll try the default dask client first and see how it does.
-
-#+begin_src python :results none
-client = Client()
-#+end_src
-
-*** Bubba
-#+begin_src python :results output :exports both
-with TIMER:
-    bubba_futures = client.map(bubba, things_to_sort)
-    bubba_counts = client.gather(bubba_futures)
-#+end_src
-
-#+RESULTS:
-: Started: 2021-11-21 01:03:55.743480
-: Ended: 2021-11-21 01:05:34.394792
-: Elapsed: 0:01:38.651312
-
-Without the GIL it looks like dask is about as fast as joblib (when I ran it before without setting ~nogil=True~ on numba dask took closer to three minutes because the default uses threads).
-
-*** Bubble
-   This should take about the same amount of time, I think.
+So, it looks like there are sometimes significant differences between the two sorts, but how do they appear given the total number of comparisons made?
 
 #+begin_src python :results output :exports both
-with TIMER:
-    bubble_futures = client.map(bubble, things_to_sort)
-    bubble_counts = client.gather(bubble_futures)
+bubba_frame["Difference/Comparisons"] = bubba_frame.Difference/bubba_frame.Bubba
+sub_bubba = bubba_frame[["Elements", "Difference/Comparisons"]]
+chart = altair.Chart(sub_bubba).mark_trail().encode(
+    x="Elements:O",
+    y="Difference/Comparisons:Q",
+    size="Difference/Comparisons:Q",
+    tooltip=[altair.Tooltip("Elements", format=","),
+             altair.Tooltip("Difference/Comparisons", format=".4f")]
+).properties(title="Proportion of Difference Between the Bubble Sorts",
+             height=500,
+             width=900).interactive()
+
+save_chart(chart, "bubble_difference_proportions", output_path=OUTPUT_PATH,
+           height=600)
 #+end_src
 
-#+RESULTS:
-: Started: 2021-11-21 01:11:09.312631
-: Ended: 2021-11-21 01:12:48.202451
-: Elapsed: 0:01:38.889820
+#+begin_export html
+<object type="text/html" data="bubble_difference_proportions.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
 
-** Try it distributed.
-
-#+begin_src python :results none
-client = Client("192.168.86.137:8786")
-#+end_src
-
-I could not get this to work. Here's some of the problems to note:
-
- - The workers don't add the current directory to the path so you either have to set it in the code you run or install all the code that gets imported (the ~bowling.sort.bubba~ imports were crashing the workers until I installed the ~bowling~ module).
-
- - According to the [[https://distributed.dask.org/en/latest/worker.html][dask worker documentation]], if your stuff is stuck in the GIL, you should set the threads to 1 and run as many processes as you can, so I did this (before I turned off the GIL) and the workers kept getting killed before the code could finish
-
- - So I turned off the GIL and it seemed to work for a little while but then the workers just stopped running and nothing happened.
-
-I think I'll stick to pypy for most things and numba with joblib for longer running things, and maybe revisit dask later on if I need to use pandas or something else that can take better advantage of the threading workers. I think too that maybe you need to be able to break things up more somehow, rather than doing huge batches like this. I don't really know how, but the long looping seems to be problematic.
+It looks like as the amount of sorting that's needed goes up, the difference made by the short-circuiting becomes smaller in comparison to the total number of comparisons made, but even the biggest effect proportional to the amount of comparisons made by the short-circuiting sorter only comes to the difference being 0.2% of the total comparisons.
 
 * The End, The End
   Well, I think I've beaten this dead horse enough for now. The overview for all the posts is {{% lancelot "here" %}}the-bubble-sort{{% /lancelot %}}, if you didn't get enough of it. Up next: {{% doc %}}selection-sort{{% /doc %}}.
