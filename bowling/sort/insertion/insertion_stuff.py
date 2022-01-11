@@ -11,10 +11,10 @@ InsertionOutput = namedtuple("InsertionOutput", ["element_count",
 
 def insertion_sort(elements: MutableSequence) -> InsertionOutput:
     """Sorts elements using iterative insertion-sort
-    
+
     Args:
      elements: sortable collection of elements
-    
+
     Returns:
      count of elements, comparisons made, swaps made, sorted elements
     """
