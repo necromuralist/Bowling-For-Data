@@ -5,7 +5,7 @@ SelectionOutput = namedtuple("SelectionOutput",
                              ["element_count",
                               "comparisons",
                               "swaps",
-                              "elements"]))
+                              "elements"])
 Swaps = Dict[int, list[int]]
 Sortable = MutableSequence[Any]
 
@@ -34,7 +34,8 @@ def selection_counter(elements: Sortable) -> SelectionOutput:
         )
     return SelectionOutput(element_count=number_of_elements,
                            comparisons=comparisons,
-                           swaps=swaps, elements=elements)
+                           swaps=swaps,
+                           elements=elements)
 
 def selection_swaps(elements: Sortable) -> Swaps:
     """Keeps track of the element indexes as they are swapped

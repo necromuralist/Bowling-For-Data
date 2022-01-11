@@ -11,12 +11,14 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-a7aef5e7-7fca-483f-80fd-25c7e881cffd-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-582a3fb3-2341-4577-840b-13dc34ec42e9-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
+
 * Umm... Selection Sort?
+
   Yes, this continues the look at Brute-Force Sorting, begun with the {{% doc %}}the-bubble-sort{{% /doc %}}. With the selection sort you repeatedly pick the smallest item in the unsorted section of the data and place it at the end of the sorted data until you have sorted all the items. {{% doc %}}HTTAA{{% /doc %}} classifies it as a {{% doc %}}More of the Output{{% /doc %}} algorithm, one of the types of {{% doc %}}iterative-algorithms{{% /doc %}}, while {{% doc %}}itdaa{{% /doc %}} classifies it as a *Brute Force* algorithm.
 
 ** Imports
@@ -27,24 +29,32 @@ from random import shuffle
 
 # pypi
 from numba import njit
-from bokeh.models import HoverTool
 from expects import contain_exactly, equal, expect
 from joblib import Parallel, delayed
 from numpy.random import default_rng
 
-import hvplot.pandas
+import altair
 import numpy
 import pandas
 
+# this project
+from bowling.sort.bubble.bubble import bubble
+from bowling.sort.selection import selection_counter
+from bowling.sort.selection.selection import selection_swaps
+
 # my stuff
-from graeae import EmbedHoloviews, Timer
+from graeae.visualization.altair_helpers import output_path, save_chart
+from graeae import Timer
 #+end_src
 ** Set Up
+
 #+begin_src python :results none
 random = default_rng(2021)
 TIMER = Timer()
 
-Embed = partial(EmbedHoloviews, folder_path="files/posts/selection-sort")
+SLUG = "selection-sort"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
 #+end_src
 * Parts of the Algorithm
 | Item | Answer |
@@ -123,7 +133,7 @@ SelectionOutput = namedtuple("SelectionOutput",
                              ["element_count",
                               "comparisons",
                               "swaps",
-                              "elements"]))
+                              "elements"])
 Swaps = Dict[int, list[int]]
 Sortable = MutableSequence[Any]
 #+end_src
@@ -155,13 +165,12 @@ def selection_counter(elements: Sortable) -> SelectionOutput:
         )
     return SelectionOutput(element_count=number_of_elements,
                            comparisons=comparisons,
-                           swaps=swaps, elements=elements)
+                           swaps=swaps,
+                           elements=elements)
 #+end_src
 
 *** Some Checks
 #+begin_src python :results none
-from bowling.sort.selection.selection import selection_counter
-
 def check(collection: list, n: int, comparisons: int, swaps: int) -> None:
     """Check that the sort worked
 
@@ -182,19 +191,21 @@ def check(collection: list, n: int, comparisons: int, swaps: int) -> None:
     return
     
 test = [1, 2, 3]
-n, comparisons, swaps = selection_sort(test)
+n, comparisons, swaps, _ = selection_counter(test)
 check(test, n, comparisons, swaps)
 
 test = [4, 3, 2, 1]
-n, comparisons, swaps = selection_sort(test)
+n, comparisons, swaps, _ = selection_counter(test)
 check(test, n, comparisons, swaps)
 
 COUNT = 1000
 test = random.integers(low=0, high=COUNT, size=COUNT)
-n, comparisons, swaps = selection_sort(test)
+n, comparisons, swaps, _ = selection_counter(test)
 check(test, n, comparisons, swaps)
 #+end_src
+
 ** Run It
+
    So, let's see how it does. We'll set the selection sort up as a numba function and set up the things to sort so that we can compare it to the bubble sort.
 
 #+begin_src python :results none
@@ -210,151 +221,53 @@ with TIMER:
         for thing_to_sort in things_to_sort)
 #+end_src
 
+#+RESULTS:
+: Started: 2022-01-11 00:05:00.866956
+: Ended: 2022-01-11 00:05:41.085584
+: Elapsed: 0:00:40.218628
+
+Let's plot the comparisons and swaps.
+
 #+begin_src python :results none
 SIZE, COMPARISONS, SWAPS = 0, 1, 2
 unzipped = list(zip(*elements_comparisons_and_swaps))
-bubba_frame = pandas.DataFrame({"Elements": unzipped[SIZE],
+count_frame = pandas.DataFrame({"Elements": unzipped[SIZE],
                                 "Selection Comparisons": unzipped[COMPARISONS],
                                 "Selection Swaps": unzipped[SWAPS]})
-tooltips_comparisons = [
-    ("Elements", "@Elements{0,}"),
-    ("Comparisons", "@Comparisons{0,}")
-]
-
-tooltips_swaps = [
-    ("Elements", "@Elements{0,}"),
-    ("Swaps", "@Swaps{0,}")
-]
-
-hover_comparisons = HoverTool(tooltips=tooltips_comparisons)
-hover_swaps = HoverTool(tooltips=tooltips_swaps)
-
-swap_plots = bubba_frame.hvplot(x="Elements", y="Swaps").opts(
-    tools=[hover_swaps])
-comparison_plots = bubba_frame.hvplot(x="Elements", y="Comparisons").opts(
-    tools=[hover_comparisons])
-
-plot = (swap_plots * comparison_plots).opts(
-    title="Comparisons, Swaps and n-squared Counts (Selection Sort)",
-    height=700, width=800)
-output = Embed(plot=plot, file_name="selection_sort_comparisons")()
-#+end_src
-
-#+begin_src python :results output html :exports output
-print(output)
-#+end_src
-
-#+begin_export html
-<object type="text/html" data="selection_sort_comparisons.html" style="width:100%" height=800>
-  <p>Figure Missing</p>
-</object>
-#+end_export
-
-** Compared To Bubble Sort
-   I didn't add the counting of the swaps when I implemented this so I'm going to have to re-do it again.
-#+begin_src python :tangle ../bowling/sort/bubble/bubble_2.py :exports none
-<<bubble-return-type>>
-
-<<bubble-sort>>
-#+end_src
-
-#+begin_src python :noweb-ref bubblereturn-type
-Counts = tuple[int, int, int]
-#+end_src
-
-
-#+begin_src python :noweb-ref bubble-sort
-def bubble(elements) -> Counts:
-    """Sorts the list in place
-
-    Args:
-     elements: list of (in-place) sortable elements
-
-    Returns:
-     number of elements, count of comparisons, count of swaps
-    """
-    all_but_one = len(elements) - 1
-    comparisons = swaps = 0
-    for items_bubbled_up in range(all_but_one):
-        swapped_at_least_once = False
-        for left_hand in range(all_but_one - items_bubbled_up):
-            comparisons += 1
-            right_hand = left_hand + 1
-            if elements[right_hand] < elements[left_hand]:
-                (elements[left_hand],
-                 elements[right_hand]) = (elements[right_hand],
-                                          elements[left_hand])
-                swaps += 1
-                swapped_at_least_once = True
-        if not swapped_at_least_once:
-            break
-    return (len(elements), comparisons, swaps)
-#+end_src
-
-#+begin_src python :results none
-from bowling.sort.bubble.bubble_2 import bubble
-
-numba_bubble = njit(bubble)
 #+end_src
 
 #+begin_src python :results output :exports both
-with TIMER:
-    bubble_elements_comparisons_and_swaps = Parallel(n_jobs=-1)(
-        delayed(numba_bubble)(thing_to_sort)
-        for thing_to_sort in things_to_sort)
-#+end_src
-
-#+RESULTS:
-: Started: 2021-11-25 06:34:47.916186
-: Ended: 2021-11-25 06:36:25.527382
-: Elapsed: 0:01:37.611196
-
-#+begin_src python :results none
-SIZE, COMPARISONS, SWAPS = 0, 1, 2
-unzipped = list(zip(*bubble_elements_comparisons_and_swaps))
-bubba_frame["Bubble Comparisons"] =  unzipped[COMPARISONS]
-bubba_frame["Bubble Swaps"] = unzipped[SWAPS]
-
-tooltips_bubba = [
-    ("Elements", "@Elements{0,}"),
-    ("Bubble Swaps", "@{Bubble Swaps}{0,}"),
-]
-
-tooltips_selection = [
-    ("Elements", "@Elements{0,}"),
-    ("Selection Swaps", "@{Selection Swaps}{0,}"),
-]
-
-hover_bubba = HoverTool(tooltips=tooltips_bubba)
-hover_selection = HoverTool(tooltips=tooltips_selection)
-
-bubba_swap_plots = bubba_frame.hvplot(x="Elements", y="Bubble Swaps").opts(
-    tools=[hover_bubba])
-selection_swap_plots = bubba_frame.hvplot(x="Elements", y="Selection Swaps").opts(
-    tools=[hover_selection]
+base = altair.Chart(count_frame).mark_point().encode(
+    x = "Elements",
 )
 
+comparisons = base.encode(
+    y="Selection Comparisons",
+    tooltip=[altair.Tooltip("Elements", format=","),
+             altair.Tooltip("Selection Comparisons", format=","),
+             altair.Tooltip("Selection Swaps", format=",")]
+).properties(title="Selection Sort Comparisons", width=800, height=250)
 
-plot = (bubba_swap_plots * selection_swap_plots).opts(
-    ylabel="Swaps",
-    title="Bubble Vs Selection Sort Swaps",
-    height=700, width=800)
-output = Embed(plot=plot, file_name="bubble_vs_selection_sort_swaps")()
-#+end_src
+swaps = base.mark_point(color="DarkRed").encode(
+    x="Elements",
+    y="Selection Swaps",
+    tooltip=[altair.Tooltip("Elements", format=","),
+             altair.Tooltip("Selection Comparisons", format=","),
+             altair.Tooltip("Selection Swaps", format=",")]
+).properties(title="Selection Sort Swaps", width=800, height=250)
 
-#+begin_src python :results output html :exports output
-print(output)
+chart = (comparisons & swaps)
+
+save_it(chart, "selection-sort-comparisons")
 #+end_src
 
 #+begin_export html
-<object type="text/html" data="bubble_vs_selection_sort_swaps.html" style="width:100%" height=800>
+<object type="text/html" data="selection-sort-comparisons.html" style="width:100%" height=600>
   <p>Figure Missing</p>
 </object>
 #+end_export
 
-In retrospect, I guess this wasn't really necessary, since the number of Selection Sort swaps is always done in the outer loop so it's always /number of elements - 1/. But I guess there's no harm in double checking.
-
-An interesting question that I haven't seen addressed is that if we're using the \(\Theta\) as the way to compare algorithms and they're the same for Bubble Sort and Selection Sort, then how do you characterize the fact that Bubble Sort is a "worse" algorithm that, according to Donald Knuth, shouldn't even be taught [[BSAAA][(Astrachan 2003]])? Anyway, we don't use either one so I guess the point is moot.
+It's important to note the scale of the y-axes here - when I tried putting the comparisons and swaps on the same plot it was pretty much impossible to see the slope of the swaps, even when zoomed way in. Unlike the Bubble Sort, the Selection Sort's swaps have a linear growth instead of a quadratic growth.
 
 * Looking at the Swaps
   Here's where it might be a little more interesting. We can do the same exercise we did with the bubble sort and plot the actual swaps to see if we can see the sorting in action.
@@ -391,13 +304,11 @@ def selection_swaps(elements: Sortable) -> Swaps:
     return swaps
 #+end_src
 
+Because we're tracking the swaps with a dict there can't be any  repetitions in the inputs, so I'll use python instead of numpy to make the randomized input since it seems clearer to me.
+
 #+begin_src python :results none
-from bowling.sort.selection.selection import selection_swaps
 COUNT = 50
 
-# because we're tracking the swaps with a dict there can't be any 
-# repetitions in the inputs, so I'll use python instead of numpy
-# since it seems easier
 inputs = list(range(COUNT))
 shuffle(inputs)
 swaps = selection_swaps(inputs)
@@ -406,42 +317,35 @@ track_frame = pandas.DataFrame(swaps)
 re_indexed = track_frame.reset_index().rename(columns={"index": "Swap"})
 melted = re_indexed.melt(var_name="Value To Sort",
                          value_name="Location In Array", id_vars="Swap")
-
-tooltips = [
-    ("Item to Sort", "@{Value To Sort}"),
-    ("Swap", "@{Swap}"),
-    ("Current Location", "@{Location In Array}")
-]
-
-hover = HoverTool(tooltips=tooltips)
-
-ticks = [(index, index) for index in range(COUNT)]
-plot = melted.hvplot(x="Swap", y="Location In Array",
-                     by="Value To Sort").opts(tools=[hover],
-                                              show_legend=False,
-                     width=800, height=700, yticks=ticks,
-                            title="Selection Sort Swaps",)
-
-
-output = Embed(plot=plot, file_name="Selection_sort_swaps")()
 #+end_src
 
-#+begin_src python :results output html :exports output
-print(output)
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_line().encode(
+    x="Swap",
+    y="Location In Array",
+    color="Value To Sort:O",
+    tooltip=["Swap", "Location In Array", "Value To Sort"]
+).properties(
+    title="Selection Sort Swaps",
+    width=800,
+    height=525,
+).interactive()
+
+save_it(chart, "selection-sort-swaps")
 #+end_src
 
 #+RESULTS:
-#+begin_export html
-<object type="text/html" data="Selection_sort_swaps.html" style="width:100%" height=800>
-  <p>Figure Missing</p>
-</object>
-#+end_export
+ #+begin_export html
+ <object type="text/html" data="selection-sort-swaps.html" style="width:100%" height=600>
+   <p>Figure Missing</p>
+ </object>
+ #+end_export
+ 
 
-Since I put in more inputs than I did with the Bubble Sort, the actual swaps aren't so easy to see, here, but the point of this plot is to show the (imaginary) diagonal line running from the bottom left corner up te the upper right. This shows why it's called a "More of the Output" algorithm - with each loop one more sorted item is added to the beginning of the list until you end up with a sorted list in the end.
+Since I put in more inputs than I did with the Bubble Sort, the actual swaps aren't so easy to see, here, but the point of this plot is to show the (imaginary) diagonal line running from the bottom left corner up te the upper right. This shows why it's called a "More of the Output" algorithm - with each loop (represented by a "Swap" on the X-axis) one more sorted item is added to the beginning of the list (the bottom of the chart) from the unsorted part (the section above the imaginary diagonal of the chart) until you end up with a sorted list.
 * Sources
  - {{% doc %}}HTTAA{{% /doc %}}
  - {{% doc %}}itdaa{{% /doc %}}
- - <<BSAAA>> (Astrachan 2003) {{% doc %}}bubble-sort-an-archeological-algorithmic-analysis{{% /doc %}}
 
 #+begin_export html
 <script>
