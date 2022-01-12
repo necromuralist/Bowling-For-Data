@@ -1,7 +1,6 @@
 # python
 from collections import namedtuple
 from collections.abc import MutableSequence
-from dataclasses import dataclass
 
 InsertionOutput = namedtuple("InsertionOutput", ["element_count",
                                                  "comparisons",
@@ -26,7 +25,7 @@ def insertion_sort(elements: MutableSequence) -> InsertionOutput:
                                         next_unsorted_cell)
 
         while not (in_front_of_me < 0 or
-               elements[in_front_of_me] <= thing_to_insert):
+                   elements[in_front_of_me] <= thing_to_insert):
             comparisons += 1
             swaps += 1
             elements[to_the_right] = elements[in_front_of_me]

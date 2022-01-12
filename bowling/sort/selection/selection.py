@@ -9,6 +9,7 @@ SelectionOutput = namedtuple("SelectionOutput",
 Swaps = Dict[int, list[int]]
 Sortable = MutableSequence[Any]
 
+
 def selection_counter(elements: Sortable) -> SelectionOutput:
     """Does the selection sort on the elements
 
@@ -20,7 +21,7 @@ def selection_counter(elements: Sortable) -> SelectionOutput:
     """
     number_of_elements = len(elements)
     comparisons = swaps = 0
-    
+
     for start_of_unselected in range(number_of_elements - 1):
         smallest_unselected = start_of_unselected
         for next_unselected in range(start_of_unselected + 1,
@@ -36,6 +37,7 @@ def selection_counter(elements: Sortable) -> SelectionOutput:
                            comparisons=comparisons,
                            swaps=swaps,
                            elements=elements)
+
 
 def selection_swaps(elements: Sortable) -> Swaps:
     """Keeps track of the element indexes as they are swapped
@@ -57,7 +59,7 @@ def selection_swaps(elements: Sortable) -> Swaps:
                                      number_of_elements):
             if elements[next_unselected] < elements[smallest_unselected]:
                 smallest_unselected = next_unselected
-        
+
         elements[start_of_unselected], elements[smallest_unselected] = (
             elements[smallest_unselected], elements[start_of_unselected]
         )

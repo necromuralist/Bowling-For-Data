@@ -44,7 +44,7 @@ def bubba(elements: MutableSequence) -> Counts:
             if elements[to_the_right] < elements[in_front_of_us]:
                 (elements[in_front_of_us],
                  elements[to_the_right]) = (elements[to_the_right],
-                                          elements[in_front_of_us])
+                                            elements[in_front_of_us])
                 swaps += 1
                 swapped_at_least_once = True
         if not swapped_at_least_once:
@@ -70,7 +70,7 @@ def bubble(elements: MutableSequence) -> Counts:
             if elements[to_the_right] < elements[in_front_of_us]:
                 (elements[in_front_of_us],
                  elements[to_the_right]) = (elements[to_the_right],
-                                          elements[in_front_of_us])
+                                            elements[in_front_of_us])
                 swaps += 1
     return BubbleOutput(len(elements), comparisons, swaps, elements)
 
@@ -94,7 +94,7 @@ def swap_tracker(elements: MutableSequence) -> Swaps:
             if elements[to_the_right] < elements[in_front_of_us]:
                 (elements[in_front_of_us],
                  elements[to_the_right]) = (elements[to_the_right],
-                                          elements[in_front_of_us])
+                                            elements[in_front_of_us])
                 for index, element in enumerate(elements):
                     swaps[element].append(index)
     return swaps
