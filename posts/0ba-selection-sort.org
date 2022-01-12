@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-582a3fb3-2341-4577-840b-13dc34ec42e9-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-7e5d7caf-ac6f-4b83-94b4-f2957337d7b1-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -344,9 +344,47 @@ save_it(chart, "selection-sort-swaps")
  #+end_export
  
 
-Since I put in more inputs than I did with the Bubble Sort, the actual swaps aren't so easy to see, here, but the point of this plot is to show the (imaginary) diagonal line running from the bottom left corner up te the upper right. This shows why it's called a "More of the Output" algorithm - with each loop (represented by a "Swap" on the X-axis) one more sorted item is added to the beginning of the list (the bottom of the chart) from the unsorted part (the section above the imaginary diagonal of the chart) until you end up with a sorted list.
+Since I put in more inputs than I did with the Bubble Sort, the actual swaps aren't so easy to see, here, but the point of this plot is to show the (imaginary) diagonal line running from the bottom left corner up to the upper right. This shows why it's called a "More of the Output" algorithm - with each loop (represented by a "Swap" on the X-axis) one more sorted item is added to the beginning of the list (the bottom of the chart) from the unsorted part (the section above the imaginary diagonal of the chart) until you end up with a sorted list.
+
+Since the Selection Sort always checks all the items in the "unsorted" section, the lengths of the lines above the diagonal as they move up and down don't really have a significance, they're just single swaps. What matters more is that the section below the diagonal is "sorted" and when picking the next item the algorithm has to check every element above the diagonal to find the next smallest item.
 
 ** Worst Case
+
+#+begin_src python :results none
+COUNT = 50
+
+inputs = list(reversed(range(COUNT)))
+swaps = selection_swaps(inputs)
+
+track_frame = pandas.DataFrame(swaps)
+re_indexed = track_frame.reset_index().rename(columns={"index": "Swap"})
+melted = re_indexed.melt(var_name="Value To Sort",
+                         value_name="Location In Array", id_vars="Swap")
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_line().encode(
+    x="Swap",
+    y="Location In Array",
+    color="Value To Sort:O",
+    tooltip=["Swap", "Location In Array", "Value To Sort"]
+).properties(
+    title="Selection Sort Locations (Worst Case)",
+    width=800,
+    height=525,
+).interactive()
+
+save_it(chart, "selection-sort-locations-worst-case")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="selection-sort-locations-worst-case.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+This produces kind of an interesting figure... Since the input list is in exactly the backwards order (from largest element to smallest), and the selection sort traverses the list from start to end and swaps out each element with the smallest element to the right of the current element, we are always swapping out the largest element remaining for the smallest remaining element, so although the algorithm doesn't specifically try to do it, it's putting both the smallest unsorted element in place and the largest unsorted element in place with each swap, so it's actually done sorting at the halfway point. We could, then create a short-circuit version of this as well, to make it quit if there's no element in the unsorted smaller than the elements sorted so far, but as with the bubble sort, this would most-likely only help in outside cases like these.
 
 * Sources
  - {{% doc %}}HTTAA{{% /doc %}}
