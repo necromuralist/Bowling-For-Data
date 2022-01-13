@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-e3f08aa9-3054-40b8-bb70-01b1a4c26354-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-22b993ba-27c1-4f24-b2be-19d39a40533b-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -189,6 +189,7 @@ from numba import njit
 from numpy.random import default_rng
 
 import altair
+import numpy
 import pandas
 
 # this project
@@ -254,8 +255,8 @@ print(output.swaps)
 
 #+RESULTS:
 : 4950.0
-: 2488
-: 2587
+: 2277
+: 2376
 
 ** Comparisons and Swaps
 
@@ -273,9 +274,9 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-01-11 22:03:52.831283
-: Ended: 2022-01-11 22:04:04.906339
-: Elapsed: 0:00:12.075056
+: Started: 2022-01-13 01:15:39.913807
+: Ended: 2022-01-13 01:15:52.093208
+: Elapsed: 0:00:12.179401
 
 #+begin_src python :results none
 SIZE, COMPARISONS, SWAPS = 0, 1, 2
@@ -318,6 +319,79 @@ save_it(chart, "insertion-sort-comparisons")
   <p>Figure Missing</p>
 </object>
 #+end_export
+
+** Best and Worst Cases
+   
+#+begin_src python :results none
+frame = count_frame.rename(columns={"Insertion Comparisons": "Random"})
+del frame["n^2"]
+#+end_src
+
+#+begin_src python :results output :exports both
+best_things = [numpy.arange(count, dtype=int) for count in range(1, 10**5+ 1, 1000)]
+worst_things = [numpy.flip(things) for things in best_things]
+
+with TIMER:
+    worst_output = Parallel(n_jobs=-1)(
+        delayed(numba_sort)(thing) for thing in worst_things
+)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-13 01:23:32.940045
+: Ended: 2022-01-13 01:23:55.971288
+: Elapsed: 0:00:23.031243
+
+#+begin_src python :results output :exports both
+with TIMER:
+    best_output = Parallel(n_jobs=-1)(
+        delayed(numba_sort)(thing) for thing in best_things
+)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-13 01:55:01.131774
+: Ended: 2022-01-13 01:55:02.295769
+: Elapsed: 0:00:01.163995
+
+#+begin_src python :results none
+best_unzipped = list(zip(*best_output))
+worst_unzipped = list(zip(*worst_output))
+
+count_frame["Best"] = best_unzipped[COMPARISONS]
+count_frame["Worst"] = worst_unzipped[COMPARISONS]
+count_frame = count_frame.rename(columns={"Insertion Comparisons": "Random"})
+del(count_frame["n^2"])
+#+end_src
+
+#+begin_src python :results none
+melted = count_frame.melt(id_vars=["Elements"],
+                          var_name="Input",
+                          value_name="Comparisons")
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_point().encode(
+    x="Elements",
+    y="Comparisons",
+    color="Input"
+).properties(
+    title="Insertion Sort Best, Worst, Random",
+    width=800,
+    height=550
+).interactive()
+
+save_it(chart, "best-worst-random")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="best-worst-random.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Here we can see why Insertion Sort is considered better than Bubble and Selection Sort. In those cases they have to traverse the entire unsorted collection every time but Insertion Sort only picks whatever is the next unsorted item and searches the sorted until it finds the right place to insert it. In the worst case they're all the same, but whenever it isn't the worst case insertion sort offers a little improvement.
 
 ** The Swaps
    Let's look at what plotting the location of the elements as they are swapped looks like.
