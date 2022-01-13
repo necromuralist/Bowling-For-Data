@@ -10,16 +10,19 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-764f7848-2911-4a33-a245-7b58dacdf497-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-32508e50-b621-415e-b8ec-0e875f4dd1f0-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
 
 This is a continuation of a {{% lancelot "series on the Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}.
+
 * In the Beginning
+
   In the {{% lancelot "previous bubble sort post" %}}bubble-sort-an-empirical-look{{% /lancelot %}} I implemented the basic bubble sort, but there is a variation of it where you short-circuit the search if the collection is already sorted which is what I'll look at here. The short-circuiting means that the bubble sort can sometimes do better than other methods, but only when the data is mostly sorted so it's still not a practical algorithm.
-  Why do this, then? Eh,  Why not?
+  Why do this, then? Eh,  why not?
+
 ** Some Setup
 *** Imports
 #+begin_src python :results none
@@ -35,12 +38,11 @@ from numba.typed import List
 from numpy.random import default_rng
 
 import altair
-import hvplot.pandas
 import numpy
 import pandas
 
 # this project
-from bowling.plotting.altair_helpers import output_path, save_chart
+from graeae.visualization.altair_helpers import output_path, save_chart
 from bowling.sort.bubble import bubble, BubbleOutput
 
 # my other stuff
@@ -137,7 +139,7 @@ expect(original_output.comparisons).to(equal(worst))
 
 * Counting Comparisons
 
-    Since the actual method of sorting is the same the swaps should be the same in either case (since the new version doesn't quit until there's no more swaps to be done) so I'll just look at the comparisons and see if it made any real difference.
+    Since the actual method of sorting is the same the swaps should be the same in either case (the new version doesn't quit until there's no more swaps to be done) so I'll just look at the comparisons and see if it made any real difference.
 
 ** Set Up Numba
 
@@ -159,9 +161,9 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-01-09 02:12:14.054946
-: Ended: 2022-01-09 02:13:46.223005
-: Elapsed: 0:01:32.168059
+: Started: 2022-01-12 23:40:18.730737
+: Ended: 2022-01-12 23:41:51.143272
+: Elapsed: 0:01:32.412535
 
 ** Run the Bubba Counter
 #+begin_src python :results output :exports both
@@ -172,9 +174,9 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-01-09 02:30:24.228930
-: Ended: 2022-01-09 02:32:04.837461
-: Elapsed: 0:01:40.608531
+: Started: 2022-01-12 23:41:58.766180
+: Ended: 2022-01-12 23:43:38.475355
+: Elapsed: 0:01:39.709175
 
 Time-wise it seems to have done about the same as the original bubble sort.
 
@@ -270,6 +272,80 @@ save_chart(chart, "bubble_difference_proportions", output_path=OUTPUT_PATH,
 #+end_export
 
 It looks like as the amount of sorting that's needed goes up, the difference made by the short-circuiting becomes smaller in comparison to the total number of comparisons made, but even the biggest effect proportional to the amount of comparisons made by the short-circuiting sorter only comes to the difference being 0.2% of the total comparisons.
+
+** Best Case, Worst Case
+
+   Now that we know that the short-circuiting isn't that big a deal I'll add some plotting showing how our random cases compare to the best-case and worst case sorting inputs.
+
+#+begin_src python :results output :exports both
+best_things = [numpy.arange(count, dtype=int) for count in range(1, 10**5+ 1, 1000)]
+worst_things = [numpy.flip(things) for things in best_things]
+
+with TIMER:
+    worst_output = Parallel(n_jobs=-1)(
+        delayed(bubba)(thing) for thing in worst_things
+)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-13 00:01:27.932132
+: Ended: 2022-01-13 00:02:08.108278
+: Elapsed: 0:00:40.176146
+
+#+begin_src python :results output :exports both
+with TIMER:
+    best_output = Parallel(n_jobs=-1)(
+        delayed(bubba)(thing) for thing in best_things
+)
+
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-13 00:08:59.231664
+: Ended: 2022-01-13 00:09:00.409103
+: Elapsed: 0:00:01.177439
+
+#+begin_src python :results none
+worst_unzipped = list(zip(*worst_output))
+best_unzipped = list(zip(*best_output))
+
+del bubba_frame["Bubble"]
+del bubba_frame["Difference"]
+del bubba_frame["Difference/Comparisons"]
+bubba_frame = bubba_frame.rename(columns={"Bubba": "Random"})
+#+end_src
+
+#+begin_src python :results none
+bubba_frame["Worst Case"] = worst_unzipped[COMPARISONS]
+bubba_frame["Best Case"] = best_unzipped[COMPARISONS]
+
+melted = bubba_frame.melt(id_vars=["Elements"],
+                          var_name="Input",
+                          value_name="Comparisons")
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_point().encode(
+    x="Elements",
+    y="Comparisons",
+    color="Input"
+).properties(
+    width=800,
+    height=550,
+    title="Bubble Sort Best, Worst, and Random Input Comparisons"
+).interactive()
+
+save_chart(chart, "best-worst-random", output_path=OUTPUT_PATH, height=600)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="best-worst-random.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Once again we run into the problem/case that it looks like the Random input is missing, but if you zoom way in you'll see it does /slightly/ better than the /worst-case/, but the difference is so small that when you zoom back out they look like they did exactly the same. The /best-case/ does much better, since it only has to pass through the data once to see that it's already sorted and then quit (which isn't really reflected in the plot because our increment of /comparisons/ only happens if the inner loop is entered), but except for this unusual case, random inputs don't do enough better than the worst-case examples to make short-circuiting a noteworthy improvement.
 
 * The End, The End
   Well, I think I've beaten this dead horse enough for now. The overview for all the posts is {{% lancelot "here" %}}the-bubble-sort{{% /lancelot %}}, if you didn't get enough of it. Up next: {{% doc %}}selection-sort{{% /doc %}}.
