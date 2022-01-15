@@ -1,0 +1,72 @@
+#+BEGIN_COMMENT
+.. title: Binary Search
+.. slug: binary-search
+.. date: 2022-01-14 16:22:42 UTC-08:00
+.. tags: search,divide-and-conquer,algorithms
+.. category: Algorithms
+.. link: 
+.. description: A look at the Binary Search algorithm.
+.. type: text
+.. has_pseudocode: yessir
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-1f2af69e-eef3-484d-977a-b73f728fe041-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+#+begin_comment
+Adding a SmallCaps command.
+From https://stackoverflow.com/questions/11576237/mathjax-textsc
+#+end_comment
+\(\def\sc#1{\dosc#1\csod} \def\dosc#1#2\csod{{\rm #1{\small #2}}}\)
+* Beginning
+** The Pseudocode
+#+begin_export html
+<pre id="binarysearch" style="display:hidden;">
+\begin{algorithm}
+\caption{BinarySearch}
+\begin{algorithmic}
+\INPUT Array A of items in non-decreasing order, search key
+\OUTPUT If key is in array, the index of the item that matches
+\PROCEDURE{BinarySearch}{$A$}
+\STATE $left \gets 0$
+\STATE $right \gets A.length - 1$
+
+\WHILE {$right > left$}
+\STATE $middle \gets \left \lfloor \frac{left + right}{2} \right \rfloor$
+
+\IF {$key = A[middle]$}
+\RETURN $middle$
+\ELSIF {$key < A[middle]$}
+\STATE $right \gets middle - 1$
+\ELSE
+\STATE $left \gets middle + 1$
+\ENDIF
+\ENDWHILE
+\RETURN NotFound
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+** The Parts
+   - **Precondition:** The input array (A) is sorted in non-decreasing order.
+   - **Postcondition:** If the key is in the array the index of the matching element is output
+   - **Loop Invariant:** If the key is in the original list then it is in the current sub-list.
+   - **Basic Step:** Cut the list in half, keep the half that that key would be in if it is.
+   - **Exit Condition:** Key is in the middle of the sublist or the sublist is empty.
+   - **Make Progress:** After each loop the sublist is half the size of the previous sublist.
+   - **Maintain the Loop Invariant:** Pick the half of the sublist whose boundary value would allow the key.
+   - **Establish the Loop Invariant:** The initial sublist is the original list.
+   - **Worst Case Runtime:** Since the input is repeatedly halved, the worst-case is \(\Theta(\log_{2} n)\).
+* End
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("binarysearch"));
+});
+</script>
+#+end_export
