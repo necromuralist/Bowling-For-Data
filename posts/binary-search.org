@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-1f2af69e-eef3-484d-977a-b73f728fe041-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-377c1e5d-2424-424f-87ba-3f7d3153d790-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -37,36 +37,420 @@ From https://stackoverflow.com/questions/11576237/mathjax-textsc
 \WHILE {$right > left$}
 \STATE $middle \gets \left \lfloor \frac{left + right}{2} \right \rfloor$
 
-\IF {$key = A[middle]$}
-\RETURN $middle$
-\ELSIF {$key < A[middle]$}
-\STATE $right \gets middle - 1$
+\IF {$key \le A[middle]$}
+\STATE $right \gets middle$
 \ELSE
 \STATE $left \gets middle + 1$
 \ENDIF
 \ENDWHILE
+
+\IF {$key = A[left]$}
+\RETURN left
+\ELSE
 \RETURN NotFound
+\ENDIF
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
 </pre>
 #+end_export
 ** The Parts
-   - **Precondition:** The input array (A) is sorted in non-decreasing order.
-   - **Postcondition:** If the key is in the array the index of the matching element is output
-   - **Loop Invariant:** If the key is in the original list then it is in the current sub-list.
-   - **Basic Step:** Cut the list in half, keep the half that that key would be in if it is.
-   - **Exit Condition:** Key is in the middle of the sublist or the sublist is empty.
+   - **Precondition:** The input array (A) is sorted in non-decreasing order and the key $k$ is in $A$.
+   - **Postcondition:** The index of the matching element is output
+   - **Loop Invariant:** The key is in our current sublist: $k \in A[left \ldots right]$.
+   - **Basic Step:** Find the midpoint of the sub-array, adjust the sub-array to use the midpoint such that the key is in the new sub-array.
+   - **Exit Condition:** $left \le right$.
    - **Make Progress:** After each loop the sublist is half the size of the previous sublist.
    - **Maintain the Loop Invariant:** Pick the half of the sublist whose boundary value would allow the key.
-   - **Establish the Loop Invariant:** The initial sublist is the original list.
+   - **Establish the Loop Invariant:** The initial sublist is the original list ($left = 0, right=A.length -1$).
    - **Worst Case Runtime:** Since the input is repeatedly halved, the worst-case is \(\Theta(\log_{2} n)\).
-* End
+
+Rather than saying "if k is in A" over and over, the search precondition requires that $k$ is in $A$ and if it isn't it's considered a failed search - which doesn't mean the algorithm is incorrect, just that the pre-condition wasn't met. We have to handle the other case, but for the purpose of defining the algorithm we'll set a stricter pre-condition.
+
+* Implementation
+** Imports
+#+begin_src python :results none
+# python
+from collections import namedtuple
+from collections.abc import Sequence
+from functools import partial
+
+import random
+
+# pypi
+from expects import be_false, be_none, equal, expect, raise_error
+from joblib import Parallel, delayed
+from numba import njit
+from numpy.random import default_rng
+
+import altair
+import numpy
+import pandas
+
+from graeae import Timer
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+** Set Up
+
+#+begin_src python :results none
+TIMER = Timer()
+OUTPUT_PATH = output_path("binary-search")
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+
+SearchOutput = namedtuple("SearchOutput", ["index", "count"])
+
+random = default_rng(2022)
+#+end_src
+
+** Binary Search
+
+**Note:** Numba doesn't like using None and integers in namedtuples, but seems to do okay with None in regular tuples, so since I'm going to use this function to plot later on I'm not going to use the namedtuple for the return value (I wasn't really doing anything with it anyway).
+   
+#+begin_src python :results none
+def binary_search(element: int, elements: Sequence) -> SearchOutput:
+    """Does an iterative binary search for the key
+
+    Args:
+     element: item in the source to search for
+     elements: sorted (non-decreasing) collection with the key
+
+    Returns:
+     SearchOutput(index of the key in the source or None if not found, count of comparisons)
+    """
+    left, right = 0, len(elements) - 1
+    count = 0
+
+    if not len(elements) or not (elements[left] <= element <= elements[right]):
+        return (None, 1)
+
+    while right > left:
+        assert elements[left] <= element <= elements[right]
+        count += 1
+        middle = (left + right)//2
+
+        left, right = ((left, middle) if element <= elements[middle]
+                       else (middle + 1, right))
+                     
+    location = left if (elements[left] == element) else None
+    return (location, count)
+#+end_src
+
+
+#+begin_src python :results none
+def test_it(searcher):
+    test_case = numpy.arange(11)
+    expect(searcher(element=5, elements=test_case)[0]).to(equal(5))
+
+    items = list(sorted(random.sample(range(100), k=50)))
+
+    for expected, item in enumerate(items):
+        expect(searcher(element=item, elements=items)[0]).to(equal(expected))
+
+    expect(searcher(element=-5, elements=items)[0]).to(be_none)
+
+    last = items[-1]
+    items[-1] = last + 100
+    expect(searcher(101, items)[0]).to(be_none)
+
+    expect(searcher(5, [])[0]).to(be_none)
+
+    expect(searcher(5, [5])[0]).to(equal(0))
+    return
+
+test_it(binary_search)
+#+end_src
+
+
+** Original Version
+   The version I entered above is one that I found on the web ([[https://www.eecs.yorku.ca/course_archive/2013-14/W/2011/lectures/09%20Loop%20Invariants%20and%20Binary%20Search.pdf][PDF Lecture Notes]]), the one in {{% lancelot "Levitin's Book" %}}itdaa{{% /lancelot %}} is clearer but has one more comparison.
+
+#+begin_export html
+<pre id="binarysearch2" style="display:hidden;">
+\begin{algorithm}
+\caption{BinarySearchTwo}
+\begin{algorithmic}
+\INPUT Array A of items in non-decreasing order, search key in A
+\OUTPUT The index of the item that matches key
+\PROCEDURE{BinarySearchTwo}{$A$}
+\STATE $left \gets 0$
+\STATE $right \gets A.length - 1$
+
+\WHILE {$left \le right$}
+\STATE $middle \gets \left \lfloor \frac{left + right}{2} \right \rfloor$
+
+\IF {$key = A[middle]$}
+\RETURN middle
+\ELIF {$key \le A[middle]$}
+\STATE $right \gets middle - 1$
+\ELSE
+\STATE $left \gets middle + 1$
+\ENDIF
+\ENDWHILE
+
+\IF {$key = A[left]$}
+\RETURN left
+\ELSE
+\RETURN NotFound
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+#+begin_src python :results none
+def binary_search_two(element, elements) -> SearchOutput:
+    """Iterative Binary Search
+
+    Args:
+     element: item in the source
+     elements: sorted collection to search
+
+    Returns:
+     index where key is found in the source or False if not found
+
+    Raises:
+     AssertionError: key is out of bounds for the source
+    """
+    left, right = 0, len(elements) - 1
+    count = 0
+    location = None
+    while left <= right and location is None:
+        middle = (left + right)//2
+
+        if element == elements[middle]:
+            location = middle
+
+        left, right = ((left, middle - 1) if element <= elements[middle] else
+                       (middle + 1, right))
+    return (location, count)
+#+end_src
+
+#+begin_src python :results none
+test_it(binary_search_two)
+#+end_src
+* Recursive Version
+
+  Although it is pretty straightforward as an iterative function, divide and conquer lends itself to recursive forms so just for completeness, here's a recursive version of the binary search.
+
+#+begin_src python :results none
+def recursive_binary_search(elements: Sequence, element: int,
+                            left: int, right: int,
+                            count: int=0):
+    """Recursive binary search
+
+    Args:
+     elements: sorted sequence with element in it
+     element: item in elements to search for
+     left: left index of the current sub-list to search
+     right: right index of the current sub-list to search
+     count: number of times we run the comparison (for plotting)
+
+    Returns:
+     (index, count) - index of the element in the elements and the comparison count
+    """
+    count += 1
+    if left > right:
+        # we missed it, the element isn't in the elements
+        return None, count
+
+    middle = (left + right)//2
+    
+    if elements[middle] == element:
+        # base-case, we found it
+        return middle, count
+
+    left, right = ((middle + 1, right) if elements[middle] < element
+                   else (left, middle - 1))
+    return recursive_binary_search(elements, element, left, right, count)
+#+end_src
+
+This is a helper to get the recursive call started and to handle empty lists or search terms that are outside of the range of the list.
+
+#+begin_src python :results none
+def search(element: int, elements: Sequence) -> tuple:
+    """calls the recursive binary search
+    
+    Args:
+     element: an element in source to search for
+     elements: sorted sequence of items     
+    """
+    left, right = 0, len(elements) - 1
+
+    if not len(elements) or  not elements[left] <= element <= elements[right]:
+        return (None, 1)
+    return recursive_binary_search(elements, element, left, right)
+#+end_src
+
+#+begin_src python :results none
+test_it(search)
+#+end_src
+
+* Some Plotting
+** Left and Right
+   Let's look at how the search updates the left and right boundaries. First we'll need a function that records the locations.
+
+#+begin_src python :results none
+def binary_search_points(key, source) -> tuple:
+    """Iterative Binary Search
+
+    Args:
+     key: item in the source
+     source: sorted collection to search
+
+    Returns:
+     tuple of left-right locations
+
+    Raises:
+     AssertionError: key is out of bounds for the source
+    """
+    left, right = 0, len(source) - 1
+    lefts = [left]
+    rights = [right]
+
+    while right > left:
+        assert source[left] <= key <= source[right]
+        middle = (left + right)//2
+
+        (left, right) = ((left, middle) if key <= source[middle]
+                         else (middle + 1, right))
+        lefts.append(left)
+        rights.append(right)
+    return lefts, rights
+#+end_src
+
+Now we'll plot it.
+
+#+begin_src python :results output :exports both
+items = list(range(101))
+key = items[24]
+lefts, rights = binary_search_points(key, items)
+
+data = pandas.DataFrame(dict(Left=lefts, Right=rights, Split=list(range(len(lefts)))))
+
+melted = data.melt(id_vars=["Split"], value_vars=["Left", "Right"],
+                   var_name="left_or_right",
+                   value_name="Index")
+base = altair.Chart(melted)
+
+lines = base.mark_line().encode(
+    x="Split:O",
+    y="Index",
+    color="left_or_right"
+)
+
+points = base.mark_point().encode(
+    x="Split:O",
+    y="Index",
+    color="left_or_right"
+)
+
+chart = (lines + points).properties(
+    title="Binary Search Left-Right Boundaries",
+    width=800,
+    height=550
+).interactive()
+
+save_it(chart=chart, name="binary-search")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="binary-search.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+So, it isn't really so pretty as with the sorting plots. As the plot confirms, the left and right slowly narrow to find the item in the list.
+
+** Runtime
+   Let's see how the number of loops goes up with the size of the search space.
+
+#+begin_src python :results output :exports both
+EXPONENT = 5
+numba_search = njit(binary_search)
+
+sizes = tuple(range(1, 10**EXPONENT + 1, 1000))
+random_source = [numpy.sort(random.integers(low=0, high=count, size=count))
+                    for count in sizes]
+random_things = [(random.choice(elements), elements)
+                    for elements in random_source]
+
+worst_things = [(elements[0], elements) for elements in random_source]
+
+with TIMER:
+    random_output = Parallel(n_jobs=-1)(
+        delayed(numba_search)(element, elements)
+        for (element, elements) in random_things)
+
+    worst_output = Parallel(n_jobs=-1)(
+        delayed(numba_search)(element, elements)
+        for (element, elements) in worst_things)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-16 21:33:07.668315
+: Ended: 2022-01-16 21:33:08.905390
+: Elapsed: 0:00:01.237075
+
+#+begin_src python :results none
+data = pandas.DataFrame(dict(
+    Count=sizes,
+    Random=[output[1] for output in random_output],
+    First=[output[1] for output in worst_output]
+))
+
+melted = data.melt(id_vars=["Count"], value_vars=["Random", "First"],
+                   var_name="Location", value_name="Bisections")
+
+theoretical = pandas.DataFrame(dict(Count=sizes, Theoretical=numpy.log2(sizes)))
+#+end_src
+
+Now, to plot.
+
+#+begin_src python :results output :exports both
+points = altair.Chart(melted).mark_point().encode(
+    x="Count",
+    y="Bisections",
+    color="Location")
+
+line = altair.Chart(theoretical).mark_line().encode(
+    x="Count",
+    y="Theoretical",
+    tooltip=[altair.Tooltip("Count", format=","),
+             altair.Tooltip("Theoretical", format=".2f")],
+)
+chart = (line + points).properties(
+    title="Binary Search Bisections",
+    width=800,
+    height=525,
+).interactive()
+
+save_chart(chart=chart, name="binary-search-comparisons",
+           output_path=OUTPUT_PATH)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="binary-search-comparisons.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+* See Also
+ - Loop Invariants [Internet]. [cited 2022 Jan 15]. Available from: https://www.cs.cornell.edu/courses/cs2112/2018fa/lectures/lec_loopinv/
+ - {{% doc %}}itdaa{{% /doc %}}
 
 #+begin_export html
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("binarysearch"));
+});
+</script>
+
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("binarysearch2"));
 });
 </script>
 #+end_export
