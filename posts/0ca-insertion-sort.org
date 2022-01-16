@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-22b993ba-27c1-4f24-b2be-19d39a40533b-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-67722f94-009b-41e5-ba23-0a925075a345-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -255,8 +255,8 @@ print(output.swaps)
 
 #+RESULTS:
 : 4950.0
-: 2277
-: 2376
+: 2585
+: 2684
 
 ** Comparisons and Swaps
 
@@ -274,40 +274,33 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-01-13 01:15:39.913807
-: Ended: 2022-01-13 01:15:52.093208
-: Elapsed: 0:00:12.179401
+: Started: 2022-01-16 22:55:12.336777
+: Ended: 2022-01-16 22:55:23.534382
+: Elapsed: 0:00:11.197605
 
 #+begin_src python :results none
 SIZE, COMPARISONS, SWAPS = 0, 1, 2
 unzipped = list(zip(*sort_output))
 count_frame = pandas.DataFrame({"Elements": unzipped[SIZE],
-                                "Insertion Comparisons": unzipped[COMPARISONS]})
+                                "Insertion": unzipped[SWAPS]})
 
 count_frame["n^2"] = count_frame.Elements**2
+
+melted = count_frame.melt(id_vars=["Elements"], var_name="Source", value_name="Runtime")
 #+end_src
 
 #+begin_src python :results output :exports both
-base = altair.Chart(count_frame).mark_point().encode(
-    x = "Elements",
-)
-
 tooltip = [altair.Tooltip("Elements", format=","),
-           altair.Tooltip("Insertion Comparisons", format=","), 
-           altair.Tooltip("n^2", format=",")]
+           altair.Tooltip("Runtime", format=","), 
+           altair.Tooltip("Source:N")]
 
-comparisons = base.encode(
-    y="Insertion Comparisons",
-    tooltip=tooltip,
-)
-
-n_squared = base.mark_point(color="DarkRed").encode(
-    x="Elements",
-    y="n^2",
-    tooltip=tooltip,
-)
-chart = (comparisons + n_squared).properties(
-    width=800, height=550, title="Insertion Sort"
+chart = altair.Chart(melted).mark_point().encode(
+    x = "Elements",
+    y = "Runtime",
+    color="Source:N",
+    tooltip=tooltip
+).properties(
+    width=800, height=525, title="Insertion Sort"
 )
 
 save_it(chart, "insertion-sort-comparisons")
@@ -320,10 +313,13 @@ save_it(chart, "insertion-sort-comparisons")
 </object>
 #+end_export
 
+With our random input the Insertion Sort does better than the theoretical worst case. 
+
 ** Best and Worst Cases
-   
+   Let's get rid of the $n^2$ and add the best-case and worst-case data.
+
 #+begin_src python :results none
-frame = count_frame.rename(columns={"Insertion Comparisons": "Random"})
+frame = count_frame.rename(columns={"Insertion": "Random"})
 del frame["n^2"]
 #+end_src
 
@@ -338,9 +334,9 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-01-13 01:23:32.940045
-: Ended: 2022-01-13 01:23:55.971288
-: Elapsed: 0:00:23.031243
+: Started: 2022-01-16 22:56:34.282090
+: Ended: 2022-01-16 22:56:56.373266
+: Elapsed: 0:00:22.091176
 
 #+begin_src python :results output :exports both
 with TIMER:
@@ -350,35 +346,36 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-01-13 01:55:01.131774
-: Ended: 2022-01-13 01:55:02.295769
-: Elapsed: 0:00:01.163995
+: Started: 2022-01-16 22:57:04.941850
+: Ended: 2022-01-16 22:57:05.067092
+: Elapsed: 0:00:00.125242
 
 #+begin_src python :results none
 best_unzipped = list(zip(*best_output))
 worst_unzipped = list(zip(*worst_output))
 
-count_frame["Best"] = best_unzipped[COMPARISONS]
-count_frame["Worst"] = worst_unzipped[COMPARISONS]
-count_frame = count_frame.rename(columns={"Insertion Comparisons": "Random"})
-del(count_frame["n^2"])
+frame["Best"] = best_unzipped[SWAPS]
+frame["Worst"] = worst_unzipped[SWAPS]
 #+end_src
 
 #+begin_src python :results none
-melted = count_frame.melt(id_vars=["Elements"],
-                          var_name="Input",
-                          value_name="Comparisons")
+melted = frame.melt(id_vars=["Elements"],
+                    var_name="Input",
+                    value_name="Comparisons")
 #+end_src
 
 #+begin_src python :results output :exports both
 chart = altair.Chart(melted).mark_point().encode(
     x="Elements",
     y="Comparisons",
-    color="Input"
+    color="Input",
+    tooltip=[altair.Tooltip("Elements", format=","),
+             altair.Tooltip("Comparisons", format=","),
+             "Input"],
 ).properties(
     title="Insertion Sort Best, Worst, Random",
     width=800,
-    height=550
+    height=525
 ).interactive()
 
 save_it(chart, "best-worst-random")
