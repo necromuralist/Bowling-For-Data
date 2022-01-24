@@ -1,0 +1,85 @@
+#+BEGIN_COMMENT
+.. title: The Merge
+.. slug: the-merge
+.. date: 2022-01-23 17:32:22 UTC-08:00
+.. tags: sorting,algorithms
+.. category: Sorting
+.. link:
+.. description: The Merge algorithm.
+.. type: text
+.. has_pseudocode: yes indeed
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0eaa6432-e4b1-4ee1-8198-18b8399c773e-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* The Merge
+This is an implementation of the merge portion of the merge-sort. It takes two sorted sections of a collection and merges them together in place.
+
+** The Algorithm
+The precondition for this to work is that there are two sections within the array passed in to the algorithm that are already sorted and that they are located by the three index-values given to the algorithm. The first sorted section starts at ~p~ and ends at ~q~ in the array and the second sorted section starts at ~q + 1~ and ends at ~r~ within the array.
+
+This is the CLRS version with the indexing changed to start at 0.
+
+#+begin_export html
+<pre id="the-merge" style="display:hidden;">
+\begin{algorithm}
+\caption{Merge}
+\begin{algorithmic}
+\INPUT An array and left, middle, and right locations in the array
+\REQUIRE Sub-arrays from $p$ to $q$ and from $q + 1$ to $r$ are sorted
+\OUTPUT The array with the two sections collated in order
+
+\PROCEDURE{Merge}{$A, p, q, r$}
+
+\STATE \textbf{The sizes of the sub-sections}
+\STATE $n_1 \gets q - p + 1$
+\STATE $n_2 \gets r - q$
+
+\STATE \\ \textbf{Copy the subsections to new arrays.}
+\STATE \textit{New arrays have one extra cell to hold a sentinel.}
+\STATE $L \gets Array[0\ldots n_1]$
+\STATE $R \gets Array[0 \ldots n_2]$
+
+\FOR {$i \in {0 \ldots n_1 - 1}$}
+  \STATE $L[i] \gets A[p + i - 1]$
+\ENDFOR
+
+\FOR{$j \in {0 \ldots n_2 - 1}$}
+  \STATE $R[j] \gets A[q + j]$
+\ENDFOR
+
+\STATE \\ \textbf{Add sentinel to indicate end}
+\STATE $L[n_1] \gets \infty $
+\STATE $R[n_2] \gets \infty $
+
+\STATE \\ \textbf{Collate}
+\STATE $i \gets 0$
+\STATE $j \gets 0$
+
+\FOR {$k \in {p \ldots r}$}
+ \IF {$L[i] \leq R[j]$}
+   \STATE $A[k] \gets L[i]$
+   \STATE $i' \gets i + 1$
+ \ELSE
+  \STATE $A[k] \gets R[j]$
+  \STATE $j' \gets j + 1$
+\ENDIF
+\ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+* Middle
+* End
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-merge"));
+});
+</script>
+#+end_export
