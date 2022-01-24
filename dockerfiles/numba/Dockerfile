@@ -8,10 +8,10 @@ FROM ${IMAGE_NAME}:${TAG}
 # first do the stuff that you need to be root to do
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    openssh-server \
     rsync \
-    zile \
     screen \
-    openssh-server && \
+    zile && \
     useradd --create-home --shell /bin/bash bravo
 
 # # switch from root to bravo
