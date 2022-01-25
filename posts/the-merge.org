@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0eaa6432-e4b1-4ee1-8198-18b8399c773e-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-43137634-23b8-443d-a445-8fa11a11f88f-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -74,7 +74,79 @@ This is the CLRS version with the indexing changed to start at 0.
 \end{algorithm}
 </pre>
 #+end_export
-* Middle
+
+One way to think about how the algorithm is like you have two stacks of cards, each of which is sorted and you want to merge them together in sorted order. Since they are already sorted, you only have to compare the top cards on the two stacks to each other, chose the lower card and put it in your output stack, and keep repeating this until you've moved all the cards from the two stacks to the output. If one stack runs out of cards you just move the other remaining cards onto the output stack.
+
+Our algorithm starts by copying out the values from the source array into two new arrays to create our stacks. We append an \(\infty\) onto the end of each to simulate the emptying of the stack. Then we keep looking at the top item in each stack and copying the smaller item back into the original array. Because of the copying we are going over the input twice, but that is a relatively small (linear) increase.
+** Implement It
+#+begin_src python :results none
+# python
+from collections.abc import MutableSequence
+
+# pypi
+from expects import contain_exactly, equal, expect
+#+end_src
+
+#+begin_src python :results none
+INFINITY = float("inf")
+#+end_src
+
+#+begin_src python :results none
+def merge(collection: MutableSequence,
+          left_start: int,
+          left_end: int,
+          right_end: int) -> int:
+    """Merge the sub-sections from the collection
+
+    Args:
+     collection: list or array with sorted sub-sections
+     left_start: index of start of first sub-section
+     left_end: index of last item of first sub-section
+     right_end: index of the last item of second sub-section
+    """
+    count = 0
+    left_size = left_end - left_start + 1
+    right_size = right_end - left_end
+    right_start = left_end + 1
+
+    left_stack = ([None] * left_size)
+    right_stack = ([None] * right_size)
+    
+    for stack_location in range(left_size):
+        left_stack[stack_location] = collection[left_start + stack_location]
+        count += 1
+        
+    for stack_location in range(right_size):
+        right_stack[stack_location] = collection[right_start + stack_location]
+        count += 1
+
+    left_stack.append(INFINITY)
+    right_stack.append(INFINITY)
+
+    next_left = next_right = 0
+
+    for put_next_item_here in range(left_start, right_end + 1):
+        count += 1
+        if left_stack[next_left] <= right_stack[next_right]:
+            collection[put_next_item_here] = left_stack[next_left]
+            next_left += 1
+        else:
+            collection[put_next_item_here] = right_stack[next_right]
+            next_right += 1
+    return count
+#+end_src
+
+#+begin_src python :results none
+first = list(range(5))
+second = first[:]
+collection = first + second
+
+count = merge(collection, 0, 4, 9)
+
+expect(count).to(equal(20))
+
+expect(collection).to(contain_exactly(0,0,1,1,2,2,3,3,4,4))
+#+end_src
 * End
 #+begin_export html
 <script>
