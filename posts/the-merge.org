@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-43137634-23b8-443d-a445-8fa11a11f88f-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-05f299e0-f06a-41df-80b9-56964580830e-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -147,7 +147,29 @@ expect(count).to(equal(20))
 
 expect(collection).to(contain_exactly(0,0,1,1,2,2,3,3,4,4))
 #+end_src
+
+#+begin_src python :results none
+collection = [10] + first + second
+count = merge(collection, 1, 5, 10)
+
+expect(count).to(equal(20))
+
+expect(collection[1:11]).to(contain_exactly(0,0,1,1,2,2,3,3,4,4))
+#+end_src
+
+#+begin_src python :results none
+collection = [10] + first + second + [-1, 5]
+count = merge(collection, 1, 5, 10)
+
+expect(count).to(equal(20))
+
+expect(collection[1:11]).to(contain_exactly(0,0,1,1,2,2,3,3,4,4))
+#+end_src
+** Runtime
+Without doing anything fancy we can see that there's three for loops, the first two cover copying over all the sub-list items from the original list to the new lists, so together they execute once for every item (/n/ times). And the loop that does the actual merge also runs once for each item so it also runs /n/ times so altogether it has a run time of /2n/ which we'll say is $\Theta(n)$. This is actually going to be part of the merge-sort but I thought I'd put that in here since the post is separate.
 * End
+- {{% doc %}}clrs{{% /doc %}}
+
 #+begin_export html
 <script>
 window.addEventListener('load', function () {
