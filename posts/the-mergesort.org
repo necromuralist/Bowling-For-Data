@@ -1,0 +1,71 @@
+#+BEGIN_COMMENT
+.. title: The Mergesort
+.. slug: the-mergesort
+.. date: 2022-01-25 17:49:38 UTC-08:00
+.. tags: sorting,algorithms,divide-and-conquer,recursion
+.. category: Algorithms
+.. link: 
+.. description: The Mergesort algorithm.
+.. type: text
+.. has_pseudocode: yup
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-05f299e0-f06a-41df-80b9-56964580830e-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* Beginning
+This is a look at the [[https://en.wikipedia.org/wiki/Merge_sort][/Mergesort/]], an example of the {{% doc %}}divide-and-conquer{{% /doc %}} strategy for sorting collections.
+* Middle
+** The Algorithm
+Our /Mergesort/ repeatedly divides the given list into two parts and then recursively calls itself with the sub-problems and then takes advantage of our previously defined {{% lancelot "Merge" %}}the-merge{{% /lancelot %}} function to combine the solutions together once we are down to one item to sort (\(p = r\)).
+
+#+begin_export html
+<pre id="the-mergesort" style="display:hidden;">
+\begin{algorithm}
+\caption{Mergesort}
+\begin{algorithmic}
+\INPUT An array and left and right locations of the subarray in the array
+\OUTPUT The array in sorted order
+
+\PROCEDURE{Mergesort}{$A, p, r$}
+\IF {p < r}
+         \STATE \textbf{Divide}
+         \STATE $q \gets \lfloor \frac{p + r}{2} \rfloor$
+         
+         \STATE \\ \textbf{Conquer}
+         \STATE \textsc{MergeSort}(A, p, q)
+         \STATE \textsc{MergeSort}(A, q + 1, r)
+
+         \STATE \\ \textbf{Combine}
+         \STATE \textsc{Merge}(A, p, q, r)
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+** Runtime
+
+- **Divide:** \(D(n) = \Theta(1)\)
+- **Conquer:** \(2T\left (\frac{n}{2}\right)\)
+- **Combine:** \(C(n) = \Theta(n)\)
+
+\begin{align}
+T(n) &= 2T \left( \frac{n}{2} \right) + \Theta(1) + \Theta(n) \\
+&= 2T \left( \frac{n}{2} \right) + \Theta(n) \\
+&= \Theta(n \log_2 n)
+\end{align}
+* End
+- {{% doc %}}CLRS{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-mergesort"));
+});
+</script>
+#+end_export
