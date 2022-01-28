@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-05f299e0-f06a-41df-80b9-56964580830e-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-3a273c01-6dde-4d9f-81e5-5ed6448a4b64-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -19,7 +19,7 @@
 * Beginning
 This is a look at the [[https://en.wikipedia.org/wiki/Merge_sort][/Mergesort/]], an example of the {{% doc %}}divide-and-conquer{{% /doc %}} strategy for sorting collections.
 * Middle
-** The Algorithm
+** The CLRS Algorithm
 Our /Mergesort/ repeatedly divides the given list into two parts and then recursively calls itself with the sub-problems and then takes advantage of our previously defined {{% lancelot "Merge" %}}the-merge{{% /lancelot %}} function to combine the solutions together once we are down to one item to sort (\(p = r\)).
 
 #+begin_export html
@@ -59,13 +59,287 @@ T(n) &= 2T \left( \frac{n}{2} \right) + \Theta(1) + \Theta(n) \\
 &= 2T \left( \frac{n}{2} \right) + \Theta(n) \\
 &= \Theta(n \log_2 n)
 \end{align}
+** The Levitin
+
+#+begin_export html
+<pre id="the-mergesort-levitin" style="display:hidden;">
+\begin{algorithm}
+\caption{Levitin's Mergesort}
+\begin{algorithmic}
+\INPUT Array $A[0 \ldots n - 1]$ of orderable elements.
+\OUTPUT Array $A[0 \ldots n - 1]$ sorted in non-decreasing order.
+
+\PROCEDURE{Mergesort}{A}
+\IF {n > 1}
+         \STATE \textbf{Divide}
+         \STATE Copy $A\left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$ to $B \left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$
+         \STATE Copy $A \left[\left\lfloor \frac{n}{2}\right\rfloor \ldots n - 1 \right]$ to $C \left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$
+         
+         \STATE \\ \textbf{Conquer}
+         \STATE \textsc{MergeSort}(B)
+         \STATE \textsc{MergeSort}(C)
+
+         \STATE \\ \textbf{Combine}
+         \STATE \textsc{Merge}(B, C, A)
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** Implement It
+#+begin_src python :results none
+# python
+from collections.abc import MutableSequence, Sequence
+from math import log2
+
+import random
+
+# pypi
+from expects import contain_exactly, equal, expect
+#+end_src
+
+#+begin_src python :results none
+def merge(left_stack: Sequence,
+          right_stack: Sequence,
+          target: MutableSequence) -> int:
+    """Merges values from left and right stacks into target collection
+
+    Args:
+     left_stack: sorted collection of items to merge
+     right_stack: sorted collection of items to merge
+     target: collection into which to merge the items
+
+    Returns:
+     count of basic operations
+    """
+    left_size, right_size = len(left_stack), len(right_stack)
+    next_left = next_right = put_item_here = count = 0
+    
+    while next_left < left_size and next_right < right_size:
+        count += 1
+        if left_stack[next_left] <= right_stack[next_right]:
+            target[put_item_here] = left_stack[next_left]
+            next_left += 1
+        else:
+            target[put_item_here] = right_stack[next_right]
+            next_right += 1
+
+        put_item_here += 1
+        
+    if next_left == left_size and next_right < right_size:
+        for stack_offset in range(left_size + right_size - put_item_here):
+            count += 1
+            target[put_item_here + stack_offset] = right_stack[next_right + stack_offset]
+    elif next_left < left_size:
+        for stack_offset in range(left_size + right_size - put_item_here):
+            count += 1
+            target[put_item_here + stack_offset] = left_stack[next_left + stack_offset]
+    return count
+#+end_src
+
+#+begin_src python :results none
+def mergesort(collection: MutableSequence) -> int:
+    """Sorts the collection using a recursive mergesort
+
+    Args:
+     collection: a mutable sequence
+
+    Returns:
+     runtime count
+    """
+    items = len(collection)
+    count = 0
+    if items > 1:
+        middle = items//2
+        left_stack = collection[:middle]
+        right_stack = collection[middle:]
+        assert len(left_stack) + len(right_stack) == items
+        count += mergesort(left_stack)
+        count += mergesort(right_stack)
+        count += merge(left_stack, right_stack, collection)
+    return count
+#+end_src
+
+#+begin_src python :results output :exports both
+size = 2**10
+items = random.choices(list(range(size)), k=size)
+starting = items.copy()
+runtime = mergesort(items)
+expect(runtime).to(equal(size * log2(size)))
+expect(items).to(contain_exactly(*list(sorted(starting))))
+print(f"{size * log2(size):,}")
+print(f"{runtime:,}")
+#+end_src
+
+#+RESULTS:
+: 10,240.0
+: 10,240
+
+* Comparing Sorts
+#+begin_src python :results none
+# python
+from functools import partial
+
+# pypi
+from numba import njit
+from joblib import Parallel, delayed
+
+from numpy.random import default_rng
+
+import altair
+import numpy
+import pandas
+
+# this project
+from bowling.sort.insertion import insertion_sort
+
+from graeae import Timer
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+#+begin_src python :results none
+numba_random = default_rng(2022)
+TIMER = Timer()
+
+SLUG = "the-mergesort"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+#+end_src
+
+#+begin_src python :results none
+def merger(thing_to_sort) -> tuple:
+    """A thing to add the size of the input to the output
+
+    Args:
+     thing_to_sort: collection of items to sort
+
+    Returns:
+     number of things to sort, count of merges
+    """
+    return len(thing_to_sort), mergesort(thing_to_sort)
+#+end_src
+
+#+begin_src python :results none
+ninsertion = njit(insertion_sort)
+
+things_to_sort = [numba_random.integers(low=0, high=count, size=count)
+                  for count in range(1, 10**5 + 1, 1000)]
+#+end_src
+
+#+begin_src python :results output :exports both
+with TIMER:
+    insertion_output = Parallel(n_jobs=-1)(
+        delayed(ninsertion)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-28 01:12:10.628102
+: Ended: 2022-01-28 01:12:22.681161
+: Elapsed: 0:00:12.053059
+
+#+begin_src python :results output :exports both
+with TIMER:
+    merge_output = Parallel(n_jobs=-1)(
+        delayed(merger)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-28 01:12:33.278574
+: Ended: 2022-01-28 01:12:38.850064
+: Elapsed: 0:00:05.571490
+
+#+begin_src python :results none
+SIZE, COMPARISONS = 0, 1
+unzipped = list(zip(*merge_output))
+frame = pandas.DataFrame({"Size": unzipped[SIZE],
+"Mergesort": unzipped[COMPARISONS]})
+
+unzipped = list(zip(*insertion_output))
+frame["Insertion Sort"] = unzipped[COMPARISONS]
+
+melted = frame.melt(id_vars=["Size"],
+                    value_vars=["Mergesort", "Insertion Sort"],
+                    var_name="Sort Algorithm", value_name="Comparisons")
+
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_point().encode(
+    x="Size",
+    y="Comparisons",
+    color="Sort Algorithm",
+    tooltip=[altair.Tooltip("Size", format=","),
+             altair.Tooltip("Comparisons", format=","),
+             "Sort Algorithm"]
+).properties(
+    title="Insertion vs Merge Sort",
+    width=800,
+    height=525,
+)
+
+save_it(chart, "insertion-vs-merge")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="insertion-vs-merge.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+#+begin_src python :results output :exports both
+frame["nlog2(n)"] = frame["Size"] * numpy.log2(frame["Size"])
+del(frame["Insertion Sort"])
+melted = frame.melt(id_vars=["Size"],
+                    value_vars=["Mergesort", "nlog2(n)"],
+                    var_name="Source", value_name="Comparisons")
+
+chart = altair.Chart(melted).mark_point().encode(
+    x="Size",
+    y="Comparisons",
+    color="Source",
+    tooltip=[altair.Tooltip("Size", format=","),
+             altair.Tooltip("Comparisons", format=","),
+             "Source"]
+).properties(
+    title="Merge Sort vs Theoretical",
+    width=800,
+    height=525,
+)
+
+save_it(chart, "merge-by-logn")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="merge-by-logn.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+
+
+
 * End
 - {{% doc %}}CLRS{{% /doc %}}
+- {{% doc %}}itdaa{{% /doc %}}
 
 #+begin_export html
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("the-mergesort"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-mergesort-levitin"));
 });
 </script>
 #+end_export
