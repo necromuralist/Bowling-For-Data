@@ -11,13 +11,15 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-7f3b040f-0263-4697-9657-dfeb46da5524-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
 * The Algorithm
 ** Levitin
+The Levitin version of the Partition function is a little more complicated than the CLRS version. It uses an outer loop with two inner loops. The outer loop continues until the indices for the partitions cross-over (or meet) and the inner loops move the boundaries until they find a value that needs to be swapped to the other partition (e.g. the loop sweeping upwards finds an element that's greater than or equal to the pivot element and so it needs to be moved to the upper partition). It uses the first element in the array as the value around which to partition the array.
+
 #+begin_export html
 <pre id="the-levitin-partition" style="display:hidden;">
 \begin{algorithm}
@@ -26,26 +28,25 @@
 \INPUT An array and left and right locations defining a subarray
 \OUTPUT The sub-array from left to right is partitioned and the partition location is returned
 
-\PROCEDURE{Partition}{$A, left, right$}
+\PROCEDURE{Partition}{A, left, right}
 
-\STATE pivot $\gets$ A[left]
+\STATE PivotElement $\gets$ A[left]
 \STATE PartitionLeft $\gets$ left
 \STATE PartitionRight $\gets$ right + 1
-
+\STATE \\
 \REPEAT
   \REPEAT
     \STATE PartitionLeft $\gets$ PartitionLeft + 1
-  \UNTIL {A[PartitionLeft] $\geq$ pivot}
-
+  \UNTIL {A[PartitionLeft] $\geq$ PivotElement}
+  \STATE \\
   \REPEAT
     \STATE PartitionRight $\gets$ PartitionRight - 1
-  \UNTIL {A[PartitionRight] $\leq$ pivot}
+  \UNTIL {A[PartitionRight] $\leq$ PivotElement}
 
-  \STATE Swap(A[PartitionLeft], A[PartitionRight])
+  \STATE \\ Swap(A[PartitionLeft], A[PartitionRight])
 
 \UNTIL {PartitionLeft $\geq$ PartitionRight}
-
-\STATE Swap(A[PartitionLeft], A[PartitionRight])
+\STATE \\ Swap(A[PartitionLeft], A[PartitionRight])
 \STATE Swap(A[left], A[PartitionRight])
 
 \RETURN PartitionRight
@@ -54,6 +55,77 @@
 \end{algorithm}
 </pre>
 #+end_export
+** CLRS
+
+The CLRS version seems a little clearer to follow with the exception of the fact that they use the last element as the pivot element instead of the first which threw me off for a bit. It uses a single for loop which moves anything less than the pivot element to the lower partition as it traverses the elements.
+
+#+begin_export html
+<pre id="the-clrs-partition" style="display:hidden;">
+\begin{algorithm}
+\caption{Partition}
+\begin{algorithmic}
+\INPUT An array and left and right locations defining a subarray
+\OUTPUT The sub-array from left to right is partitioned and the partition location is returned
+
+\PROCEDURE{Partition}{A, left, right}
+
+\STATE PivotElement $\gets$ A[right]
+\STATE LowerBound $\gets$ left - 1
+
+\FOR {UpperBound $\in$ \{left $\ldots$ right - 1\}}
+ \IF {A[UpperBound] $\leq$ PivotElement}
+   \STATE LowerBound = LowerBound + 1
+   \STATE \textsc{Swap}(A[LowerBound], A[UpperBound])
+ \ENDIF
+\ENDFOR
+
+\STATE pivot $\gets$ LowerBound + 1
+\STATE \textsc{Swap}(A[pivot], A[right])
+\RETURN pivot
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** CLRS Example
+We can take a look at how this works using a table. I'll use /LB/ for the /LowerBound/ index, /UB/ for the /UpperBound/ index, and /x/ for the /PivotElement/ to keep the table from getting too wide (hopefully). The array to partition is ~[5, 7, 9, 4, 6]~ with a zero-based index so /left/ = 0, /right/ = 4 and /x/ (the pivot element) is 6.
+
+Here are the values for the variables as we step through the for-loop.
+
+| UB | A[UB] | A[UB] \(\leq\) x | LB | A             |
+|----+-------+------------------+----+---------------|
+|  0 |     5 | True             |  0 | 5, 7, 9, 4, 6 |
+|  1 |     7 | False            |  0 | 5, 7, 9, 4, 6 |
+|  2 |     9 | False            |  0 | 5, 7, 9, 4, 6 |
+|  3 |     4 | True             |  1 | 5, 4, 9, 7, 6 |
+
+As long and the element in the array we're checking is less than or equal to the Pivot Element we increment the LowerBound along with the Upper Bound since the element belongs in the lower partition. If the Lower and Upper bound indexes are equal, than they agree on where it is so nothing happens when we do the swap (or you could say they swap in place, maybe). But while the element checked is larger than the Pivot Element the Upper Bound Index goes up but the Lower Bound doesn't so when we next hit a case where the element is less than or equal to the Pivot Element, we know it's out of place and needs to be swapped with the element currently just after the lower partition.
+
+Once we're out of the loop we then swap out the Pivot Element and the element to the right of the Lower Bound (so the first element of the Upper Bound) and return the location where the Pivot Element ended up.
+
+- pivot = 2
+- A = [5, 4, 6, 7, 9]
+
+*** An Odd Case
+What happens if the last element is the largest element?
+
+- A = [9, 6, 25, 4, 100]
+- x = 100
+
+| UB | A[UB] | A[UB] \(\leq\) x | LB | A                |
+|----+-------+------------------+----+------------------|
+|  0 |     9 | True             |  0 | 9, 6, 25, 4, 100 |
+|  1 |     6 | True             |  1 | 9, 6, 25, 4, 100 |
+|  2 |    25 | True             |  2 | 9, 6, 25, 4, 100 |
+|  3 |     4 | True             |  3 | 9, 6, 25, 4, 100 |
+
+And in the end we have a pivot of \(LB + 1 = 4\) (the last element) with the lower partition being everything but the last element and no elements in the upper partition. If the array happened to be already sorted than any attempt to partition a sub-array would end up with a similar output with an empty upper partition. This doesn't really matter here, but when we use it in quicksort it will.
+
+Since nothing happens when an element being checked is greater than the pivot element, if the pivot element happens to be the smallest item in the array we'd have a similar case with an empty lower partition, the pivot element as the first element, and the rest of the elements in the upper partition, so starting with an array that's in reversed-sorted-order would also always end up with empty partitions no matter how we choose the sub-arrays.
+
+** Implementation
+
 * End
 - {{% doc %}}clrs{{% /doc %}}
 - {{% doc %}}itdaa{{% /doc %}}
@@ -62,6 +134,14 @@
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("the-levitin-partition"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-clrs-partition"));
 });
 </script>
 #+end_export
