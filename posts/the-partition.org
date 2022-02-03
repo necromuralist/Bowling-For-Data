@@ -1,5 +1,5 @@
 #+BEGIN_COMMENT
-.. title: The Partition
+.. title: The Road To Partition
 .. slug: the-partition
 .. date: 2022-01-30 17:46:07 UTC-08:00
 .. tags: algorithms,sorting
@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-e7f43106-eb94-485d-bc13-0474ec0ebeb4-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -88,6 +88,9 @@ The CLRS version seems a little clearer to follow with the exception of the fact
 </pre>
 #+end_export
 
+The /LowerBound/ is the index of the last element less than or equal to the pivot and /LowerBound + 1/ is the first element greater than the pivot. The /UpperBound/ is the index of the last item greater than the pivot.
+
+The /LowerBound/ is like a demon that guards the lower partition and the /UpperBound/ is another demon that plows through the array, throwing any elements that belong in the lower partition back to the /LowerBound/ demon who throws the first element in the upper partition back up to the /UpperBound/ and moves up to guard the expanded lower partition.
 *** CLRS Example
 We can take a look at how this works using a table. I'll use /LB/ for the /LowerBound/ index, /UB/ for the /UpperBound/ index, and /x/ for the /PivotElement/ to keep the table from getting too wide (hopefully). The array to partition is ~[5, 7, 9, 4, 6]~ with a zero-based index so /left/ = 0, /right/ = 4 and /x/ (the pivot element) is 6.
 
@@ -125,7 +128,260 @@ And in the end we have a pivot of \(LB + 1 = 4\) (the last element) with the low
 Since nothing happens when an element being checked is greater than the pivot element, if the pivot element happens to be the smallest item in the array we'd have a similar case with an empty lower partition, the pivot element as the first element, and the rest of the elements in the upper partition, so starting with an array that's in reversed-sorted-order would also always end up with empty partitions no matter how we choose the sub-arrays.
 
 ** Implementation
+*** Some Imports
+#+begin_src python :results none
+# python
+from collections.abc import MutableSequence
+from functools import partial
 
+import random
+
+# pypi
+from expects import contain_exactly, equal, expect
+
+import altair
+import pandas
+
+# other monkey stuff
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+*** The Partition
+#+begin_src python :results none
+def partition(collection: MutableSequence, left: int, right: int) -> int:
+    """Partitions the collection around the last element
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     the index of the pivot element
+    """
+    pivot_element = collection[right]
+    lower_bound = left - 1
+    for upper_bound in range(left, right):
+        if collection[upper_bound] <= pivot_element:
+            lower_bound += 1
+            (collection[lower_bound],
+             collection[upper_bound]) = (collection[upper_bound],
+                                         collection[lower_bound])
+    pivot = lower_bound + 1
+    (collection[pivot],
+     collection[right]) = (collection[right],
+                           collection[pivot])
+    return pivot
+#+end_src
+
+*** Some Checks
+**** The First Example
+#+begin_src python :results none
+start = [5, 7, 9, 4, 6]
+test = start.copy()
+expected = [5, 4, 6, 7, 9]
+first_expected_pivot = 2
+
+pivot = partition(test, 0, 4)
+
+expect(pivot).to(equal(first_expected_pivot))
+expect(test).to(contain_exactly(*expected))
+#+end_src
+
+And to make sure the sub-list works.
+
+#+begin_src python :results none
+left, right = [100, 20], [999, 888, 777]
+test = left + start.copy() + right
+
+pivot = partition(test, 2, 6)
+
+# all we did was shift the sub-list to spots to the right
+expect(pivot).to(equal(first_expected_pivot + 2))
+
+# only the sub-list should be partitioned
+expect(test).to(contain_exactly(*(left + expected + right)))
+#+end_src
+
+**** The Pivot Is the Biggest Element
+
+#+begin_src python :results none
+start = [9, 6, 25, 4, 100]
+test = start.copy()
+
+pivot = partition(test, 0, 4)
+
+# the pivot should be the last element
+expect(pivot).to(equal(4))
+
+# nothing changes in the list
+expect(test).to(contain_exactly(*start))
+#+end_src
+* Visualize It
+** Some Setup
+#+begin_src python :results none
+SLUG = "the-partition"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+#+end_src
+
+** A Tracker
+#+begin_src python :results none
+def partition_tracker(collection: MutableSequence, 
+                      left: int, right: int) -> tuple:
+    """Partitions the collection around the last element
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     locations dict, lower_bounds, upper_bounds
+    """
+    locations = {value: [index] for index, value in enumerate(collection)}
+    
+    pivot_element = collection[right]
+    lower_bound = left - 1
+
+    lower_bounds = [lower_bound]
+    for upper_bound in range(left, right):
+        if collection[upper_bound] <= pivot_element:
+            lower_bound += 1
+            (collection[lower_bound],
+             collection[upper_bound]) = (collection[upper_bound],
+                                         collection[lower_bound])
+        for index, item in enumerate(collection):
+            locations[item].append(index)
+        lower_bounds.append(lower_bound)
+    pivot = lower_bound + 1
+    (collection[pivot],
+     collection[right]) = (collection[right],
+                           collection[pivot])
+    for index, item in enumerate(collection):
+        locations[item].append(index)
+    lower_bounds.append(lower_bound)
+    return locations, lower_bounds
+#+end_src
+
+** A Backwards Case
+First, a plot of a list that starts out with all the elements greater than the pivot followed by all the elements less than the pivot.
+
+#+begin_src python :results output :exports both
+middle = 20
+first_half = list(range(middle))
+second_half = list(range(middle + 1, 2 * middle))
+
+random.shuffle(first_half)
+random.shuffle(second_half
+)
+items = second_half + first_half + [middle]
+
+locations, lower_bounds = partition_tracker(items, 0, len(items) - 1)
+
+frame = pandas.DataFrame(locations)
+re_indexed = frame.reset_index().rename(columns={"index": "Step"})
+
+melted = re_indexed.melt(id_vars=["Step"], var_name="Element",
+                         value_name="Location")
+
+lower_frame = pandas.DataFrame({"Lower Bound": lower_bounds})
+re_lowered = lower_frame.reset_index().rename(columns={"index": "Step"})
+low_melted = re_lowered.melt(id_vars=["Step"], var_name="Element",
+                            value_name="Location")
+
+
+last_location = melted.Location.max()
+
+elements = altair.Chart(melted).mark_line().encode(
+    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+               scale=altair.Scale(domain=(-1, last_location))),
+    color=altair.Color("Element:O", legend=None),
+    tooltip=["Step", "Element", "Location"]
+)
+
+lower = altair.Chart(low_melted).mark_line(color="red").encode(
+    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+               scale=altair.Scale(domain=(-1, last_location))),
+    tooltip=["Step", "Location"]
+)
+
+chart = (elements + lower).properties(
+    title="Reversed Partitions To Start",
+    width=800, height=520
+)
+
+save_it(chart, "reversed-partitions-plot")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="reversed-partitions-plot.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+
+What we have here is that the first half of the steps are going over the items greater than the pivot so we never get pass the conditional in the loop, thus nothing gets moved around. Then at the halfway point we start going over all the items bigger than the pivot so every item from that point gets swapped to the lower partition. Then in the final step we're out of the loop and the pivot gets moved to the middle of the partitions.
+
+The red-line marks the last item in the lower partition. Even though I randomized the items, since we aren't sorting the values, just moving them backwards and forwards around the partitioning, it doesn't affect what happens.
+
+** A More Random Case
+Let's try something a little more random.
+
+#+begin_src python :results output :exports both
+middle = 20
+first_half = list(range(middle))
+second_half = list(range(middle + 1, 2 * middle))
+items = first_half + second_half
+random.shuffle(items)
+items.append(middle)
+
+locations, lower_bounds = partition_tracker(items, 0, len(items) - 1)
+
+frame = pandas.DataFrame(locations)
+re_indexed = frame.reset_index().rename(columns={"index": "Step"})
+
+melted = re_indexed.melt(id_vars=["Step"], var_name="Element",
+                         value_name="Location")
+
+lower_frame = pandas.DataFrame({"Lower Bound": lower_bounds})
+re_lowered = lower_frame.reset_index().rename(columns={"index": "Step"})
+low_melted = re_lowered.melt(id_vars=["Step"], var_name="Element",
+                            value_name="Location")
+
+
+elements = altair.Chart(melted).mark_line().encode(
+    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1)),
+    color="Element:O",
+    tooltip=["Step", "Element", "Location"]
+)
+
+lower = altair.Chart(low_melted).mark_line(color="red").encode(
+    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1)),
+    tooltip=["Step", "Location"]
+)
+
+chart = (elements + lower).properties(
+    title="Randomized Input",
+    width=800, height=525
+)
+
+save_it(chart, "partitioning-plot")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="partitioning-plot.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Not a whole lot more interesting, but it shows how it normally works with the function moving things that have a lower value than the pivot element down to where the red line is (indicating the lower partition) whenever it's encountered as the loop is traversed, then at the end the pivot element gets swapped with the element that's just above the red line.
 * End
 - {{% doc %}}clrs{{% /doc %}}
 - {{% doc %}}itdaa{{% /doc %}}
