@@ -1,0 +1,309 @@
+#+BEGIN_COMMENT
+.. title: Quicksort
+.. slug: quicksort
+.. date: 2022-02-02 16:26:27 UTC-08:00
+.. tags: algorithms,sorting
+.. category: Sorting
+.. link: 
+.. description: Implementing Quicksort
+.. type: text
+.. has_pseudocode: yah
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0aea2caf-6f7c-4d88-a062-defa87a24e0f-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* The Algorithm
+ I covered the ~Partition~ function in {{% doc %}}the-partition{{% /doc %}} and now I'll use it to implement a quicksort. This is the {{% lancelot "CLRS" %}}clrs{{% /lancelot %}} version.
+
+#+begin_export html
+<pre id="the-quicksort" style="display:hidden;">
+\begin{algorithm}
+\caption{QuickSort}
+\begin{algorithmic}
+\INPUT An array and left and right locations defining a subarray
+\OUTPUT The subarray is sorted
+
+\PROCEDURE{QuickSort}{A, left, right}
+
+\IF {left < right} 
+
+\STATE pivot $\gets$ \textsc{Partition}(A, left, right)
+\STATE \textsc{QuickSort}(A, left, pivot - 1)
+\STATE \textsc{QuickSort}(A, pivot + 1, right)
+
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+* Implementing It
+*** Some Imports
+#+begin_src python :results none
+# python
+from collections.abc import MutableSequence
+from dataclasses import dataclass
+from functools import partial
+from math import log2
+
+import random
+
+# pypi
+from expects import contain_exactly, equal, expect
+from joblib import Parallel, delayed
+from numpy.random import default_rng
+
+import altair
+import pandas
+
+# this project
+from bowling.sort.insertion import insertion_sort
+from bowling.sort.merge import mergesort
+
+# other monkey stuff
+from graeae.visualization.altair_helpers import output_path, save_chart
+from graeae import Timer
+#+end_src
+
+** Some Setup
+
+#+begin_src python :results none
+@dataclass
+class PartitionOutput:
+    """Keeps the output for the partition funcion"""
+    pivot: int
+    count: int
+
+TIMER = Timer()
+
+SLUG = "quicksort"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+
+numba_random = default_rng(2022)
+#+end_src
+** The Partition
+Even though I implemented it in that other post I didn't make it so it returns counts so we can estimate the runtime so I'll do that here.
+
+#+begin_src python :results none
+def partition(collection: MutableSequence,
+              left: int, right: int) -> PartitionOutput:
+    """Partitions the collection around the last element
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     PartitionOutput(pivot, count)
+    """
+    count = 0
+    pivot_element = collection[right]
+    lower_bound = left - 1
+    for upper_bound in range(left, right):
+        count += 1
+        if collection[upper_bound] <= pivot_element:
+            lower_bound += 1
+            (collection[lower_bound],
+             collection[upper_bound]) = (collection[upper_bound],
+                                         collection[lower_bound])
+    pivot = lower_bound + 1
+    (collection[pivot],
+     collection[right]) = (collection[right],
+                           collection[pivot])
+    count += 1
+    return PartitionOutput(pivot=pivot, count=count)
+#+end_src
+
+** Some Checks
+*** The First Example
+#+begin_src python :results none
+start = [5, 7, 9, 4, 6]
+test = start.copy()
+expected = [5, 4, 6, 7, 9]
+first_expected_pivot = 2
+
+output = partition(test, 0, 4)
+
+expect(output.pivot).to(equal(first_expected_pivot))
+expect(test).to(contain_exactly(*expected))
+expect(output.count).to(equal(len(test)))
+#+end_src
+
+And to make sure the sub-list works.
+
+#+begin_src python :results none
+left, right = [100, 20], [999, 888, 777]
+test = left + start.copy() + right
+
+output = partition(test, 2, 6)
+
+# all we did was shift the sub-list to spots to the right
+expect(output.pivot).to(equal(first_expected_pivot + 2))
+
+# only the sub-list should be partitioned
+expect(test).to(contain_exactly(*(left + expected + right)))
+
+# the count should match our sub-array
+expect(output.count).to(equal(len(start)))
+#+end_src
+
+*** The Pivot Is the Biggest Element
+
+#+begin_src python :results none
+start = [9, 6, 25, 4, 100]
+test = start.copy()
+
+output = partition(test, 0, 4)
+
+# the pivot should be the last element
+expect(output.pivot).to(equal(4))
+
+# nothing changes in the list
+expect(test).to(contain_exactly(*start))
+
+# once again, count should match the size of the input
+expect(output.count).to(equal(len(test)))
+#+end_src
+** The QuickSort
+#+begin_src python :results none
+def quicksort(collection: MutableSequence, left: int, right: int) -> int:
+    """Recursive quicksort
+
+    Args:
+     collection: list to sort
+     left: index of start of sub-list in collection to sort
+     right: index of end of sub-list in collection to sort
+    """
+    count = 0
+    if left < right:
+        output = partition(collection, left, right)
+        
+        count += output.count
+        count += quicksort(collection, left, output.pivot - 1)
+        count += quicksort(collection, output.pivot + 1, right)
+    return count
+#+end_src
+*** Check It Out
+
+#+begin_src python :results output :exports both
+start = list(range(10))
+items = start.copy()
+random.shuffle(items)
+length = len(items)
+
+count = quicksort(items, 0, length-1)
+print(f"count: {count}")
+print(f"Theoretical Average: {length * log2(length):.2f}")
+print(f"Theoretical Worst: {length**2}")
+expect(items).to(contain_exactly(*start))
+#+end_src
+
+#+RESULTS:
+: count: 30
+: Theoretical Average: 33.22
+: Theoretical Worst: 100
+
+** Plotting The Quicksort Runtimes
+#+begin_src python :results none
+things_to_sort = [numba_random.integers(low=0, high=count, size=count)
+                  for count in range(1, 10**5, 1000)]
+#+end_src
+
+#+begin_src python :results none
+@dataclass
+class QuicksortOutput:
+    """Holds the output of the quicksort counts"""
+    comparisons: int
+    size: int
+
+
+def quicksorter(collection: MutableSequence) -> QuicksortOutput:
+    """runs the quicksort and outputs count and size of collection
+
+    Args:
+     collection: thing to sort
+    
+    Returns:
+     QuicksortOutput(count, size)
+    """
+    size = len(collection)
+    count = quicksort(collection, 0, size - 1)
+    return QuicksortOutput(comparisons=count, size=size)
+#+end_src
+
+#+begin_src python :results output :exports both
+with TIMER:
+    quick_output = Parallel(n_jobs=-1)(
+    delayed(quicksorter)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-02-03 02:25:42.453171
+: Ended: 2022-02-03 02:25:48.518879
+: Elapsed: 0:00:06.065708
+
+#+begin_src python :results output :exports both
+with TIMER:
+    merge_output = Parallel(n_jobs=-1)(
+    delayed(mergesort)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-02-03 02:38:03.710726
+: Ended: 2022-02-03 02:38:09.864665
+: Elapsed: 0:00:06.153939
+
+#+begin_src python :results output :exports both
+counts = [output.comparisons for output in quick_output]
+sizes = [output.size for output in quick_output]
+frame = pandas.DataFrame({"Size": sizes, "QuickSort": counts})
+frame["Merge Sort"] = [output for output in merge_output]
+
+melted = frame.melt(id_vars=["Size"],
+                    var_name="Sort Algorithm", value_name="Comparisons")
+
+chart = altair.Chart(melted).mark_point().encode(
+    x="Size",
+    y="Comparisons",
+    color="Sort Algorithm",
+    tooltip=[altair.Tooltip("Size", format=","),
+             altair.Tooltip("Comparisons", format=","),
+             "Sort Algorithm"]
+).properties(
+    title="QuickSort vs Merge Sort",
+    width=800,
+    height=525,
+)
+
+save_it(chart, "quicksort-runtime")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="quicksort-runtime.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+I originally had Insertion Sort in the plot too, but it does so poorly that it just squashes both the Merge Sort and Quick Sort runtimes to a flat line. This is kind of an interesting plot. Quick Sort does much, much better than Insertion Sort, but it still doesn't quite keep up with Merge Sort. The trade-off being that Quick Sort does its sorting in place while Merge Sort creates all these temporary copies. 
+
+
+* End
+- {{% doc %}}clrs{{% /doc %}}
+- {{% doc %}}itdaa{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-quicksort"));
+});
+</script>
+#+end_export

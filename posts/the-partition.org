@@ -1,0 +1,403 @@
+#+BEGIN_COMMENT
+.. title: The Road To Partition
+.. slug: the-partition
+.. date: 2022-01-30 17:46:07 UTC-08:00
+.. tags: algorithms,sorting
+.. category: Sorting
+.. link: 
+.. description: 
+.. type: text
+.. has_pseudocode: we think so
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-e7f43106-eb94-485d-bc13-0474ec0ebeb4-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* The Algorithm
+** Levitin
+The Levitin version of the Partition function is a little more complicated than the CLRS version. It uses an outer loop with two inner loops. The outer loop continues until the indices for the partitions cross-over (or meet) and the inner loops move the boundaries until they find a value that needs to be swapped to the other partition (e.g. the loop sweeping upwards finds an element that's greater than or equal to the pivot element and so it needs to be moved to the upper partition). It uses the first element in the array as the value around which to partition the array.
+
+#+begin_export html
+<pre id="the-levitin-partition" style="display:hidden;">
+\begin{algorithm}
+\caption{Partition}
+\begin{algorithmic}
+\INPUT An array and left and right locations defining a subarray
+\OUTPUT The sub-array from left to right is partitioned and the partition location is returned
+
+\PROCEDURE{Partition}{A, left, right}
+
+\STATE PivotElement $\gets$ A[left]
+\STATE PartitionLeft $\gets$ left
+\STATE PartitionRight $\gets$ right + 1
+\STATE \\
+\REPEAT
+  \REPEAT
+    \STATE PartitionLeft $\gets$ PartitionLeft + 1
+  \UNTIL {A[PartitionLeft] $\geq$ PivotElement}
+  \STATE \\
+  \REPEAT
+    \STATE PartitionRight $\gets$ PartitionRight - 1
+  \UNTIL {A[PartitionRight] $\leq$ PivotElement}
+
+  \STATE \\ Swap(A[PartitionLeft], A[PartitionRight])
+
+\UNTIL {PartitionLeft $\geq$ PartitionRight}
+\STATE \\ Swap(A[PartitionLeft], A[PartitionRight])
+\STATE Swap(A[left], A[PartitionRight])
+
+\RETURN PartitionRight
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+** CLRS
+
+The CLRS version seems a little clearer to follow with the exception of the fact that they use the last element as the pivot element instead of the first which threw me off for a bit. It uses a single for loop which moves anything less than the pivot element to the lower partition as it traverses the elements.
+
+#+begin_export html
+<pre id="the-clrs-partition" style="display:hidden;">
+\begin{algorithm}
+\caption{Partition}
+\begin{algorithmic}
+\INPUT An array and left and right locations defining a subarray
+\OUTPUT The sub-array from left to right is partitioned and the partition location is returned
+
+\PROCEDURE{Partition}{A, left, right}
+
+\STATE PivotElement $\gets$ A[right]
+\STATE LowerBound $\gets$ left - 1
+
+\FOR {UpperBound $\in$ \{left $\ldots$ right - 1\}}
+ \IF {A[UpperBound] $\leq$ PivotElement}
+   \STATE LowerBound = LowerBound + 1
+   \STATE \textsc{Swap}(A[LowerBound], A[UpperBound])
+ \ENDIF
+\ENDFOR
+
+\STATE pivot $\gets$ LowerBound + 1
+\STATE \textsc{Swap}(A[pivot], A[right])
+\RETURN pivot
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+The /LowerBound/ is the index of the last element less than or equal to the pivot and /LowerBound + 1/ is the first element greater than the pivot. The /UpperBound/ is the index of the last item greater than the pivot.
+
+The /LowerBound/ is like a demon that guards the lower partition and the /UpperBound/ is another demon that plows through the array, throwing any elements that belong in the lower partition back to the /LowerBound/ demon who throws the first element in the upper partition back up to the /UpperBound/ and moves up to guard the expanded lower partition.
+*** CLRS Example
+We can take a look at how this works using a table. I'll use /LB/ for the /LowerBound/ index, /UB/ for the /UpperBound/ index, and /x/ for the /PivotElement/ to keep the table from getting too wide (hopefully). The array to partition is ~[5, 7, 9, 4, 6]~ with a zero-based index so /left/ = 0, /right/ = 4 and /x/ (the pivot element) is 6.
+
+Here are the values for the variables as we step through the for-loop.
+
+| UB | A[UB] | A[UB] \(\leq\) x | LB | A             |
+|----+-------+------------------+----+---------------|
+|  0 |     5 | True             |  0 | 5, 7, 9, 4, 6 |
+|  1 |     7 | False            |  0 | 5, 7, 9, 4, 6 |
+|  2 |     9 | False            |  0 | 5, 7, 9, 4, 6 |
+|  3 |     4 | True             |  1 | 5, 4, 9, 7, 6 |
+
+As long and the element in the array we're checking is less than or equal to the Pivot Element we increment the LowerBound along with the Upper Bound since the element belongs in the lower partition. If the Lower and Upper bound indexes are equal, than they agree on where it is so nothing happens when we do the swap (or you could say they swap in place, maybe). But while the element checked is larger than the Pivot Element the Upper Bound Index goes up but the Lower Bound doesn't so when we next hit a case where the element is less than or equal to the Pivot Element, we know it's out of place and needs to be swapped with the element currently just after the lower partition.
+
+Once we're out of the loop we then swap out the Pivot Element and the element to the right of the Lower Bound (so the first element of the Upper Bound) and return the location where the Pivot Element ended up.
+
+- pivot = 2
+- A = [5, 4, 6, 7, 9]
+
+*** An Odd Case
+What happens if the last element is the largest element?
+
+- A = [9, 6, 25, 4, 100]
+- x = 100
+
+| UB | A[UB] | A[UB] \(\leq\) x | LB | A                |
+|----+-------+------------------+----+------------------|
+|  0 |     9 | True             |  0 | 9, 6, 25, 4, 100 |
+|  1 |     6 | True             |  1 | 9, 6, 25, 4, 100 |
+|  2 |    25 | True             |  2 | 9, 6, 25, 4, 100 |
+|  3 |     4 | True             |  3 | 9, 6, 25, 4, 100 |
+
+And in the end we have a pivot of \(LB + 1 = 4\) (the last element) with the lower partition being everything but the last element and no elements in the upper partition. If the array happened to be already sorted than any attempt to partition a sub-array would end up with a similar output with an empty upper partition. This doesn't really matter here, but when we use it in quicksort it will.
+
+Since nothing happens when an element being checked is greater than the pivot element, if the pivot element happens to be the smallest item in the array we'd have a similar case with an empty lower partition, the pivot element as the first element, and the rest of the elements in the upper partition, so starting with an array that's in reversed-sorted-order would also always end up with empty partitions no matter how we choose the sub-arrays.
+
+** Implementation
+*** Some Imports
+#+begin_src python :results none
+# python
+from collections.abc import MutableSequence
+from functools import partial
+
+import random
+
+# pypi
+from expects import contain_exactly, equal, expect
+
+import altair
+import pandas
+
+# other monkey stuff
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+*** The Partition
+#+begin_src python :results none
+def partition(collection: MutableSequence, left: int, right: int) -> int:
+    """Partitions the collection around the last element
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     the index of the pivot element
+    """
+    pivot_element = collection[right]
+    lower_bound = left - 1
+    for upper_bound in range(left, right):
+        if collection[upper_bound] <= pivot_element:
+            lower_bound += 1
+            (collection[lower_bound],
+             collection[upper_bound]) = (collection[upper_bound],
+                                         collection[lower_bound])
+    pivot = lower_bound + 1
+    (collection[pivot],
+     collection[right]) = (collection[right],
+                           collection[pivot])
+    return pivot
+#+end_src
+
+*** Some Checks
+**** The First Example
+#+begin_src python :results none
+start = [5, 7, 9, 4, 6]
+test = start.copy()
+expected = [5, 4, 6, 7, 9]
+first_expected_pivot = 2
+
+pivot = partition(test, 0, 4)
+
+expect(pivot).to(equal(first_expected_pivot))
+expect(test).to(contain_exactly(*expected))
+#+end_src
+
+And to make sure the sub-list works.
+
+#+begin_src python :results none
+left, right = [100, 20], [999, 888, 777]
+test = left + start.copy() + right
+
+pivot = partition(test, 2, 6)
+
+# all we did was shift the sub-list to spots to the right
+expect(pivot).to(equal(first_expected_pivot + 2))
+
+# only the sub-list should be partitioned
+expect(test).to(contain_exactly(*(left + expected + right)))
+#+end_src
+
+**** The Pivot Is the Biggest Element
+
+#+begin_src python :results none
+start = [9, 6, 25, 4, 100]
+test = start.copy()
+
+pivot = partition(test, 0, 4)
+
+# the pivot should be the last element
+expect(pivot).to(equal(4))
+
+# nothing changes in the list
+expect(test).to(contain_exactly(*start))
+#+end_src
+* Visualize It
+** Some Setup
+#+begin_src python :results none
+SLUG = "the-partition"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+#+end_src
+
+** A Tracker
+#+begin_src python :results none
+def partition_tracker(collection: MutableSequence, 
+                      left: int, right: int) -> tuple:
+    """Partitions the collection around the last element
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     locations dict, lower_bounds, upper_bounds
+    """
+    locations = {value: [index] for index, value in enumerate(collection)}
+    
+    pivot_element = collection[right]
+    lower_bound = left - 1
+
+    lower_bounds = [lower_bound]
+    for upper_bound in range(left, right):
+        if collection[upper_bound] <= pivot_element:
+            lower_bound += 1
+            (collection[lower_bound],
+             collection[upper_bound]) = (collection[upper_bound],
+                                         collection[lower_bound])
+        for index, item in enumerate(collection):
+            locations[item].append(index)
+        lower_bounds.append(lower_bound)
+    pivot = lower_bound + 1
+    (collection[pivot],
+     collection[right]) = (collection[right],
+                           collection[pivot])
+    for index, item in enumerate(collection):
+        locations[item].append(index)
+    lower_bounds.append(lower_bound)
+    return locations, lower_bounds
+#+end_src
+
+** A Backwards Case
+First, a plot of a list that starts out with all the elements greater than the pivot followed by all the elements less than the pivot.
+
+#+begin_src python :results output :exports both
+middle = 20
+first_half = list(range(middle))
+second_half = list(range(middle + 1, 2 * middle))
+
+random.shuffle(first_half)
+random.shuffle(second_half
+)
+items = second_half + first_half + [middle]
+
+locations, lower_bounds = partition_tracker(items, 0, len(items) - 1)
+
+frame = pandas.DataFrame(locations)
+re_indexed = frame.reset_index().rename(columns={"index": "Step"})
+
+melted = re_indexed.melt(id_vars=["Step"], var_name="Element",
+                         value_name="Location")
+
+lower_frame = pandas.DataFrame({"Lower Bound": lower_bounds})
+re_lowered = lower_frame.reset_index().rename(columns={"index": "Step"})
+low_melted = re_lowered.melt(id_vars=["Step"], var_name="Element",
+                            value_name="Location")
+
+
+last_location = melted.Location.max()
+
+elements = altair.Chart(melted).mark_line().encode(
+    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+               scale=altair.Scale(domain=(-1, last_location))),
+    color=altair.Color("Element:O", legend=None),
+    tooltip=["Step", "Element", "Location"]
+)
+
+lower = altair.Chart(low_melted).mark_line(color="red").encode(
+    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+               scale=altair.Scale(domain=(-1, last_location))),
+    tooltip=["Step", "Location"]
+)
+
+chart = (elements + lower).properties(
+    title="Reversed Partitions To Start",
+    width=800, height=520
+)
+
+save_it(chart, "reversed-partitions-plot")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="reversed-partitions-plot.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+
+What we have here is that the first half of the steps are going over the items greater than the pivot so we never get pass the conditional in the loop, thus nothing gets moved around. Then at the halfway point we start going over all the items bigger than the pivot so every item from that point gets swapped to the lower partition. Then in the final step we're out of the loop and the pivot gets moved to the middle of the partitions.
+
+The red-line marks the last item in the lower partition. Even though I randomized the items, since we aren't sorting the values, just moving them backwards and forwards around the partitioning, it doesn't affect what happens.
+
+** A More Random Case
+Let's try something a little more random.
+
+#+begin_src python :results output :exports both
+middle = 20
+first_half = list(range(middle))
+second_half = list(range(middle + 1, 2 * middle))
+items = first_half + second_half
+random.shuffle(items)
+items.append(middle)
+
+locations, lower_bounds = partition_tracker(items, 0, len(items) - 1)
+
+frame = pandas.DataFrame(locations)
+re_indexed = frame.reset_index().rename(columns={"index": "Step"})
+
+melted = re_indexed.melt(id_vars=["Step"], var_name="Element",
+                         value_name="Location")
+
+lower_frame = pandas.DataFrame({"Lower Bound": lower_bounds})
+re_lowered = lower_frame.reset_index().rename(columns={"index": "Step"})
+low_melted = re_lowered.melt(id_vars=["Step"], var_name="Element",
+                            value_name="Location")
+
+
+elements = altair.Chart(melted).mark_line().encode(
+    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1)),
+    color="Element:O",
+    tooltip=["Step", "Element", "Location"]
+)
+
+lower = altair.Chart(low_melted).mark_line(color="red").encode(
+    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1)),
+    tooltip=["Step", "Location"]
+)
+
+chart = (elements + lower).properties(
+    title="Randomized Input",
+    width=800, height=525
+)
+
+save_it(chart, "partitioning-plot")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="partitioning-plot.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Not a whole lot more interesting, but it shows how it normally works with the function moving things that have a lower value than the pivot element down to where the red line is (indicating the lower partition) whenever it's encountered as the loop is traversed, then at the end the pivot element gets swapped with the element that's just above the red line.
+* End
+- {{% doc %}}clrs{{% /doc %}}
+- {{% doc %}}itdaa{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-levitin-partition"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-clrs-partition"));
+});
+</script>
+#+end_export
