@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-3a273c01-6dde-4d9f-81e5-5ed6448a4b64-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-05a52ea1-1c75-4753-8c62-0ebaa34cf9e1-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -33,7 +33,7 @@ Our /Mergesort/ repeatedly divides the given list into two parts and then recurs
 \PROCEDURE{Mergesort}{$A, p, r$}
 \IF {p < r}
          \STATE \textbf{Divide}
-         \STATE $q \gets \lfloor \frac{p + r}{2} \rfloor$
+         \STATE $q \gets \left \lfloor \frac{p + r}{2} \right \rfloor$
          
          \STATE \\ \textbf{Conquer}
          \STATE \textsc{MergeSort}(A, p, q)
@@ -177,6 +177,31 @@ print(f"{runtime:,}")
 #+RESULTS:
 : 10,240.0
 : 10,240
+
+* Looking at the Mergesort
+#+begin_src python :results none
+def mergesort_tracer(collection: MutableSequence) -> int:
+    """Sorts the collection using a recursive mergesort
+
+    Args:
+     collection: a mutable sequence
+
+    Returns:
+     runtime count
+    """
+    items = len(collection)
+    count = 0
+
+    if items > 1:
+        middle = items//2
+        left_stack = collection[:middle]
+        right_stack = collection[middle:]
+        assert len(left_stack) + len(right_stack) == items
+        count += mergesort(left_stack)
+        count += mergesort(right_stack)
+        count += merge(left_stack, right_stack, collection)
+    return count
+#+end_src
 
 * Comparing Sorts
 #+begin_src python :results none
