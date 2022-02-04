@@ -178,31 +178,6 @@ print(f"{runtime:,}")
 : 10,240.0
 : 10,240
 
-* Looking at the Mergesort
-#+begin_src python :results none
-def mergesort_tracer(collection: MutableSequence) -> int:
-    """Sorts the collection using a recursive mergesort
-
-    Args:
-     collection: a mutable sequence
-
-    Returns:
-     runtime count
-    """
-    items = len(collection)
-    count = 0
-
-    if items > 1:
-        middle = items//2
-        left_stack = collection[:middle]
-        right_stack = collection[middle:]
-        assert len(left_stack) + len(right_stack) == items
-        count += mergesort(left_stack)
-        count += mergesort(right_stack)
-        count += merge(left_stack, right_stack, collection)
-    return count
-#+end_src
-
 * Comparing Sorts
 #+begin_src python :results none
 # python
@@ -347,6 +322,117 @@ save_it(chart, "merge-by-logn")
 </object>
 #+end_export
 
+
+* Looking at the Mergesort
+The version of mergesort I implemented above is based on Levitin's algorithm, which I thought was clearer, since the copying was happening outside of the merge. This makes it harder to plot the progress of the sort, though, so I'm going to use the CLRS algorithm here to get some kind of visualization (hopefully).
+
+#+begin_src python :results none
+from bowling.sort.merge import merge_clrs
+#+end_src
+
+#+begin_src python :results none
+def mergesort_tracer(collection: MutableSequence, left: int, right: int,
+                     tracer: dict=None) -> dict:
+    """Sorts the collection using a recursive mergesort
+
+    This uses the CLRS merge-sort to build dict of the locations of the
+    elements as the merging is done
+
+    Args:
+     collection: a mutable sequence
+     left: the index of the beginning element of the sub-array
+     right: the index of the ending element of the sub-array
+     tracer: the dictionary to track the indices of the items
+
+    Returns:
+     tracer updated with post-merge locations of the items in tracer
+    """
+    if tracer is None:
+        tracer = {element: [index] for index, element in enumerate(collection)}
+
+    if left < right:
+        middle = (left + right)//2
+        mergesort_tracer(collection, left, middle, tracer)
+        mergesort_tracer(collection, middle + 1, right, tracer)
+        merge_clrs(collection, left, middle, right)
+
+        for index, element in enumerate(collection):
+            tracer[element].append(index)
+    return tracer
+#+end_src
+
+** A Shuffle Input
+
+#+begin_src python :results output :exports both
+elements = 20
+start = list(range(elements))
+inputs = start.copy()
+random.shuffle(inputs)
+tracer = mergesort_tracer(inputs, left=0, right=len(inputs) - 1)
+expect(inputs).to(contain_exactly(*start))
+
+frame = pandas.DataFrame(tracer)
+frame = frame.reset_index().rename(columns={"index": "Merge"})
+melted = frame.melt(id_vars=["Merge"], var_name="Element", value_name="Location")
+
+chart = altair.Chart(melted).mark_line().encode(
+    x=altair.X("Merge", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location", axis=altair.Axis(tickMinStep=1)),
+    color=altair.Color("Element", legend=None),
+    tooltip=["Merge", "Location", "Element"]
+).properties(
+    title="Mergesort Tracing",
+    width=800,
+    height=525
+)
+
+save_it(chart, "mergesort-trace")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="mergesort-trace.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+You can kind of see what's going on, every time you see a bunch of crossed lines it's because the merge moved items around... but maybe an artificial case will be clearer.
+
+** A Reversed Input
+Let's use an input that's sorted but backwards to see the swaps more clearly.
+
+#+begin_src python :results output :exports both
+elements = 20
+start = list(range(elements))
+inputs = start.copy()
+inputs.reverse()
+tracer = mergesort_tracer(inputs, left=0, right=len(inputs) - 1)
+expect(inputs).to(contain_exactly(*start))
+
+frame = pandas.DataFrame(tracer)
+frame = frame.reset_index().rename(columns={"index": "Merge"})
+melted = frame.melt(id_vars=["Merge"], var_name="Element", value_name="Location")
+
+chart = altair.Chart(melted).mark_line().encode(
+    x=altair.X("Merge", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location", axis=altair.Axis(tickMinStep=1)),
+    color=altair.Color("Element", legend=None),
+    tooltip=["Merge", "Location", "Element"]
+).properties(
+    title="Mergesort Tracing (From Backwards Source)",
+    width=800,
+    height=525
+)
+
+save_it(chart, "mergesort-trace-backwards")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="mergesort-trace-backwards.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
 
 
 
