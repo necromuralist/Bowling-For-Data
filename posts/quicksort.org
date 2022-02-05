@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0aea2caf-6f7c-4d88-a062-defa87a24e0f-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-74cdb3d8-e22b-4993-b993-0efc6965af64-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -55,7 +55,6 @@ import random
 # pypi
 from expects import contain_exactly, equal, expect
 from joblib import Parallel, delayed
-from numpy.random import default_rng
 
 import altair
 import pandas
@@ -83,8 +82,6 @@ TIMER = Timer()
 SLUG = "quicksort"
 OUTPUT_PATH = output_path(SLUG)
 save_it = partial(save_chart, output_path=OUTPUT_PATH)
-
-numba_random = default_rng(2022)
 #+end_src
 ** The Partition
 Even though I implemented it in that other post I didn't make it so it returns counts so we can estimate the runtime so I'll do that here.
@@ -179,6 +176,9 @@ def quicksort(collection: MutableSequence, left: int, right: int) -> int:
      collection: list to sort
      left: index of start of sub-list in collection to sort
      right: index of end of sub-list in collection to sort
+     
+    Returns:
+     count of comparisons
     """
     count = 0
     if left < right:
@@ -205,15 +205,11 @@ expect(items).to(contain_exactly(*start))
 #+end_src
 
 #+RESULTS:
-: count: 30
+: count: 37
 : Theoretical Average: 33.22
 : Theoretical Worst: 100
 
 ** Plotting The Quicksort Runtimes
-#+begin_src python :results none
-things_to_sort = [numba_random.integers(low=0, high=count, size=count)
-                  for count in range(1, 10**5, 1000)]
-#+end_src
 
 #+begin_src python :results none
 @dataclass
@@ -236,6 +232,12 @@ def quicksorter(collection: MutableSequence) -> QuicksortOutput:
     count = quicksort(collection, 0, size - 1)
     return QuicksortOutput(comparisons=count, size=size)
 #+end_src
+*** With Random Input
+#+begin_src python :results none
+things_to_sort = [list(range(count)) for count in range(1, 10**5, 1000)]
+for things in things_to_sort:
+    random.shuffle(things)
+#+end_src
 
 #+begin_src python :results output :exports both
 with TIMER:
@@ -245,9 +247,9 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-02-03 02:25:42.453171
-: Ended: 2022-02-03 02:25:48.518879
-: Elapsed: 0:00:06.065708
+: Started: 2022-02-05 00:57:12.120397
+: Ended: 2022-02-05 00:57:14.397235
+: Elapsed: 0:00:02.276838
 
 #+begin_src python :results output :exports both
 with TIMER:
@@ -257,9 +259,11 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-02-03 02:38:03.710726
-: Ended: 2022-02-03 02:38:09.864665
-: Elapsed: 0:00:06.153939
+: Started: 2022-02-05 00:58:40.087042
+: Ended: 2022-02-05 00:58:42.326204
+: Elapsed: 0:00:02.239162
+
+**Note to future self:** Pypy is much faster with the python inputs and much slower with numpy inputs.
 
 #+begin_src python :results output :exports both
 counts = [output.comparisons for output in quick_output]
@@ -294,6 +298,168 @@ save_it(chart, "quicksort-runtime")
 #+end_export
 
 I originally had Insertion Sort in the plot too, but it does so poorly that it just squashes both the Merge Sort and Quick Sort runtimes to a flat line. This is kind of an interesting plot. Quick Sort does much, much better than Insertion Sort, but it still doesn't quite keep up with Merge Sort. The trade-off being that Quick Sort does its sorting in place while Merge Sort creates all these temporary copies. 
+
+*** Worst-Case Input
+Remember that case in the {{% lancelot "the partition" %}}the-partition{{% /lancelot %}} post where the last item (the pivot) was the largest item, and how it resulted in nothing being moved around? What if no matter what sub-array you picked, the last item was always the largest? In other words, what if it's already sorted?
+
+For one thing with really big inputs the interpreter throws an error because you've made too many recursive calls, so that tells you that something bad is happening.
+
+#+begin_src python :results none
+things_to_sort = [list(range(count)) for count in range(1, 10**3, 100)]
+#+end_src
+
+#+begin_src python :results output :exports both
+with TIMER:
+    quick_output = Parallel(n_jobs=-1)(
+    delayed(quicksorter)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-02-05 01:06:19.614254
+: Ended: 2022-02-05 01:06:20.159874
+: Elapsed: 0:00:00.545620
+
+#+begin_src python :results output :exports both
+with TIMER:
+    merge_output = Parallel(n_jobs=-1)(
+    delayed(mergesort)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-02-05 01:06:23.592928
+: Ended: 2022-02-05 01:06:23.661150
+: Elapsed: 0:00:00.068222
+
+**Note to future self:** Pypy is much faster with the python inputs and much slower with numpy inputs.
+
+#+begin_src python :results output :exports both
+counts = [output.comparisons for output in quick_output]
+sizes = [output.size for output in quick_output]
+frame = pandas.DataFrame({"Size": sizes, "QuickSort": counts})
+frame["Merge Sort"] = [output for output in merge_output]
+
+melted = frame.melt(id_vars=["Size"],
+                    var_name="Sort Algorithm", value_name="Comparisons")
+
+chart = altair.Chart(melted).mark_point().encode(
+    x="Size",
+    y="Comparisons",
+    color="Sort Algorithm",
+    tooltip=[altair.Tooltip("Size", format=","),
+             altair.Tooltip("Comparisons", format=","),
+             "Sort Algorithm"]
+).properties(
+    title="QuickSort vs Merge Sort (Worst-Case)",
+    width=800,
+    height=525,
+)
+
+save_it(chart, "quicksort-runtime-worst")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="quicksort-runtime-worst.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+** Looking At the Sort In Progress
+
+#+begin_src python :results none
+def quicksort_tracer(collection: MutableSequence,
+                     left: int, right: int, tracer: dict=None) -> int:
+    """Recursive quicksort
+
+    Args:
+     collection: list to sort
+     left: index of start of sub-list in collection to sort
+     right: index of end of sub-list in collection to sort
+     tracer: dict of element: list of locations
+
+    Returns:
+     tracer dict
+    """
+    if tracer is None:
+        tracer = {element: [index] for index, element in enumerate(collection)}
+
+    if left < right:
+        output = partition(collection, left, right)
+        
+        quicksort_tracer(collection, left, output.pivot - 1, tracer)
+        quicksort_tracer(collection, output.pivot + 1, right, tracer)
+
+        for index, element in enumerate(collection):
+            tracer[element].append(index)
+    return tracer
+#+end_src
+
+#+begin_src python :results output :exports both
+size = 20
+start = list(range(size))
+inputs = start.copy()
+inputs.reverse()
+
+tracer = quicksort_tracer(inputs, 0, size - 1)
+
+frame = pandas.DataFrame(tracer)
+frame = frame.reset_index().rename(columns={"index": "Quicksort Call"})
+melted = frame.melt(id_vars=["Quicksort Call"], var_name="Element", value_name="Location")
+
+chart = altair.Chart(melted).mark_line().encode(
+    x="Quicksort Call",
+    y="Location",
+    color="Element",
+    tooltip=["Quicksort Call", "Location", "Element"]
+).properties(
+    title="Quicksort Trace (Reversed Input)",
+    width=800,
+    height=525,
+)
+
+save_it(chart, "quicksort-trace-backwards")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="quicksort-trace-backwards.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+#+begin_src python :results output :exports both
+size = 20
+start = list(range(size))
+inputs = start.copy()
+random.shuffle(inputs)
+
+tracer = quicksort_tracer(inputs, 0, size - 1)
+
+frame = pandas.DataFrame(tracer)
+frame = frame.reset_index().rename(columns={"index": "Quicksort Call"})
+melted = frame.melt(id_vars=["Quicksort Call"], var_name="Element", value_name="Location")
+
+chart = altair.Chart(melted).mark_line().encode(
+    x="Quicksort Call",
+    y="Location",
+    color="Element",
+    tooltip=["Quicksort Call", "Location", "Element"]
+).properties(
+    title="Quicksort Trace (Shuffled Input)",
+    width=800,
+    height=525,
+)
+
+save_it(chart, "quicksort-trace-shuffled")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="quicksort-trace-shuffled.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
 
 
 * End

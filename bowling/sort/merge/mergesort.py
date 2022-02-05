@@ -2,7 +2,7 @@
 from collections.abc import MutableSequence, Sequence
 
 # this package
-from .merge import merge_clrs
+from .merge import merge, merge_clrs
 
 
 
