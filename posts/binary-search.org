@@ -11,50 +11,13 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-377c1e5d-2424-424f-87ba-3f7d3153d790-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0b4c4b9f-8d5c-4b1b-889d-295f27b257db-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
-#+begin_comment
-Adding a SmallCaps command.
-From https://stackoverflow.com/questions/11576237/mathjax-textsc
-#+end_comment
-\(\def\sc#1{\dosc#1\csod} \def\dosc#1#2\csod{{\rm #1{\small #2}}}\)
 * Beginning
-** The Pseudocode
-#+begin_export html
-<pre id="binarysearch" style="display:hidden;">
-\begin{algorithm}
-\caption{BinarySearch}
-\begin{algorithmic}
-\INPUT Array A of items in non-decreasing order, search key
-\OUTPUT If key is in array, the index of the item that matches
-\PROCEDURE{BinarySearch}{$A$}
-\STATE $left \gets 0$
-\STATE $right \gets A.length - 1$
-
-\WHILE {$right > left$}
-\STATE $middle \gets \left \lfloor \frac{left + right}{2} \right \rfloor$
-
-\IF {$key \le A[middle]$}
-\STATE $right \gets middle$
-\ELSE
-\STATE $left \gets middle + 1$
-\ENDIF
-\ENDWHILE
-
-\IF {$key = A[left]$}
-\RETURN left
-\ELSE
-\RETURN NotFound
-\ENDIF
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-#+end_export
-** The Parts
+** The Algorithm Parts
    - **Precondition:** The input array (A) is sorted in non-decreasing order and the key $k$ is in $A$.
    - **Postcondition:** The index of the matching element is output
    - **Loop Invariant:** The key is in our current sublist: $k \in A[left \ldots right]$.
@@ -80,8 +43,6 @@ import random
 # pypi
 from expects import be_false, be_none, equal, expect, raise_error
 from joblib import Parallel, delayed
-from numba import njit
-from numpy.random import default_rng
 
 import altair
 import numpy
@@ -98,14 +59,44 @@ OUTPUT_PATH = output_path("binary-search")
 save_it = partial(save_chart, output_path=OUTPUT_PATH)
 
 SearchOutput = namedtuple("SearchOutput", ["index", "count"])
-
-random = default_rng(2022)
 #+end_src
 
-** Binary Search
+** Binary Search One
+*** The Pseudocode
+#+begin_export html
+<pre id="binarysearch" style="display:hidden;">
+\begin{algorithm}
+\caption{BinarySearch}
+\begin{algorithmic}
+\INPUT Array A of items in non-decreasing order, search key
+\OUTPUT If key is in array, the index of the item that matches
+\PROCEDURE{BinarySearch}{A, key}
+\STATE left $\gets$ 0
+\STATE right $\gets$ A.length - 1
 
-**Note:** Numba doesn't like using None and integers in namedtuples, but seems to do okay with None in regular tuples, so since I'm going to use this function to plot later on I'm not going to use the namedtuple for the return value (I wasn't really doing anything with it anyway).
-   
+\WHILE {right > left}
+\STATE middle $\gets \left \lfloor \frac{\textrm{left} + \textrm{right}}{2} \right \rfloor$
+
+\IF {key $\le$ A[middle]}
+\STATE right $\gets$ middle
+\ELSE
+\STATE left $\gets$ middle + 1
+\ENDIF
+\ENDWHILE
+
+\IF {key = A[left]}
+\RETURN left
+\ELSE
+\RETURN NotFound
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** The Function   
+
 #+begin_src python :results none
 def binary_search(element: int, elements: Sequence) -> SearchOutput:
     """Does an iterative binary search for the key
@@ -138,7 +129,7 @@ def binary_search(element: int, elements: Sequence) -> SearchOutput:
 
 #+begin_src python :results none
 def test_it(searcher):
-    test_case = numpy.arange(11)
+    test_case = list(range(11))
     expect(searcher(element=5, elements=test_case)[0]).to(equal(5))
 
     items = list(sorted(random.sample(range(100), k=50)))
@@ -161,9 +152,9 @@ test_it(binary_search)
 #+end_src
 
 
-** Original Version
-   The version I entered above is one that I found on the web ([[https://www.eecs.yorku.ca/course_archive/2013-14/W/2011/lectures/09%20Loop%20Invariants%20and%20Binary%20Search.pdf][PDF Lecture Notes]]), the one in {{% lancelot "Levitin's Book" %}}itdaa{{% /lancelot %}} is clearer but has one more comparison.
-
+** Levitin's Version
+   The version I entered above is one that I found on the web ([[https://www.eecs.yorku.ca/course_archive/2013-14/W/2011/lectures/09%20Loop%20Invariants%20and%20Binary%20Search.pdf][PDF Lecture Notes]]), and is roughly what CLRS has. The one in {{% lancelot "Levitin's Book" %}}itdaa{{% /lancelot %}} is clearer to me but has one more comparison.
+*** The Pseudocode
 #+begin_export html
 <pre id="binarysearch2" style="display:hidden;">
 \begin{algorithm}
@@ -171,23 +162,23 @@ test_it(binary_search)
 \begin{algorithmic}
 \INPUT Array A of items in non-decreasing order, search key in A
 \OUTPUT The index of the item that matches key
-\PROCEDURE{BinarySearchTwo}{$A$}
-\STATE $left \gets 0$
-\STATE $right \gets A.length - 1$
+\PROCEDURE{BinarySearchTwo}{A, key}
+\STATE left $\gets$ 0
+\STATE right $\gets$ A.length - 1
 
-\WHILE {$left \le right$}
-\STATE $middle \gets \left \lfloor \frac{left + right}{2} \right \rfloor$
+\WHILE {left $\le$ right}
+\STATE middle $\gets \left \lfloor \frac{\textrm{left} + \textrm{right}}{2} \right \rfloor$
 
-\IF {$key = A[middle]$}
-\RETURN middle
-\ELIF {$key \le A[middle]$}
-\STATE $right \gets middle - 1$
+\IF {key = A[middle]}
+  \RETURN middle
+\ELIF {key < A[middle]}
+\STATE right $\gets$ middle - 1
 \ELSE
-\STATE $left \gets middle + 1$
+\STATE left $\gets$ middle + 1
 \ENDIF
 \ENDWHILE
 
-\IF {$key = A[left]$}
+\IF {key = A[left]}
 \RETURN left
 \ELSE
 \RETURN NotFound
@@ -197,6 +188,8 @@ test_it(binary_search)
 \end{algorithm}
 </pre>
 #+end_export
+
+*** The Function
 
 #+begin_src python :results none
 def binary_search_two(element, elements) -> SearchOutput:
@@ -229,19 +222,55 @@ def binary_search_two(element, elements) -> SearchOutput:
 #+begin_src python :results none
 test_it(binary_search_two)
 #+end_src
-* Recursive Version
 
-  Although it is pretty straightforward as an iterative function, divide and conquer lends itself to recursive forms so just for completeness, here's a recursive version of the binary search.
+** Recursive Version
+
+  Although it is pretty straightforward as an iterative function, divide and conquer lends itself to recursion so, just for completeness, here's a recursive version of the binary search.
+
+*** The Pseudocode
+#+begin_export html
+<pre id="binarysearch3" style="display:hidden;">
+\begin{algorithm}
+\caption{Recursive Binary Search}
+\begin{algorithmic}
+\REQUIRE Input Array is in non-decreasing order
+\INPUT Array A , search key, left and right indices to limit the search
+\OUTPUT The index of the item that matches the key
+\PROCEDURE{BinarySearchRecursive}{A, key, left, right}
+
+\IF {left > right}
+  \RETURN NotFound
+\ENDIF
+
+\STATE middle $\gets \left \lfloor \frac{\textrm{left} + \textrm{right}}{2} \right \rfloor$
+
+\IF {key = A[middle]}
+ \RETURN middle
+\ELIF {key < A[middle]}
+ \STATE right $\gets$ middle - 1
+\ELSE
+ \STATE left $\gets$ middle + 1
+\ENDIF
+
+\RETURN \textsc{BinarySearchRecursive}(elements, key, left, right)
+
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** The Implementation
 
 #+begin_src python :results none
-def recursive_binary_search(elements: Sequence, element: int,
+def recursive_binary_search(elements: Sequence, key: int,
                             left: int, right: int,
                             count: int=0):
     """Recursive binary search
 
     Args:
      elements: sorted sequence with element in it
-     element: item in elements to search for
+     key: item in elements to search for
      left: left index of the current sub-list to search
      right: right index of the current sub-list to search
      count: number of times we run the comparison (for plotting)
@@ -256,13 +285,16 @@ def recursive_binary_search(elements: Sequence, element: int,
 
     middle = (left + right)//2
     
-    if elements[middle] == element:
-        # base-case, we found it
+    if elements[middle] == key:
+        # we found it
         return middle, count
 
-    left, right = ((middle + 1, right) if elements[middle] < element
-                   else (left, middle - 1))
-    return recursive_binary_search(elements, element, left, right, count)
+    # move one of the boundaries to the middle
+    if key < elements[middle]:
+        right = middle - 1
+    else:
+        left = middle + 1
+    return recursive_binary_search(elements, key, left, right, count)
 #+end_src
 
 This is a helper to get the recursive call started and to handle empty lists or search terms that are outside of the range of the list.
@@ -451,6 +483,12 @@ window.addEventListener('load', function () {
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("binarysearch2"));
+});
+</script>
+
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("binarysearch3"));
 });
 </script>
 #+end_export
