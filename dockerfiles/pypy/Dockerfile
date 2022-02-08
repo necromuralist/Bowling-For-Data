@@ -16,15 +16,15 @@ RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONT
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    rsync \
-    zile \
-    screen \
-    byobu \
     openssh-server \
     pypy3 \
     pypy3-dev \
     pypy3-lib \
-    virtualenv
+    rsync \
+    screen \
+    zile \
+    virtualenv && \
+    useradd --create-home --shell /bin/bash bravo
 
 # this requires docker-buildkit to be turned on
 # (environment variable DOCKER_BUILDKIT=1)
@@ -34,26 +34,31 @@ RUN --mount=type=cache,target=/root/.cache \
     pypy3 -m pip install --upgrade pip
 
 # *** setup user bravo *** #
-RUN useradd --create-home --shell /bin/bash bravo
 # switch from root to bravo
 USER bravo
 WORKDIR /home/bravo
 
 COPY --chown=bravo:bravo authorized_keys .ssh/authorized_keys
 COPY --chown=bravo:bravo requirements.txt .
+COPY --chown=bravo:bravo screenrc .screenrc
 
 # define our virtualenv paths
 ENV VIRTUALENVS=.virtualenvs
 ENV VIRTUALENV=$VIRTUALENVS/Bowling-For-Data
 
 # setup the virtualenv
-RUN mkdir $VIRTUALENVS
-RUN pypy3 -m venv $VIRTUALENV
+RUN mkdir $VIRTUALENVS && \
+    pypy3 -m venv $VIRTUALENV
+
 ENV PATH="$VIRTUALENV/bin:$PATH"
 
-# install the dependencies to the virtualenv
 RUN pypy3 -m ensurepip
-RUN pypy3 -m pip install -r requirements.txt
+# install wheel outside of the requirements file
+# otherwise the other packages in the file won't be able to use it
+RUN --mount=type=cache,target=/root/.cache \
+    pypy3 -m pip --no-cache-dir install --upgrade pip && \
+    pypy3 -m pip --no-cache-dir install --upgrade wheel && \
+    pypy3 -m pip --no-cache-dir install -r requirements.txt
 
 # setup the bashrc to activate the virtulaenv when bravo logs in
 RUN echo 'source ~/.virtualenvs/Bowling-For-Data/bin/activate' >> .bashrc
