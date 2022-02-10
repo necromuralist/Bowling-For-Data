@@ -16,6 +16,7 @@ RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONT
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    graphviz \
     openssh-server \
     pypy3 \
     pypy3-dev \
