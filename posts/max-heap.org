@@ -24,6 +24,8 @@ This is a post that looks at [[https://en.wikipedia.org/wiki/Heap_(data_structur
 - **Max-Heap Property**: \(A[Parent(i)]) \ge A[i]\)
 - **Min-Heap Property**: \(A[Parent(i)]) \le A[i]\)
 
+Which means that for any node in a MaxHeap, its value is greater than or equal to that of any of its children, and for any node in a MinHeap, the node's value is less than or equal to its children.
+
 The heap has (at least) two attributes.
 
 - /A.length/: the number of elements in the array
@@ -79,11 +81,33 @@ For any Node in the Heap located at /i/:
 </pre>
 #+end_export
 
+These Functions show the relationship between the location of a node and its children in the array that makes up the heap.
+
+*** Some Requirements
 There are also two requirements:
 
  - **Shape Requirement**: All levels but the last have to be complete (only the rightmost leaves can be incomplete)
  - **Dominance Requirement**: Every node is greater than or equal to its children (in the Max-Heap, less than or equal for the Min-Heap)
 
+That Dominance Requirement is also covered by the Heap Property.
+*** Heap Properties
+These are from {{% doc %}}itdaa{{% /doc %}}.
+
+1. There exists exactly one essentially complete binary tree with /n/ nodes. It's a binary tree so its height is \(\lfloor \log_2 n\rfloor\).
+2. The root of a (Max) Heap always has the largest element.
+3. A node of a heap with all its descendants is also a heap.
+4. A heap implemented as an array with the heap's elements stored at \(1 \ldots n\) can be constructed using:
+   - the parental node keys will be the first \(\lfloor \frac{n}{2} \rfloor\) elements while the leaf nodes will be in the last \(\lceil \frac{n}{2} \rceil\) positions
+   - The childern of a parent node at position /i/ will be in positions /2i/ and /2i + 1/.
+   - The parent of a child node at position /i/ will be in position \(\lfloor \frac{i}{2}\rfloor\).
+
+Property four is what was defined in the functions up above. Levitin also gives a slightly different variation on stating the heap property.
+
+\[
+H[i] \ge \max{H[2i], H[2i + 1]} \textrm{ for } i= 1, \ldots, \lfloor \frac{n}{2} \rfloor.
+\]
+
+This is sort of an inversion of the Max-Heap Property stated above. While the Max-Heap Property was given as every node is less than or equal to its parent, this says that every parent is greater than or equal to its children.
 * The Max Heap
 ** The Imports
 #+begin_src python :results none
@@ -95,8 +119,10 @@ from typing import Generator
 import random
 
 # pypi
-from attrs import define
 from expects import contain_exactly, equal, expect, raise_error
+
+# software under test
+from bowling.data_structures.heap import MaxHeap
 
 from graeae import EmbedHoloviews
 #+end_src
@@ -107,7 +133,50 @@ path = f"files/posts/{SLUG}/"
 Embed = partial(EmbedHoloviews, folder_path=path)
 #+end_src
 ** The Class
-#+begin_src python :results none
+#+begin_src python :tangle ../bowling/data_structures/heap.py :exports none
+<<imports>>
+
+
+<<max-heap>>
+
+    <<from-list>>
+
+    <<size>>
+
+    <<length>>
+
+    <<maximum>>
+
+    <<parent>>
+
+    <<left>>
+
+    <<right>>
+
+    <<heapify-subtree>>
+
+    <<increase-key>>
+
+    <<insert>>
+
+    <<call>>
+
+    <<check-rep>>
+
+    <<getitem>>    
+#+end_src
+
+*** Imports
+#+begin_src python :noweb-ref imports
+# pypi
+# https://www.attrs.org/en/stable/index.html
+from attrs import define
+#+end_src
+
+*** The Definition
+Besides declaring the class definition, the MaxHeap will hold some constants to hopefully make the code easier to read.
+
+#+begin_src python :noweb-ref max-heap
 @define
 class MaxHeap:
     """Build and maintain a max-heap
@@ -122,160 +191,241 @@ class MaxHeap:
 
     heap: list = [INFINITY]
     _size: int = None
+#+end_src
 
-    @classmethod
-    def from_list(cls, heap: list) -> MaxHeap:
-        """Builds a max-heap instance from the starter list"""
-        return cls(heap = [cls.INFINITY] + heap)
+*** From List
+This is a class method to create the list for the heap. The calculations for the locations in the array of parent and child nodes is easier if we have a 1-based list so I'll pad the list being passed in. Additionally, I'll set the first value to \(\infty\) so that the Heap Property will pass for the root node without needing any special consideration for what its parent is.
 
-    @property
-    def size(self) -> int:
-        """The size of the max heap"""
-        if self._size is None:
-            self._size = len(self.heap) - 1
-        return self._size
+#+begin_src python :noweb-ref from-list
+@classmethod
+def from_list(cls, heap: list):
+    """Builds a max-heap instance from the starter list
 
-    @size.setter
-    def size(self, new_size) -> int:
-        """Set the size of the max heap
-
-        Args:
-         new_size: how much of the list is in the heap
-        """
-        assert 0 < new_size <= self.length
-        self._size = new_size
-        return
-
-    @property
-    def length(self) -> int:
-        """The size of the array for the heap"""
-        return len(self.heap)
-
-    @property
-    def maximum(self):
-        """The value in the root node"""
-        return self.heap[self.ROOT_NODE]
-
-    def parent(self, node: int) -> int:
-        """Find the parent of a node
-
-        Args:
-         node: the index of the node to check
-
-        Returns:
-         the index of the parent of the node
-        """
-        return node//2
-
-    def left(self, parent: int) -> int:
-        """Find the left child of a parent
-
-        Args:
-         parent: the index of the parent node
-
-        Returns:
-         index of the left child of the parent
-        """
-        return 2 * parent
-
-    def right(self, parent: int) -> int:
-        """Find the right child of a parent
-
-        Args:
-         parent: the index of the parent node
-
-        Returns:
-         index of the right child of the parent
-        """
-        return 2 * parent + 1
-
-    def heapify_subtree(self, node):
-        """Heapify the tree rooted at the node
-
-        Args:
-         node: index of the current root of the tree        
-        """
-        left, right = self.left(node), self.right(node)
-        if left <= self.size and self.heap[left] > self.heap[node]:
-            largest = left
-
-        else:
-            largest = node
-
-        if right <= self.size and self.heap[right] > self.heap[largest]:
-            largest = right
-
-        if largest != node:
-            self.heap[node], self.heap[largest] = (self.heap[largest],
-                                                   self.heap[node])
-            self.heapify_subtree(largest)
-        return
-
-    def increase_key(self, node, key):
-        """Increase the node's value
-
-        Args:
-         node: index of node in heap to change
-         key: new value for the node
-        """
-        assert key > self.heap[node]
-        self.heap[node] = key
-
-        while node > 1 and self.heap[self.parent(node)] < self.heap[node]:
-            self.heap[node], self.heap[self.parent(node)] = (
-                self.heap[self.parent(node)], self.heap[node])
-            node = self.parent(node)
-        return
-
-    def insert(self, key):
-        """Insert the key into the heap
-
-        Args:
-         key: orderable item to insert into the heap
-        """
-        self.size += 1
-        self.heap[self.size - 1] = self.NEGATIVE_INFINITY
-        self.increase_key(self.size - 1, key)
-        return
-        
-    def __getitem__(self, key: int):
-        """Gets an item from the heap
-        
-        Args: 
-         key: index of the heap to get the value
-        """
-        return self.heap[key]
-
-    def __setitem__(self, key, value):
-        """Sets the value at the key in the heap
-
-        Args:
-         key: index of the heap to set the value
-         value: what to set the location in the heap to
-        """
-        self.heap[key] = value
-        return
+    Args:
+     heap: list of elements to dump on the heap
     
-    def __call__(self):
-        """Heapifies the heap
-        """
-        for parent in reversed(range(1, self.size//2 + 1)):
-            self.heapify_subtree(parent)
+    Returns:
+     MaxHeap instance with the heap list added
+    """
+    return cls(heap = [cls.INFINITY] + heap)
+#+end_src
 
-        self.check_rep()
-        return
+*** The Heap Size
+Since we padded the list holding the heap the length of the list will never be the same as the number of nodes in the heap. Additionally we'll sometimes manipulate things so things that were in the heap are later excluded but still in the list so the ~size~ property will help us to keep track of how big we think our heap is.
 
-    def check_rep(self) -> None:
-        """Checks the heap property
+#+begin_src python :noweb-ref size
+@property
+def size(self) -> int:
+    """The size of the max heap"""
+    if self._size is None:
+        self._size = len(self.heap) - 1
+    return self._size
+
+@size.setter
+def size(self, new_size) -> int:
+    """Set the size of the max heap
+    
+    Args:
+     new_size: how much of the list is in the heap
+
+    Raises:
+     AssertionError if the size is out of bounds for the list
+    """
+    assert 0 <= new_size <= self.length
+    self._size = new_size
+    return
+#+end_src
+
+*** Length
+This is the length of the array, not necessarily of the heap. This one's a little tricky, since the padding throws it off by one it would seem that it should be lowered by one, but if you use it to figure out the last index that will mess it up a little. Since we already have the size for the number of nodes I'll just pass the length of the list on and see what happens.
+
+I was debating whether to use ~__len__~ but I decided that this is really an internal measure and ~size~ is meant to be the attribute to use. I'm mostly keeping this around so that it matches the CLRS attributes.
+
+#+begin_src python :noweb-ref length
+@property
+def length(self) -> int:
+    """The size of the array for the heap
+
+    Warning:
+     This includes the padding at the beginning of the list
+    """
+    return len(self.heap)
+#+end_src
+*** Maximum
+Since this is a max-heap the largest element is in the root, this just makes getting it more explicit.
+
+#+begin_src python :noweb-ref maximum
+@property
+def maximum(self):
+    """The value in the root node"""
+    return self.heap[self.ROOT_NODE]
+#+end_src
+*** Finding the Parent, Left-Child, and Right-Child of a Node
+These are the implementations of the functions at the start of the post.
+
+#+begin_src python :noweb-ref parent
+def parent(self, node: int) -> int:
+    """Find the parent of a node
+    
+    Args:
+     node: the index of the node to check
+
+    Returns:
+     the index of the parent of the node
+    """
+    return node//2
+#+end_src
+
+#+begin_src python :noweb-ref left
+def left_child(self, parent: int) -> int:
+    """Find the left child of a parent
+
+    Args:
+     parent: the index of the parent node
+
+    Returns:
+     index of the left child of the parent
+    """
+    return 2 * parent
+#+end_src
+
+#+begin_src python :noweb-ref right
+def right_child(self, parent: int) -> int:
+    """Find the right child of a parent
+
+    Args:
+     parent: the index of the parent node
+
+    Returns:
+     index of the right child of the parent
+    """
+    return 2 * parent + 1
+#+end_src
+
+*** Heapify A Sub Tree
+CLRS just calls this MaxHeapify. But then the bottoms-up heapification of the tree seemed more like it should be called heapify so I called it ~heapify_subtree~ to note that it starts at a specific node which might not be the root.
+
+#+begin_src python :noweb-ref heapify-subtree
+def heapify_subtree(self, node: int):
+    """Heapify the tree rooted at the node
+    
+    Args:
+     node: index of the node to compare to its descendants
+    """
+    left, right = self.left_child(node), self.right_child(node)
+    largest = node
+    
+    if left <= self.size and self.heap[left] > self.heap[largest]:
+        # the left child was larger than the current parent node
+        largest = left
+
+    if right <= self.size and self.heap[right] > self.heap[largest]:
+        # the right child is larger than the left and the current parent
+        largest = right
+
+    if largest != node:
+        # the current parent is out of place, swap it with the larger child
+        self.heap[node], self.heap[largest] = (self.heap[largest],
+                                               self.heap[node])
+
+        # after the swap the item at "largest" is the value from the 
+        # "node" we started with so try it again with this new location
+        self.heapify_subtree(largest)
+    return
+#+end_src
+*** The Call
+This makes the MaxHeap callable and heapifies the entire heap using a bottoms-up construction.
+
+#+begin_src python :noweb-ref call
+def __call__(self):
+    """Heapifies the heap
+
+    Raises:
+     AssertionError: something bad happened and the Heap Property failed
+    """
+    for parent in reversed(range(1, self.size//2 + 1)):
+        self.heapify_subtree(parent)
+
+    self.check_rep()
+    return
+#+end_src
+*** Increase a Key
+When we change the value of a node, if the value is higher than the previous value it might be in the wrong place in the heap (e.g. it might be bigger than its parent) so we need to traverse upward, swapping it with parents smaller than it, until we find where it should go. CLRS made it a requirement that the new value is larger than the old one, which makes sense in light of the name ~IncreaseKey~, but it seems to me that you could just call it ~ChangeKey~ and use a conditional instead of raise an exception, but I'll stick with the error for now.
+
+#+begin_src python :noweb-ref increase-key
+def increase_key(self, node, key):
+    """Increase the node's value
+
+    Args:
+     node: index of node in heap to change
+     key: new value for the node
+
+    Raises:
+     AssertionError if new value isn't larger than the previous value
+    """
+    assert key > self.heap[node], (f"{key} not greater than previous value {self.heap.node}")
+    self.heap[node] = key
+
+    while (node > self.ROOT_NODE and
+           self.heap[self.parent(node)] < self.heap[node]):
+        self.heap[node], self.heap[self.parent(node)] = (
+            self.heap[self.parent(node)], self.heap[node])
+        node = self.parent(node)
+    return
+#+end_src
+*** Insert a Value
+CLRS describes ~insert~ and ~increase_key~ as part of updating a priority queue, but Levitin's description of ~top-down heap construction~ seems to use them as an alternative way to create the heap. He describes this method of construction (top-down) as starting with an empty heap and repeatedly inserting elements from the original array until you have a heap.
+
+#+begin_src python :noweb-ref insert
+def insert(self, key):
+    """Insert the key into the heap
+
+    Args:
+     key: orderable item to insert into the heap
+    """
+    self.size += 1
+    self.heap[self.size - 1] = self.NEGATIVE_INFINITY
+    self.increase_key(self.size - 1, key)
+    return
+#+end_src    
+
+*** Check the Heap Property
+This checks that the Heap Property holds for all the nodes.
+
+#+begin_src python :noweb-ref check-rep
+def check_rep(self) -> None:
+    """Checks the heap property
+
+    Raises:
+     AssertionError: the heap property has been violated
+    """
+    for node in range(1, self.size):
+        assert self.heap[self.parent(node)] >= self.heap[node], (
+            f"Parent node {self.parent(node)} = {self.heap[self.parent(node)]} "
+            f"not >= {node}={self.heap[node]}")
+    return
+#+end_src
+*** Get and Set Item
+I threw these in because I kept forgetting that the heap is an attribute of the MaxHeap, but it's only for convenience.
+
+#+begin_src python :noweb-ref getitem
+def __getitem__(self, node: int):
+    """Gets an item from the heap
         
-        Raises:
-         AssertionError: the heap property has been violated
-        """
-        for node in range(1, self.size):
-            assert self.heap[self.parent(node)] >= self.heap[node], (
-                f"Parent node {self.parent(node)} = {self.heap[self.parent(node)]} "
-                f"not >= {node}={self.heap[node]}")
-        return
+    Args: 
+     node: index of the heap to get the value
+    """
+    return self.heap[node]
+
+def __setitem__(self, node, value):
+    """Sets the value at the node in the heap
+
+    Args:
+     node: index of the heap to set the value
+     value: what to set the location in the heap to
+    """
+    self.heap[node] = value
+    return
 #+end_src
 ** The Tests
 
@@ -332,7 +482,26 @@ heap()
 expect(heap.maximum).to(equal(16))
 #+end_src
 * Heap Sort
-#+begin_src python :results none
+#+begin_src python :tangle ../bowling/sort/heap.py
+<<heapsort-imports>>
+
+<<heap-sort>>
+#+end_src
+
+** Imports
+#+begin_src python :noweb-ref heapsort-imports
+# pypi
+# https://www.attrs.org/en/stable/index.html
+from attrs import define
+
+# this project
+from bowling.data_structures.heap import MaxHeap
+#+end_src
+
+** The Heap Sort Class
+The HeapSort uses the fact that a Max Heap always has the largest element at the root and repeatedly puts the root at the end of the list then shrinks the heap so it doesn't include the value that was moved over.
+
+#+begin_src python :noweb-ref heap-sort
 @define
 class HeapSort:
     """Sort using a heap
@@ -370,9 +539,10 @@ class HeapSort:
 
 ** The Tests
 #+begin_src python :results none
+from bowling.sort.heap import HeapSort
 k = 100
 items = random.choices(range(k), k=k)
-sorter = HeapSort(items)
+sorter = HeapSort(items.copy())
 
 sorter()
 
