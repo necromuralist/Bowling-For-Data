@@ -11,13 +11,44 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-e7f43106-eb94-485d-bc13-0474ec0ebeb4-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f9643d96-546a-4c26-ac04-cec33163d7db-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
-* The Algorithm
-** Levitin
+* The Beginning
+** Some Imports
+#+begin_src python :results none
+# python
+from collections.abc import MutableSequence
+from dataclasses import dataclass
+from functools import partial
+
+import random
+
+# pypi
+from expects import contain_exactly, equal, expect
+from joblib import Parallel, delayed
+
+import altair
+import pandas
+
+# other monkey stuff
+from graeae import Timer
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+** Some Setup
+#+begin_src python :results none
+SLUG = "the-partition"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+TIMER = Timer()
+#+end_src
+
+* Levitin
+** The Algorithm
+
 The Levitin version of the Partition function is a little more complicated than the CLRS version. It uses an outer loop with two inner loops. The outer loop continues until the indices for the partitions cross-over (or meet) and the inner loops move the boundaries until they find a value that needs to be swapped to the other partition (e.g. the loop sweeping upwards finds an element that's greater than or equal to the pivot element and so it needs to be moved to the upper partition). It uses the first element in the array as the value around which to partition the array.
 
 #+begin_export html
@@ -55,9 +86,98 @@ The Levitin version of the Partition function is a little more complicated than 
 \end{algorithm}
 </pre>
 #+end_export
-** CLRS
 
-The CLRS version seems a little clearer to follow with the exception of the fact that they use the last element as the pivot element instead of the first which threw me off for a bit. It uses a single for loop which moves anything less than the pivot element to the lower partition as it traverses the elements.
+** The Implementation
+
+The version {{% lancelot "Levitin" %}}itdaa{{% /lancelot %}} uses appears to be closer to the [[https://en.wikipedia.org/wiki/Quicksort#Hoare_partition_scheme][version given by Tony Hoare]], the creator of Quicksort. A notable difference between Wikipedia's pseudocode for Hoare's version and this version is that Hoare uses the middle element in the sub-array as the pivot while Levitin uses the left-most element as the pivot.
+
+#+begin_src python :results none
+def partition_levitin(collection: MutableSequence,
+                      left: int, right: int) -> int:
+    """Partitions the collection using a variation of Hoare's method
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     the index of the pivot element
+    """
+    pivot_element = collection[left]
+    partition_left = left
+    partition_right = right + 1
+    stop_right = len(collection) - 1
+    
+    while True:
+        # if the pivot element is the largest element this loop
+        # will try to go past the break won't be reached so we need 
+        # a check in the loop before we increment the partition_left
+        while partition_left < stop_right:
+            partition_left += 1
+            if collection[partition_left] >= pivot_element:
+                break
+
+        while True:
+            partition_right -= 1
+            if collection[partition_right] <= pivot_element:
+                break
+
+        if partition_left >= partition_right:
+            break
+
+        collection[partition_left], collection[partition_right] = (
+            collection[partition_right], collection[partition_left]
+        )
+
+    # move the pivot element from the far left to its final place
+    collection[left], collection[partition_right] = (
+        collection[partition_right], collection[left]
+    )
+
+    return partition_right
+#+end_src
+
+*** Some Checks
+#+begin_src python :results none
+start = [8, 9, 7]
+output = partition_levitin(start, 0, 2)
+expect(output).to(equal(1))
+expect(start).to(contain_exactly(7, 8, 9))
+#+end_src
+
+#+begin_src python :results none
+start = [9, 9, 9 ,9, 9]
+output = partition_levitin(start, 0, 3)
+expect(output).to(equal(len(start)//2))
+#+end_src
+
+#+begin_src python :results output :exports both
+start = [0, 1, 2, 3, 4, 5]
+output = partition_levitin(start, 0, 5)
+print(output)
+print(start)
+#+end_src
+
+#+RESULTS:
+: 0
+: [0, 1, 2, 3, 4, 5]
+
+#+begin_src python :results output :exports both
+start = [5, 4, 3, 2, 1, 0]
+output = partition_levitin(start, 0, 5)
+print(output)
+print(start)
+#+end_src
+
+#+RESULTS:
+: 5
+: [0, 4, 3, 2, 1, 5]
+
+* CLRS
+** The Algorithm
+
+The CLRS version seems a little clearer to follow although they use the last element as the pivot element instead of the first which threw me off for a bit. It uses a single for loop which moves anything less than the pivot element to the lower partition as it traverses the elements.
 
 #+begin_export html
 <pre id="the-clrs-partition" style="display:hidden;">
@@ -91,7 +211,7 @@ The CLRS version seems a little clearer to follow with the exception of the fact
 The /LowerBound/ is the index of the last element less than or equal to the pivot and /LowerBound + 1/ is the first element greater than the pivot. The /UpperBound/ is the index of the last item greater than the pivot.
 
 The /LowerBound/ is like a demon that guards the lower partition and the /UpperBound/ is another demon that plows through the array, throwing any elements that belong in the lower partition back to the /LowerBound/ demon who throws the first element in the upper partition back up to the /UpperBound/ and moves up to guard the expanded lower partition.
-*** CLRS Example
+*** A Worked Example
 We can take a look at how this works using a table. I'll use /LB/ for the /LowerBound/ index, /UB/ for the /UpperBound/ index, and /x/ for the /PivotElement/ to keep the table from getting too wide (hopefully). The array to partition is ~[5, 7, 9, 4, 6]~ with a zero-based index so /left/ = 0, /right/ = 4 and /x/ (the pivot element) is 6.
 
 Here are the values for the variables as we step through the for-loop.
@@ -126,27 +246,9 @@ What happens if the last element is the largest element?
 And in the end we have a pivot of \(LB + 1 = 4\) (the last element) with the lower partition being everything but the last element and no elements in the upper partition. If the array happened to be already sorted than any attempt to partition a sub-array would end up with a similar output with an empty upper partition. This doesn't really matter here, but when we use it in quicksort it will.
 
 Since nothing happens when an element being checked is greater than the pivot element, if the pivot element happens to be the smallest item in the array we'd have a similar case with an empty lower partition, the pivot element as the first element, and the rest of the elements in the upper partition, so starting with an array that's in reversed-sorted-order would also always end up with empty partitions no matter how we choose the sub-arrays.
+** The Implementation
+According to wikipedia, the version {{% lancelot "CLRS" %}}clrs{{% /lancelot %}} uses is a version of the [[https://en.wikipedia.org/wiki/Quicksort#Lomuto_partition_scheme][Lomuto Partition Scheme]], created by Nico Lomuto.
 
-** Implementation
-*** Some Imports
-#+begin_src python :results none
-# python
-from collections.abc import MutableSequence
-from functools import partial
-
-import random
-
-# pypi
-from expects import contain_exactly, equal, expect
-
-import altair
-import pandas
-
-# other monkey stuff
-from graeae.visualization.altair_helpers import output_path, save_chart
-#+end_src
-
-*** The Partition
 #+begin_src python :results none
 def partition(collection: MutableSequence, left: int, right: int) -> int:
     """Partitions the collection around the last element
@@ -174,8 +276,8 @@ def partition(collection: MutableSequence, left: int, right: int) -> int:
     return pivot
 #+end_src
 
-*** Some Checks
-**** The First Example
+** Some Checks
+*** The First Example
 #+begin_src python :results none
 start = [5, 7, 9, 4, 6]
 test = start.copy()
@@ -203,7 +305,7 @@ expect(pivot).to(equal(first_expected_pivot + 2))
 expect(test).to(contain_exactly(*(left + expected + right)))
 #+end_src
 
-**** The Pivot Is the Biggest Element
+*** The Pivot Is the Biggest Element
 
 #+begin_src python :results none
 start = [9, 6, 25, 4, 100]
@@ -217,15 +319,18 @@ expect(pivot).to(equal(4))
 # nothing changes in the list
 expect(test).to(contain_exactly(*start))
 #+end_src
-* Visualize It
-** Some Setup
+*** Small Inputs
 #+begin_src python :results none
-SLUG = "the-partition"
-OUTPUT_PATH = output_path(SLUG)
-save_it = partial(save_chart, output_path=OUTPUT_PATH)
-#+end_src
+start = [0]
+pivot = partition(start, 0, 0)
+expect(pivot).to(equal(0))
 
-** A Tracker
+start = [1, 2]
+pivot = partition(start, 0, 1)
+expect(pivot).to(equal(1))
+#+end_src
+* Visualize It
+** A CLRS Tracker
 #+begin_src python :results none
 def partition_tracker(collection: MutableSequence, 
                       left: int, right: int) -> tuple:
@@ -382,9 +487,168 @@ save_it(chart, "partitioning-plot")
 #+end_export
 
 Not a whole lot more interesting, but it shows how it normally works with the function moving things that have a lower value than the pivot element down to where the red line is (indicating the lower partition) whenever it's encountered as the loop is traversed, then at the end the pivot element gets swapped with the element that's just above the red line.
-* End
+** Comparing Swaps
+Both of the versions of partition shown here traverse the collection once, so looking at the number of comparisons doesn't seem so interesting. According to the [[https://en.wikipedia.org/wiki/Quicksort][Wikipedia page on Quicksort]], the swaps for Hoare's method (which is slightly different from Levitin's) is better for the worst cases, so let's see if this matters for Levitin's and CLRS's swaps.
+*** A Levitin Swap Counter
+#+begin_src python :results none
+def levitin_swaps(collection: MutableSequence,
+                    left: int, right: int) -> int:
+    """Partitions the collection using a variation of Hoare's method
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     count of swaps
+    """
+    pivot_element = collection[left]
+    partition_left = left
+    partition_right = right + 1
+    stop_right = len(collection) - 1
+    swaps = 0
+    while True:
+        while partition_left < stop_right:
+            partition_left += 1
+            if collection[partition_left] >= pivot_element:
+                break
+
+        while True:
+            partition_right -= 1
+            if collection[partition_right] <= pivot_element:
+                break
+
+        if partition_left >= partition_right:
+            break
+
+        collection[partition_left], collection[partition_right] = (
+            collection[partition_right], collection[partition_left]
+        )
+        swaps += 1
+
+    # move the pivot element from the far left to its final place
+    collection[left], collection[partition_right] = (
+        collection[partition_right], collection[left]
+    )
+    swaps += 1
+    return swaps
+#+end_src
+
+
+#+begin_src python :results none
+def clrs_swaps(collection: MutableSequence, left: int, right: int) -> int:
+    """Partitions the collection around the last element
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     count of swaps
+    """
+    pivot_element = collection[right]
+    lower_bound = left - 1
+    swaps = 0
+    for upper_bound in range(left, right):
+        if collection[upper_bound] <= pivot_element:
+            lower_bound += 1
+            (collection[lower_bound],
+             collection[upper_bound]) = (collection[upper_bound],
+                                         collection[lower_bound])
+            swaps += 1
+    pivot = lower_bound + 1
+    (collection[pivot],
+     collection[right]) = (collection[right],
+                           collection[pivot])
+    swaps += 1
+    return swaps
+#+end_src
+
+#+begin_src python :results none
+@dataclass
+class SwapCounts:
+    size: int
+    swaps: int
+
+def swap_counter(collection: MutableSequence, swap_counter: object) -> SwapCounts:
+    """Runs the swap_counter over the collection of inputs
+
+    Args:
+     collection: elements to partition
+     
+    Returns:
+     SwapCounts: size, swap-count
+    """
+    size = len(collection)
+    swaps = swap_counter(collection, 0, size-1)
+    return SwapCounts(size=size, swaps=swaps)
+#+end_src
+
+*** Random Inputs
+#+begin_src python :results output :exports both
+counts = range(10, 10011, 100)
+things_to_partition = [random.choices(range(count), k=count) for count in counts]
+
+with TIMER:
+    clrs_output = Parallel(n_jobs=-1)(
+        delayed(swap_counter)(thing_to_partition, clrs_swaps)
+        for thing_to_partition in things_to_partition)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-02-22 02:29:59.112453
+: Ended: 2022-02-22 02:29:59.763818
+: Elapsed: 0:00:00.651365
+
+#+begin_src python :results output :exports both
+with TIMER:
+    levitin_output = Parallel(n_jobs=-1)(
+        delayed(swap_counter)(thing_to_partition, levitin_swaps)
+        for thing_to_partition in things_to_partition)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-02-22 02:31:21.230978
+: Ended: 2022-02-22 02:31:22.145080
+: Elapsed: 0:00:00.914102
+
+#+begin_src python :results output :exports both
+expect(len(levitin_output)).to(equal(len(clrs_output)))
+frame = pandas.DataFrame({
+    "Size": [output.size for output in levitin_output],
+    "Levitin": [output.swaps for output in levitin_output],
+    "CLRS": [output.swaps for output in clrs_output]})
+
+levitin_points = altair.Chart(frame[["Size", "Levitin"]]).mark_point(color="coral").encode(x="Size", y="Levitin")
+clrs_points = altair.Chart(frame[["Size", "CLRS"]]).mark_point(color="dodgerblue").encode(x="Size", y="CLRS")
+
+levitin_line = levitin_points.transform_regression("Size", "Levitin").mark_line(color="crimson")
+clrs_line = clrs_points.transform_regression("Size", "CLRS").mark_line()
+
+chart = (levitin_points + clrs_points + levitin_line + clrs_line).properties(
+    title="Levitin vs CLRS Partition Swap Count (Randomized Input)",
+    width=800,
+    height=525
+)
+
+save_it(chart, "swaps_random_2")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_random_2.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+
+
+* Sources
 - {{% doc %}}clrs{{% /doc %}}
 - {{% doc %}}itdaa{{% /doc %}}
+- [[https://en.wikipedia.org/wiki/Quicksort][Wikipedia on Quicksort]]
 
 #+begin_export html
 <script>
