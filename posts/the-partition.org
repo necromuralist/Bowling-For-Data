@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f9643d96-546a-4c26-ac04-cec33163d7db-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-9ad41a90-368e-4b1e-9e5a-5767e64017b8-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -27,7 +27,7 @@ from functools import partial
 import random
 
 # pypi
-from expects import contain_exactly, equal, expect
+from expects import be_true, contain_exactly, equal, expect
 from joblib import Parallel, delayed
 
 import altair
@@ -54,7 +54,7 @@ The Levitin version of the Partition function is a little more complicated than 
 #+begin_export html
 <pre id="the-levitin-partition" style="display:hidden;">
 \begin{algorithm}
-\caption{Partition}
+\caption{Partition (Levitin)}
 \begin{algorithmic}
 \INPUT An array and left and right locations defining a subarray
 \OUTPUT The sub-array from left to right is partitioned and the partition location is returned
@@ -107,13 +107,12 @@ def partition_levitin(collection: MutableSequence,
     pivot_element = collection[left]
     partition_left = left
     partition_right = right + 1
-    stop_right = len(collection) - 1
     
     while True:
         # if the pivot element is the largest element this loop
-        # will try to go past the break won't be reached so we need 
+        # will try to go past the end of the list so we need a
         # a check in the loop before we increment the partition_left
-        while partition_left < stop_right:
+        while partition_left < right:
             partition_left += 1
             if collection[partition_left] >= pivot_element:
                 break
@@ -152,28 +151,32 @@ output = partition_levitin(start, 0, 3)
 expect(output).to(equal(len(start)//2))
 #+end_src
 
-#+begin_src python :results output :exports both
+#+begin_src python :results none
 start = [0, 1, 2, 3, 4, 5]
 output = partition_levitin(start, 0, 5)
-print(output)
-print(start)
+expect(output).to(equal(0))
+expect(start).to(contain_exactly(0, 1, 2, 3, 4, 5))
 #+end_src
 
-#+RESULTS:
-: 0
-: [0, 1, 2, 3, 4, 5]
-
-#+begin_src python :results output :exports both
+#+begin_src python :results none
 start = [5, 4, 3, 2, 1, 0]
 output = partition_levitin(start, 0, 5)
-print(output)
-print(start)
+expect(output).to(equal(5))
+expect(start).to(contain_exactly(0, 4, 3, 2, 1, 5))
 #+end_src
 
-#+RESULTS:
-: 5
-: [0, 4, 3, 2, 1, 5]
+#+begin_src python :results none
+prefix = random.choices(range(100), k=100)
+middle = 100
+suffix = random.choices(range(101, 201), k=100)
+test = [middle] + prefix + suffix
 
+output = partition_levitin(test, 0, len(test) - 1)
+expect(output).to(equal(middle))
+expect(test[output]).to(equal(middle))
+expect(all(item < middle for item in test[:output])).to(be_true)
+expect(all(item > middle for item in test[output + 1:])).to(be_true)
+#+end_src
 * CLRS
 ** The Algorithm
 
@@ -182,7 +185,7 @@ The CLRS version seems a little clearer to follow although they use the last ele
 #+begin_export html
 <pre id="the-clrs-partition" style="display:hidden;">
 \begin{algorithm}
-\caption{Partition}
+\caption{Partition (CLRS)}
 \begin{algorithmic}
 \INPUT An array and left and right locations defining a subarray
 \OUTPUT The sub-array from left to right is partitioned and the partition location is returned
@@ -278,6 +281,8 @@ def partition(collection: MutableSequence, left: int, right: int) -> int:
 
 ** Some Checks
 *** The First Example
+This is the worked example I gave.
+
 #+begin_src python :results none
 start = [5, 7, 9, 4, 6]
 test = start.copy()
@@ -290,7 +295,7 @@ expect(pivot).to(equal(first_expected_pivot))
 expect(test).to(contain_exactly(*expected))
 #+end_src
 
-And to make sure the sub-list works.
+And to make sure the sub-list works (as opposed to using the whole list).
 
 #+begin_src python :results none
 left, right = [100, 20], [999, 888, 777]
@@ -307,6 +312,8 @@ expect(test).to(contain_exactly(*(left + expected + right)))
 
 *** The Pivot Is the Biggest Element
 
+If the last element (the pivot) is the biggest element then partitioning doesn't do anything to the list.
+
 #+begin_src python :results none
 start = [9, 6, 25, 4, 100]
 test = start.copy()
@@ -320,6 +327,8 @@ expect(pivot).to(equal(4))
 expect(test).to(contain_exactly(*start))
 #+end_src
 *** Small Inputs
+Make sure it can handle collections of small size.
+
 #+begin_src python :results none
 start = [0]
 pivot = partition(start, 0, 0)
@@ -328,6 +337,22 @@ expect(pivot).to(equal(0))
 start = [1, 2]
 pivot = partition(start, 0, 1)
 expect(pivot).to(equal(1))
+#+end_src
+
+*** Big Inputs
+This is the same test as given to the Levitin version except we need to move the test-value to the end of the input list.
+
+#+begin_src python :results none
+prefix = random.choices(range(100), k=100)
+middle = 100
+suffix = random.choices(range(101, 201), k=100)
+test = prefix + suffix + [middle]
+
+output = partition(test, 0, len(test) - 1)
+expect(output).to(equal(middle))
+expect(test[output]).to(equal(middle))
+expect(all(item < middle for item in test[:output])).to(be_true)
+expect(all(item > middle for item in test[output + 1:])).to(be_true)
 #+end_src
 * Visualize It
 ** A CLRS Tracker
@@ -369,7 +394,46 @@ def partition_tracker(collection: MutableSequence,
     return locations, lower_bounds
 #+end_src
 
-** A Backwards Case
+#+begin_src python :results none
+def partition_track_plotter(locations, lower_bounds, title, filename):
+    frame = pandas.DataFrame(locations)
+    re_indexed = frame.reset_index().rename(columns={"index": "Step"})
+
+    melted = re_indexed.melt(id_vars=["Step"], var_name="Element",
+                             value_name="Location")
+
+    lower_frame = pandas.DataFrame({"Lower Bound": lower_bounds})
+    re_lowered = lower_frame.reset_index().rename(columns={"index": "Step"})
+    low_melted = re_lowered.melt(id_vars=["Step"], var_name="Element",
+                                 value_name="Location")
+
+
+    last_location = melted.Location.max()
+
+    elements = altair.Chart(melted).mark_line().encode(
+        x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+        y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+                   scale=altair.Scale(domain=(-1, last_location))),
+        color=altair.Color("Element:O", legend=None),
+        tooltip=["Step", "Element", "Location"]
+    )
+
+    lower = altair.Chart(low_melted).mark_line(color="red").encode(
+        x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+        y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+                   scale=altair.Scale(domain=(-1, last_location))),
+        tooltip=["Step", "Location"]
+    )
+
+    chart = (elements + lower).properties(
+        title=title,
+        width=800, height=520
+    )
+
+    save_it(chart, filename)
+    return
+#+end_src
+*** A Backwards Case
 First, a plot of a list that starts out with all the elements greater than the pivot followed by all the elements less than the pivot.
 
 #+begin_src python :results output :exports both
@@ -384,56 +448,21 @@ items = second_half + first_half + [middle]
 
 locations, lower_bounds = partition_tracker(items, 0, len(items) - 1)
 
-frame = pandas.DataFrame(locations)
-re_indexed = frame.reset_index().rename(columns={"index": "Step"})
-
-melted = re_indexed.melt(id_vars=["Step"], var_name="Element",
-                         value_name="Location")
-
-lower_frame = pandas.DataFrame({"Lower Bound": lower_bounds})
-re_lowered = lower_frame.reset_index().rename(columns={"index": "Step"})
-low_melted = re_lowered.melt(id_vars=["Step"], var_name="Element",
-                            value_name="Location")
-
-
-last_location = melted.Location.max()
-
-elements = altair.Chart(melted).mark_line().encode(
-    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
-    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
-               scale=altair.Scale(domain=(-1, last_location))),
-    color=altair.Color("Element:O", legend=None),
-    tooltip=["Step", "Element", "Location"]
-)
-
-lower = altair.Chart(low_melted).mark_line(color="red").encode(
-    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
-    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
-               scale=altair.Scale(domain=(-1, last_location))),
-    tooltip=["Step", "Location"]
-)
-
-chart = (elements + lower).properties(
-    title="Reversed Partitions To Start",
-    width=800, height=520
-)
-
-save_it(chart, "reversed-partitions-plot")
+partition_track_plotter(locations, lower_bounds, "CLRS Worst-Case Swapping", "clrs-worst-case")
 #+end_src
 
 #+RESULTS:
 #+begin_export html
-<object type="text/html" data="reversed-partitions-plot.html" style="width:100%" height=600>
+<object type="text/html" data="clrs-worst-case.html" style="width:100%" height=600>
   <p>Figure Missing</p>
 </object>
 #+end_export
-
 
 What we have here is that the first half of the steps are going over the items greater than the pivot so we never get pass the conditional in the loop, thus nothing gets moved around. Then at the halfway point we start going over all the items bigger than the pivot so every item from that point gets swapped to the lower partition. Then in the final step we're out of the loop and the pivot gets moved to the middle of the partitions.
 
 The red-line marks the last item in the lower partition. Even though I randomized the items, since we aren't sorting the values, just moving them backwards and forwards around the partitioning, it doesn't affect what happens.
 
-** A More Random Case
+*** A More Random Case
 Let's try something a little more random.
 
 #+begin_src python :results output :exports both
@@ -446,37 +475,9 @@ items.append(middle)
 
 locations, lower_bounds = partition_tracker(items, 0, len(items) - 1)
 
-frame = pandas.DataFrame(locations)
-re_indexed = frame.reset_index().rename(columns={"index": "Step"})
-
-melted = re_indexed.melt(id_vars=["Step"], var_name="Element",
-                         value_name="Location")
-
-lower_frame = pandas.DataFrame({"Lower Bound": lower_bounds})
-re_lowered = lower_frame.reset_index().rename(columns={"index": "Step"})
-low_melted = re_lowered.melt(id_vars=["Step"], var_name="Element",
-                            value_name="Location")
-
-
-elements = altair.Chart(melted).mark_line().encode(
-    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
-    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1)),
-    color="Element:O",
-    tooltip=["Step", "Element", "Location"]
-)
-
-lower = altair.Chart(low_melted).mark_line(color="red").encode(
-    x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
-    y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1)),
-    tooltip=["Step", "Location"]
-)
-
-chart = (elements + lower).properties(
-    title="Randomized Input",
-    width=800, height=525
-)
-
-save_it(chart, "partitioning-plot")
+partition_track_plotter(locations, lower_bounds,
+                        title="Randomized Input",
+                        filename="partitioning-plot")
 #+end_src
 
 #+RESULTS:
@@ -487,8 +488,173 @@ save_it(chart, "partitioning-plot")
 #+end_export
 
 Not a whole lot more interesting, but it shows how it normally works with the function moving things that have a lower value than the pivot element down to where the red line is (indicating the lower partition) whenever it's encountered as the loop is traversed, then at the end the pivot element gets swapped with the element that's just above the red line.
+
+** A Levitin Tracker
+#+begin_src python :results none
+def levitin_tracker(collection: MutableSequence, 
+                    left: int, right: int) -> tuple:
+    """Partitions the collection around the last element
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+
+    Returns:
+     locations dict, lower_bounds, upper_bounds
+    """
+    # for the plotting
+    locations = {value: [index] for index, value in enumerate(collection)}
+    upper_bound = right
+    lower_bound = left
+    
+    lower_bounds = [lower_bound]
+    upper_bounds = [upper_bound]
+
+    # the algorithm
+    pivot_element = collection[left]
+    partition_left = left
+    partition_right = right + 1
+
+    while True:
+        while partition_left < right:
+            partition_left += 1
+            if collection[partition_left] >= pivot_element:
+                break
+
+        while True:
+            partition_right -= 1
+            if collection[partition_right] <= pivot_element:
+                break
+
+        if partition_left >= partition_right:
+            break
+
+        collection[partition_left], collection[partition_right] = (
+            collection[partition_right], collection[partition_left]
+        )
+
+        # update the plotting
+        upper_bounds.append(partition_right)
+        lower_bounds.append(partition_left)
+        for index, value in enumerate(collection):
+            locations[value].append(index)
+
+    collection[left], collection[partition_right] = (
+        collection[partition_right], collection[left]
+    )
+
+    # update the plotting
+    upper_bounds.append(partition_right)
+    lower_bounds.append(partition_left)
+    for index, value in enumerate(collection):
+        locations[value].append(index)
+
+    return locations, lower_bounds, upper_bounds
+#+end_src
+
+#+begin_src python :results none
+def levitin_track_plotter(locations, lower_bounds, upper_bounds, title, filename):
+    frame = pandas.DataFrame(locations)
+    re_indexed = frame.reset_index().rename(columns={"index": "Step"})
+
+    melted = re_indexed.melt(id_vars=["Step"], var_name="Element",
+                             value_name="Location")
+
+    lower_frame = pandas.DataFrame({"Lower Bound": lower_bounds})
+    re_lowered = lower_frame.reset_index().rename(columns={"index": "Step"})
+    low_melted = re_lowered.melt(id_vars=["Step"], var_name="Element",
+                                 value_name="Location")
+
+    upper_frame = pandas.DataFrame({"Lower Bound": upper_bounds})
+    re_uppered = upper_frame.reset_index().rename(columns={"index": "Step"})
+    up_melted = re_uppered.melt(id_vars=["Step"], var_name="Element",
+                                value_name="Location")
+
+    last_location = melted.Location.max()
+
+    elements = altair.Chart(melted).mark_line().encode(
+        x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+        y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+                   scale=altair.Scale(domain=(-1, last_location))),
+        color=altair.Color("Element:O", legend=None),
+        tooltip=["Step", "Element", "Location"]
+    )
+
+    lower = altair.Chart(low_melted).mark_line(color="red").encode(
+        x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+        y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+                   scale=altair.Scale(domain=(-1, last_location))),
+        tooltip=["Step", "Location"]
+    )
+
+    upper = altair.Chart(up_melted).mark_line(color="red").encode(
+        x=altair.X("Step:Q", axis=altair.Axis(tickMinStep=1)),
+        y=altair.Y("Location:Q", axis=altair.Axis(tickMinStep=1),
+                   scale=altair.Scale(domain=(-1, last_location))),
+        tooltip=["Step", "Location"]
+    )
+
+    chart = (elements + lower + upper).properties(
+        title=title,
+    width=800, height=520
+    )
+
+    save_it(chart, filename)
+    return
+#+end_src
+*** A Backwards Case
+
+#+begin_src python :results output :exports both
+middle = 20
+first_half = list(range(middle))
+second_half = list(range(middle + 1, 2 * middle))
+
+random.shuffle(first_half)
+random.shuffle(second_half)
+
+items = [middle] + second_half + first_half
+
+locations, lower_bounds, upper_bounds = levitin_tracker(items, 0, len(items) - 1)
+levitin_track_plotter(locations, lower_bounds, upper_bounds,
+                      "Levitin Worst Case Swaps", "levitin-worst-plot")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="levitin-worst-plot.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+*** A More Random Case
+Let's try something a little more random.
+
+#+begin_src python :results output :exports both
+middle = 20
+first_half = list(range(middle))
+second_half = list(range(middle + 1, 2 * middle))
+items = first_half + second_half
+random.shuffle(items)
+items.append(middle)
+
+locations, lower_bounds = partition_tracker(items, 0, len(items) - 1)
+levitin_track_plotter(locations, lower_bounds, upper_bounds,
+                      title="Randomized Input", filename="partitioning-plot")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="partitioning-plot.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Not a whole lot more interesting, but it shows how it normally works with the function moving things that have a lower value than the pivot element down to where the red line is (indicating the lower partition) whenever it's encountered as the loop is traversed, then at the end the pivot element gets swapped with the element that's just above the red line.
+
 ** Comparing Swaps
 Both of the versions of partition shown here traverse the collection once, so looking at the number of comparisons doesn't seem so interesting. According to the [[https://en.wikipedia.org/wiki/Quicksort][Wikipedia page on Quicksort]], the swaps for Hoare's method (which is slightly different from Levitin's) is better for the worst cases, so let's see if this matters for Levitin's and CLRS's swaps.
+
 *** A Levitin Swap Counter
 #+begin_src python :results none
 def levitin_swaps(collection: MutableSequence,
@@ -535,6 +701,7 @@ def levitin_swaps(collection: MutableSequence,
     return swaps
 #+end_src
 
+*** A CLRS Swap Counter
 
 #+begin_src python :results none
 def clrs_swaps(collection: MutableSequence, left: int, right: int) -> int:
@@ -566,6 +733,9 @@ def clrs_swaps(collection: MutableSequence, left: int, right: int) -> int:
     return swaps
 #+end_src
 
+*** A Parallelizer Function
+This is what I'll pass to joblib to run the two swap-counter functions.
+
 #+begin_src python :results none
 @dataclass
 class SwapCounts:
@@ -586,9 +756,51 @@ def swap_counter(collection: MutableSequence, swap_counter: object) -> SwapCount
     return SwapCounts(size=size, swaps=swaps)
 #+end_src
 
+#+begin_src python :results none
+def swap_plots(levitin_output: list, clrs_output: list,
+               title: str, filename: str):
+    expect(len(levitin_output)).to(equal(len(clrs_output)))
+    frame = pandas.DataFrame({
+        "Input Size": [output.size for output in levitin_output],
+        "Levitin": [output.swaps for output in levitin_output],
+        "CLRS": [output.swaps for output in clrs_output]})
+
+
+    melted = frame.melt(id_vars=["Input Size"],
+                        var_name="Algorithm", value_name="Swaps")
+
+    points = altair.Chart(melted).mark_point().encode(
+        x="Input Size",
+        y="Swaps",
+        color="Algorithm",
+        tooltip=[altair.Tooltip("Input Size", format=","),
+                 altair.Tooltip("Swaps", format=",")]
+    )
+    # levitin_points = altair.Chart(frame[["Input Size", "Levitin"]]).mark_point(
+    #     color="coral").encode(x="Input Size", y="Levitin", tooltip=[
+    #         altair.Tooltip("Input Size", format=","),
+    #         altair.Tooltip("Levitin", format=",", title="Levitin Swaps")])
+    # clrs_points = altair.Chart(frame[["Input Size", "CLRS"]]).mark_point(
+    #     color="dodgerblue").encode(x="Input Size", y="CLRS", tooltip=[
+    #         altair.Tooltip("Input Size", format=","),
+    #         altair.Tooltip("CLRS", format=",", title="CLRS Swaps")])
+
+    levitin_line = altair.Chart(frame[["Input Size", "Levitin"]]).transform_regression("Input Size", "Levitin").mark_line(
+        color="crimson")
+    clrs_line = altair.Chart(frame[["Input Size", "CLRS"]]).transform_regression("Input Size", "CLRS").mark_line()
+
+    chart = (points + levitin_line  + clrs_line).properties(
+        title=title,
+        width=800,
+        height=525
+    )
+
+    save_it(chart, filename)
+    return
+#+end_src
 *** Random Inputs
 #+begin_src python :results output :exports both
-counts = range(10, 10011, 100)
+counts = range(10, 100011, 100)
 things_to_partition = [random.choices(range(count), k=count) for count in counts]
 
 with TIMER:
@@ -598,9 +810,9 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-02-22 02:29:59.112453
-: Ended: 2022-02-22 02:29:59.763818
-: Elapsed: 0:00:00.651365
+: Started: 2022-02-23 02:49:16.582310
+: Ended: 2022-02-23 02:49:30.068506
+: Elapsed: 0:00:13.486196
 
 #+begin_src python :results output :exports both
 with TIMER:
@@ -610,30 +822,15 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-02-22 02:31:21.230978
-: Ended: 2022-02-22 02:31:22.145080
-: Elapsed: 0:00:00.914102
+: Started: 2022-02-23 02:49:34.086297
+: Ended: 2022-02-23 02:49:46.534852
+: Elapsed: 0:00:12.448555
+
 
 #+begin_src python :results output :exports both
-expect(len(levitin_output)).to(equal(len(clrs_output)))
-frame = pandas.DataFrame({
-    "Size": [output.size for output in levitin_output],
-    "Levitin": [output.swaps for output in levitin_output],
-    "CLRS": [output.swaps for output in clrs_output]})
-
-levitin_points = altair.Chart(frame[["Size", "Levitin"]]).mark_point(color="coral").encode(x="Size", y="Levitin")
-clrs_points = altair.Chart(frame[["Size", "CLRS"]]).mark_point(color="dodgerblue").encode(x="Size", y="CLRS")
-
-levitin_line = levitin_points.transform_regression("Size", "Levitin").mark_line(color="crimson")
-clrs_line = clrs_points.transform_regression("Size", "CLRS").mark_line()
-
-chart = (levitin_points + clrs_points + levitin_line + clrs_line).properties(
-    title="Levitin vs CLRS Partition Swap Count (Randomized Input)",
-    width=800,
-    height=525
-)
-
-save_it(chart, "swaps_random_2")
+swap_plots(levitin_output, clrs_output,
+           title="Levitin vs CLRS Partition Swap Count (Randomized Input)",
+           filename="swaps_random_2")
 #+end_src
 
 #+RESULTS:
@@ -643,6 +840,71 @@ save_it(chart, "swaps_random_2")
 </object>
 #+end_export
 
+
+*** Already Sorted
+What happens if the input was already sorted?
+
+#+begin_src python :results output :exports both
+counts = range(10, 100011, 100)
+things_to_partition = [list(range(count)) for count in counts]
+
+with TIMER:
+    clrs_output = Parallel(n_jobs=-1)(
+        delayed(swap_counter)(thing_to_partition, clrs_swaps)
+        for thing_to_partition in things_to_partition)
+
+with TIMER:
+    levitin_output = Parallel(n_jobs=-1)(
+        delayed(swap_counter)(thing_to_partition, levitin_swaps)
+        for thing_to_partition in things_to_partition)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-02-23 01:46:18.594043
+: Ended: 2022-02-23 01:46:31.740998
+: Elapsed: 0:00:13.146955
+: Started: 2022-02-23 01:46:31.741867
+: Ended: 2022-02-23 01:46:43.952444
+: Elapsed: 0:00:12.210577
+
+#+begin_src python :results output :exports both
+swap_plots(levitin_output, clrs_output,
+           title="Levitin vs CLRS Partition Swap Count (Sorted Input)",
+           filename="swaps_sorted")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_sorted.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+*** All The Same
+
+#+begin_src python :results output :exports both
+counts = range(10, 100011, 100)
+things_to_partition = [[5] * count for count in counts]
+
+clrs_output = Parallel(n_jobs=-1)(
+    delayed(swap_counter)(thing_to_partition, clrs_swaps)
+    for thing_to_partition in things_to_partition)
+
+levitin_output = Parallel(n_jobs=-1)(
+    delayed(swap_counter)(thing_to_partition, levitin_swaps)
+    for thing_to_partition in things_to_partition)
+
+swap_plots(levitin_output=levitin_output, clrs_output=clrs_output,
+           title="Levitin vs CLRS Partition Swap Count (All Same Input)",
+           filename="swaps_all_same")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_all_same.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
 
 
 * Sources
