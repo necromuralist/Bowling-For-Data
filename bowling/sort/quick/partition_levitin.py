@@ -4,7 +4,7 @@ from collections.abc import MutableSequence
 
 def partition_levitin(collection: MutableSequence,
                       left: int, right: int) -> int:
-    """Partitions the collection using a variation of Hoare's method
+    """Partitions the collection around the first element
 
     Args:
      collection: the list to partition

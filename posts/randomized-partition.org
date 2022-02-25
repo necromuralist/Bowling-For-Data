@@ -1,0 +1,161 @@
+#+BEGIN_COMMENT
+.. title: Randomized Partition
+.. slug: randomized-partition
+.. date: 2022-02-24 16:37:18 UTC-08:00
+.. tags: algorithms,sorting
+.. category: Sorting
+.. link: 
+.. description: 
+.. type: text
+.. has_pseudocode: just a little
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-434a0491-d664-4013-b50a-e4515f5c725a-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+#+begin_src python :tangle ../bowling/sort/quick/partition_randomized.py :exports none
+<<imports>>
+
+
+<<randomized-partition>>
+#+end_src
+* Introduction
+This is part of a series about the Partition algorithm that starts with {{% lancelot "this post" %}}the-partition{{% /lancelot %}}.
+
+** Imports and Setup
+#+begin_src python :results none
+# python
+# this is the version we want for python 3.9 and newer
+# from collections.abc import MutableSequence
+# But Ubuntu 21.10 has pypy 3.7 which needs the version from typing
+# for what we want
+from functools import partial
+from typing import Callable, MutableSequence, TypeVar
+
+import random
+
+# pypi
+from expects import be_true, contain_exactly, equal, expect
+
+import altair
+import pandas
+
+# software under test
+from bowling.sort.quick import (clrs_partition,
+                                levitins_partition,
+                                randomized_partition)
+
+# monkey
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+#+begin_src python :results none
+SLUG = "randomized-partition"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+Orderable = TypeVar("Orderable")
+#+end_src
+* The Algorithm
+
+The randomized partition just swaps the pivot element for a random element, but since the CLRS version uses the last element as the pivot and the Levitin version uses the first element (and Hoare used the middle) I'm going to pass in the pivot and the function explicitly so I don't have to implement different versions of the randomized partition.
+
+For the pseudocode I'll just assume that the partition function is in the global space instead of passing it in.
+
+#+begin_export html
+<pre id="the-randomized-partition" style="display:hidden;">
+\begin{algorithm}
+\caption{Randomized Partition}
+\begin{algorithmic}
+\INPUT An array and left, right, and pivot locations
+\OUTPUT The sub-array from left to right is partitioned and the partition location is returned
+
+\PROCEDURE{RandomizedPartition}{A, left, right, pivot}
+
+\STATE i $\gets$ \textsc{Random}(left, right)
+\STATE \textsc{Swap}(A[i], A[pivot])
+\RETURN \textsc{Partition}(A, left, right)
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+The downside to this approach is that to use it you have to remember where the pivot is. Maybe I'll make separate ones for the different algorithms later...
+* The Implementation
+
+#+begin_src python :noweb-ref imports :exports none
+# python
+# For python 3.9 and newer you want to import from collections.abc
+# But Ubuntu 21.10 has pypy 3.7 which needs the version from typing
+# for what we want here
+from typing import Callable, MutableSequence, TypeVar
+
+import random
+
+Orderable = TypeVar("Orderable")
+Partition = Callable[[MutableSequence[Orderable], int, int], int]
+#+end_src
+
+#+begin_src python :noweb-ref randomized-partition
+def partition_randomized(collection: MutableSequence[Orderable],
+                         left: int, right: int,
+                         pivot: int,
+                         partition: Partition) -> int:
+    """Partitions the collection around a random element in the list
+
+    Args:
+     collection: the list to partition
+     left: index of the first element in the sub-list to partition
+     right: index of the last element in the sub-list to partition
+     pivot: location of the pivot element
+     partition: the partition function to use
+
+    Returns:
+     the index of the pivot element
+    """
+    random_index = random.randrange(left, right + 1)
+    collection[pivot], collection[random_index] = (collection[random_index],
+                                                   collection[pivot])
+    return partition(collection, left, right)
+#+end_src
+* Some Checks
+#+begin_src python :results none
+randomized_clrs = partial(randomized_partition, pivot=-1,
+                          partition=clrs_partition)
+randomized_levitin = partial(randomized_partition, pivot=0,
+                             partition=levitins_partition)
+#+end_src
+
+#+begin_src python :results none
+def test_partitioner(partitioner: Callable[[MutableSequence[Orderable], int, int], int],
+                     input_size: int=10**5) -> None:
+    elements = list(range(input_size))
+    random.shuffle(elements)
+    
+    pivot = partitioner(elements, left=0, right=input_size-1)
+    pivot_element = elements[pivot]
+    expect(all(element < pivot_element
+               for element in elements[:pivot])).to(be_true)
+    expect(all(element > pivot_element
+               for element in elements[pivot + 1:])).to(be_true)
+    expect(len(elements)).to(equal(input_size))
+    return
+#+end_src
+
+#+begin_src python :results none
+test_partitioner(randomized_clrs)
+test_partitioner(randomized_levitin)
+#+end_src
+
+* Sources
+- {{% doc %}}clrs{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-randomized-partition"));
+});
+</script>
+#+end_export
