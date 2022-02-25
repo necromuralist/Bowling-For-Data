@@ -11,11 +11,17 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-974509d3-517c-4923-8bf6-fa98738943d6-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-5319e6b2-e22a-47ec-8b9f-eebe03ede8f6-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
+#+begin_src python :tangle ../bowling/sort/quick/partition_levitin.py :exports none
+<<imports>>
+
+
+<<levitins-partition>>
+#+end_src
 * Introduction
 This is part of a series that starts with {{% lancelot "this post" %}}the-partition{{% /lancelot %}}.
 ** The Algorithm
@@ -73,6 +79,9 @@ from expects import be_true, contain_exactly, equal, expect
 import altair
 import pandas
 
+# software under test
+from bowling.sort.quick import levitins_partition
+
 # monkey
 from graeae.visualization.altair_helpers import output_path, save_chart
 #+end_src
@@ -85,7 +94,12 @@ save_it = partial(save_chart, output_path=OUTPUT_PATH)
 
 The version {{% lancelot "Levitin" %}}itdaa{{% /lancelot %}} uses appears to be closer to the [[https://en.wikipedia.org/wiki/Quicksort#Hoare_partition_scheme][version given by Tony Hoare]], the creator of Quicksort. A notable difference between Wikipedia's pseudocode for Hoare's version and this version is that Hoare uses the middle element in the sub-array as the pivot while Levitin uses the left-most element as the pivot.
 
-#+begin_src python :results none
+#+begin_src python :noweb-ref imports :exports none
+# python
+from collections.abc import MutableSequence
+#+end_src
+
+#+begin_src python :noweb-ref levitins-partition
 def partition_levitin(collection: MutableSequence,
                       left: int, right: int) -> int:
     """Partitions the collection using a variation of Hoare's method
@@ -134,27 +148,27 @@ def partition_levitin(collection: MutableSequence,
 *** Some Checks
 #+begin_src python :results none
 start = [8, 9, 7]
-output = partition_levitin(start, 0, 2)
+output = levitins_partition(start, 0, 2)
 expect(output).to(equal(1))
 expect(start).to(contain_exactly(7, 8, 9))
 #+end_src
 
 #+begin_src python :results none
 start = [9, 9, 9 ,9, 9]
-output = partition_levitin(start, 0, 3)
+output = levitins_partition(start, 0, 3)
 expect(output).to(equal(len(start)//2))
 #+end_src
 
 #+begin_src python :results none
 start = [0, 1, 2, 3, 4, 5]
-output = partition_levitin(start, 0, 5)
+output = levitins_partition(start, 0, 5)
 expect(output).to(equal(0))
 expect(start).to(contain_exactly(0, 1, 2, 3, 4, 5))
 #+end_src
 
 #+begin_src python :results none
 start = [5, 4, 3, 2, 1, 0]
-output = partition_levitin(start, 0, 5)
+output = levitins_partition(start, 0, 5)
 expect(output).to(equal(5))
 expect(start).to(contain_exactly(0, 4, 3, 2, 1, 5))
 #+end_src
@@ -165,7 +179,7 @@ middle = 100
 suffix = random.choices(range(101, 201), k=100)
 test = [middle] + prefix + suffix
 
-output = partition_levitin(test, 0, len(test) - 1)
+output = levitins_partition(test, 0, len(test) - 1)
 expect(output).to(equal(middle))
 expect(test[output]).to(equal(middle))
 expect(all(item < middle for item in test[:output])).to(be_true)
@@ -173,6 +187,8 @@ expect(all(item > middle for item in test[output + 1:])).to(be_true)
 #+end_src
 
 ** A Levitin Tracker
+This is the same function (hopefully) as ~levitins_partition~ but it collects the position of the elements in the list as things get swapped around so that we can plot it.
+
 #+begin_src python :results none
 def levitin_tracker(collection: MutableSequence, 
                     left: int, right: int) -> tuple:

@@ -10,11 +10,17 @@
 .. has_pseudocode: yes!
 #+END_COMMENT
 #+OPTIONS: ^:{}
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-9a679682-a3f2-47fb-86b8-c1bd72da4577-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-080607b3-f4ec-4f25-81b2-2ce8457f1631-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
+#+begin_src python :tangle ../bowling/sort/quick/partition_clrs.py
+<<imports>>
+
+
+<<clrs-partition>>
+#+end_src
 * Introduction
 This is part of a series that starts with {{% lancelot "this post" %}}the-partition{{% /lancelot %}}.
 
@@ -32,6 +38,9 @@ from expects import be_true, contain_exactly, equal, expect
 import altair
 import pandas
 
+# software under test
+from bowling.sort.quick import clrs_partition
+
 # monkey
 from graeae.visualization.altair_helpers import output_path, save_chart
 #+end_src
@@ -41,7 +50,6 @@ SLUG = "clrs-partition"
 OUTPUT_PATH = output_path(SLUG)
 save_it = partial(save_chart, output_path=OUTPUT_PATH)
 #+end_src
-
 
 * The Algorithm
 
@@ -117,8 +125,13 @@ Since nothing happens when an element being checked is greater than the pivot el
 * The Implementation
 According to wikipedia, the version {{% lancelot "CLRS" %}}clrs{{% /lancelot %}} uses is a version of the [[https://en.wikipedia.org/wiki/Quicksort#Lomuto_partition_scheme][Lomuto Partition Scheme]], created by Nico Lomuto.
 
-#+begin_src python :results none
-def partition(collection: MutableSequence, left: int, right: int) -> int:
+#+begin_src python :noweb-ref imports :exports none
+# python
+from collections.abc import MutableSequence
+#+end_src
+
+#+begin_src python :noweb-ref clrs-partition
+def partition_clrs(collection: MutableSequence, left: int, right: int) -> int:
     """Partitions the collection around the last element
 
     Args:
@@ -154,7 +167,7 @@ test = start.copy()
 expected = [5, 4, 6, 7, 9]
 first_expected_pivot = 2
 
-pivot = partition(test, 0, 4)
+pivot = clrs_partition(test, 0, 4)
 
 expect(pivot).to(equal(first_expected_pivot))
 expect(test).to(contain_exactly(*expected))
@@ -166,7 +179,7 @@ And to make sure the sub-list works (as opposed to using the whole list).
 left, right = [100, 20], [999, 888, 777]
 test = left + start.copy() + right
 
-pivot = partition(test, 2, 6)
+pivot = clrs_partition(test, 2, 6)
 
 # all we did was shift the sub-list to spots to the right
 expect(pivot).to(equal(first_expected_pivot + 2))
@@ -183,7 +196,7 @@ If the last element (the pivot) is the biggest element then partitioning doesn't
 start = [9, 6, 25, 4, 100]
 test = start.copy()
 
-pivot = partition(test, 0, 4)
+pivot = clrs_partition(test, 0, 4)
 
 # the pivot should be the last element
 expect(pivot).to(equal(4))
@@ -196,11 +209,11 @@ Make sure it can handle collections of small size.
 
 #+begin_src python :results none
 start = [0]
-pivot = partition(start, 0, 0)
+pivot = clrs_partition(start, 0, 0)
 expect(pivot).to(equal(0))
 
 start = [1, 2]
-pivot = partition(start, 0, 1)
+pivot = clrs_partition(start, 0, 1)
 expect(pivot).to(equal(1))
 #+end_src
 
@@ -213,13 +226,15 @@ middle = 100
 suffix = random.choices(range(101, 201), k=100)
 test = prefix + suffix + [middle]
 
-output = partition(test, 0, len(test) - 1)
+output = clrs_partition(test, 0, len(test) - 1)
 expect(output).to(equal(middle))
 expect(test[output]).to(equal(middle))
 expect(all(item < middle for item in test[:output])).to(be_true)
 expect(all(item > middle for item in test[output + 1:])).to(be_true)
 #+end_src
 * A CLRS Tracker
+This should be the same function (as ~clrs_partition~) but it collects the locations of the elements within the list as they get swapped around.
+
 #+begin_src python :results none
 def partition_tracker(collection: MutableSequence, 
                       left: int, right: int) -> tuple:
