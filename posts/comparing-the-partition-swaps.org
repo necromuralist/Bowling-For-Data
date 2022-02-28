@@ -9,25 +9,26 @@
 .. type: text
 
 #+END_COMMENT
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-fc8f29c0-3e61-4a76-87fb-e5bf43bc4124-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-8a73dbb1-dab1-43aa-8e51-c2f814a35ee8-ssh.json
+
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
 * Introduction
-This is part of a series that starts with {{% lancelot "this post" %}}the-partition{{% /lancelot %}}.
+This is part of a series of posts about the Partition algorithm that starts with {{% lancelot "this post" %}}the-partition{{% /lancelot %}}.
 
 ** Imports and Setup
 #+begin_src python :results none
 # python
-from collections.abc import MutableSequence
+from typing import Callable, List, TypeVar, MutableSequence
 from dataclasses import dataclass
 from functools import partial
 
 import random
 
 # pypi
-from expects import equal, expect
+from expects import be_true, equal, expect
 from joblib import Parallel, delayed
 
 import altair
@@ -41,25 +42,29 @@ from graeae.visualization.altair_helpers import output_path, save_chart
 SLUG = "comparing-the-partition-swaps"
 OUTPUT_PATH = output_path(SLUG)
 save_it = partial(save_chart, output_path=OUTPUT_PATH)
+
+Orderable = TypeVar("Orderable")
+random.seed(2022)
 #+end_src
 
 * Comparing  the Swaps
 Both of the versions of partition shown here traverse the collection once, so looking at the number of comparisons doesn't seem so interesting. According to the [[https://en.wikipedia.org/wiki/Quicksort][Wikipedia page on Quicksort]], the swaps for Hoare's method (which is slightly different from Levitin's) is better for the worst cases, so let's see if this matters for Levitin's and CLRS's swaps.
 
-** A Levitin Swap Counter
+** Some Swap Counters
+Since we're only calling the partitioners once rather than repeatedly using them to partition sub-lists in the collection we can get rid of the ~left~ and ~right~ arguments to the functions.
+
+*** A Levitin Swap Counter
 #+begin_src python :results none
-def levitin_swaps(collection: MutableSequence,
-                    left: int, right: int) -> int:
+def levitin_swaps(collection: MutableSequence[Orderable]) -> int:
     """Partitions the collection using a variation of Hoare's method
 
     Args:
      collection: the list to partition
-     left: index of the first element in the sub-list to partition
-     right: index of the last element in the sub-list to partition
 
     Returns:
      count of swaps
     """
+    left, right = 0, len(collection) - 1
     pivot_element = collection[left]
     partition_left = left
     partition_right = right + 1
@@ -92,20 +97,30 @@ def levitin_swaps(collection: MutableSequence,
     return swaps
 #+end_src
 
-** A CLRS Swap Counter
+#+begin_src python :results none
+middle = 100
+prefix = random.choices(range(middle), k=middle)
+suffix = random.choices(range(middle + 1, 201), k=middle)
+test = [middle] + prefix + suffix
+
+swaps = levitin_swaps(test)
+
+expect(all(item < middle for item in test[:middle])).to(be_true)
+expect(all(item > middle for item in test[middle + 1:])).to(be_true)
+#+end_src
+*** A CLRS Swap Counter
 
 #+begin_src python :results none
-def clrs_swaps(collection: MutableSequence, left: int, right: int) -> int:
+def clrs_swaps(collection: MutableSequence[Orderable]) -> int:
     """Partitions the collection around the last element
 
     Args:
      collection: the list to partition
-     left: index of the first element in the sub-list to partition
-     right: index of the last element in the sub-list to partition
 
     Returns:
      count of swaps
     """
+    left, right = 0, len(collection) - 1
     pivot_element = collection[right]
     lower_bound = left - 1
     swaps = 0
@@ -124,6 +139,17 @@ def clrs_swaps(collection: MutableSequence, left: int, right: int) -> int:
     return swaps
 #+end_src
 
+#+begin_src python :results none
+middle = 100
+prefix = random.choices(range(middle), k=middle)
+suffix = random.choices(range(middle + 1, 201), k=middle)
+test = prefix + suffix + [middle]
+
+swaps = clrs_swaps(test)
+
+expect(all(item < middle for item in test[:middle])).to(be_true)
+expect(all(item > middle for item in test[middle + 1:])).to(be_true)
+#+end_src
 ** A Parallelizer Function
 This is what I'll pass to joblib to run the two swap-counter functions.
 
@@ -143,64 +169,127 @@ def swap_counter(collection: MutableSequence, swap_counter: object) -> SwapCount
      SwapCounts: size, swap-count
     """
     size = len(collection)
-    swaps = swap_counter(collection, 0, size-1)
+    swaps = swap_counter(collection)
     return SwapCounts(size=size, swaps=swaps)
 #+end_src
 
+I couldn't get the coloring of the Regression Lines to match the correct set of points sometimes when I was melting the pandas data frame for some reason, so I switched to the Altair way of doing it, which seems a little less intuitive (and is much less documented). I got it from [[https://altair-viz.github.io/gallery/scatter_with_loess.html][the altair gallery]].
+
 #+begin_src python :results none
-def swap_plots(levitin_output: list, clrs_output: list,
+def swap_plots(first_output: List[SwapCounts], second_output: List[SwapCounts],
+               first_label: str, second_label: str,
                title: str, filename: str):
-    expect(len(levitin_output)).to(equal(len(clrs_output)))
+    """Plot the swap counts
+
+    Args:
+     first_output, second_output: lists of SwapCounts
+     first_label, second_label: Algorithm labels for the counts
+     title: title for the plot
+     filename: name to save the plot to 
+    """
+    expect(len(first_output)).to(equal(len(second_output)))
     frame = pandas.DataFrame({
-        "Input Size": [output.size for output in levitin_output],
-        "Levitin": [output.swaps for output in levitin_output],
-        "CLRS": [output.swaps for output in clrs_output]})
+        "Input Size": [output.size for output in first_output],
+        first_label: [output.swaps for output in first_output],
+        second_label: [output.swaps for output in second_output]})
 
-
-    melted = frame.melt(id_vars=["Input Size"],
+    melted = frame.melt(id_vars="Input Size",
+                        value_vars=[first_label, second_label],
                         var_name="Algorithm", value_name="Swaps")
 
-    points = altair.Chart(melted).mark_point().encode(
-        x="Input Size",
-        y="Swaps",
-        color="Algorithm",
-        tooltip=[altair.Tooltip("Input Size", format=","),
-                 altair.Tooltip("Swaps", format=",")]
-    )
-
-    levitin_line = altair.Chart(
-        frame[["Input Size", "Levitin"]]).mark_circle().encode(
-            x="Input Size", y="Levitin").transform_regression(
-                "Input Size", "Levitin").mark_line(color="crimson")
-
-    clrs_line = altair.Chart(
-        frame[["Input Size", "CLRS"]]).mark_circle().encode(
-            x="Input Size", y="CLRS").transform_regression(
-                "Input Size", "CLRS").mark_line(color="dodgerblue")
-
-    chart = (points + levitin_line + clrs_line).properties(
+    base = (altair.Chart(melted).mark_circle(opacity=0.5)
+            .encode(x=altair.X("Input Size:Q",
+                               scale=altair.Scale(
+                                   domain=(0, melted["Input Size"].max()))),
+                    y=altair.Y("Swaps:Q",scale=altair.Scale(domainMin=0)),
+                               color="Algorithm:N",
+                    tooltip=[altair.Tooltip("Input Size:Q", format=","),
+                             altair.Tooltip("Swaps:Q", format=","),
+                             altair.Tooltip("Algorithm:N")]))
+    
+    line = (base.transform_regression("Input Size", "Swaps",
+                                      groupby=["Algorithm"])
+            .mark_line())
+    chart = (line + base).properties(
         title=title,
         width=800,
         height=525
-    )
+    ).interactive()
 
     save_it(chart, filename)
     return
 #+end_src
+
+#+begin_src python :results none
+def swap_ratio_plots(first_output: List[SwapCounts], second_output: List[SwapCounts],
+                     first_label: str, second_label: str,
+                     title: str, filename: str):
+    """Plot the swap count ratios
+
+    Args:
+     first_output, second_output: lists of SwapCounts
+     first_label, second_label: Algorithm labels for the counts
+     title: title for the plot
+     filename: name to save the plot to 
+    """
+    expect(len(first_output)).to(equal(len(second_output)))
+    frame = pandas.DataFrame({
+        "Input Size": [output.size for output in first_output],
+        first_label: [output.swaps for output in first_output],
+        second_label: [output.swaps for output in second_output]})
+
+    frame["Ratio"] = frame[first_label]/(frame[second_label] + 1)
+    
+    base = (altair.Chart(frame[["Input Size", "Ratio"]]).mark_circle(opacity=0.5)
+            .encode(x="Input Size:Q", y=altair.Y("Ratio:Q", scale=altair.Scale(domainMin=0)),
+                    tooltip=[altair.Tooltip("Input Size", format=","),
+                             altair.Tooltip("Ratio", format=",.2f")]))
+    
+    line = (base.transform_regression("Input Size", "Ratio")
+            .mark_line())
+    chart = (base + line).properties(
+        title=title,
+        width=800,
+        height=525
+    ).interactive()
+
+    save_it(chart, filename)
+    return
+#+end_src
+
+#+begin_src python :results none
+def swap_runner(swapper_one: Callable, swapper_two: Callable,
+                label_one: str, label_two: str,
+                things_to_partition: List[List],
+                title: str, filename: str, plotter: Callable=swap_plots) -> None:
+    """Run the partitioners and plot
+
+    Args:
+     swapper_one, swapper_two: swap-counter functions
+     label_one, label_two: algorithm labels for the plot
+     things_to_partition: collections for the partitioners to partition
+     title, filename: plot strings
+    """
+    first_output = Parallel(n_jobs=-1)(
+    delayed(swap_counter)(thing_to_partition, swapper_one)
+    for thing_to_partition in things_to_partition)
+
+    second_output = Parallel(n_jobs=-1)(
+        delayed(swap_counter)(thing_to_partition, swapper_two)
+        for thing_to_partition in things_to_partition)
+
+    plotter(first_output, second_output, label_one, label_two,
+            title=title,
+            filename=filename)
+    return
+#+end_src
+
 ** Random Inputs
 #+begin_src python :results output :exports both
 counts = range(10, 100011, 100)
-things_to_partition = [random.choices(range(count), k=count) for count in counts]
-
-clrs_output = Parallel(n_jobs=-1)(
-    delayed(swap_counter)(thing_to_partition, clrs_swaps)
-    for thing_to_partition in things_to_partition)
-
-levitin_output = Parallel(n_jobs=-1)(
-    delayed(swap_counter)(thing_to_partition, levitin_swaps)
-    for thing_to_partition in things_to_partition)
-
-swap_plots(levitin_output, clrs_output,
+random_things_to_partition = [random.choices(range(count), k=count)
+                              for count in counts]
+swap_runner(levitin_swaps, clrs_swaps, "Levitin", "CLRS", random_things_to_partition,
            title="Levitin vs CLRS Partition Swap Count (Randomized Input)",
            filename="swaps_random_2")
 #+end_src
@@ -212,26 +301,27 @@ swap_plots(levitin_output, clrs_output,
 </object>
 #+end_export
 
+#+begin_src python :results output :exports both
+swap_runner(clrs_swaps, levitin_swaps, "CLRS", "Levitin", random_things_to_partition,
+            title="CLRS/Levitin Partition Swap Ratio (Randomized Input)",
+            filename="swaps_random_ratio", plotter=swap_ratio_plots)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_random_ratio.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 ** Already Sorted
 What happens if the input was already sorted?
 
-#+begin_src python :results none
-counts = range(10, 100011, 100)
-things_to_partition = [list(range(count)) for count in counts]
-
-
-clrs_output = Parallel(n_jobs=-1)(
-    delayed(swap_counter)(thing_to_partition, clrs_swaps)
-    for thing_to_partition in things_to_partition)
-
-
-levitin_output = Parallel(n_jobs=-1)(
-    delayed(swap_counter)(thing_to_partition, levitin_swaps)
-    for thing_to_partition in things_to_partition)
-#+end_src
-
 #+begin_src python :results output :exports both
-swap_plots(levitin_output, clrs_output,
+counts = range(10, 100011, 100)
+sorted_things_to_partition = [list(range(count)) for count in counts]
+
+swap_runner(levitin_swaps, clrs_swaps, "Levitin", "CLRS", sorted_things_to_partition,
            title="Levitin vs CLRS Partition Swap Count (Sorted Input)",
            filename="swaps_sorted")
 #+end_src
@@ -247,17 +337,9 @@ swap_plots(levitin_output, clrs_output,
 
 #+begin_src python :results output :exports both
 counts = range(10, 100011, 100)
-things_to_partition = [[5] * count for count in counts]
+same_things_to_partition = [[5] * count for count in counts]
 
-clrs_output = Parallel(n_jobs=-1)(
-    delayed(swap_counter)(thing_to_partition, clrs_swaps)
-    for thing_to_partition in things_to_partition)
-
-levitin_output = Parallel(n_jobs=-1)(
-    delayed(swap_counter)(thing_to_partition, levitin_swaps)
-    for thing_to_partition in things_to_partition)
-
-swap_plots(levitin_output=levitin_output, clrs_output=clrs_output,
+swap_runner(clrs_swaps, levitin_swaps, "CLRS", "Levitin", same_things_to_partition,
            title="Levitin vs CLRS Partition Swap Count (All Same Input)",
            filename="swaps_all_same")
 #+end_src
@@ -269,4 +351,118 @@ swap_plots(levitin_output=levitin_output, clrs_output=clrs_output,
 </object>
 #+end_export
 
+#+begin_src python :results output :exports both
+swap_runner(clrs_swaps, levitin_swaps,"CLRS", "Levitin", same_things_to_partition,
+           title="CLRS/Levitin Partition Swap Ratio (All Same Input)",
+           filename="swaps_all_same_ratio", plotter=swap_ratio_plots)
+#+end_src
 
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_all_same_ratio.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+* Randomized Swaps
+** A Randomized Swap Counter
+#+begin_src python :results none
+def randomized_swaps(collection: MutableSequence[Orderable],
+                     partition: Callable, pivot: int) -> int:
+    """Partitions the collection around the last element
+
+    Args:
+     collection: the list to partition
+     partition: function to partition the list
+     pivot: index of the element used for the pivot
+     
+    Returns:
+     count of swaps
+    """
+    random_index = random.randrange(len(collection))
+    collection[pivot], collection[random_index] = (collection[random_index],
+                                                   collection[pivot])
+    return 1 + partition(collection)
+#+end_src
+
+#+begin_src python :results none
+randomized_levitin = partial(randomized_swaps, partition=levitin_swaps, pivot=0)
+randomized_clrs = partial(randomized_swaps, partition=clrs_swaps, pivot=-1)
+#+end_src
+** Randomized Levitin Swaps
+*** Shuffled Input
+#+begin_src python :results output :exports both
+counts = range(10, 100011, 100)
+things_to_partition = [random.choices(range(count), k=count) for count in counts]
+swap_runner(levitin_swaps, randomized_levitin, "Levitin", "Randomized Levitin", things_to_partition,
+           title="Levitin vs Randomized Levitin Partition Swap Count (Randomized Input)",
+           filename="swaps_randomized_random")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_randomized_random.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+*** Backwards Sorted Input
+What happens if the input was sorted backwards?
+
+#+begin_src python :results output :exports both
+counts = range(10, 100011, 100)
+things_to_partition = [list(reversed(range(count))) for count in counts]
+
+swap_runner(levitin_swaps, randomized_levitin, "Levitin", "Randomized Levitin", things_to_partition,
+           title="Levitin vs Randomized Levitin Partition Swap Count (Reverse Sorted Input)",
+           filename="swaps_levitin_randomized_sorted")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_levitin_randomized_sorted.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+
+*** All The Same Input
+
+Since only difference between the randomized and the non-randomized input is that the pivot was (probably) swapped out, the input will look the same when all the values are the same to start with so I'm not going to re-plot those.
+
+
+** Randomized CLRS Swaps
+*** Shuffled Input
+#+begin_src python :results output :exports both
+counts = range(10, 100011, 100)
+things_to_partition = [random.choices(range(count), k=count) for count in counts]
+swap_runner(clrs_swaps, randomized_clrs, "CLRS", "Randomized CLRS", things_to_partition,
+           title="CLRS vs Randomized CLRS Partition Swap Count (Randomized Input)",
+           filename="swaps_randomized_clrs_random")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_randomized_clrs_random.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+*** Sorted Input
+What happens if the input was already sorted?
+
+#+begin_src python :results output :exports both
+counts = range(10, 100011, 100)
+things_to_partition = [list(range(count)) for count in counts]
+
+swap_runner(clrs_swaps, randomized_clrs, "CLRS", "Randomized CLRS", things_to_partition,
+           title="CLRS vs Randomized CLRS Partition Swap Count (Sorted Input)",
+           filename="swaps_clrs_randomized_sorted")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_clrs_randomized_sorted.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
