@@ -9,7 +9,7 @@
 .. type: text
 
 #+END_COMMENT
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-8a73dbb1-dab1-43aa-8e51-c2f814a35ee8-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-31fa3a53-f1ba-4f58-b456-fa409d84e0c0-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -173,8 +173,6 @@ def swap_counter(collection: MutableSequence, swap_counter: object) -> SwapCount
     return SwapCounts(size=size, swaps=swaps)
 #+end_src
 
-I couldn't get the coloring of the Regression Lines to match the correct set of points sometimes when I was melting the pandas data frame for some reason, so I switched to the Altair way of doing it, which seems a little less intuitive (and is much less documented). I got it from [[https://altair-viz.github.io/gallery/scatter_with_loess.html][the altair gallery]].
-
 #+begin_src python :results none
 def swap_plots(first_output: List[SwapCounts], second_output: List[SwapCounts],
                first_label: str, second_label: str,
@@ -314,15 +312,17 @@ swap_runner(clrs_swaps, levitin_swaps, "CLRS", "Levitin", random_things_to_parti
 </object>
 #+end_export
 
-** Already Sorted
-What happens if the input was already sorted?
+** Biggest Item Last
+What happens if the input has the biggest item at the end of the list?
 
 #+begin_src python :results output :exports both
 counts = range(10, 100011, 100)
-sorted_things_to_partition = [list(range(count)) for count in counts]
+big_ended_things_to_partition = [random.choices(range(count), k=count) + [count]
+                                 for count in counts]
 
-swap_runner(levitin_swaps, clrs_swaps, "Levitin", "CLRS", sorted_things_to_partition,
-           title="Levitin vs CLRS Partition Swap Count (Sorted Input)",
+swap_runner(levitin_swaps, clrs_swaps, "Levitin", "CLRS",
+            big_ended_things_to_partition,
+           title="Levitin vs CLRS Partition Swap Count (Biggest Item Last)",
            filename="swaps_sorted")
 #+end_src
 
@@ -333,11 +333,31 @@ swap_runner(levitin_swaps, clrs_swaps, "Levitin", "CLRS", sorted_things_to_parti
 </object>
 #+end_export
 
+** Sorted
+What happens if the input is already sorted?
+
+#+begin_src python :results output :exports both
+counts = range(10, 100011, 100)
+sorted_things_to_partition = [list(range(count)) for count in counts]
+
+swap_runner(levitin_swaps, clrs_swaps, "Levitin", "CLRS",
+            sorted_things_to_partition,
+            title="Levitin vs CLRS Partition Swap Count (Sorted input)",
+           filename="swaps_already_sorted")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_already_sorted.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 ** All The Same
 
 #+begin_src python :results output :exports both
 counts = range(10, 100011, 100)
-same_things_to_partition = [[5] * count for count in counts]
+same_things_to_partition = [[count] * count for count in counts]
 
 swap_runner(clrs_swaps, levitin_swaps, "CLRS", "Levitin", same_things_to_partition,
            title="Levitin vs CLRS Partition Swap Count (All Same Input)",
@@ -392,9 +412,8 @@ randomized_clrs = partial(randomized_swaps, partition=clrs_swaps, pivot=-1)
 ** Randomized Levitin Swaps
 *** Shuffled Input
 #+begin_src python :results output :exports both
-counts = range(10, 100011, 100)
-things_to_partition = [random.choices(range(count), k=count) for count in counts]
-swap_runner(levitin_swaps, randomized_levitin, "Levitin", "Randomized Levitin", things_to_partition,
+swap_runner(levitin_swaps, randomized_levitin, "Levitin", "Randomized Levitin",
+            random_things_to_partition,
            title="Levitin vs Randomized Levitin Partition Swap Count (Randomized Input)",
            filename="swaps_randomized_random")
 #+end_src
@@ -406,21 +425,22 @@ swap_runner(levitin_swaps, randomized_levitin, "Levitin", "Randomized Levitin", 
 </object>
 #+end_export
 
-*** Backwards Sorted Input
-What happens if the input was sorted backwards?
+*** Smallest Item At the End
 
 #+begin_src python :results output :exports both
 counts = range(10, 100011, 100)
-things_to_partition = [list(reversed(range(count))) for count in counts]
+backwards_things_to_partition = [random.choices(range(1, count), k=count) + [0]
+                                 for count in counts]
 
-swap_runner(levitin_swaps, randomized_levitin, "Levitin", "Randomized Levitin", things_to_partition,
-           title="Levitin vs Randomized Levitin Partition Swap Count (Reverse Sorted Input)",
-           filename="swaps_levitin_randomized_sorted")
+swap_runner(levitin_swaps, randomized_levitin, "Levitin", "Randomized Levitin",
+            backwards_things_to_partition,
+            title=("Levitin vs Randomized Levitin Partition Swap Count (Backwards Input)"),
+            filename="swaps_levitin_randomized_sorted_backwards")
 #+end_src
 
 #+RESULTS:
 #+begin_export html
-<object type="text/html" data="swaps_levitin_randomized_sorted.html" style="width:100%" height=600>
+<object type="text/html" data="swaps_levitin_randomized_sorted_backwards.html" style="width:100%" height=600>
   <p>Figure Missing</p>
 </object>
 #+end_export
@@ -430,13 +450,11 @@ swap_runner(levitin_swaps, randomized_levitin, "Levitin", "Randomized Levitin", 
 
 Since only difference between the randomized and the non-randomized input is that the pivot was (probably) swapped out, the input will look the same when all the values are the same to start with so I'm not going to re-plot those.
 
-
 ** Randomized CLRS Swaps
 *** Shuffled Input
 #+begin_src python :results output :exports both
-counts = range(10, 100011, 100)
-things_to_partition = [random.choices(range(count), k=count) for count in counts]
-swap_runner(clrs_swaps, randomized_clrs, "CLRS", "Randomized CLRS", things_to_partition,
+swap_runner(clrs_swaps, randomized_clrs, "CLRS", "Randomized CLRS",
+            random_things_to_partition,
            title="CLRS vs Randomized CLRS Partition Swap Count (Randomized Input)",
            filename="swaps_randomized_clrs_random")
 #+end_src
@@ -448,16 +466,27 @@ swap_runner(clrs_swaps, randomized_clrs, "CLRS", "Randomized CLRS", things_to_pa
 </object>
 #+end_export
 
-*** Sorted Input
-What happens if the input was already sorted?
-
+*** Biggest Item at the End
 #+begin_src python :results output :exports both
-counts = range(10, 100011, 100)
-things_to_partition = [list(range(count)) for count in counts]
+swap_runner(clrs_swaps, randomized_clrs, "CLRS", "Randomized CLRS",
+            big_ended_things_to_partition,
+            title="CLRS vs Randomized CLRS Partition Swap Count (Big-Ended Input)",
+            filename="swaps_clrs_randomized_big_ended")
+#+end_src
 
-swap_runner(clrs_swaps, randomized_clrs, "CLRS", "Randomized CLRS", things_to_partition,
-           title="CLRS vs Randomized CLRS Partition Swap Count (Sorted Input)",
-           filename="swaps_clrs_randomized_sorted")
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="swaps_clrs_randomized_big_ended.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+*** Sorted
+#+begin_src python :results output :exports both
+swap_runner(clrs_swaps, randomized_clrs, "CLRS", "Randomized CLRS",
+            sorted_things_to_partition,
+            title="CLRS vs Randomized CLRS Partition Swap Count (Sorted Input)",
+            filename="swaps_clrs_randomized_sorted")
 #+end_src
 
 #+RESULTS:

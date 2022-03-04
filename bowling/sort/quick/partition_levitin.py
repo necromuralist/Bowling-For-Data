@@ -21,7 +21,7 @@ def partition_levitin(collection: MutableSequence,
     while True:
         # if the pivot element is the largest element this loop
         # will try to go past the end of the list so we need a
-        # a check in the loop before we increment the partition_left
+        # check in the loop before we increment the partition_left
         while partition_left < right:
             partition_left += 1
             if collection[partition_left] >= pivot_element:
