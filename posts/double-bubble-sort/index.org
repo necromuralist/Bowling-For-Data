@@ -1,0 +1,351 @@
+#+BEGIN_COMMENT
+.. title: Bubble-Sort Revisited
+.. slug: double-bubble-sort
+.. date: 2021-11-19 17:14:43 UTC-08:00
+.. tags: brute-force,sorting,algorithms
+.. category: Sorting
+.. link: 
+.. description: Another look at Bubble Sort.
+.. type: text
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-32508e50-b621-415e-b8ec-0e875f4dd1f0-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+This is a continuation of a {{% lancelot "series on the Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}.
+
+* In the Beginning
+
+  In the {{% lancelot "previous bubble sort post" %}}bubble-sort-an-empirical-look{{% /lancelot %}} I implemented the basic bubble sort, but there is a variation of it where you short-circuit the search if the collection is already sorted which is what I'll look at here. The short-circuiting means that the bubble sort can sometimes do better than other methods, but only when the data is mostly sorted so it's still not a practical algorithm.
+  Why do this, then? Eh,  why not?
+
+** Some Setup
+*** Imports
+#+begin_src python :results none
+# python
+from functools import partial
+
+# pypi
+# from bokeh.models import HoverTool
+from expects import be_below, contain_exactly, equal, expect
+from joblib import Parallel, delayed
+from numba import njit
+from numba.typed import List
+from numpy.random import default_rng
+
+import altair
+import numpy
+import pandas
+
+# this project
+from graeae.visualization.altair_helpers import output_path, save_chart
+from bowling.sort.bubble import bubble, BubbleOutput
+
+# my other stuff
+from graeae import Timer
+#+end_src
+
+*** Stuff For Later
+#+begin_src python :results none
+TIMER = Timer()
+SLUG = "double-bubble-sort"
+OUTPUT_PATH = output_path(SLUG)
+random = default_rng(2021)
+#+end_src
+* The Sorters
+** Bubba Sort
+   This will be the short-circuiting version of the bubble sort.
+
+*** Bubba
+    This is the short-circuiter. It works pretty much the same way with just an extra if-statement to break out of the loop if nothing was swapped.
+
+#+begin_src python :results none
+def bubba(elements) -> BubbleOutput:
+    """Sorts the list in place
+
+    Args:
+     elements: list of (in-place) sortable elements
+
+    Returns:
+     number of elements, count of comparisons
+    """
+    all_but_one = len(elements) - 1
+    comparisons = swaps = 0
+    for items_sorted in range(all_but_one):
+        swapped_at_least_once = False
+        for in_front_of_us in range(all_but_one - items_sorted):
+            comparisons += 1
+            to_the_right = in_front_of_us + 1
+            if elements[to_the_right] < elements[in_front_of_us]:
+                (elements[in_front_of_us],
+                 elements[to_the_right]) = (elements[to_the_right],
+                                          elements[in_front_of_us])
+                swapped_at_least_once = True
+                swaps += 1
+        if not swapped_at_least_once:
+            break
+    return BubbleOutput(len(elements), comparisons, swaps, elements)
+#+end_src
+*** Bubble
+    I showed how I implement the bubble sort in the {{% lancelot "previous bubble sort post" %}}bubble-sort-an-empirical-look{{% /lancelot %}} so, since I imported it up above, I'm just going to run it.
+*** Test It Out
+    Once again, let's just make sure everything works.
+
+#+begin_src python :results none
+inputs = [1, 2, 3, 4, 7, 6, 5]
+
+expected = list(sorted(inputs))
+
+test_1, test_2 = inputs.copy(), inputs.copy()
+
+bubba_output = bubba(test_1)
+original_output = bubble(test_2)
+
+expect(test_1).to(contain_exactly(*expected))
+expect(test_2).to(contain_exactly(*expected))
+
+n = len(inputs)
+worst = (n * (n - 1))/2
+expect(bubba_output.comparisons).to(be_below(worst))
+expect(bubba_output.comparisons).to(equal(15))
+
+expect(bubba_output.swaps).to(equal(original_output.swaps))
+expect(original_output.comparisons).to(equal(worst))
+
+# try a bigger input
+inputs = random.choice(list(range(100)), size=100)
+expected = list(sorted(inputs))
+
+test_1, test_2 = inputs.copy(), inputs.copy()
+
+bubba_output = bubba(test_1)
+original_output = bubble(test_2)
+
+expect(list(test_1)).to(contain_exactly(*expected))
+expect(list(test_2)).to(contain_exactly(*expected))
+
+n = len(inputs)
+worst = (n * (n - 1))/2
+expect(bubba_output.comparisons).to(be_below(worst))
+expect(original_output.comparisons).to(equal(worst))
+
+expect(bubba_output.swaps).to(equal(original_output.swaps))
+expect(original_output.comparisons).to(equal(worst))
+#+end_src
+
+* Counting Comparisons
+
+    Since the actual method of sorting is the same the swaps should be the same in either case (the new version doesn't quit until there's no more swaps to be done) so I'll just look at the comparisons and see if it made any real difference.
+
+** Set Up Numba
+
+#+begin_src python :results none
+bubba = njit(bubba, nogil=True)
+bubble = njit(bubble, nogil=True)
+#+end_src
+
+** Run The Bubble Counter
+
+#+begin_src python :results output :exports both
+things_to_sort = [random.choice(list(range(count)), size=count)
+                  for count in range(1, 10**5+ 1, 1000)]
+
+with TIMER:
+    bubbles_counts_and_comparisons = Parallel(n_jobs=-1)(
+        delayed(bubble)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-12 23:40:18.730737
+: Ended: 2022-01-12 23:41:51.143272
+: Elapsed: 0:01:32.412535
+
+** Run the Bubba Counter
+#+begin_src python :results output :exports both
+with TIMER:
+    bubbas_counts_and_comparisons = Parallel(n_jobs=-2)(
+        delayed(bubba)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-12 23:41:58.766180
+: Ended: 2022-01-12 23:43:38.475355
+: Elapsed: 0:01:39.709175
+
+Time-wise it seems to have done about the same as the original bubble sort.
+
+
+#+begin_src python :results none
+SIZE, COMPARISONS = 0, 1
+bubble_unzipped = list(zip(*bubbles_counts_and_comparisons))
+bubba_unzipped = list(zip(*bubbas_counts_and_comparisons))
+bubba_frame = pandas.DataFrame({"Elements": bubble_unzipped[SIZE],
+                                "Bubble": bubble_unzipped[COMPARISONS],
+                                "Bubba": bubba_unzipped[COMPARISONS]})
+
+melted = bubba_frame.melt(id_vars=["Elements"],
+                          var_name="Sorter",
+                          value_name="Comparisons")
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_point().encode(
+    x="Elements",
+    y="Comparisons",
+    color="Sorter",
+    tooltip=[altair.Tooltip("Elements", format=","), "Sorter",
+             altair.Tooltip("Comparisons", format=",")]
+).properties(
+    title="Bubble Sort Comparisons (with and without short-circuiting)",
+    width=900,
+).interactive()
+
+save_chart(chart, "bubble_comparisons", output_path=OUTPUT_PATH, height=400)
+#+end_src
+
+
+#+begin_export html
+<object type="text/html" data="bubble_comparisons.html" style="width:100%" height=400>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+At first glance it looks like there's only one grey set of points, but if you zoom in (using the mouse's scroll wheel) you'll see that the grey points are actually (sometimes) created by adjacent points with the short-circuiting version's point (the blue point) slightly lower than the non-short-ciruiting orange point. So there is a difference, but it's small enough that it isn't easy to see.
+
+Let's see if it becomes more obvious using the difference between the points instead.
+#+begin_src python :results none
+bubba_frame["Difference"] = (bubba_frame["Bubble"] -
+                             bubba_frame["Bubba"])
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(bubba_frame).mark_trail().encode(
+    x="Elements:O",
+    y="Difference:Q",
+    size="Difference:Q",
+    tooltip=[altair.Tooltip("Elements", format=","),
+             altair.Tooltip("Difference", format=","),
+             altair.Tooltip("Bubble", format=","),
+             altair.Tooltip("Bubba", format=",")]
+).properties(title="Difference In Comparisons Between the Bubble Sorts",
+             height=500,
+             width=900).interactive()
+
+save_chart(chart, "bubble_differences", output_path=OUTPUT_PATH, height=600)
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="bubble_differences.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+So, it looks like there are sometimes significant differences between the two sorts, but how do they appear given the total number of comparisons made?
+
+#+begin_src python :results output :exports both
+bubba_frame["Difference/Comparisons"] = bubba_frame.Difference/bubba_frame.Bubba
+sub_bubba = bubba_frame[["Elements", "Difference/Comparisons"]]
+chart = altair.Chart(sub_bubba).mark_trail().encode(
+    x="Elements:O",
+    y="Difference/Comparisons:Q",
+    size="Difference/Comparisons:Q",
+    tooltip=[altair.Tooltip("Elements", format=","),
+             altair.Tooltip("Difference/Comparisons", format=".4f")]
+).properties(title="Proportion of Difference Between the Bubble Sorts",
+             height=500,
+             width=900).interactive()
+
+save_chart(chart, "bubble_difference_proportions", output_path=OUTPUT_PATH,
+           height=600)
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="bubble_difference_proportions.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+It looks like as the amount of sorting that's needed goes up, the difference made by the short-circuiting becomes smaller in comparison to the total number of comparisons made, but even the biggest effect proportional to the amount of comparisons made by the short-circuiting sorter only comes to the difference being 0.2% of the total comparisons.
+
+** Best Case, Worst Case
+
+   Now that we know that the short-circuiting isn't that big a deal I'll add some plotting showing how our random cases compare to the best-case and worst case sorting inputs.
+
+#+begin_src python :results output :exports both
+best_things = [numpy.arange(count, dtype=int) for count in range(1, 10**5+ 1, 1000)]
+worst_things = [numpy.flip(things) for things in best_things]
+
+with TIMER:
+    worst_output = Parallel(n_jobs=-1)(
+        delayed(bubba)(thing) for thing in worst_things
+)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-13 00:01:27.932132
+: Ended: 2022-01-13 00:02:08.108278
+: Elapsed: 0:00:40.176146
+
+#+begin_src python :results output :exports both
+with TIMER:
+    best_output = Parallel(n_jobs=-1)(
+        delayed(bubba)(thing) for thing in best_things
+)
+
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-13 00:08:59.231664
+: Ended: 2022-01-13 00:09:00.409103
+: Elapsed: 0:00:01.177439
+
+#+begin_src python :results none
+worst_unzipped = list(zip(*worst_output))
+best_unzipped = list(zip(*best_output))
+
+del bubba_frame["Bubble"]
+del bubba_frame["Difference"]
+del bubba_frame["Difference/Comparisons"]
+bubba_frame = bubba_frame.rename(columns={"Bubba": "Random"})
+#+end_src
+
+#+begin_src python :results none
+bubba_frame["Worst Case"] = worst_unzipped[COMPARISONS]
+bubba_frame["Best Case"] = best_unzipped[COMPARISONS]
+
+melted = bubba_frame.melt(id_vars=["Elements"],
+                          var_name="Input",
+                          value_name="Comparisons")
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_point().encode(
+    x="Elements",
+    y="Comparisons",
+    color="Input"
+).properties(
+    width=800,
+    height=550,
+    title="Bubble Sort Best, Worst, and Random Input Comparisons"
+).interactive()
+
+save_chart(chart, "best-worst-random", output_path=OUTPUT_PATH, height=600)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="best-worst-random.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Once again we run into the problem/case that it looks like the Random input is missing, but if you zoom way in you'll see it does /slightly/ better than the /worst-case/, but the difference is so small that when you zoom back out they look like they did exactly the same. The /best-case/ does much better, since it only has to pass through the data once to see that it's already sorted and then quit (which isn't really reflected in the plot because our increment of /comparisons/ only happens if the inner loop is entered), but except for this unusual case, random inputs don't do enough better than the worst-case examples to make short-circuiting a noteworthy improvement.
+
+* The End, The End
+  Well, I think I've beaten this dead horse enough for now. The overview for all the posts is {{% lancelot "here" %}}the-bubble-sort{{% /lancelot %}}, if you didn't get enough of it. Up next: {{% doc %}}selection-sort{{% /doc %}}.

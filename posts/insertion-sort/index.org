@@ -1,0 +1,611 @@
+#+BEGIN_COMMENT
+.. title: Insertion Sort
+.. slug: insertion-sort
+.. date: 2021-11-30 17:15:24 UTC-08:00
+.. tags: sorting,algorithms,reduce & conquer,iterative,more of the output
+.. category: Sorting
+.. link: 
+.. description: A look at the Insertion Sort algorithm.
+.. type: text
+.. has_pseudocode: You betcha.
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-67722f94-009b-41e5-ba23-0a925075a345-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+#+begin_comment
+Define small-caps (sc)
+https://stackoverflow.com/questions/11576237/mathjax-textsc
+#+end_comment
+
+$\def\sc#1{\dosc#1\csod} \def\dosc#1#2\csod{{\rm #1{\small #2}}}$
+
+* The Insertion Sort
+  The insertion sort is an instance of a {{% doc %}}decrease-and-conquer{{% /doc %}} algorithm and is another case where you maintain a sorted sub-list at the beginning of the list of elements to sort (similar to {{{% lancelot "selection sort" %}}selection-sort{{% /lancelot %}}) but instead of scanning the entire unsorted section for the next smallest item to pick (as in "selection sort") you pick the next item in the unsorted and scan down through the sorted section until you find the right place to insert it. This has the slight advantage over selection sort in that you might not have to scan the entire sorted section to find where to insert the next item, while you always have to scan the entire unsorted section to find the next item to select in the selection sort. On the other hand, instead of swapping just two items at the end of each loop, as in the selection sort, with the insertion sort you have to shift every item above where the next item is going to be inserted in order to make a space for it.
+
+* The Algorithm Parts
+  This is taken pretty straight from {{% doc %}}HTTAA{{% /doc %}}.
+
+  - **Specification:** This is a {{% lancelot "Sorting Problem" %}}the-sorting-problem{{% /lancelot %}}.
+  - **Basic Steps:** Repeatedly insert an item where it belongs.
+  - **Measure of Progress:** The number of elements we've inserted so far.
+  - **The Loop Invariant:** The inserted elements are in sorted order.
+  - **Main Steps:** Take an unselected item and insert it into the correct place in the sorted list.
+  - **Make Progress:** We always insert an item.
+  - **Maintain the Loop Invariant:**
+   + \( \langle \textit{Loop Invariant} \rangle\): Insertion List is sorted.
+   + \(\lnot \langle \textit{Exit-Condition} \rangle \): There's more to sort.
+   + \(\sc{CodeLoop}\): The item that was chosen was inserted in the place that maintains the loop invariant.
+  - **Establish the Loop Invariant:** Pick the first item from the unsorted list giving us a sorted list with one item.
+  - **Exit Condition:** We've inserted all the items.
+  - **Ending:**
+    + \(\langle \textit{Exit-Condition} \rangle\): All elements were inserted.
+    + \(\langle \textit{Loop Invariant} \rangle\): All inserted elements are in the right order.
+    + \(\rightarrow \langle \textit{Post-Condition} \rangle\): All the elements are in sorted order.
+* The Pseudocode
+
+#+begin_export html
+<pre id="insertionsort" style="display:hidden;">
+\begin{algorithm}
+\caption{InsertionSort}
+\begin{algorithmic}
+\INPUT An array of orderable items
+\OUTPUT The array sorted in ascending order
+\PROCEDURE{InsertionSort}{$A$}
+  \FOR{$i \gets 1$ to $n - 1$}
+    \STATE $v \gets A[i]$
+    \STATE $j \gets i - 1$
+    \WHILE{$j \geq 0$ and $A[j] > v$}
+       \STATE $A[j + 1] \gets A[j]$
+       \STATE $j \gets j - 1$
+    \ENDWHILE
+    \STATE $A[j + 1] \gets v$
+  \ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+The outer loop tracks the boundary between the sorted section of the list (elements whose index is less than /i/) and the unsorted section (/i/ to the end of the list). Every time through the outer loop we pick the next item to insert (and assign it to /v/) then in the ~while~ loop we traverse the list backwards, moving the items up one in the list until we find a place where the value to insert isn't less than the next item in the array (or we haven't reached the start of the list). Once we end up at the place to insert the value we exit the ~while~ loop and insert the value where we stopped. Then we move our outer loop up one and start again until everything's sorted.
+
+* Runtime
+  Given the two loops you can probably guess that it's going to be $\Theta(n^2)$, but I'll go through it so I don't forget later on.
+
+\begin{align}
+C_{worst} &= \sum_{i=1}^{n - 1} \sum_{j=0}^{i-1} 1\\
+&= \sum_{i=1}^{n - 1} ((i - 1) - 0 + 1) \\
+&= \sum_{i=1}^{n - 1} i
+\end{align}
+
+This is pretty similar to what I had in the {{% doc %}}bubble-sort-runtime-explained{{% /doc %}} post so I won't go over the reasons for the steps, but at this point we can use the summing backwards and forwards of the series trick to see what our worst-case runtime is.
+
+\begin{array}{ccccccccc}
+& 1 & + & 2 & + & \cdots & + & (n - 2) & + & (n - 1) \\
++ & (n - 1) & + & (n - 2) & + & \cdots & + & 2 & + & 1 \\
+\hline
+& n & + & n & + & \cdots & + & n & + & n\\
+\end{array}
+
+So we have /n - 1/ terms of /n/ in our doubled runtime which we can then halve to get:
+
+\[
+C_{worst} = \frac{n (n - 1)}{2} \in \Theta(n^2)
+\]
+
+* Implement It
+   I'll try and copy the way the selection and bubble sorts looked to make it easier to compare them later.
+
+#+begin_src python :tangle ../bowling/sort/insertion/insertion_stuff.py :exports none
+<<imports>>
+
+<<some-types>>
+
+
+<<comparison-counter>>
+#+end_src
+
+** Imports
+
+#+begin_src python :noweb-ref imports
+# python
+from collections import namedtuple
+from collections.abc import MutableSequence
+#+end_src
+
+** Some Types
+
+   **Note:** For my future self: using the ~dataclass~ is the python way to make a data object, but numba doesn't like it, so we can't use it.
+
+#+begin_src python
+@dataclass
+class InsertionOutput:
+    element_count: int
+    comparisons: int
+    swaps: int
+    elements: MutableSequence
+#+end_src
+
+I'll use the regular ~namedtuple~ instead.
+
+#+begin_src python :noweb-ref some-types
+InsertionOutput = namedtuple("InsertionOutput", ["element_count",
+                                                 "comparisons",
+                                                 "swaps",
+                                                 "elements"])
+#+end_src
+
+** The Counter
+
+#+begin_src python :noweb-ref comparison-counter
+def insertion_sort(elements: MutableSequence) -> InsertionOutput:
+    """Sorts elements using iterative insertion-sort
+
+    Args:
+     elements: sortable collection of elements
+
+    Returns:
+     count of elements, comparisons made, swaps made, sorted elements
+    """
+    comparisons = swaps = 0
+    for next_unsorted_cell in range(1, len(elements)):
+        thing_to_insert = elements[next_unsorted_cell]
+
+        in_front_of_me, to_the_right = (next_unsorted_cell - 1,
+                                        next_unsorted_cell)
+
+        while not (in_front_of_me < 0 or
+                   elements[in_front_of_me] <= thing_to_insert):
+            comparisons += 1
+            swaps += 1
+            elements[to_the_right] = elements[in_front_of_me]
+            in_front_of_me, to_the_right = (in_front_of_me - 1,
+                                            in_front_of_me)
+
+        elements[to_the_right] = thing_to_insert
+        swaps += 1
+
+    return InsertionOutput(len(elements), comparisons, swaps, elements)
+#+end_src
+
+I negated the while-condition and re-stated the body to make more sense to me. Hopefully it's still clear what's going on.
+
+** Some Simple Testing
+*** Importing
+
+#+begin_src python :results none
+# python
+from functools import partial
+import random
+
+# pypi
+from expects import contain_exactly, equal, expect
+from joblib import Parallel, delayed
+from numba import njit
+from numpy.random import default_rng
+
+import altair
+import numpy
+import pandas
+
+# this project
+from bowling.sort.insertion import insertion_sort
+
+# my stuff
+from graeae import Timer
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+*** Set Up
+
+#+begin_src python :results none
+numba_random = default_rng(2022)
+TIMER = Timer()
+
+SLUG = "insertion-sort"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+#+end_src
+
+*** Worst Case
+
+#+begin_src python :results none
+n = 100
+inputs = list(reversed(range(n)))
+expected = list(sorted(inputs.copy()))
+
+output = insertion_sort(inputs)
+
+expect(output.elements).to(contain_exactly(*expected))
+
+expect(output.comparisons).to(equal((n * (n - 1))/2))
+#+end_src
+
+*** Best Case
+
+#+begin_src python :results none
+inputs = expected.copy()
+output = insertion_sort(inputs)
+expect(output.elements).to(contain_exactly(*expected))
+
+expect(output.comparisons).to(equal(0))
+expect(output.swaps).to(equal(n - 1))
+#+end_src
+
+Maybe ~comparisons~ is the wrong term since it's really counting the number of times we get past the sentinel in the ~while~ statement, but I don't think there's a good way to count how many times the sentinel gets checked, so the swaps has to act as a proxy for this best-case scenario where we never drop into the while loop.
+
+*** Random
+
+#+begin_src python :results output :exports both
+inputs = random.choices(inputs, k=n)
+expected = list(sorted(inputs.copy()))
+
+output = insertion_sort(inputs)
+
+expect(output.elements).to(contain_exactly(*expected))
+
+print((n * (n - 1))/2)
+print(output.comparisons)
+print(output.swaps)
+#+end_src
+
+#+RESULTS:
+: 4950.0
+: 2585
+: 2684
+
+** Comparisons and Swaps
+
+#+begin_src python :results none
+numba_sort = njit(insertion_sort)
+things_to_sort = [numba_random.integers(low=0, high=count, size=count)
+                  for count in range(1, 10**5 + 1, 1000)]
+#+end_src
+
+#+begin_src python :results output :exports both
+with TIMER:
+    sort_output = Parallel(n_jobs=-1)(
+        delayed(numba_sort)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-16 22:55:12.336777
+: Ended: 2022-01-16 22:55:23.534382
+: Elapsed: 0:00:11.197605
+
+#+begin_src python :results none
+SIZE, COMPARISONS, SWAPS = 0, 1, 2
+unzipped = list(zip(*sort_output))
+count_frame = pandas.DataFrame({"Elements": unzipped[SIZE],
+                                "Insertion": unzipped[SWAPS]})
+
+count_frame["n^2"] = count_frame.Elements**2
+
+melted = count_frame.melt(id_vars=["Elements"], var_name="Source", value_name="Runtime")
+#+end_src
+
+#+begin_src python :results output :exports both
+tooltip = [altair.Tooltip("Elements", format=","),
+           altair.Tooltip("Runtime", format=","), 
+           altair.Tooltip("Source:N")]
+
+chart = altair.Chart(melted).mark_point().encode(
+    x = "Elements",
+    y = "Runtime",
+    color="Source:N",
+    tooltip=tooltip
+).properties(
+    width=800, height=525, title="Insertion Sort"
+)
+
+save_it(chart, "insertion-sort-comparisons")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="insertion-sort-comparisons.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+With our random input the Insertion Sort does better than the theoretical worst case. 
+
+** Best and Worst Cases
+   Let's get rid of the $n^2$ and add the best-case and worst-case data.
+
+#+begin_src python :results none
+frame = count_frame.rename(columns={"Insertion": "Random"})
+del frame["n^2"]
+#+end_src
+
+#+begin_src python :results output :exports both
+best_things = [numpy.arange(count, dtype=int) for count in range(1, 10**5+ 1, 1000)]
+worst_things = [numpy.flip(things) for things in best_things]
+
+with TIMER:
+    worst_output = Parallel(n_jobs=-1)(
+        delayed(numba_sort)(thing) for thing in worst_things
+)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-16 22:56:34.282090
+: Ended: 2022-01-16 22:56:56.373266
+: Elapsed: 0:00:22.091176
+
+#+begin_src python :results output :exports both
+with TIMER:
+    best_output = Parallel(n_jobs=-1)(
+        delayed(numba_sort)(thing) for thing in best_things
+)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-16 22:57:04.941850
+: Ended: 2022-01-16 22:57:05.067092
+: Elapsed: 0:00:00.125242
+
+#+begin_src python :results none
+best_unzipped = list(zip(*best_output))
+worst_unzipped = list(zip(*worst_output))
+
+frame["Best"] = best_unzipped[SWAPS]
+frame["Worst"] = worst_unzipped[SWAPS]
+#+end_src
+
+#+begin_src python :results none
+melted = frame.melt(id_vars=["Elements"],
+                    var_name="Input",
+                    value_name="Comparisons")
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_point().encode(
+    x="Elements",
+    y="Comparisons",
+    color="Input",
+    tooltip=[altair.Tooltip("Elements", format=","),
+             altair.Tooltip("Comparisons", format=","),
+             "Input"],
+).properties(
+    title="Insertion Sort Best, Worst, Random",
+    width=800,
+    height=525
+).interactive()
+
+save_it(chart, "best-worst-random")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="best-worst-random.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Here we can see why Insertion Sort is considered better than Bubble and Selection Sort. In those cases they have to traverse the entire unsorted collection every time but Insertion Sort only picks whatever is the next unsorted item and searches the sorted until it finds the right place to insert it. In the worst case they're all the same, but whenever it isn't the worst case insertion sort offers a little improvement.
+
+** The Swaps
+   Let's look at what plotting the location of the elements as they are swapped looks like.
+
+#+begin_src python :results none
+def insertion_swaps(elements) -> dict:
+    """Keeps track of the element indexes as they are swapped
+
+    Args:
+     elements: list of orderable elements
+
+    Returns:
+     dict mapping element to list of indices where it was in the elements list
+    """
+    swaps = {element: [index] for index, element in enumerate(elements)}
+
+    number_of_elements = len(elements)
+
+    for next_unsorted_cell in range(1, len(elements)):
+        thing_to_insert = elements[next_unsorted_cell]
+
+        in_front_of_me, to_the_right = (next_unsorted_cell - 1,
+                                        next_unsorted_cell)
+
+        while not (in_front_of_me < 0 or
+               elements[in_front_of_me] <= thing_to_insert):
+            elements[to_the_right] = elements[in_front_of_me]
+            in_front_of_me, to_the_right = (in_front_of_me - 1,
+                                            in_front_of_me)
+
+        elements[to_the_right] = thing_to_insert
+
+        for index, element in enumerate(elements):
+            swaps[element].append(index)
+
+    return swaps
+#+end_src
+
+ A little sanity check.
+
+#+begin_src python :results none
+inputs = random.choices(inputs, k=n)
+expected = list(sorted(inputs.copy()))
+
+output = insertion_swaps(inputs)
+
+expect(inputs).to(contain_exactly(*expected))
+#+end_src
+
+*** Random Case
+
+#+begin_src python :results none
+COUNT = 50
+
+inputs = list(range(COUNT))
+random.shuffle(inputs)
+swaps = insertion_swaps(inputs)
+
+track_frame = pandas.DataFrame(swaps)
+re_indexed = track_frame.reset_index().rename(columns={"index": "Swap"})
+melted = re_indexed.melt(var_name="Value To Sort",
+                         value_name="Location In Array", id_vars="Swap")
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_line().encode(
+    x="Swap",
+    y="Location In Array",
+    color="Value To Sort:O",
+    tooltip=["Swap", "Location In Array", "Value To Sort"]
+).properties(
+    title="Insertion Sort Insertions",
+    width=800,
+    height=525,
+).interactive()
+
+save_it(chart, "insertion-sort-swaps")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="insertion-sort-swaps.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+To interpret the chart, the y-axis values are the indices of the input list and as we move left to right along the x-axis we are traversing the outer loop. Everytime a line goes from horizontal to a downward slope that means that the element at the /y/ location was plucked from the unsorted section and inserted into the previously sorted section. The longer the downward line, the further back it had to go in the sorted section before being inserted (and so the more items had to be moved aside for it to find its place).
+
+*** Worst Case Swaps
+
+Now we'll take a look at what the swaps look like when the collection to be sorted is in exactly the reversed order.
+
+#+begin_src python :results none
+COUNT = 50
+
+inputs = list(reversed(range(COUNT)))
+swaps = insertion_swaps(inputs)
+
+track_frame = pandas.DataFrame(swaps)
+re_indexed = track_frame.reset_index().rename(columns={"index": "Swap"})
+melted = re_indexed.melt(var_name="Value To Sort",
+                         value_name="Location In Array", id_vars="Swap")
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_line().encode(
+    x="Swap",
+    y="Location In Array",
+    color="Value To Sort:O",
+    tooltip=["Swap", "Location In Array", "Value To Sort"]
+).properties(
+    title="Insertion Sort Insertions (Worst-Case)",
+    width=800,
+    height=525,
+).interactive()
+
+save_it(chart, "worst-case-insertion-sort-swaps")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="worst-case-insertion-sort-swaps.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+So, here we don't have the mostly short lines of the previous chart because every element had to be inserted at the beginning of the previously sorted section of the list.
+
+* Compare The Three Amigos
+
+  We've had three brute-force sorters so far, let's see if there's a noticeable difference in their comparisons.
+
+#+begin_src python :results none
+from bowling.sort.bubble.bubble import bubba
+from bowling.sort.selection import selection_counter
+#+end_src
+
+#+begin_src python :results output :exports both
+numba_bubble = njit(bubba)
+with TIMER:
+    bubble_output = Parallel(n_jobs=-1)(
+        delayed(numba_bubble)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-11 23:38:40.676138
+: Ended: 2022-01-11 23:40:07.211075
+: Elapsed: 0:01:26.534937
+
+#+begin_src python :results output :exports both
+numba_selection = njit(selection_counter)
+with TIMER:
+    selection_output = Parallel(n_jobs=-1)(
+        delayed(numba_selection)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-11 23:00:03.404894
+: Ended: 2022-01-11 23:00:43.390039
+: Elapsed: 0:00:39.985145
+
+#+begin_src python :results none
+unzipped = list(zip(*bubble_output))
+
+count_frame["Bubble"] = unzipped[COMPARISONS]
+
+unzipped = list(zip(*selection_output))
+
+count_frame["Selection"] = unzipped[COMPARISONS]
+#+end_src
+
+#+begin_src python :results none
+count_frame = count_frame.rename(columns={"Insertion Comparisons": "Insertion"})
+#+end_src
+
+#+begin_src python :results none
+frame = count_frame.melt(id_vars=["Elements"], var_name="Sorter", value_name="Comparisons")
+#+end_src
+
+#+begin_src python :results output :exports both
+tooltip = [altair.Tooltip("Elements", format=","),
+           altair.Tooltip("Comparisons", format=","), 
+           altair.Tooltip("Sorter")]
+
+chart = altair.Chart(frame).mark_point().encode(
+    x="Elements",
+    y="Comparisons",
+    color="Sorter",
+    tooltip=tooltip,
+).properties(
+    width=800, height=550, title="The Three Amigos"
+).interactive()
+
+save_it(chart, "three-amigos-comparisons")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="three-amigos-comparisons.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+You might be looking at the chart and wondering - "Where's the Bubble Sort?". Well, since Selection Sort always checks all the unsorted for the next item, it has to do just as many comparisons as Bubble Sort does so they are (almost) overlapping - since I used the short-circuiting Bubble Sort if you zoom way, way in you'll see that the Bubble Sort's points are actually usually slighly lower than the Selection Sort's line.
+
+I guess the main takeaway is that because the Insertion Sort has an out that lets it short-circuit each inner while-loop it generally will perform better than the other two sorts, although it's still a quadratic sort.
+
+* Sources
+ - {{% doc %}}HTTAA{{% /doc %}}
+ - {{% doc %}}itdaa{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("insertionsort"));
+});
+</script>
+#+end_export

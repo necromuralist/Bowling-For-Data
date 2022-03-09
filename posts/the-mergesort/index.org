@@ -1,0 +1,457 @@
+#+BEGIN_COMMENT
+.. title: The Mergesort
+.. slug: the-mergesort
+.. date: 2022-01-25 17:49:38 UTC-08:00
+.. tags: sorting,algorithms,divide-and-conquer,recursion
+.. category: Algorithms
+.. link: 
+.. description: The Mergesort algorithm.
+.. type: text
+.. has_pseudocode: yup
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-05a52ea1-1c75-4753-8c62-0ebaa34cf9e1-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* Beginning
+This is a look at the [[https://en.wikipedia.org/wiki/Merge_sort][/Mergesort/]], an example of the {{% doc %}}divide-and-conquer{{% /doc %}} strategy for sorting collections.
+* Middle
+** The CLRS Algorithm
+Our /Mergesort/ repeatedly divides the given list into two parts and then recursively calls itself with the sub-problems and then takes advantage of our previously defined {{% lancelot "Merge" %}}the-merge{{% /lancelot %}} function to combine the solutions together once we are down to one item to sort (\(p = r\)).
+
+#+begin_export html
+<pre id="the-mergesort" style="display:hidden;">
+\begin{algorithm}
+\caption{Mergesort}
+\begin{algorithmic}
+\INPUT An array and left and right locations of the subarray in the array
+\OUTPUT The array in sorted order
+
+\PROCEDURE{Mergesort}{$A, p, r$}
+\IF {p < r}
+         \STATE \textbf{Divide}
+         \STATE $q \gets \left \lfloor \frac{p + r}{2} \right \rfloor$
+         
+         \STATE \\ \textbf{Conquer}
+         \STATE \textsc{MergeSort}(A, p, q)
+         \STATE \textsc{MergeSort}(A, q + 1, r)
+
+         \STATE \\ \textbf{Combine}
+         \STATE \textsc{Merge}(A, p, q, r)
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+** Runtime
+
+- **Divide:** \(D(n) = \Theta(1)\)
+- **Conquer:** \(2T\left (\frac{n}{2}\right)\)
+- **Combine:** \(C(n) = \Theta(n)\)
+
+\begin{align}
+T(n) &= 2T \left( \frac{n}{2} \right) + \Theta(1) + \Theta(n) \\
+&= 2T \left( \frac{n}{2} \right) + \Theta(n) \\
+&= \Theta(n \log_2 n)
+\end{align}
+** The Levitin
+
+#+begin_export html
+<pre id="the-mergesort-levitin" style="display:hidden;">
+\begin{algorithm}
+\caption{Levitin's Mergesort}
+\begin{algorithmic}
+\INPUT Array $A[0 \ldots n - 1]$ of orderable elements.
+\OUTPUT Array $A[0 \ldots n - 1]$ sorted in non-decreasing order.
+
+\PROCEDURE{MergeSort}{A}
+\IF {n > 1}
+         \STATE \textbf{Divide}
+         \STATE Copy $A\left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$ to $B \left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$
+         \STATE Copy $A \left[\left\lfloor \frac{n}{2}\right\rfloor \ldots n - 1 \right]$ to $C \left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$
+         
+         \STATE \\ \textbf{Conquer}
+         \STATE \textsc{MergeSort}(B)
+         \STATE \textsc{MergeSort}(C)
+
+         \STATE \\ \textbf{Combine}
+         \STATE \textsc{Merge}(B, C, A)
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** Implement It
+#+begin_src python :results none
+# python
+from collections.abc import MutableSequence, Sequence
+from math import log2
+
+import random
+
+# pypi
+from expects import contain_exactly, equal, expect
+#+end_src
+
+#+begin_src python :results none
+def merge(left_stack: Sequence,
+          right_stack: Sequence,
+          target: MutableSequence) -> int:
+    """Merges values from left and right stacks into target collection
+
+    Args:
+     left_stack: sorted collection of items to merge
+     right_stack: sorted collection of items to merge
+     target: collection into which to merge the items
+
+    Returns:
+     count of basic operations
+    """
+    left_size, right_size = len(left_stack), len(right_stack)
+    next_left = next_right = put_item_here = count = 0
+    
+    while next_left < left_size and next_right < right_size:
+        count += 1
+        if left_stack[next_left] <= right_stack[next_right]:
+            target[put_item_here] = left_stack[next_left]
+            next_left += 1
+        else:
+            target[put_item_here] = right_stack[next_right]
+            next_right += 1
+
+        put_item_here += 1
+        
+    if next_left == left_size and next_right < right_size:
+        for stack_offset in range(left_size + right_size - put_item_here):
+            count += 1
+            target[put_item_here + stack_offset] = right_stack[next_right + stack_offset]
+    elif next_left < left_size:
+        for stack_offset in range(left_size + right_size - put_item_here):
+            count += 1
+            target[put_item_here + stack_offset] = left_stack[next_left + stack_offset]
+    return count
+#+end_src
+
+#+begin_src python :results none
+def mergesort(collection: MutableSequence) -> int:
+    """Sorts the collection using a recursive mergesort
+
+    Args:
+     collection: a mutable sequence
+
+    Returns:
+     runtime count
+    """
+    items = len(collection)
+    count = 0
+
+    if items > 1:
+        middle = items//2
+        left_stack = collection[:middle]
+        right_stack = collection[middle:]
+        assert len(left_stack) + len(right_stack) == items
+        count += mergesort(left_stack)
+        count += mergesort(right_stack)
+        count += merge(left_stack, right_stack, collection)
+    return count
+#+end_src
+
+#+begin_src python :results output :exports both
+size = 2**10
+items = random.choices(list(range(size)), k=size)
+starting = items.copy()
+runtime = mergesort(items)
+expect(runtime).to(equal(size * log2(size)))
+expect(items).to(contain_exactly(*list(sorted(starting))))
+print(f"{size * log2(size):,}")
+print(f"{runtime:,}")
+#+end_src
+
+#+RESULTS:
+: 10,240.0
+: 10,240
+
+* Comparing Sorts
+#+begin_src python :results none
+# python
+from functools import partial
+
+# pypi
+from numba import njit
+from joblib import Parallel, delayed
+
+from numpy.random import default_rng
+
+import altair
+import numpy
+import pandas
+
+# this project
+from bowling.sort.insertion import insertion_sort
+
+from graeae import Timer
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+#+begin_src python :results none
+numba_random = default_rng(2022)
+TIMER = Timer()
+
+SLUG = "the-mergesort"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
+#+end_src
+
+#+begin_src python :results none
+def merger(thing_to_sort) -> tuple:
+    """A thing to add the size of the input to the output
+
+    Args:
+     thing_to_sort: collection of items to sort
+
+    Returns:
+     number of things to sort, count of merges
+    """
+    return len(thing_to_sort), mergesort(thing_to_sort)
+#+end_src
+
+#+begin_src python :results none
+ninsertion = njit(insertion_sort)
+
+things_to_sort = [numba_random.integers(low=0, high=count, size=count)
+                  for count in range(1, 10**5 + 1, 1000)]
+#+end_src
+
+#+begin_src python :results output :exports both
+with TIMER:
+    insertion_output = Parallel(n_jobs=-1)(
+        delayed(ninsertion)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-28 01:12:10.628102
+: Ended: 2022-01-28 01:12:22.681161
+: Elapsed: 0:00:12.053059
+
+#+begin_src python :results output :exports both
+with TIMER:
+    merge_output = Parallel(n_jobs=-1)(
+        delayed(merger)(thing_to_sort)
+        for thing_to_sort in things_to_sort)
+#+end_src
+
+#+RESULTS:
+: Started: 2022-01-28 01:12:33.278574
+: Ended: 2022-01-28 01:12:38.850064
+: Elapsed: 0:00:05.571490
+
+#+begin_src python :results none
+SIZE, COMPARISONS = 0, 1
+unzipped = list(zip(*merge_output))
+frame = pandas.DataFrame({"Size": unzipped[SIZE],
+"Mergesort": unzipped[COMPARISONS]})
+
+unzipped = list(zip(*insertion_output))
+frame["Insertion Sort"] = unzipped[COMPARISONS]
+
+melted = frame.melt(id_vars=["Size"],
+                    value_vars=["Mergesort", "Insertion Sort"],
+                    var_name="Sort Algorithm", value_name="Comparisons")
+
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(melted).mark_point().encode(
+    x="Size",
+    y="Comparisons",
+    color="Sort Algorithm",
+    tooltip=[altair.Tooltip("Size", format=","),
+             altair.Tooltip("Comparisons", format=","),
+             "Sort Algorithm"]
+).properties(
+    title="Insertion vs Merge Sort",
+    width=800,
+    height=525,
+)
+
+save_it(chart, "insertion-vs-merge")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="insertion-vs-merge.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+#+begin_src python :results output :exports both
+frame["nlog2(n)"] = frame["Size"] * numpy.log2(frame["Size"])
+del(frame["Insertion Sort"])
+melted = frame.melt(id_vars=["Size"],
+                    value_vars=["Mergesort", "nlog2(n)"],
+                    var_name="Source", value_name="Comparisons")
+
+chart = altair.Chart(melted).mark_point().encode(
+    x="Size",
+    y="Comparisons",
+    color="Source",
+    tooltip=[altair.Tooltip("Size", format=","),
+             altair.Tooltip("Comparisons", format=","),
+             "Source"]
+).properties(
+    title="Merge Sort vs Theoretical",
+    width=800,
+    height=525,
+)
+
+save_it(chart, "merge-by-logn")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="merge-by-logn.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+
+* Looking at the Mergesort
+The version of mergesort I implemented above is based on Levitin's algorithm, which I thought was clearer, since the copying was happening outside of the merge. This makes it harder to plot the progress of the sort, though, so I'm going to use the CLRS algorithm here to get some kind of visualization (hopefully).
+
+#+begin_src python :results none
+from bowling.sort.merge import merge_clrs
+#+end_src
+
+#+begin_src python :results none
+def mergesort_tracer(collection: MutableSequence, left: int, right: int,
+                     tracer: dict=None) -> dict:
+    """Sorts the collection using a recursive mergesort
+
+    This uses the CLRS merge-sort to build dict of the locations of the
+    elements as the merging is done
+
+    Args:
+     collection: a mutable sequence
+     left: the index of the beginning element of the sub-array
+     right: the index of the ending element of the sub-array
+     tracer: the dictionary to track the indices of the items
+
+    Returns:
+     tracer updated with post-merge locations of the items in tracer
+    """
+    if tracer is None:
+        tracer = {element: [index] for index, element in enumerate(collection)}
+
+    if left < right:
+        middle = (left + right)//2
+        mergesort_tracer(collection, left, middle, tracer)
+        mergesort_tracer(collection, middle + 1, right, tracer)
+        merge_clrs(collection, left, middle, right)
+
+        for index, element in enumerate(collection):
+            tracer[element].append(index)
+    return tracer
+#+end_src
+
+** A Shuffle Input
+
+#+begin_src python :results output :exports both
+elements = 20
+start = list(range(elements))
+inputs = start.copy()
+random.shuffle(inputs)
+tracer = mergesort_tracer(inputs, left=0, right=len(inputs) - 1)
+expect(inputs).to(contain_exactly(*start))
+
+frame = pandas.DataFrame(tracer)
+frame = frame.reset_index().rename(columns={"index": "Merge"})
+melted = frame.melt(id_vars=["Merge"], var_name="Element", value_name="Location")
+
+chart = altair.Chart(melted).mark_line().encode(
+    x=altair.X("Merge", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location", axis=altair.Axis(tickMinStep=1)),
+    color=altair.Color("Element", legend=None),
+    tooltip=["Merge", "Location", "Element"]
+).properties(
+    title="Mergesort Tracing",
+    width=800,
+    height=525
+)
+
+save_it(chart, "mergesort-trace")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="mergesort-trace.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+You can kind of see what's going on, every time you see a bunch of crossed lines it's because the merge moved items around... but maybe an artificial case will be clearer.
+
+** A Reversed Input
+Let's use an input that's sorted but backwards to see the swaps more clearly.
+
+#+begin_src python :results output :exports both
+elements = 20
+start = list(range(elements))
+inputs = start.copy()
+inputs.reverse()
+tracer = mergesort_tracer(inputs, left=0, right=len(inputs) - 1)
+expect(inputs).to(contain_exactly(*start))
+
+frame = pandas.DataFrame(tracer)
+frame = frame.reset_index().rename(columns={"index": "Merge"})
+melted = frame.melt(id_vars=["Merge"], var_name="Element", value_name="Location")
+
+chart = altair.Chart(melted).mark_line().encode(
+    x=altair.X("Merge", axis=altair.Axis(tickMinStep=1)),
+    y=altair.Y("Location", axis=altair.Axis(tickMinStep=1)),
+    color=altair.Color("Element", legend=None),
+    tooltip=["Merge", "Location", "Element"]
+).properties(
+    title="Mergesort Tracing (From Backwards Source)",
+    width=800,
+    height=525
+)
+
+save_it(chart, "mergesort-trace-backwards")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="mergesort-trace-backwards.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+
+
+* End
+- {{% doc %}}CLRS{{% /doc %}}
+- {{% doc %}}itdaa{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-mergesort"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-mergesort-levitin"));
+});
+</script>
+#+end_export

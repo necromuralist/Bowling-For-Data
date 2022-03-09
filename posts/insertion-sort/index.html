@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="A look at the Insertion Sort algorithm.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insertion Sort | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/insertion-sort/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../bubble-sort-an-archeological-algorithmic-analysis/" title="Bubble Sort: An Archeological Algorithmic Analysis" type="text/html">
+<link rel="next" href="../r-babel-test/" title="R Babel Test" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="Insertion Sort">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/insertion-sort/">
+<meta property="og:description" content="A look at the Insertion Sort algorithm.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2021-11-30T17:15:24-08:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="iterative">
+<meta property="article:tag" content="more of the output">
+<meta property="article:tag" content="reduce &amp; conquer">
+<meta property="article:tag" content="sorting">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Insertion Sort</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2021-11-30T17:15:24-08:00" itemprop="datePublished" title="2021-11-30 17:15">2021-11-30 17:15</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org2e75c43">The Insertion Sort</a></li>
+<li><a href="#orga9ea1b6">The Algorithm Parts</a></li>
+<li><a href="#orgd309dd8">The Pseudocode</a></li>
+<li><a href="#org52e30f4">Runtime</a></li>
+<li>
+<a href="#orgb3592ad">Implement It</a>
+<ul>
+<li><a href="#org27d5762">Imports</a></li>
+<li><a href="#org82e77e6">Some Types</a></li>
+<li><a href="#org83183da">The Counter</a></li>
+<li>
+<a href="#org7fa1199">Some Simple Testing</a>
+<ul>
+<li><a href="#org17bf996">Importing</a></li>
+<li><a href="#org1cca09f">Set Up</a></li>
+<li><a href="#org2dd318c">Worst Case</a></li>
+<li><a href="#org11804b0">Best Case</a></li>
+<li><a href="#orgd1f3231">Random</a></li>
+</ul>
+</li>
+<li><a href="#orge03ba9a">Comparisons and Swaps</a></li>
+<li><a href="#org11bf817">Best and Worst Cases</a></li>
+<li>
+<a href="#org739cc98">The Swaps</a>
+<ul>
+<li><a href="#orge68306f">Random Case</a></li>
+<li><a href="#org7649df9">Worst Case Swaps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org6c08a3b">Compare The Three Amigos</a></li>
+<li><a href="#org0d37cfa">Sources</a></li>
+</ul>
+</div>
+</div>
+<p>
+\(\def\sc#1{\dosc#1\csod} \def\dosc#1#2\csod{{\rm #1{\small #2}}}\)
+</p>
+
+<div id="outline-container-org2e75c43" class="outline-2">
+<h2 id="org2e75c43">The Insertion Sort</h2>
+<div class="outline-text-2" id="text-org2e75c43">
+<p>
+The insertion sort is an instance of a <a href="../decrease-and-conquer/">Decrease And Conquer</a> algorithm and is another case where you maintain a sorted sub-list at the beginning of the list of elements to sort (similar to {<a href="../selection-sort/">selection sort</a>) but instead of scanning the entire unsorted section for the next smallest item to pick (as in "selection sort") you pick the next item in the unsorted and scan down through the sorted section until you find the right place to insert it. This has the slight advantage over selection sort in that you might not have to scan the entire sorted section to find where to insert the next item, while you always have to scan the entire unsorted section to find the next item to select in the selection sort. On the other hand, instead of swapping just two items at the end of each loop, as in the selection sort, with the insertion sort you have to shift every item above where the next item is going to be inserted in order to make a space for it.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga9ea1b6" class="outline-2">
+<h2 id="orga9ea1b6">The Algorithm Parts</h2>
+<div class="outline-text-2" id="text-orga9ea1b6">
+<p>
+This is taken pretty straight from <a href="../HTTAA/">How To Think About Algorithms</a>.
+</p>
+
+<ul class="org-ul">
+<li>
+<b><b>Specification:</b></b> This is a <a href="../the-sorting-problem/">Sorting Problem</a>.</li>
+<li>
+<b><b>Basic Steps:</b></b> Repeatedly insert an item where it belongs.</li>
+<li>
+<b><b>Measure of Progress:</b></b> The number of elements we've inserted so far.</li>
+<li>
+<b><b>The Loop Invariant:</b></b> The inserted elements are in sorted order.</li>
+<li>
+<b><b>Main Steps:</b></b> Take an unselected item and insert it into the correct place in the sorted list.</li>
+<li>
+<b><b>Make Progress:</b></b> We always insert an item.</li>
+<li>
+<b><b>Maintain the Loop Invariant:</b></b>
+<ul class="org-ul">
+<li>\( \langle \textit{Loop Invariant} \rangle\): Insertion List is sorted.</li>
+<li>\(\lnot \langle \textit{Exit-Condition} \rangle \): There's more to sort.</li>
+<li>\(\sc{CodeLoop}\): The item that was chosen was inserted in the place that maintains the loop invariant.</li>
+</ul>
+</li>
+<li>
+<b><b>Establish the Loop Invariant:</b></b> Pick the first item from the unsorted list giving us a sorted list with one item.</li>
+<li>
+<b><b>Exit Condition:</b></b> We've inserted all the items.</li>
+<li>
+<b><b>Ending:</b></b>
+<ul class="org-ul">
+<li>\(\langle \textit{Exit-Condition} \rangle\): All elements were inserted.</li>
+<li>\(\langle \textit{Loop Invariant} \rangle\): All inserted elements are in the right order.</li>
+<li>\(\rightarrow \langle \textit{Post-Condition} \rangle\): All the elements are in sorted order.</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgd309dd8" class="outline-2">
+<h2 id="orgd309dd8">The Pseudocode</h2>
+<div class="outline-text-2" id="text-orgd309dd8">
+<pre id="insertionsort" style="display:hidden;">
+\begin{algorithm}
+\caption{InsertionSort}
+\begin{algorithmic}
+\INPUT An array of orderable items
+\OUTPUT The array sorted in ascending order
+\PROCEDURE{InsertionSort}{$A$}
+  \FOR{$i \gets 1$ to $n - 1$}
+    \STATE $v \gets A[i]$
+    \STATE $j \gets i - 1$
+    \WHILE{$j \geq 0$ and $A[j] &gt; v$}
+       \STATE $A[j + 1] \gets A[j]$
+       \STATE $j \gets j - 1$
+    \ENDWHILE
+    \STATE $A[j + 1] \gets v$
+  \ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+
+<p>
+The outer loop tracks the boundary between the sorted section of the list (elements whose index is less than <i>i</i>) and the unsorted section (<i>i</i> to the end of the list). Every time through the outer loop we pick the next item to insert (and assign it to <i>v</i>) then in the <code>while</code> loop we traverse the list backwards, moving the items up one in the list until we find a place where the value to insert isn't less than the next item in the array (or we haven't reached the start of the list). Once we end up at the place to insert the value we exit the <code>while</code> loop and insert the value where we stopped. Then we move our outer loop up one and start again until everything's sorted.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org52e30f4" class="outline-2">
+<h2 id="org52e30f4">Runtime</h2>
+<div class="outline-text-2" id="text-org52e30f4">
+<p>
+Given the two loops you can probably guess that it's going to be \(\Theta(n^2)\), but I'll go through it so I don't forget later on.
+</p>
+
+\begin{align}
+C_{worst} &amp;= \sum_{i=1}^{n - 1} \sum_{j=0}^{i-1} 1\\
+&amp;= \sum_{i=1}^{n - 1} ((i - 1) - 0 + 1) \\
+&amp;= \sum_{i=1}^{n - 1} i
+\end{align}
+
+<p>
+This is pretty similar to what I had in the <a href="../bubble-sort-runtime-explained/">Bubble Sort: Runtime Explained</a> post so I won't go over the reasons for the steps, but at this point we can use the summing backwards and forwards of the series trick to see what our worst-case runtime is.
+</p>
+
+\begin{array}{ccccccccc}
+&amp; 1 &amp; + &amp; 2 &amp; + &amp; \cdots &amp; + &amp; (n - 2) &amp; + &amp; (n - 1) \\
++ &amp; (n - 1) &amp; + &amp; (n - 2) &amp; + &amp; \cdots &amp; + &amp; 2 &amp; + &amp; 1 \\
+\hline
+&amp; n &amp; + &amp; n &amp; + &amp; \cdots &amp; + &amp; n &amp; + &amp; n\\
+\end{array}
+
+<p>
+So we have <i>n - 1</i> terms of <i>n</i> in our doubled runtime which we can then halve to get:
+</p>
+
+<p>
+\[
+C_{worst} = \frac{n (n - 1)}{2} \in \Theta(n^2)
+\]
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb3592ad" class="outline-2">
+<h2 id="orgb3592ad">Implement It</h2>
+<div class="outline-text-2" id="text-orgb3592ad">
+<p>
+I'll try and copy the way the selection and bubble sorts looked to make it easier to compare them later.
+</p>
+</div>
+
+<div id="outline-container-org27d5762" class="outline-3">
+<h3 id="org27d5762">Imports</h3>
+<div class="outline-text-3" id="text-org27d5762">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org82e77e6" class="outline-3">
+<h3 id="org82e77e6">Some Types</h3>
+<div class="outline-text-3" id="text-org82e77e6">
+<p>
+<b><b>Note:</b></b> For my future self: using the <code>dataclass</code> is the python way to make a data object, but numba doesn't like it, so we can't use it.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">InsertionOutput</span><span class="p">:</span>
+    <span class="n">element_count</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">comparisons</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">swaps</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">elements</span><span class="p">:</span> <span class="n">MutableSequence</span>
+</pre></div>
+
+<p>
+I'll use the regular <code>namedtuple</code> instead.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">InsertionOutput</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"InsertionOutput"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"element_count"</span><span class="p">,</span>
+						 <span class="s2">"comparisons"</span><span class="p">,</span>
+						 <span class="s2">"swaps"</span><span class="p">,</span>
+						 <span class="s2">"elements"</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org83183da" class="outline-3">
+<h3 id="org83183da">The Counter</h3>
+<div class="outline-text-3" id="text-org83183da">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insertion_sort</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InsertionOutput</span><span class="p">:</span>
+    <span class="sd">"""Sorts elements using iterative insertion-sort</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     elements: sortable collection of elements</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     count of elements, comparisons made, swaps made, sorted elements</span>
+<span class="sd">    """</span>
+    <span class="n">comparisons</span> <span class="o">=</span> <span class="n">swaps</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">next_unsorted_cell</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)):</span>
+	<span class="n">thing_to_insert</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">next_unsorted_cell</span><span class="p">]</span>
+
+	<span class="n">in_front_of_me</span><span class="p">,</span> <span class="n">to_the_right</span> <span class="o">=</span> <span class="p">(</span><span class="n">next_unsorted_cell</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+					<span class="n">next_unsorted_cell</span><span class="p">)</span>
+
+	<span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">in_front_of_me</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span>
+		   <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_me</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">thing_to_insert</span><span class="p">):</span>
+	    <span class="n">comparisons</span> <span class="o">+=</span> <span class="mi">1</span>
+	    <span class="n">swaps</span> <span class="o">+=</span> <span class="mi">1</span>
+	    <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_me</span><span class="p">]</span>
+	    <span class="n">in_front_of_me</span><span class="p">,</span> <span class="n">to_the_right</span> <span class="o">=</span> <span class="p">(</span><span class="n">in_front_of_me</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+					    <span class="n">in_front_of_me</span><span class="p">)</span>
+
+	<span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">]</span> <span class="o">=</span> <span class="n">thing_to_insert</span>
+	<span class="n">swaps</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">InsertionOutput</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span> <span class="n">comparisons</span><span class="p">,</span> <span class="n">swaps</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
+</pre></div>
+
+<p>
+I negated the while-condition and re-stated the body to make more sense to me. Hopefully it's still clear what's going on.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7fa1199" class="outline-3">
+<h3 id="org7fa1199">Some Simple Testing</h3>
+<div class="outline-text-3" id="text-org7fa1199">
+</div>
+<div id="outline-container-org17bf996" class="outline-4">
+<h4 id="org17bf996">Importing</h4>
+<div class="outline-text-4" id="text-org17bf996">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">default_rng</span>
+
+<span class="kn">import</span> <span class="nn">altair</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.sort.insertion</span> <span class="kn">import</span> <span class="n">insertion_sort</span>
+
+<span class="c1"># my stuff</span>
+<span class="kn">from</span> <span class="nn">graeae</span> <span class="kn">import</span> <span class="n">Timer</span>
+<span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_chart</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org1cca09f" class="outline-4">
+<h4 id="org1cca09f">Set Up</h4>
+<div class="outline-text-4" id="text-org1cca09f">
+<div class="highlight"><pre><span></span><span class="n">numba_random</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
+
+<span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"insertion-sort"</span>
+<span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
+<span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org2dd318c" class="outline-4">
+<h4 id="org2dd318c">Worst Case</h4>
+<div class="outline-text-4" id="text-org2dd318c">
+<div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)))</span>
+<span class="n">expected</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">insertion_sort</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">expected</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">comparisons</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">((</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org11804b0" class="outline-4">
+<h4 id="org11804b0">Best Case</h4>
+<div class="outline-text-4" id="text-org11804b0">
+<div class="highlight"><pre><span></span><span class="n">inputs</span> <span class="o">=</span> <span class="n">expected</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">insertion_sort</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">expected</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">comparisons</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">swaps</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+
+<p>
+Maybe <code>comparisons</code> is the wrong term since it's really counting the number of times we get past the sentinel in the <code>while</code> statement, but I don't think there's a good way to count how many times the sentinel gets checked, so the swaps has to act as a proxy for this best-case scenario where we never drop into the while loop.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd1f3231" class="outline-4">
+<h4 id="orgd1f3231">Random</h4>
+<div class="outline-text-4" id="text-orgd1f3231">
+<div class="highlight"><pre><span></span><span class="n">inputs</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">expected</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">insertion_sort</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">expected</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">((</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">comparisons</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">swaps</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+4950.0
+2585
+2684
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge03ba9a" class="outline-3">
+<h3 id="orge03ba9a">Comparisons and Swaps</h3>
+<div class="outline-text-3" id="text-orge03ba9a">
+<div class="highlight"><pre><span></span><span class="n">numba_sort</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="n">insertion_sort</span><span class="p">)</span>
+<span class="n">things_to_sort</span> <span class="o">=</span> <span class="p">[</span><span class="n">numba_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
+		  <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)]</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
+    <span class="n">sort_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+	<span class="n">delayed</span><span class="p">(</span><span class="n">numba_sort</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Started: 2022-01-16 22:55:12.336777
+Ended: 2022-01-16 22:55:23.534382
+Elapsed: 0:00:11.197605
+</pre>
+
+
+<div class="highlight"><pre><span></span><span class="n">SIZE</span><span class="p">,</span> <span class="n">COMPARISONS</span><span class="p">,</span> <span class="n">SWAPS</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+<span class="n">unzipped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">sort_output</span><span class="p">))</span>
+<span class="n">count_frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Elements"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">SIZE</span><span class="p">],</span>
+				<span class="s2">"Insertion"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">SWAPS</span><span class="p">]})</span>
+
+<span class="n">count_frame</span><span class="p">[</span><span class="s2">"n^2"</span><span class="p">]</span> <span class="o">=</span> <span class="n">count_frame</span><span class="o">.</span><span class="n">Elements</span><span class="o">**</span><span class="mi">2</span>
+
+<span class="n">melted</span> <span class="o">=</span> <span class="n">count_frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Elements"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Runtime"</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">tooltip</span> <span class="o">=</span> <span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Elements"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+	   <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Runtime"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span> 
+	   <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Source:N"</span><span class="p">)]</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="s2">"Elements"</span><span class="p">,</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="s2">"Runtime"</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Source:N"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="n">tooltip</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Insertion Sort"</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"insertion-sort-comparisons"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="insertion-sort-comparisons.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+With our random input the Insertion Sort does better than the theoretical worst case. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org11bf817" class="outline-3">
+<h3 id="org11bf817">Best and Worst Cases</h3>
+<div class="outline-text-3" id="text-org11bf817">
+<p>
+Let's get rid of the \(n^2\) and add the best-case and worst-case data.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">frame</span> <span class="o">=</span> <span class="n">count_frame</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"Insertion"</span><span class="p">:</span> <span class="s2">"Random"</span><span class="p">})</span>
+<span class="k">del</span> <span class="n">frame</span><span class="p">[</span><span class="s2">"n^2"</span><span class="p">]</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">best_things</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)]</span>
+<span class="n">worst_things</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">things</span><span class="p">)</span> <span class="k">for</span> <span class="n">things</span> <span class="ow">in</span> <span class="n">best_things</span><span class="p">]</span>
+
+<span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
+    <span class="n">worst_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+	<span class="n">delayed</span><span class="p">(</span><span class="n">numba_sort</span><span class="p">)(</span><span class="n">thing</span><span class="p">)</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">worst_things</span>
+<span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Started: 2022-01-16 22:56:34.282090
+Ended: 2022-01-16 22:56:56.373266
+Elapsed: 0:00:22.091176
+</pre>
+
+
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
+    <span class="n">best_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+	<span class="n">delayed</span><span class="p">(</span><span class="n">numba_sort</span><span class="p">)(</span><span class="n">thing</span><span class="p">)</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">best_things</span>
+<span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Started: 2022-01-16 22:57:04.941850
+Ended: 2022-01-16 22:57:05.067092
+Elapsed: 0:00:00.125242
+</pre>
+
+
+<div class="highlight"><pre><span></span><span class="n">best_unzipped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">best_output</span><span class="p">))</span>
+<span class="n">worst_unzipped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">worst_output</span><span class="p">))</span>
+
+<span class="n">frame</span><span class="p">[</span><span class="s2">"Best"</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_unzipped</span><span class="p">[</span><span class="n">SWAPS</span><span class="p">]</span>
+<span class="n">frame</span><span class="p">[</span><span class="s2">"Worst"</span><span class="p">]</span> <span class="o">=</span> <span class="n">worst_unzipped</span><span class="p">[</span><span class="n">SWAPS</span><span class="p">]</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Elements"</span><span class="p">],</span>
+		    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Input"</span><span class="p">,</span>
+		    <span class="n">value_name</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"Elements"</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Input"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Elements"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Comparisons"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+	     <span class="s2">"Input"</span><span class="p">],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Insertion Sort Best, Worst, Random"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span>
+<span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"best-worst-random"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="best-worst-random.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+Here we can see why Insertion Sort is considered better than Bubble and Selection Sort. In those cases they have to traverse the entire unsorted collection every time but Insertion Sort only picks whatever is the next unsorted item and searches the sorted until it finds the right place to insert it. In the worst case they're all the same, but whenever it isn't the worst case insertion sort offers a little improvement.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org739cc98" class="outline-3">
+<h3 id="org739cc98">The Swaps</h3>
+<div class="outline-text-3" id="text-org739cc98">
+<p>
+Let's look at what plotting the location of the elements as they are swapped looks like.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insertion_swaps</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">"""Keeps track of the element indexes as they are swapped</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     elements: list of orderable elements</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     dict mapping element to list of indices where it was in the elements list</span>
+<span class="sd">    """</span>
+    <span class="n">swaps</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elements</span><span class="p">)}</span>
+
+    <span class="n">number_of_elements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">next_unsorted_cell</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)):</span>
+	<span class="n">thing_to_insert</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">next_unsorted_cell</span><span class="p">]</span>
+
+	<span class="n">in_front_of_me</span><span class="p">,</span> <span class="n">to_the_right</span> <span class="o">=</span> <span class="p">(</span><span class="n">next_unsorted_cell</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+					<span class="n">next_unsorted_cell</span><span class="p">)</span>
+
+	<span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">in_front_of_me</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span>
+	       <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_me</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">thing_to_insert</span><span class="p">):</span>
+	    <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_me</span><span class="p">]</span>
+	    <span class="n">in_front_of_me</span><span class="p">,</span> <span class="n">to_the_right</span> <span class="o">=</span> <span class="p">(</span><span class="n">in_front_of_me</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+					    <span class="n">in_front_of_me</span><span class="p">)</span>
+
+	<span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">]</span> <span class="o">=</span> <span class="n">thing_to_insert</span>
+
+	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+	    <span class="n">swaps</span><span class="p">[</span><span class="n">element</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">swaps</span>
+</pre></div>
+
+<p>
+A little sanity check.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">inputs</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">expected</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="n">insertion_swaps</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">expected</span><span class="p">))</span>
+</pre></div>
+</div>
+
+<div id="outline-container-orge68306f" class="outline-4">
+<h4 id="orge68306f">Random Case</h4>
+<div class="outline-text-4" id="text-orge68306f">
+<div class="highlight"><pre><span></span><span class="n">COUNT</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">COUNT</span><span class="p">))</span>
+<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+<span class="n">swaps</span> <span class="o">=</span> <span class="n">insertion_swaps</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+<span class="n">track_frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">swaps</span><span class="p">)</span>
+<span class="n">re_indexed</span> <span class="o">=</span> <span class="n">track_frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Swap"</span><span class="p">})</span>
+<span class="n">melted</span> <span class="o">=</span> <span class="n">re_indexed</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">var_name</span><span class="o">=</span><span class="s2">"Value To Sort"</span><span class="p">,</span>
+			 <span class="n">value_name</span><span class="o">=</span><span class="s2">"Location In Array"</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="s2">"Swap"</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"Swap"</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"Location In Array"</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Value To Sort:O"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Swap"</span><span class="p">,</span> <span class="s2">"Location In Array"</span><span class="p">,</span> <span class="s2">"Value To Sort"</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Insertion Sort Insertions"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"insertion-sort-swaps"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="insertion-sort-swaps.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+To interpret the chart, the y-axis values are the indices of the input list and as we move left to right along the x-axis we are traversing the outer loop. Everytime a line goes from horizontal to a downward slope that means that the element at the <i>y</i> location was plucked from the unsorted section and inserted into the previously sorted section. The longer the downward line, the further back it had to go in the sorted section before being inserted (and so the more items had to be moved aside for it to find its place).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7649df9" class="outline-4">
+<h4 id="org7649df9">Worst Case Swaps</h4>
+<div class="outline-text-4" id="text-org7649df9">
+<p>
+Now we'll take a look at what the swaps look like when the collection to be sorted is in exactly the reversed order.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">COUNT</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">COUNT</span><span class="p">)))</span>
+<span class="n">swaps</span> <span class="o">=</span> <span class="n">insertion_swaps</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+<span class="n">track_frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">swaps</span><span class="p">)</span>
+<span class="n">re_indexed</span> <span class="o">=</span> <span class="n">track_frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Swap"</span><span class="p">})</span>
+<span class="n">melted</span> <span class="o">=</span> <span class="n">re_indexed</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">var_name</span><span class="o">=</span><span class="s2">"Value To Sort"</span><span class="p">,</span>
+			 <span class="n">value_name</span><span class="o">=</span><span class="s2">"Location In Array"</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="s2">"Swap"</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"Swap"</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"Location In Array"</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Value To Sort:O"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Swap"</span><span class="p">,</span> <span class="s2">"Location In Array"</span><span class="p">,</span> <span class="s2">"Value To Sort"</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Insertion Sort Insertions (Worst-Case)"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"worst-case-insertion-sort-swaps"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="worst-case-insertion-sort-swaps.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+So, here we don't have the mostly short lines of the previous chart because every element had to be inserted at the beginning of the previously sorted section of the list.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6c08a3b" class="outline-2">
+<h2 id="org6c08a3b">Compare The Three Amigos</h2>
+<div class="outline-text-2" id="text-org6c08a3b">
+<p>
+We've had three brute-force sorters so far, let's see if there's a noticeable difference in their comparisons.
+</p>
+
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.sort.bubble.bubble</span> <span class="kn">import</span> <span class="n">bubba</span>
+<span class="kn">from</span> <span class="nn">bowling.sort.selection</span> <span class="kn">import</span> <span class="n">selection_counter</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">numba_bubble</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="n">bubba</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
+    <span class="n">bubble_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+	<span class="n">delayed</span><span class="p">(</span><span class="n">numba_bubble</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Started: 2022-01-11 23:38:40.676138
+Ended: 2022-01-11 23:40:07.211075
+Elapsed: 0:01:26.534937
+</pre>
+
+
+<div class="highlight"><pre><span></span><span class="n">numba_selection</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="n">selection_counter</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
+    <span class="n">selection_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+	<span class="n">delayed</span><span class="p">(</span><span class="n">numba_selection</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Started: 2022-01-11 23:00:03.404894
+Ended: 2022-01-11 23:00:43.390039
+Elapsed: 0:00:39.985145
+</pre>
+
+
+<div class="highlight"><pre><span></span><span class="n">unzipped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bubble_output</span><span class="p">))</span>
+
+<span class="n">count_frame</span><span class="p">[</span><span class="s2">"Bubble"</span><span class="p">]</span> <span class="o">=</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">COMPARISONS</span><span class="p">]</span>
+
+<span class="n">unzipped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">selection_output</span><span class="p">))</span>
+
+<span class="n">count_frame</span><span class="p">[</span><span class="s2">"Selection"</span><span class="p">]</span> <span class="o">=</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">COMPARISONS</span><span class="p">]</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">count_frame</span> <span class="o">=</span> <span class="n">count_frame</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"Insertion Comparisons"</span><span class="p">:</span> <span class="s2">"Insertion"</span><span class="p">})</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">frame</span> <span class="o">=</span> <span class="n">count_frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Elements"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Sorter"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">tooltip</span> <span class="o">=</span> <span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Elements"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+	   <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Comparisons"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span> 
+	   <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Sorter"</span><span class="p">)]</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"Elements"</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Sorter"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="n">tooltip</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">550</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"The Three Amigos"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"three-amigos-comparisons"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="three-amigos-comparisons.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+You might be looking at the chart and wondering - "Where's the Bubble Sort?". Well, since Selection Sort always checks all the unsorted for the next item, it has to do just as many comparisons as Bubble Sort does so they are (almost) overlapping - since I used the short-circuiting Bubble Sort if you zoom way, way in you'll see that the Bubble Sort's points are actually usually slighly lower than the Selection Sort's line.
+</p>
+
+<p>
+I guess the main takeaway is that because the Insertion Sort has an out that lets it short-circuit each inner while-loop it generally will perform better than the other two sorts, although it's still a quadratic sort.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0d37cfa" class="outline-2">
+<h2 id="org0d37cfa">Sources</h2>
+<div class="outline-text-2" id="text-org0d37cfa">
+<ul class="org-ul">
+<li><a href="../HTTAA/">How To Think About Algorithms</a></li>
+<li><a href="../itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("insertionsort"));
+});
+</script>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/iterative/" rel="tag">iterative</a></li>
+            <li><a class="tag p-category" href="../../categories/more-of-the-output/" rel="tag">more of the output</a></li>
+            <li><a class="tag p-category" href="../../categories/reduce-conquer/" rel="tag">reduce &amp; conquer</a></li>
+            <li><a class="tag p-category" href="../../categories/sorting/" rel="tag">sorting</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../bubble-sort-an-archeological-algorithmic-analysis/" rel="prev" title="Bubble Sort: An Archeological Algorithmic Analysis">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../r-babel-test/" rel="next" title="R Babel Test">Next post</a>
+            </li>
+        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
+             MathJax.Hub.Config({
+               tex2jax: {
+                 inlineMath: [['$','$'], ['\\(','\\)']],
+                 displayMath: [['$$','$$'], ['\\[','\\]']],
+                 processEscapes: true,
+                 processEnvironments: true,
+               },
+               displayAlign: 'center',
+               "HTML-CSS": {
+                 styles: {'.MathJax_Display': {"margin": 0}}
+               }
+             });
+            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>

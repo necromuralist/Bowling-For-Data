@@ -1,0 +1,1288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="../assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Bowling For Data (Posts about Visualization)</title><link>https://necromuralist.github.io/Bowling-For-Data/</link><description></description><atom:link href="https://necromuralist.github.io/Bowling-For-Data/categories/cat_visualization.xml" rel="self" type="application/rss+xml"></atom:link><language>en</language><copyright>Contents © 2022 &lt;a href="mailto:cloisteredmonkey.jmark@slmail.me"&gt;The Cloistered Monkey&lt;/a&gt; 
+ &lt;a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"&gt;
+ &lt;img alt="Creative Commons License BY-NC-SA"
+ style="border-width:0; margin-bottom:12px;"
+ src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"&gt;&lt;/a&gt;</copyright><lastBuildDate>Mon, 24 Jan 2022 01:58:34 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>A Look At ggplot</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="table-of-contents"&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;div id="text-table-of-contents"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org9d10e04"&gt;Introduction&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgc1d8817"&gt;Set Up Stuff&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orge9b79e8"&gt;Imports&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org6b755f4"&gt;Constants&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgab011ad"&gt;The GGPlot2 Theme&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org1884712"&gt;The MPG Dataset&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgd6d4a78"&gt;The Variables&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgadc231f"&gt;Renaming Some Columns&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgc859b16"&gt;Looking at the Data&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org369048a"&gt;Some Renaming&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org664a87c"&gt;The Drive Trains&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgd853164"&gt;Fuel Types&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org6577038"&gt;Transmission&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org6f5c896"&gt;Displacement Vs Highway Mileage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orga368cbe"&gt;Ditching the Highway (Mileage)&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgc73e629"&gt;Combined Mileage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orga0a64b6"&gt;Comparing the Two&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgd80aa01"&gt;Gallons Per Mile&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org37acfc2"&gt;Displacement With Class&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org2258019"&gt;Efficiency&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org3088412"&gt;Faceting The Classes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org9791ab3"&gt;Smoothing the Line&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org00c1fdc"&gt;Different Datasets to the Geometries&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org7495d9d"&gt;Small Four-Wheel Drive Automobiles&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgddc204b"&gt;Bar Plots&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org612c2b8"&gt;By Count&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org6e8795a"&gt;By Proportion&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org9034afa"&gt;Un-Stacked&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org3944f33"&gt;Proportions Not Counts&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgc7a8eee"&gt;Stat Summary&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org419b096"&gt;Boxplot&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgfdaa4eb"&gt;The End&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org8af7a9a"&gt;Link Collection&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org9d10e04" class="outline-2"&gt;
+&lt;h2 id="org9d10e04"&gt;Introduction&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org9d10e04"&gt;
+&lt;p&gt;
+This is a quick walk-through of some aspects of &lt;a href="https://ggplot2.tidyverse.org/"&gt;ggplot2&lt;/a&gt; based on the first chapter of {% doc %}r-for-data-science{% /doc %}.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-orgc1d8817" class="outline-2"&gt;
+&lt;h2 id="orgc1d8817"&gt;Set Up Stuff&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgc1d8817"&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-orge9b79e8" class="outline-3"&gt;
+&lt;h3 id="orge9b79e8"&gt;Imports&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orge9b79e8"&gt;
+&lt;p&gt;
+   &lt;b&gt;&lt;b&gt;Note:&lt;/b&gt;&lt;/b&gt; 
+When you run the first code block to start the session, remember to give it the path to the posts-output folder so you don't need the path when saving the plots.
+&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;library&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"assertthat"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nf"&gt;library&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"ggplot2"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nf"&gt;library&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"knitr"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nf"&gt;library&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"tidyverse"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org6b755f4" class="outline-3"&gt;
+&lt;h3 id="org6b755f4"&gt;Constants&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org6b755f4"&gt;
+&lt;p&gt;
+These are stuff that get re-used in the plotting.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;DISPLACEMENT&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="s"&gt;"Engine Displacement (Liters)"&lt;/span&gt;
+&lt;span class="n"&gt;EFFICIENCY&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt;&lt;span class="s"&gt;"Gallons Per Mile (Combined)"&lt;/span&gt;
+&lt;span class="n"&gt;DISPLACEMENT_VS_EFFICIENCY&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;partial&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;DISPLACEMENT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;BLUE&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="s"&gt;"#4687b7"&lt;/span&gt;
+&lt;span class="n"&gt;RED&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="s"&gt;"#ce7b6d"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgab011ad" class="outline-3"&gt;
+&lt;h3 id="orgab011ad"&gt;The GGPlot2 Theme&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgab011ad"&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;theme_set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;theme_minimal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;base_family&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Palatino"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org1884712" class="outline-2"&gt;
+&lt;h2 id="org1884712"&gt;The MPG Dataset&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org1884712"&gt;
+&lt;p&gt;
+For some reason loading &lt;code&gt;ggplot2&lt;/code&gt; also loads this dataset. Its short description is "Fuel economy data from 1999 to 2008 for 38 popular models of cars". The long description:
+&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;
+This dataset contains a subset of the fuel economy data that the
+EPA makes available on &amp;lt;URL: &lt;a href="https://fueleconomy.gov/"&gt;https://fueleconomy.gov/&lt;/a&gt;&amp;gt;. It
+contains only models which had a new release every year between
+1999 and 2008 - this was used as a proxy for the popularity of the
+car.
+&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgd6d4a78" class="outline-3"&gt;
+&lt;h3 id="orgd6d4a78"&gt;The Variables&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgd6d4a78"&gt;
+&lt;p&gt;
+It's a data frame with 234 rows and 11 variables:
+&lt;/p&gt;
+
+&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
+
+
+&lt;colgroup&gt;
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-left"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th scope="col" class="org-left"&gt;Variable&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;manufacturer&lt;/td&gt;
+&lt;td class="org-left"&gt;manufacturer name&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;model&lt;/td&gt;
+&lt;td class="org-left"&gt;model name&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;displ&lt;/td&gt;
+&lt;td class="org-left"&gt;engine displacement, in litres&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;year&lt;/td&gt;
+&lt;td class="org-left"&gt;year of manufacture&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;cyl&lt;/td&gt;
+&lt;td class="org-left"&gt;number of cylinders&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;trans&lt;/td&gt;
+&lt;td class="org-left"&gt;type of transmission&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;drv&lt;/td&gt;
+&lt;td class="org-left"&gt;drive train (&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#org664a87c"&gt;listed below&lt;/a&gt;)&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;cty&lt;/td&gt;
+&lt;td class="org-left"&gt;city miles per gallon&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;hwy&lt;/td&gt;
+&lt;td class="org-left"&gt;highway miles per gallon&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;fl&lt;/td&gt;
+&lt;td class="org-left"&gt;fuel type&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;class&lt;/td&gt;
+&lt;td class="org-left"&gt;"type" of car&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;
+I'll do some column renaming here since I keep forgetting what abbreviations they used.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgadc231f" class="outline-3"&gt;
+&lt;h3 id="orgadc231f"&gt;Renaming Some Columns&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgadc231f"&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;mpg&lt;/span&gt; &lt;span class="o"&gt;%&amp;gt;%&lt;/span&gt;
+  &lt;span class="nf"&gt;rename&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displ&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;cylinders&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cyl&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;transmission&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;trans&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;drv&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;city_mpg&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cty&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;highway_mpg&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;hwy&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;fuel_type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;fl&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;pre class="example"&gt;
+tibble [234 × 11] (S3: tbl_df/tbl/data.frame)
+ $ manufacturer: chr [1:234] "audi" "audi" "audi" "audi" ...
+ $ model       : chr [1:234] "a4" "a4" "a4" "a4" ...
+ $ displacement: num [1:234] 1.8 1.8 2 2 2.8 2.8 3.1 1.8 1.8 2 ...
+ $ year        : int [1:234] 1999 1999 2008 2008 1999 1999 2008 1999 1999 2008 ...
+ $ cylinders   : int [1:234] 4 4 4 4 6 6 6 4 4 4 ...
+ $ transmission: chr [1:234] "auto(l5)" "manual(m5)" "manual(m6)" "auto(av)" ...
+ $ drive_train : chr [1:234] "f" "f" "f" "f" ...
+ $ city_mpg    : int [1:234] 18 21 20 21 16 18 18 18 16 20 ...
+ $ highway_mpg : int [1:234] 29 29 31 30 26 26 27 26 25 28 ...
+ $ fuel_type   : chr [1:234] "p" "p" "p" "p" ...
+ $ class       : chr [1:234] "compact" "compact" "compact" "compact" ...
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgc859b16" class="outline-3"&gt;
+&lt;h3 id="orgc859b16"&gt;Looking at the Data&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgc859b16"&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;kable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;head&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;caption&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"MPG Dataset (EPA Automobile Data)"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+Table: MPG Dataset (EPA Automobile Data)
+&lt;/p&gt;
+
+&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
+
+
+&lt;colgroup&gt;
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-left"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th scope="col" class="org-left"&gt;manufacturer&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;model&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;displacement&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;year&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;cylinders&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;transmission&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;drive_train&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;city_mpg&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;highway_mpg&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;fuel_type&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;class&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;audi&lt;/td&gt;
+&lt;td class="org-left"&gt;a4&lt;/td&gt;
+&lt;td class="org-right"&gt;1.8&lt;/td&gt;
+&lt;td class="org-right"&gt;1999&lt;/td&gt;
+&lt;td class="org-right"&gt;4&lt;/td&gt;
+&lt;td class="org-left"&gt;auto(l5)&lt;/td&gt;
+&lt;td class="org-left"&gt;f&lt;/td&gt;
+&lt;td class="org-right"&gt;18&lt;/td&gt;
+&lt;td class="org-right"&gt;29&lt;/td&gt;
+&lt;td class="org-left"&gt;p&lt;/td&gt;
+&lt;td class="org-left"&gt;compact&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;audi&lt;/td&gt;
+&lt;td class="org-left"&gt;a4&lt;/td&gt;
+&lt;td class="org-right"&gt;1.8&lt;/td&gt;
+&lt;td class="org-right"&gt;1999&lt;/td&gt;
+&lt;td class="org-right"&gt;4&lt;/td&gt;
+&lt;td class="org-left"&gt;manual(m5)&lt;/td&gt;
+&lt;td class="org-left"&gt;f&lt;/td&gt;
+&lt;td class="org-right"&gt;21&lt;/td&gt;
+&lt;td class="org-right"&gt;29&lt;/td&gt;
+&lt;td class="org-left"&gt;p&lt;/td&gt;
+&lt;td class="org-left"&gt;compact&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;audi&lt;/td&gt;
+&lt;td class="org-left"&gt;a4&lt;/td&gt;
+&lt;td class="org-right"&gt;2.0&lt;/td&gt;
+&lt;td class="org-right"&gt;2008&lt;/td&gt;
+&lt;td class="org-right"&gt;4&lt;/td&gt;
+&lt;td class="org-left"&gt;manual(m6)&lt;/td&gt;
+&lt;td class="org-left"&gt;f&lt;/td&gt;
+&lt;td class="org-right"&gt;20&lt;/td&gt;
+&lt;td class="org-right"&gt;31&lt;/td&gt;
+&lt;td class="org-left"&gt;p&lt;/td&gt;
+&lt;td class="org-left"&gt;compact&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;audi&lt;/td&gt;
+&lt;td class="org-left"&gt;a4&lt;/td&gt;
+&lt;td class="org-right"&gt;2.0&lt;/td&gt;
+&lt;td class="org-right"&gt;2008&lt;/td&gt;
+&lt;td class="org-right"&gt;4&lt;/td&gt;
+&lt;td class="org-left"&gt;auto(av)&lt;/td&gt;
+&lt;td class="org-left"&gt;f&lt;/td&gt;
+&lt;td class="org-right"&gt;21&lt;/td&gt;
+&lt;td class="org-right"&gt;30&lt;/td&gt;
+&lt;td class="org-left"&gt;p&lt;/td&gt;
+&lt;td class="org-left"&gt;compact&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;audi&lt;/td&gt;
+&lt;td class="org-left"&gt;a4&lt;/td&gt;
+&lt;td class="org-right"&gt;2.8&lt;/td&gt;
+&lt;td class="org-right"&gt;1999&lt;/td&gt;
+&lt;td class="org-right"&gt;6&lt;/td&gt;
+&lt;td class="org-left"&gt;auto(l5)&lt;/td&gt;
+&lt;td class="org-left"&gt;f&lt;/td&gt;
+&lt;td class="org-right"&gt;16&lt;/td&gt;
+&lt;td class="org-right"&gt;26&lt;/td&gt;
+&lt;td class="org-left"&gt;p&lt;/td&gt;
+&lt;td class="org-left"&gt;compact&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;audi&lt;/td&gt;
+&lt;td class="org-left"&gt;a4&lt;/td&gt;
+&lt;td class="org-right"&gt;2.8&lt;/td&gt;
+&lt;td class="org-right"&gt;1999&lt;/td&gt;
+&lt;td class="org-right"&gt;6&lt;/td&gt;
+&lt;td class="org-left"&gt;manual(m5)&lt;/td&gt;
+&lt;td class="org-left"&gt;f&lt;/td&gt;
+&lt;td class="org-right"&gt;18&lt;/td&gt;
+&lt;td class="org-right"&gt;26&lt;/td&gt;
+&lt;td class="org-left"&gt;p&lt;/td&gt;
+&lt;td class="org-left"&gt;compact&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+&lt;div id="outline-container-org369048a" class="outline-3"&gt;
+&lt;h3 id="org369048a"&gt;Some Renaming&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org369048a"&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org664a87c" class="outline-4"&gt;
+&lt;h4 id="org664a87c"&gt;The Drive Trains&lt;/h4&gt;
+&lt;div class="outline-text-4" id="text-org664a87c"&gt;
+&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
+
+
+&lt;colgroup&gt;
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-left"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th scope="col" class="org-left"&gt;Abbreviation&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;Meaning&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;f&lt;/td&gt;
+&lt;td class="org-left"&gt;Front-Wheel Drive&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;r&lt;/td&gt;
+&lt;td class="org-left"&gt;Rear-Wheel Drive&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;4&lt;/td&gt;
+&lt;td class="org-left"&gt;Four-Wheel Drive&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;
+These aren't too obscure, but I think I'll rename them anyway.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;drive_train&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nf"&gt;recode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			  &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Front-Wheel"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Rear-Wheel"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;`4`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Four-Wheel"&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nf"&gt;kable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;unique&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;col.names&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Drives"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
+
+
+&lt;colgroup&gt;
+&lt;col class="org-left"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th scope="col" class="org-left"&gt;Drives&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Front-Wheel&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Four-Wheel&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Rear-Wheel&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;assert_that&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;noNA&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgd853164" class="outline-4"&gt;
+&lt;h4 id="orgd853164"&gt;Fuel Types&lt;/h4&gt;
+&lt;div class="outline-text-4" id="text-orgd853164"&gt;
+&lt;p&gt;
+Although this is about &lt;code&gt;ggplot2&lt;/code&gt;, and the data is sort of a side effect, since I had to look some of this data up to figure out what it meant (at &lt;a href="https://www.fueleconomy.gov/"&gt;fueleconomy.gov&lt;/a&gt;) I'll use this opportunity to document it by updating the data.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;fuel_type&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nf"&gt;recode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;fuel_type&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Premium Unleaded"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Regular Unleaded"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			&lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Ethanol"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Diesel Fuel"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Compressed Natural Gas"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;kable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;unique&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;fuel_type&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;col.names&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Fuel Type"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
+
+
+&lt;colgroup&gt;
+&lt;col class="org-left"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th scope="col" class="org-left"&gt;Fuel Type&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Premium Unleaded&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Regular Unleaded&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Ethanol&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Diesel Fuel&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Compressed Natural Gas&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;
+For some reason I couldn't find a table that directly mapped to the data set so I'm sort of guessing that this is what they stood for based on the 1999 guide on their &lt;a href="https://www.fueleconomy.gov/feg/download.shtml"&gt;download page&lt;/a&gt;. There's also a &lt;code&gt;L&lt;/code&gt; for &lt;b&gt;Liquified Petroleum Gas (Propane)&lt;/b&gt; in the guide but it's not in the data set.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;assert_that&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;noNA&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;fuel_type&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org6577038" class="outline-4"&gt;
+&lt;h4 id="org6577038"&gt;Transmission&lt;/h4&gt;
+&lt;div class="outline-text-4" id="text-org6577038"&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;transmission&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nf"&gt;recode&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;transmission&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`auto(av)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Continuously Variable"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`auto(s4)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Automatic 4-Speed"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`auto(s5)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Automatic 5-Speed"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`auto(s6)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Automatic 6-Speed"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`auto(l3)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Automatic Lockup 3-Speed"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`auto(l4)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Automatic Lockup 4-Speed"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`auto(l5)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Automatic Lockup 5-Speed"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`auto(l6)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Automatic Lockup 6-Speed"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`manual(m5)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Manual 5-Speed"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			   &lt;span class="n"&gt;`manual(m6)`&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Manual 6-Speed"&lt;/span&gt;
+			   &lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;kable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;unique&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;transmission&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;col.names&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Transmission"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
+
+
+&lt;colgroup&gt;
+&lt;col class="org-left"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th scope="col" class="org-left"&gt;Transmission&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Automatic Lockup 5-Speed&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Manual 5-Speed&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Manual 6-Speed&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Continuously Variable&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Automatic 6-Speed&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Automatic Lockup 4-Speed&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Automatic Lockup 3-Speed&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Automatic Lockup 6-Speed&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Automatic 5-Speed&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;Automatic 4-Speed&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;
+Strangely, there's no listing for 4-speed manual transmissions.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;assert_that&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;noNA&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;transmission&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org6f5c896" class="outline-2"&gt;
+&lt;h2 id="org6f5c896"&gt;Displacement Vs Highway Mileage&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org6f5c896"&gt;
+&lt;p&gt;
+Now we come to the basic thing that the chapter in &lt;code&gt;R For Data Science&lt;/code&gt; looks at (mostly) - what affects mileage for automobiles. The first thing we'll do is look at how the size of the engine affects the mileage.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;highway_mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;highway_mpg&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;DISPLACEMENT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Highway MPG"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+       &lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Displacement vs Mileage"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"displacement_vs_mileage.png"&lt;/span&gt;
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/displacement_vs_mileage.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+It has a roughly linear relationship, as you might expect, but the rest of this post is about how to get more information out of the data using &lt;code&gt;ggplot2&lt;/code&gt;.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orga368cbe" class="outline-2"&gt;
+&lt;h2 id="orga368cbe"&gt;Ditching the Highway (Mileage)&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orga368cbe"&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-orgc73e629" class="outline-3"&gt;
+&lt;h3 id="orgc73e629"&gt;Combined Mileage&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgc73e629"&gt;
+&lt;p&gt;
+The EPA uses a weighted average to create a combined metric that uses both Highway and City mileage.
+&lt;/p&gt;
+
+&lt;p&gt;
+\[
+\textrm{Combined Fuel Economy} = 0.55 \times \textit{city} + 0.45 \times \textit{highway}
+\]
+&lt;/p&gt;
+
+&lt;p&gt;
+I've also seen it done as the harmonic mean (&lt;a href="https://tasks.illustrativemathematics.org/content-standards/tasks/825"&gt;on Illustrative Mathematics&lt;/a&gt;), but if you round to the nearest whole number it comes out about the same.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;combined_fuel_economy&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="m"&gt;0.55&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;city_mpg&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="m"&gt;0.45&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;highway_mpg&lt;/span&gt;
+
+&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;combined_fuel_economy&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;combined_fuel_economy&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;DISPLACEMENT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Combined MPG"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+       &lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Displacement vs Mileage"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"displacement_vs_combined_mileage.png"&lt;/span&gt;
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/displacement_vs_combined_mileage.png" alt="nil"&gt;
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orga0a64b6" class="outline-3"&gt;
+&lt;h3 id="orga0a64b6"&gt;Comparing the Two&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orga0a64b6"&gt;
+&lt;p&gt;
+We can plot them together to see how much the combined MPG differs from the highway MPG.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_smooth&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;combined_fuel_economy&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"red"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_smooth&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;highway_mpg&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"blue"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;DISPLACEMENT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"MPG"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+       &lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Displacement vs Mileage (Highway and Combined)"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"highway_vs_combined_mileage.png"&lt;/span&gt;
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/highway_vs_combined_mileage.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+Adding the city mileage drops the mileage somewhat, although the line looks to be about the same shape.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgd80aa01" class="outline-3"&gt;
+&lt;h3 id="orgd80aa01"&gt;Gallons Per Mile&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgd80aa01"&gt;
+&lt;p&gt;
+The EPA's explanation of their &lt;a href="https://www.epa.gov/fueleconomy/text-version-gasoline-label"&gt;vehicle labels&lt;/a&gt; mentions that the reason why they put a &lt;b&gt;Fuel Consumption Rate&lt;/b&gt; is that the &lt;b&gt;Miles Per Gallon&lt;/b&gt; metric is actually not a good way to compare mileage - it is subject to a "Miles Per Gallon Illusion" (&lt;a href="https://www.realclearscience.com/blog/2019/02/14/the_miles_per_gallon_illusion.html#!"&gt;ReaClearScience&lt;/a&gt; has an article about it). Here's how the number of gallons used per 1,000 miles driven changes with miles-per-gallon.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;mileage&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nf"&gt;seq&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="m"&gt;100&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;miles&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;1000&lt;/span&gt;
+&lt;span class="n"&gt;gallons_per_1000_miles&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;miles&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;mileage&lt;/span&gt;
+
+&lt;span class="n"&gt;improvement&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nf"&gt;data.frame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;MPG&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mileage&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			  &lt;span class="n"&gt;gallons&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_1000_miles&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;improvement&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mileage&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0.5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"blue"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_line&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mileage&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"blue"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Fuel Consumption vs MPG"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+       &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Miles Per Gallon"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+       &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Gallons Used Per 1,000 Miles"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"gallons_vs_mpg.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/gallons_vs_mpg.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+As you can see the improvement in the number of gallons used goes down pretty fast as the miles-per-gallon goes up. Let's see about adding a fuel-efficency column. What happens when you switch to Gallons Per Mile?
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;mileage&lt;/span&gt;
+&lt;span class="n"&gt;gallons_per_1000_miles&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="n"&gt;miles&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;
+
+&lt;span class="n"&gt;improvement&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nf"&gt;data.frame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;gpm&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			  &lt;span class="n"&gt;gallons&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_1000_miles&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;improvement&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gpm&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;0.5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"blue"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_line&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gpm&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"blue"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Fuel Consumption vs Gallons Per Mile"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+       &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Gallons Per Mile"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+       &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Gallons Used Per 1,000 Miles"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"gallons_vs_efficiency.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/gallons_vs_efficiency.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+I suppose you could just figure that that'd be the case, but this &lt;i&gt;is&lt;/i&gt; about plotting.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;combined_fuel_economy&lt;/span&gt;
+
+&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;DISPLACEMENT_VS_EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Displacement vs Fuel Efficiency"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"displacement_vs_fuel_efficiency.png"&lt;/span&gt;
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/displacement_vs_fuel_efficiency.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+Even though this is just the inverse of the MPG plot it seems more intuitive to me. I didn't really notice that big outlier at the top when I plotted it using MPG, so I think I'll stick with this.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org37acfc2" class="outline-2"&gt;
+&lt;h2 id="org37acfc2"&gt;Displacement With Class&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org37acfc2"&gt;
+&lt;p&gt;
+The displacement seems to mostly have a linear relationship with mileage, but there's exceptions, let's see if showing the class of the car reveals any interesting patterns.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;unique&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;class&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;pre class="example"&gt;
+[1] "compact"    "midsize"    "suv"        "2seater"    "minivan"   
+[6] "pickup"     "subcompact"
+&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org2258019" class="outline-3"&gt;
+&lt;h3 id="org2258019"&gt;Efficiency&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org2258019"&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+	     &lt;span class="n"&gt;position&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"jitter"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;DISPLACEMENT_VS_EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Displacement vs Fuel Efficiency"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"displacement_vs_mileage_with_class.png"&lt;/span&gt;
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/displacement_vs_mileage_with_class.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+I added a little jitter because it looked like the top outlier was just one point. It looks like 2-seaters and one of the mid-sized cars had unusually good mileage given their engine displacement. What's a two-seater?
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;kable&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;filter&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;class&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="s"&gt;"2seater"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
+
+
+&lt;colgroup&gt;
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-left"&gt;
+
+&lt;col class="org-right"&gt;
+
+&lt;col class="org-right"&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th scope="col" class="org-left"&gt;manufacturer&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;model&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;displacement&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;year&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;cylinders&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;transmission&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;drive_train&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;city_mpg&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;highway_mpg&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;fuel_type&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;class&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;combined_fuel_economy&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;gallons_per_mile&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class="org-left"&gt;chevrolet&lt;/td&gt;
+&lt;td class="org-left"&gt;corvette&lt;/td&gt;
+&lt;td class="org-right"&gt;5.7&lt;/td&gt;
+&lt;td class="org-right"&gt;1999&lt;/td&gt;
+&lt;td class="org-right"&gt;8&lt;/td&gt;
+&lt;td class="org-left"&gt;Manual 6-Speed&lt;/td&gt;
+&lt;td class="org-left"&gt;Rear-Wheel&lt;/td&gt;
+&lt;td class="org-right"&gt;16&lt;/td&gt;
+&lt;td class="org-right"&gt;26&lt;/td&gt;
+&lt;td class="org-left"&gt;Premium Unleaded&lt;/td&gt;
+&lt;td class="org-left"&gt;2seater&lt;/td&gt;
+&lt;td class="org-right"&gt;20.50&lt;/td&gt;
+&lt;td class="org-right"&gt;0.0487805&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;chevrolet&lt;/td&gt;
+&lt;td class="org-left"&gt;corvette&lt;/td&gt;
+&lt;td class="org-right"&gt;5.7&lt;/td&gt;
+&lt;td class="org-right"&gt;1999&lt;/td&gt;
+&lt;td class="org-right"&gt;8&lt;/td&gt;
+&lt;td class="org-left"&gt;Automatic Lockup 4-Speed&lt;/td&gt;
+&lt;td class="org-left"&gt;Rear-Wheel&lt;/td&gt;
+&lt;td class="org-right"&gt;15&lt;/td&gt;
+&lt;td class="org-right"&gt;23&lt;/td&gt;
+&lt;td class="org-left"&gt;Premium Unleaded&lt;/td&gt;
+&lt;td class="org-left"&gt;2seater&lt;/td&gt;
+&lt;td class="org-right"&gt;18.60&lt;/td&gt;
+&lt;td class="org-right"&gt;0.0537634&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;chevrolet&lt;/td&gt;
+&lt;td class="org-left"&gt;corvette&lt;/td&gt;
+&lt;td class="org-right"&gt;6.2&lt;/td&gt;
+&lt;td class="org-right"&gt;2008&lt;/td&gt;
+&lt;td class="org-right"&gt;8&lt;/td&gt;
+&lt;td class="org-left"&gt;Manual 6-Speed&lt;/td&gt;
+&lt;td class="org-left"&gt;Rear-Wheel&lt;/td&gt;
+&lt;td class="org-right"&gt;16&lt;/td&gt;
+&lt;td class="org-right"&gt;26&lt;/td&gt;
+&lt;td class="org-left"&gt;Premium Unleaded&lt;/td&gt;
+&lt;td class="org-left"&gt;2seater&lt;/td&gt;
+&lt;td class="org-right"&gt;20.50&lt;/td&gt;
+&lt;td class="org-right"&gt;0.0487805&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;chevrolet&lt;/td&gt;
+&lt;td class="org-left"&gt;corvette&lt;/td&gt;
+&lt;td class="org-right"&gt;6.2&lt;/td&gt;
+&lt;td class="org-right"&gt;2008&lt;/td&gt;
+&lt;td class="org-right"&gt;8&lt;/td&gt;
+&lt;td class="org-left"&gt;Automatic 6-Speed&lt;/td&gt;
+&lt;td class="org-left"&gt;Rear-Wheel&lt;/td&gt;
+&lt;td class="org-right"&gt;15&lt;/td&gt;
+&lt;td class="org-right"&gt;25&lt;/td&gt;
+&lt;td class="org-left"&gt;Premium Unleaded&lt;/td&gt;
+&lt;td class="org-left"&gt;2seater&lt;/td&gt;
+&lt;td class="org-right"&gt;19.50&lt;/td&gt;
+&lt;td class="org-right"&gt;0.0512821&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td class="org-left"&gt;chevrolet&lt;/td&gt;
+&lt;td class="org-left"&gt;corvette&lt;/td&gt;
+&lt;td class="org-right"&gt;7.0&lt;/td&gt;
+&lt;td class="org-right"&gt;2008&lt;/td&gt;
+&lt;td class="org-right"&gt;8&lt;/td&gt;
+&lt;td class="org-left"&gt;Manual 6-Speed&lt;/td&gt;
+&lt;td class="org-left"&gt;Rear-Wheel&lt;/td&gt;
+&lt;td class="org-right"&gt;15&lt;/td&gt;
+&lt;td class="org-right"&gt;24&lt;/td&gt;
+&lt;td class="org-left"&gt;Premium Unleaded&lt;/td&gt;
+&lt;td class="org-left"&gt;2seater&lt;/td&gt;
+&lt;td class="org-right"&gt;19.05&lt;/td&gt;
+&lt;td class="org-right"&gt;0.0524934&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;
+Just Corvettes here.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+&lt;div id="outline-container-org3088412" class="outline-3"&gt;
+&lt;h3 id="org3088412"&gt;Faceting The Classes&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org3088412"&gt;
+&lt;p&gt;
+While the use of color is useful for comparing the classes on the same plot, sometimes it can be easier to interpret plots that have the categorical classes separated into sub-plots (called &lt;b&gt;&lt;b&gt;facets&lt;/b&gt;&lt;/b&gt;).
+&lt;/p&gt;
+
+&lt;p&gt;
+By default the faceting functions use aphabetical order, I'm going to use a slightly different ordering to see if it makes it clearer how the classes compare (this is based on the medians that I plotted &lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/#orgc7a8eee"&gt;below&lt;/a&gt;).
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nf"&gt;factor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;class&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+			  &lt;span class="n"&gt;levels&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;c&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"compact"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"subcompact"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"midsize"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+				   &lt;span class="s"&gt;"2seater"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+				   &lt;span class="s"&gt;"minivan"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"suv"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"pickup"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;facet_grid&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;.&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; 
+  &lt;span class="nf"&gt;DISPLACEMENT_VS_EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Displacement vs Efficiency"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"displacement_vs_mileage_faceted_classes.png"&lt;/span&gt;
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+I'm using &lt;code&gt;facet_grid&lt;/code&gt; here, which is actually meant to use two variables (creating row and column separation). By putting the &lt;code&gt;.&lt;/code&gt; before the &lt;code&gt;~&lt;/code&gt; we're telling it to only facet using columns. There's also a &lt;code&gt;facet_wrap&lt;/code&gt; function that only does one variable but adds the ability to specify the number of rows you want to use, which might be helpful if you have a lot of classes.
+&lt;/p&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/displacement_vs_mileage_faceted_classes.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+I wouldn't have thought it, but the Corvette falls between the minivan and the sub-compact for fuel efficiency. I guess when you consider that it can only be used to transport two people and not anything relatively large it's still inefficient, just not as much if you're only using it to commute.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org9791ab3" class="outline-3"&gt;
+&lt;h3 id="org9791ab3"&gt;Smoothing the Line&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org9791ab3"&gt;
+&lt;p&gt;
+Instead of plotting a scatterpoint, you can use &lt;code&gt;geom_smooth&lt;/code&gt; to fit a single line representing the trend for the data (using a linear model).
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_smooth&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;facet_grid&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;DISPLACEMENT_VS_EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Displacement vs Efficiency By Type"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"displacement_vs_mileage_smooth.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/displacement_vs_mileage_smooth.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+One interesting thing here is that the four-wheel-drive compact and sub-compact cars did better than some of the front-wheel drive cars in the same class.
+&lt;/p&gt;
+
+&lt;p&gt;
+If you look at the front-wheel-drive sub-compact cars you'll see that the curve-fitting can get a little funky if you're not careful.
+&lt;/p&gt;
+
+&lt;p&gt;
+Note the syntax for the plot. Before we were passing the &lt;code&gt;aes&lt;/code&gt; mapping to the geometry object. You can do that here too, but if you pass it to the &lt;code&gt;ggplot&lt;/code&gt; call then it will automatically apply it to all the geometries. If you wanted to then change one of them you could pass in the &lt;code&gt;aes&lt;/code&gt; mapping to it and override the base mapping you gave to &lt;code&gt;ggplot&lt;/code&gt;.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org00c1fdc" class="outline-3"&gt;
+&lt;h3 id="org00c1fdc"&gt;Different Datasets to the Geometries&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org00c1fdc"&gt;
+&lt;p&gt;
+Besides passing in different &lt;code&gt;aes&lt;/code&gt; mappings, you can also pass in different sub-sets of the data to each geometry (using &lt;a href="https://dplyr.tidyverse.org/reference/filter.html"&gt;dplyr's filter&lt;/a&gt; to isolate the SUVs here).
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_smooth&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;filter&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;class&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="s"&gt;"suv"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;position&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"jitter"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;DISPLACEMENT_VS_EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Displacement vs Fuel Efficiency"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;filename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"displacement_vs_mileage_subsets.png"&lt;/span&gt;
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;filename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/displacement_vs_mileage_subsets.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+Looking at the trend-line for &lt;b&gt;SUVs&lt;/b&gt; you can see that it encompasses a surprising swath of the displacements, and it is mostly upwardly linear to begin with but then flattens out.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+  &lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="n"&gt;mapping&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_smooth&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;se&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;FALSE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;DISPLACEMENT_VS_EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Effect of Drive (Four, Front, or Rear) on Mileage"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"displacement_exercise_2.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/displacement_exercise_2.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+It kind of looks like an emerging pattern that up to a point gasoline consumption goes up with engine size but then once a certain point is passed consumption flattens out, even as the engines get bigger.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org7495d9d" class="outline-3"&gt;
+&lt;h3 id="org7495d9d"&gt;Small Four-Wheel Drive Automobiles&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org7495d9d"&gt;
+&lt;p&gt;
+Just out of curiosity, I'd like to see what those small four-wheel drive cars are.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;small&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;-&lt;/span&gt; &lt;span class="nf"&gt;filter&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="s"&gt;"Four-Wheel"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+  &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;small&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;displacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_point&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;facet_grid&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="n"&gt;manufacturer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;DISPLACEMENT_VS_EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"4WD Less Than 3 Liters"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"small_4wd.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/small_4wd.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+There are only three companies making these small four-wheel-drive automobiles, with Audi being the one focused on sedans.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgddc204b" class="outline-2"&gt;
+&lt;h2 id="orgddc204b"&gt;Bar Plots&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgddc204b"&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org612c2b8" class="outline-3"&gt;
+&lt;h3 id="org612c2b8"&gt;By Count&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org612c2b8"&gt;
+&lt;p&gt;
+The Bar Plot is an example of what the Grammar of Graphics calls a Statistical Transformation (I guess the scatter plots are so called "Identity" transformations, but, whatever). It doesn't display the values in the data (unless you tell it to) but instead shows how often categorical values appear in the data. We can also have it set the color to create a stacked bar plot.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_bar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;mapping&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;fill&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Count of Cars by Class"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Class Ordered by Median MPG"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Count"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"class_count.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/class_count.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+So most models of car are SUVs, how disheartening. This is only a sub-set of cars, though, and it doesn't reflect sales, just model counts.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org6e8795a" class="outline-3"&gt;
+&lt;h3 id="org6e8795a"&gt;By Proportion&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org6e8795a"&gt;
+&lt;p&gt;
+Instead of using counts we can use proportions to show how the sub-category portions compare across categories.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_bar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;mapping&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;fill&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="n"&gt;position&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"fill"&lt;/span&gt;
+  &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Proportion of Drives by Class"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Class Ordered by Median MPG"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Proportion"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"class_count_filled.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/class_count_filled.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+This shows what proportion if each class of car has what type of drive.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org9034afa" class="outline-3"&gt;
+&lt;h3 id="org9034afa"&gt;Un-Stacked&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org9034afa"&gt;
+&lt;p&gt;
+To make it easier to see how sub-categories compare within the class, we can change the positioning so that the bars are put side-by-side.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_bar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;mapping&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;fill&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;drive_train&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="n"&gt;position&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"dodge"&lt;/span&gt;
+  &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Count of Model Drives by Class"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Class Ordered by Median MPG"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Count"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"class_count_dodged.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/class_count_dodged.png" alt="nil"&gt;
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org3944f33" class="outline-3"&gt;
+&lt;h3 id="org3944f33"&gt;Proportions Not Counts&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org3944f33"&gt;
+&lt;p&gt;
+Our original bar graph showed the counts, but we can show the same plot using the proportion that each categories' count is of the total count as the y-axis.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;mapping&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_bar&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;mapping&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;..prop..&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Proportion of Cars by Class"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Class Ordered by Median MPG"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Proportion"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"class_proportion.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/class_proportion.png" alt="nil"&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+Two things:
+&lt;/p&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;That funky &lt;code&gt;..prop..&lt;/code&gt; is really how R specifies that argument&lt;/li&gt;
+&lt;li&gt;The &lt;code&gt;group=1&lt;/code&gt; argument tells ggplot that there's only one group for the whole dataset, otherwise each category is taken as a separate group and they are all end up as 100% of their group.&lt;/li&gt;
+&lt;li&gt;I couldn't get ggplot to set the colors based on the class&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgc7a8eee" class="outline-2"&gt;
+&lt;h2 id="orgc7a8eee"&gt;Stat Summary&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgc7a8eee"&gt;
+&lt;p&gt;
+This is a way to plot different kinds of summary statistics for the dataset.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;stat_summary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;mapping&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="n"&gt;fun.min&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;min&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;fun.max&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;fun&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;median&lt;/span&gt;
+  &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Spread of Efficiency by Class"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Class"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"mpg_class_spread.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/mpg_class_spread.png" alt="nil"&gt;
+&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org419b096" class="outline-3"&gt;
+&lt;h3 id="org419b096"&gt;Boxplot&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org419b096"&gt;
+&lt;p&gt;
+That was a nice clean way to show it, and it's flexible, but maybe a good old-fashioned box-plot is the best, in the end.
+&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;ggplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;mpg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;geom_boxplot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;mapping&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nf"&gt;aes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;gallons_per_mile&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;color&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;class_order&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+  &lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt;
+  &lt;span class="nf"&gt;labs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;title&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Spread of Efficiency by Class"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;EFFICIENCY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Class"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nf"&gt;ggsave&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"mpg_class_boxplot.png"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+&lt;img src="https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/mpg_class_boxplot.png" alt="nil"&gt;
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgfdaa4eb" class="outline-2"&gt;
+&lt;h2 id="orgfdaa4eb"&gt;The End&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgfdaa4eb"&gt;
+&lt;p&gt;
+Well, that's more than enough of that. The Chapter in &lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/r-for-data-science/"&gt;R For Data Science&lt;/a&gt; has other stuff in there, in particular there's a section on changing the coordinate system, but I think it's time to move on.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org8af7a9a" class="outline-2"&gt;
+&lt;h2 id="org8af7a9a"&gt;Link Collection&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org8af7a9a"&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;&lt;a href="https://fueleconomy.gov/"&gt;fueleconomy.gov&lt;/a&gt;: the federal government's site on fuel efficiency for cars sold in the United States&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://ggplot2.tidyverse.org/"&gt;ggplot2&lt;/a&gt; main page&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.realclearscience.com/blog/2019/02/14/the_miles_per_gallon_illusion.html#!"&gt;RealClear Science&lt;/a&gt; on the MPG Illusion&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://cfss.uchicago.edu/notes/grammar-of-graphics/"&gt;The Grammar of Graphics:&lt;/a&gt; This is a page on the University of Chicago's &lt;a href="https://cfss.uchicago.edu/"&gt;Computing For Social Sciences&lt;/a&gt; site that has an explanation of what makes up the Layered Grammar of Graphics that &lt;code&gt;ggplot2&lt;/code&gt; is based on.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description><category>ggplot</category><category>r</category><category>visualization</category><guid>https://necromuralist.github.io/Bowling-For-Data/posts/a-look-at-ggplot/</guid><pubDate>Mon, 13 Dec 2021 22:34:19 GMT</pubDate></item></channel></rss>

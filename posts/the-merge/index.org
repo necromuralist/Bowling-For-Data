@@ -1,0 +1,352 @@
+#+BEGIN_COMMENT
+.. title: The Merge
+.. slug: the-merge
+.. date: 2022-01-23 17:32:22 UTC-08:00
+.. tags: sorting,algorithms
+.. category: Sorting
+.. link:
+.. description: The Merge algorithm.
+.. type: text
+.. has_pseudocode: yes indeed
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-7f3b040f-0263-4697-9657-dfeb46da5524-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* The Merge
+This is an implementation of the merge portion of the merge-sort. It takes two sorted sections of a collection and merges them together in place.
+
+** CLRS
+
+The precondition for this to work is that there are two sections within the array passed in to the algorithm that are already sorted and that they are located by the three index-values given to the algorithm. The first sorted section starts at ~p~ and ends at ~q~ in the array and the second sorted section starts at ~q + 1~ and ends at ~r~ within the array.
+
+This is the CLRS version with the indexing changed to start at 0.
+
+#+begin_export html
+<pre id="the-merge" style="display:hidden;">
+\begin{algorithm}
+\caption{Merge}
+\begin{algorithmic}
+\INPUT An array and left, middle, and right locations in the array
+\REQUIRE Sub-arrays from $p$ to $q$ and from $q + 1$ to $r$ are sorted
+\OUTPUT The array with the two sections collated in order
+
+\PROCEDURE{Merge}{$A, p, q, r$}
+
+\STATE \textbf{The sizes of the sub-sections}
+\STATE $n_1 \gets q - p + 1$
+\STATE $n_2 \gets r - q$
+
+\STATE \\ \textbf{Copy the subsections to new arrays.}
+\STATE \textit{New arrays have one extra cell to hold a sentinel.}
+\STATE $L \gets Array[0\ldots n_1]$
+\STATE $R \gets Array[0 \ldots n_2]$
+
+\FOR {$i \in {0 \ldots n_1 - 1}$}
+  \STATE $L[i] \gets A[p + i - 1]$
+\ENDFOR
+
+\FOR{$j \in {0 \ldots n_2 - 1}$}
+  \STATE $R[j] \gets A[q + j]$
+\ENDFOR
+
+\STATE \\ \textbf{Add sentinel to indicate end}
+\STATE $L[n_1] \gets \infty $
+\STATE $R[n_2] \gets \infty $
+
+\STATE \\ \textbf{Collate}
+\STATE $i \gets 0$
+\STATE $j \gets 0$
+
+\FOR {$k \in {p \ldots r}$}
+ \IF {$L[i] \leq R[j]$}
+   \STATE $A[k] \gets L[i]$
+   \STATE $i' \gets i + 1$
+ \ELSE
+  \STATE $A[k] \gets R[j]$
+  \STATE $j' \gets j + 1$
+\ENDIF
+\ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+One way to think about how the algorithm is like you have two stacks of cards, each of which is sorted and you want to merge them together in sorted order. Since they are already sorted, you only have to compare the top cards on the two stacks to each other, chose the lower card and put it in your output stack, and keep repeating this until you've moved all the cards from the two stacks to the output. If one stack runs out of cards you just move the other remaining cards onto the output stack.
+
+Our algorithm starts by copying out the values from the source array into two new arrays to create our stacks. We append an \(\infty\) onto the end of each to simulate the emptying of the stack. Then we keep looking at the top item in each stack and copying the smaller item back into the original array. Because of the copying we are going over the input twice, but that is a relatively small (linear) increase.
+
+*** Implement It
+
+#+begin_src python :results none
+# python
+from collections.abc import MutableSequence
+
+# pypi
+from expects import contain_exactly, equal, expect
+#+end_src
+
+#+begin_src python :results none
+INFINITY = float("inf")
+#+end_src
+
+#+begin_src python :results none
+def merge_clrs(collection: MutableSequence,
+          left_start: int,
+          left_end: int,
+          right_end: int) -> int:
+    """Merge the sub-sections from the collection
+
+    Args:
+     collection: list or array with sorted sub-sections
+     left_start: index of start of first sub-section
+     left_end: index of last item of first sub-section
+     right_end: index of the last item of second sub-section
+    """
+    count = 0
+    left_size = left_end - left_start + 1
+    right_size = right_end - left_end
+    right_start = left_end + 1
+
+    left_stack = ([None] * left_size)
+    right_stack = ([None] * right_size)
+    
+    for stack_location in range(left_size):
+        left_stack[stack_location] = collection[left_start + stack_location]
+        count += 1
+        
+    for stack_location in range(right_size):
+        right_stack[stack_location] = collection[right_start + stack_location]
+        count += 1
+
+    left_stack.append(INFINITY)
+    right_stack.append(INFINITY)
+
+    next_left = next_right = 0
+
+    for put_next_item_here in range(left_start, right_end + 1):
+        count += 1
+        if left_stack[next_left] <= right_stack[next_right]:
+            collection[put_next_item_here] = left_stack[next_left]
+            next_left += 1
+        else:
+            collection[put_next_item_here] = right_stack[next_right]
+            next_right += 1
+    return count
+#+end_src
+
+#+begin_src python :results none
+def merge_check(merger):
+    first = list(range(5))
+    second = first[:]
+    collection = first + second
+
+    count = merger(collection, 0, 4, 9)
+        
+    expect(count).to(equal(20))
+    expect(collection).to(contain_exactly(0,0,1,1,2,2,3,3,4,4))
+
+    collection = [10] + first + second
+    count = merger(collection, 1, 5, 10)
+    expect(count).to(equal(20))
+    expect(collection[1:11]).to(contain_exactly(0,0,1,1,2,2,3,3,4,4))
+    
+    collection = [10] + first + second + [-1, 5]
+    count = merger(collection, 1, 5, 10)
+
+    expect(count).to(equal(20))
+    expect(collection[1:11]).to(contain_exactly(0,0,1,1,2,2,3,3,4,4))
+    return
+#+end_src
+
+#+begin_src python :results none
+merge_check(merge_clrs)
+#+end_src
+
+*** Runtime
+
+Without doing anything fancy we can see that there's three for loops, the first two cover copying over all the sub-list items from the original list to the new lists, so together they execute once for every item (/n/ times). And the loop that does the actual merge also runs once for each item so it also runs /n/ times so altogether it has a run time of /2n/ which we'll say is $\Theta(n)$. This is actually going to be part of the merge-sort but I thought I'd put that in here since the post is separate.
+
+** Levitin
+This is the version given in {{% doc %}}itdaa{{% /doc %}} which I find a little clearer than the CLRS version. I generally prefer Levitin's versions, but, you know, CLRS is the one you *have to* have, so it's there too.
+
+#+begin_export html
+<pre id="the-merge-levitin" style="display:hidden;">
+\begin{algorithm}
+\caption{Merge}
+\begin{algorithmic}
+\INPUT $B[0 \ldots p-1]$, $C[0 \ldots q - 1]$, $A[0 \ldots p + q - 1]$
+\REQUIRE Sub-arrays $B$ and $C$ are sorted
+\OUTPUT Sorted array $A$ with the elements of $B$ and $C$.
+
+\PROCEDURE{Merge}{$B, C, A$}
+
+\STATE $i \gets 0$
+\STATE $j \gets 0$
+\STATE $k \gets 0$
+
+\WHILE {$i < p$ and $j < q$}
+ \IF {$B[i] \le C[j]$}
+  \STATE $A[k] \gets B[i]$
+  \STATE $i \gets i + 1$
+ \ELSE
+  \STATE $A[k] \gets C[j]$
+  \STATE $j \gets j + 1$
+ \ENDIF
+ \STATE $k \gets k + 1$
+\ENDWHILE
+
+\IF {$i=p$}
+ \STATE Copy $C[j \ldots q-1]$ to $A[k \ldots p + q - 1]$
+\ELSE
+ \STATE Copy $B[i \ldots p - 1]$ to $A[k \ldots p + q - 1]$
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+There are a couple of noticeable differences between Levitin's version and the CLRS version. The first is that the lists to merge are passed into the function rather than being separated inside the function, which makes the "Divide" step separate from the "Combine" step. Additionally, instead of adding a sentinel to the end of the stacks the conditional checks to see if one of them is empty and copies over the stack that isn't empty outside of the merge-loop. This adds an additional conditional check to the main loop but then takes away the conditional check when copying over the leftovers. I might give the CLRS version a point for being more concise in handling the leftovers for the case where left and right are different sizes.
+*** Implement It
+
+#+begin_src python :results none
+# python
+from collections.abc import Sequence
+#+end_src
+
+#+begin_src python :results none
+def merge_levitin(left_stack: Sequence, right_stack: Sequence,
+                  target: MutableSequence) -> int:
+    """Merges values from left and right stacks into target collection
+
+    Args:
+     left_stack: sorted collection of items to merge
+     right_stack: sorted collection of items to merge
+     target: collection into which to merge the items
+
+    Returns:
+     count of basic operations
+    """
+    left_size, right_size = len(left_stack), len(right_stack)
+    next_left = next_right = put_item_here = count = 0
+    
+    while next_left < left_size and next_right < right_size:
+        count += 1
+        if left_stack[next_left] <= right_stack[next_right]:
+            target[put_item_here] = left_stack[next_left]
+            next_left += 1
+        else:
+            target[put_item_here] = right_stack[next_right]
+            next_right += 1
+
+        put_item_here += 1
+        
+    if next_left == left_size and next_right < right_size:
+        for stack_offset in range(left_size + right_size - put_item_here):
+            count += 1
+            target[put_item_here + stack_offset] = right_stack[next_right + stack_offset]
+    elif next_left < left_size:
+        for stack_offset in range(left_size + right_size - put_item_here):
+            count += 1
+            target[put_item_here + stack_offset] = left_stack[next_left + stack_offset]
+    return count
+#+end_src
+
+#+begin_src python :results none
+first = list(range(5))
+second = [item + index for index, item in enumerate(first)]
+collection = [None] * (len(first) + len(second))
+
+count = merge_levitin(first, second, collection)
+        
+expect(count).to(equal(10))
+expect(collection).to(contain_exactly(0,0,1,2,2,3,4,4,6,8))
+
+second = list(range(5))
+first = [item + index for index, item in enumerate(second)]
+collection = [None] * (len(first) + len(second))
+
+count = merge_levitin(first, second, collection)
+        
+expect(count).to(equal(10))
+expect(collection).to(contain_exactly(0,0,1,2,2,3,4,4,6,8))
+#+end_src
+
+*** Runtime
+Since the dividing of the array is moved out of the merge the runtime for the merge is \(n\) so it's also \(\Theta(n)\).
+** A Hybrid
+#+begin_src python :results none
+def merge(left_stack: Sequence, right_stack: Sequence,
+          target: MutableSequence) -> int:
+    """Merges values from left and right stacks into target collection
+
+    Args:
+     left_stack: sorted collection of items to merge
+     right_stack: sorted collection of items to merge
+     target: collection into which to merge the items
+
+    Returns:
+     count of basic operations
+    """
+    target_size = len(left_stack) + len(right_stack)
+
+    # since we aren't copying the lists this can be kind of dangerous
+    # passing in the same list more than once will append INFINITY each time
+    left_stack.append(INFINITY)
+    right_stack.append(INFINITY)
+    next_left = next_right = count = 0
+    
+    for put_item_here in range(target_size):
+        count += 1
+        if left_stack[next_left] <= right_stack[next_right]:
+            target[put_item_here] = left_stack[next_left]
+            next_left += 1
+        else:
+            target[put_item_here] = right_stack[next_right]
+            next_right += 1
+    return count
+#+end_src
+
+#+begin_src python :results none
+first = list(range(5))
+second = [item + index for index, item in enumerate(first)]
+collection = [None] * (len(first) + len(second))
+
+count = merge(first, second, collection)
+        
+expect(count).to(equal(10))
+expect(collection).to(contain_exactly(0,0,1,2,2,3,4,4,6,8))
+
+second = list(range(5))
+first = [item + index for index, item in enumerate(second)]
+collection = [None] * (len(first) + len(second))
+
+count = merge(first, second, collection)
+        
+expect(count).to(equal(10))
+expect(collection).to(contain_exactly(0,0,1,2,2,3,4,4,6,8))
+#+end_src
+* End
+- {{% doc %}}clrs{{% /doc %}}
+- {{% doc %}}itdaa{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-merge"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-merge-levitin"));
+});
+</script>
+#+end_export

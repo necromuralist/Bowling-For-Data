@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparing the Partition Swaps | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-the-partition-swaps/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../clrs-partition/" title="CLRS Partition" type="text/html">
+<link rel="next" href="../randomized-partition/" title="Randomized Partition" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="Comparing the Partition Swaps">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-the-partition-swaps/">
+<meta property="og:description" content="Introduction
+
+
+This is part of a series of posts about the Partition algorithm that starts with this post.
+
+
+
+
+Imports and Setup
+
+# python
+from typing import Callable, List, TypeVar, MutableSequence
+f">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-02-23T21:29:25-08:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="sorting">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Comparing the Partition Swaps</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2022-02-23T21:29:25-08:00" itemprop="datePublished" title="2022-02-23 21:29">2022-02-23 21:29</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="outline-container-org6c78d4b" class="outline-2">
+<h2 id="org6c78d4b">Introduction</h2>
+<div class="outline-text-2" id="text-org6c78d4b">
+<p>
+This is part of a series of posts about the Partition algorithm that starts with <a href="../the-partition/">this post</a>.
+</p>
+</div>
+
+<div id="outline-container-orgf6cc201" class="outline-3">
+<h3 id="orgf6cc201">Imports and Setup</h3>
+<div class="outline-text-3" id="text-orgf6cc201">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">MutableSequence</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+
+<span class="kn">import</span> <span class="nn">altair</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+
+<span class="c1"># monkey</span>
+<span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_chart</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"comparing-the-partition-swaps"</span>
+<span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
+<span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
+
+<span class="n">Orderable</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"Orderable"</span><span class="p">)</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge823b97" class="outline-2">
+<h2 id="orge823b97">Comparing  the Swaps</h2>
+<div class="outline-text-2" id="text-orge823b97">
+<p>
+Both of the versions of partition shown here traverse the collection once, so looking at the number of comparisons doesn't seem so interesting. According to the <a href="https://en.wikipedia.org/wiki/Quicksort">Wikipedia page on Quicksort</a>, the swaps for Hoare's method (which is slightly different from Levitin's) is better for the worst cases, so let's see if this matters for Levitin's and CLRS's swaps.
+</p>
+</div>
+
+<div id="outline-container-org24e8d8f" class="outline-3">
+<h3 id="org24e8d8f">Some Swap Counters</h3>
+<div class="outline-text-3" id="text-org24e8d8f">
+<p>
+Since we're only calling the partitioners once rather than repeatedly using them to partition sub-lists in the collection we can get rid of the <code>left</code> and <code>right</code> arguments to the functions.
+</p>
+</div>
+
+<div id="outline-container-orgbd79292" class="outline-4">
+<h4 id="orgbd79292">A Levitin Swap Counter</h4>
+<div class="outline-text-4" id="text-orgbd79292">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">levitin_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""Partitions the collection using a variation of Hoare's method</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     collection: the list to partition</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     count of swaps</span>
+<span class="sd">    """</span>
+    <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">pivot_element</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
+    <span class="n">partition_left</span> <span class="o">=</span> <span class="n">left</span>
+    <span class="n">partition_right</span> <span class="o">=</span> <span class="n">right</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">stop_right</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">swaps</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+	<span class="k">while</span> <span class="n">partition_left</span> <span class="o">&lt;</span> <span class="n">stop_right</span><span class="p">:</span>
+	    <span class="n">partition_left</span> <span class="o">+=</span> <span class="mi">1</span>
+	    <span class="k">if</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">pivot_element</span><span class="p">:</span>
+		<span class="k">break</span>
+
+	<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+	    <span class="n">partition_right</span> <span class="o">-=</span> <span class="mi">1</span>
+	    <span class="k">if</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pivot_element</span><span class="p">:</span>
+		<span class="k">break</span>
+
+	<span class="k">if</span> <span class="n">partition_left</span> <span class="o">&gt;=</span> <span class="n">partition_right</span><span class="p">:</span>
+	    <span class="k">break</span>
+
+	<span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+	    <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">]</span>
+	<span class="p">)</span>
+	<span class="n">swaps</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># move the pivot element from the far left to its final place</span>
+    <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+	<span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">swaps</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">swaps</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">middle</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">prefix</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">middle</span><span class="p">)</span>
+<span class="n">suffix</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">201</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">middle</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="p">[</span><span class="n">middle</span><span class="p">]</span> <span class="o">+</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">suffix</span>
+
+<span class="n">swaps</span> <span class="o">=</span> <span class="n">levitin_swaps</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="o">&lt;</span> <span class="n">middle</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">test</span><span class="p">[:</span><span class="n">middle</span><span class="p">]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="o">&gt;</span> <span class="n">middle</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">test</span><span class="p">[</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org3913979" class="outline-4">
+<h4 id="org3913979">A CLRS Swap Counter</h4>
+<div class="outline-text-4" id="text-org3913979">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">clrs_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""Partitions the collection around the last element</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     collection: the list to partition</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     count of swaps</span>
+<span class="sd">    """</span>
+    <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">pivot_element</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
+    <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">left</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">swaps</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">upper_bound</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+	<span class="k">if</span> <span class="n">collection</span><span class="p">[</span><span class="n">upper_bound</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pivot_element</span><span class="p">:</span>
+	    <span class="n">lower_bound</span> <span class="o">+=</span> <span class="mi">1</span>
+	    <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">lower_bound</span><span class="p">],</span>
+	     <span class="n">collection</span><span class="p">[</span><span class="n">upper_bound</span><span class="p">])</span> <span class="o">=</span> <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">upper_bound</span><span class="p">],</span>
+					 <span class="n">collection</span><span class="p">[</span><span class="n">lower_bound</span><span class="p">])</span>
+	    <span class="n">swaps</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">pivot</span> <span class="o">=</span> <span class="n">lower_bound</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">pivot</span><span class="p">],</span>
+     <span class="n">collection</span><span class="p">[</span><span class="n">right</span><span class="p">])</span> <span class="o">=</span> <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">right</span><span class="p">],</span>
+			   <span class="n">collection</span><span class="p">[</span><span class="n">pivot</span><span class="p">])</span>
+    <span class="n">swaps</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">swaps</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">middle</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">prefix</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">middle</span><span class="p">)</span>
+<span class="n">suffix</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">201</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">middle</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">suffix</span> <span class="o">+</span> <span class="p">[</span><span class="n">middle</span><span class="p">]</span>
+
+<span class="n">swaps</span> <span class="o">=</span> <span class="n">clrs_swaps</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="o">&lt;</span> <span class="n">middle</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">test</span><span class="p">[:</span><span class="n">middle</span><span class="p">]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="o">&gt;</span> <span class="n">middle</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">test</span><span class="p">[</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org2089354" class="outline-3">
+<h3 id="org2089354">A Parallelizer Function</h3>
+<div class="outline-text-3" id="text-org2089354">
+<p>
+This is what I'll pass to joblib to run the two swap-counter functions.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">SwapCounts</span><span class="p">:</span>
+    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">swaps</span><span class="p">:</span> <span class="nb">int</span>
+
+<span class="k">def</span> <span class="nf">swap_counter</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span> <span class="n">swap_counter</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SwapCounts</span><span class="p">:</span>
+    <span class="sd">"""Runs the swap_counter over the collection of inputs</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     collection: elements to partition</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     SwapCounts: size, swap-count</span>
+<span class="sd">    """</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+    <span class="n">swaps</span> <span class="o">=</span> <span class="n">swap_counter</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SwapCounts</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">swaps</span><span class="o">=</span><span class="n">swaps</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">swap_plots</span><span class="p">(</span><span class="n">first_output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SwapCounts</span><span class="p">],</span> <span class="n">second_output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SwapCounts</span><span class="p">],</span>
+	       <span class="n">first_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+	       <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">"""Plot the swap counts</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     first_output, second_output: lists of SwapCounts</span>
+<span class="sd">     first_label, second_label: Algorithm labels for the counts</span>
+<span class="sd">     title: title for the plot</span>
+<span class="sd">     filename: name to save the plot to </span>
+<span class="sd">    """</span>
+    <span class="n">expect</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first_output</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">second_output</span><span class="p">)))</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+	<span class="s2">"Input Size"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">first_output</span><span class="p">],</span>
+	<span class="n">first_label</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">swaps</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">first_output</span><span class="p">],</span>
+	<span class="n">second_label</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">swaps</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">second_output</span><span class="p">]})</span>
+
+    <span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="s2">"Input Size"</span><span class="p">,</span>
+			<span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="n">first_label</span><span class="p">,</span> <span class="n">second_label</span><span class="p">],</span>
+			<span class="n">var_name</span><span class="o">=</span><span class="s2">"Algorithm"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Swaps"</span><span class="p">)</span>
+
+    <span class="n">base</span> <span class="o">=</span> <span class="p">(</span><span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_circle</span><span class="p">(</span><span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+	    <span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Input Size:Q"</span><span class="p">,</span>
+			       <span class="n">scale</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span>
+				   <span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">melted</span><span class="p">[</span><span class="s2">"Input Size"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()))),</span>
+		    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Swaps:Q"</span><span class="p">,</span><span class="n">scale</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domainMin</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+			       <span class="n">color</span><span class="o">=</span><span class="s2">"Algorithm:N"</span><span class="p">,</span>
+		    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Input Size:Q"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+			     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Swaps:Q"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+			     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Algorithm:N"</span><span class="p">)]))</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">transform_regression</span><span class="p">(</span><span class="s2">"Input Size"</span><span class="p">,</span> <span class="s2">"Swaps"</span><span class="p">,</span>
+				      <span class="n">groupby</span><span class="o">=</span><span class="p">[</span><span class="s2">"Algorithm"</span><span class="p">])</span>
+	    <span class="o">.</span><span class="n">mark_line</span><span class="p">())</span>
+    <span class="n">chart</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+	<span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+	<span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+	<span class="n">height</span><span class="o">=</span><span class="mi">525</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">swap_ratio_plots</span><span class="p">(</span><span class="n">first_output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SwapCounts</span><span class="p">],</span> <span class="n">second_output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SwapCounts</span><span class="p">],</span>
+		     <span class="n">first_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+		     <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">"""Plot the swap count ratios</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     first_output, second_output: lists of SwapCounts</span>
+<span class="sd">     first_label, second_label: Algorithm labels for the counts</span>
+<span class="sd">     title: title for the plot</span>
+<span class="sd">     filename: name to save the plot to </span>
+<span class="sd">    """</span>
+    <span class="n">expect</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first_output</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">second_output</span><span class="p">)))</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+	<span class="s2">"Input Size"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">first_output</span><span class="p">],</span>
+	<span class="n">first_label</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">swaps</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">first_output</span><span class="p">],</span>
+	<span class="n">second_label</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">swaps</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">second_output</span><span class="p">]})</span>
+
+    <span class="n">frame</span><span class="p">[</span><span class="s2">"Ratio"</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">first_label</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">second_label</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">base</span> <span class="o">=</span> <span class="p">(</span><span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">frame</span><span class="p">[[</span><span class="s2">"Input Size"</span><span class="p">,</span> <span class="s2">"Ratio"</span><span class="p">]])</span><span class="o">.</span><span class="n">mark_circle</span><span class="p">(</span><span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+	    <span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"Input Size:Q"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Ratio:Q"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domainMin</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+		    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Input Size"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+			     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Ratio"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">",.2f"</span><span class="p">)]))</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">transform_regression</span><span class="p">(</span><span class="s2">"Input Size"</span><span class="p">,</span> <span class="s2">"Ratio"</span><span class="p">)</span>
+	    <span class="o">.</span><span class="n">mark_line</span><span class="p">())</span>
+    <span class="n">chart</span> <span class="o">=</span> <span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+	<span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+	<span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+	<span class="n">height</span><span class="o">=</span><span class="mi">525</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">swap_runner</span><span class="p">(</span><span class="n">swapper_one</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">swapper_two</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+		<span class="n">label_one</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label_two</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+		<span class="n">things_to_partition</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">],</span>
+		<span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plotter</span><span class="p">:</span> <span class="n">Callable</span><span class="o">=</span><span class="n">swap_plots</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Run the partitioners and plot</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     swapper_one, swapper_two: swap-counter functions</span>
+<span class="sd">     label_one, label_two: algorithm labels for the plot</span>
+<span class="sd">     things_to_partition: collections for the partitioners to partition</span>
+<span class="sd">     title, filename: plot strings</span>
+<span class="sd">    """</span>
+    <span class="n">first_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+    <span class="n">delayed</span><span class="p">(</span><span class="n">swap_counter</span><span class="p">)(</span><span class="n">thing_to_partition</span><span class="p">,</span> <span class="n">swapper_one</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">thing_to_partition</span> <span class="ow">in</span> <span class="n">things_to_partition</span><span class="p">)</span>
+
+    <span class="n">second_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+	<span class="n">delayed</span><span class="p">(</span><span class="n">swap_counter</span><span class="p">)(</span><span class="n">thing_to_partition</span><span class="p">,</span> <span class="n">swapper_two</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">thing_to_partition</span> <span class="ow">in</span> <span class="n">things_to_partition</span><span class="p">)</span>
+
+    <span class="n">plotter</span><span class="p">(</span><span class="n">first_output</span><span class="p">,</span> <span class="n">second_output</span><span class="p">,</span> <span class="n">label_one</span><span class="p">,</span> <span class="n">label_two</span><span class="p">,</span>
+	    <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+	    <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-orge6c1794" class="outline-3">
+<h3 id="orge6c1794">Random Inputs</h3>
+<div class="outline-text-3" id="text-orge6c1794">
+<div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">random_things_to_partition</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
+			      <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
+<span class="n">swap_runner</span><span class="p">(</span><span class="n">levitin_swaps</span><span class="p">,</span> <span class="n">clrs_swaps</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="n">random_things_to_partition</span><span class="p">,</span>
+	   <span class="n">title</span><span class="o">=</span><span class="s2">"Levitin vs CLRS Partition Swap Count (Randomized Input)"</span><span class="p">,</span>
+	   <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_random_2"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_random_2.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">levitin_swaps</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="n">random_things_to_partition</span><span class="p">,</span>
+	    <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS/Levitin Partition Swap Ratio (Randomized Input)"</span><span class="p">,</span>
+	    <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_random_ratio"</span><span class="p">,</span> <span class="n">plotter</span><span class="o">=</span><span class="n">swap_ratio_plots</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_random_ratio.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+<div id="outline-container-org58d4eab" class="outline-3">
+<h3 id="org58d4eab">Biggest Item Last</h3>
+<div class="outline-text-3" id="text-org58d4eab">
+<p>
+What happens if the input has the biggest item at the end of the list?
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">big_ended_things_to_partition</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span>
+				 <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
+
+<span class="n">swap_runner</span><span class="p">(</span><span class="n">levitin_swaps</span><span class="p">,</span> <span class="n">clrs_swaps</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span>
+	    <span class="n">big_ended_things_to_partition</span><span class="p">,</span>
+	   <span class="n">title</span><span class="o">=</span><span class="s2">"Levitin vs CLRS Partition Swap Count (Biggest Item Last)"</span><span class="p">,</span>
+	   <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_sorted"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_sorted.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+<div id="outline-container-orgcbd193f" class="outline-3">
+<h3 id="orgcbd193f">Sorted</h3>
+<div class="outline-text-3" id="text-orgcbd193f">
+<p>
+What happens if the input is already sorted?
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">sorted_things_to_partition</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">))</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
+
+<span class="n">swap_runner</span><span class="p">(</span><span class="n">levitin_swaps</span><span class="p">,</span> <span class="n">clrs_swaps</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span>
+	    <span class="n">sorted_things_to_partition</span><span class="p">,</span>
+	    <span class="n">title</span><span class="o">=</span><span class="s2">"Levitin vs CLRS Partition Swap Count (Sorted input)"</span><span class="p">,</span>
+	   <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_already_sorted"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_already_sorted.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+<div id="outline-container-orgde702b4" class="outline-3">
+<h3 id="orgde702b4">All The Same</h3>
+<div class="outline-text-3" id="text-orgde702b4">
+<div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">same_things_to_partition</span> <span class="o">=</span> <span class="p">[[</span><span class="n">count</span><span class="p">]</span> <span class="o">*</span> <span class="n">count</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
+
+<span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">levitin_swaps</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="n">same_things_to_partition</span><span class="p">,</span>
+	   <span class="n">title</span><span class="o">=</span><span class="s2">"Levitin vs CLRS Partition Swap Count (All Same Input)"</span><span class="p">,</span>
+	   <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_all_same"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_all_same.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">levitin_swaps</span><span class="p">,</span><span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="n">same_things_to_partition</span><span class="p">,</span>
+	   <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS/Levitin Partition Swap Ratio (All Same Input)"</span><span class="p">,</span>
+	   <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_all_same_ratio"</span><span class="p">,</span> <span class="n">plotter</span><span class="o">=</span><span class="n">swap_ratio_plots</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_all_same_ratio.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb843d9d" class="outline-2">
+<h2 id="orgb843d9d">Randomized Swaps</h2>
+<div class="outline-text-2" id="text-orgb843d9d">
+</div>
+<div id="outline-container-org0f2dbd8" class="outline-3">
+<h3 id="org0f2dbd8">A Randomized Swap Counter</h3>
+<div class="outline-text-3" id="text-org0f2dbd8">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">randomized_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">],</span>
+		     <span class="n">partition</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">pivot</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""Partitions the collection around the last element</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     collection: the list to partition</span>
+<span class="sd">     partition: function to partition the list</span>
+<span class="sd">     pivot: index of the element used for the pivot</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     count of swaps</span>
+<span class="sd">    """</span>
+    <span class="n">random_index</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">collection</span><span class="p">))</span>
+    <span class="n">collection</span><span class="p">[</span><span class="n">pivot</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">random_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">random_index</span><span class="p">],</span>
+						   <span class="n">collection</span><span class="p">[</span><span class="n">pivot</span><span class="p">])</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">partition</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">randomized_levitin</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">randomized_swaps</span><span class="p">,</span> <span class="n">partition</span><span class="o">=</span><span class="n">levitin_swaps</span><span class="p">,</span> <span class="n">pivot</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">randomized_clrs</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">randomized_swaps</span><span class="p">,</span> <span class="n">partition</span><span class="o">=</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">pivot</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgb56a7b0" class="outline-3">
+<h3 id="orgb56a7b0">Randomized Levitin Swaps</h3>
+<div class="outline-text-3" id="text-orgb56a7b0">
+</div>
+<div id="outline-container-org400fa40" class="outline-4">
+<h4 id="org400fa40">Shuffled Input</h4>
+<div class="outline-text-4" id="text-org400fa40">
+<div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">levitin_swaps</span><span class="p">,</span> <span class="n">randomized_levitin</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="s2">"Randomized Levitin"</span><span class="p">,</span>
+	    <span class="n">random_things_to_partition</span><span class="p">,</span>
+	   <span class="n">title</span><span class="o">=</span><span class="s2">"Levitin vs Randomized Levitin Partition Swap Count (Randomized Input)"</span><span class="p">,</span>
+	   <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_randomized_random"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_randomized_random.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+<div id="outline-container-orgcac08a7" class="outline-4">
+<h4 id="orgcac08a7">Smallest Item At the End</h4>
+<div class="outline-text-4" id="text-orgcac08a7">
+<div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">backwards_things_to_partition</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">count</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+				 <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
+
+<span class="n">swap_runner</span><span class="p">(</span><span class="n">levitin_swaps</span><span class="p">,</span> <span class="n">randomized_levitin</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="s2">"Randomized Levitin"</span><span class="p">,</span>
+	    <span class="n">backwards_things_to_partition</span><span class="p">,</span>
+	    <span class="n">title</span><span class="o">=</span><span class="p">(</span><span class="s2">"Levitin vs Randomized Levitin Partition Swap Count (Backwards Input)"</span><span class="p">),</span>
+	    <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_levitin_randomized_sorted_backwards"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_levitin_randomized_sorted_backwards.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+
+<div id="outline-container-org1c2762f" class="outline-4">
+<h4 id="org1c2762f">All The Same Input</h4>
+<div class="outline-text-4" id="text-org1c2762f">
+<p>
+Since only difference between the randomized and the non-randomized input is that the pivot was (probably) swapped out, the input will look the same when all the values are the same to start with so I'm not going to re-plot those.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga79366a" class="outline-3">
+<h3 id="orga79366a">Randomized CLRS Swaps</h3>
+<div class="outline-text-3" id="text-orga79366a">
+</div>
+<div id="outline-container-orgb8018b7" class="outline-4">
+<h4 id="orgb8018b7">Shuffled Input</h4>
+<div class="outline-text-4" id="text-orgb8018b7">
+<div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
+	    <span class="n">random_things_to_partition</span><span class="p">,</span>
+	   <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Randomized Input)"</span><span class="p">,</span>
+	   <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_randomized_clrs_random"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_randomized_clrs_random.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+<div id="outline-container-orgb7ffaf6" class="outline-4">
+<h4 id="orgb7ffaf6">Biggest Item at the End</h4>
+<div class="outline-text-4" id="text-orgb7ffaf6">
+<div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
+	    <span class="n">big_ended_things_to_partition</span><span class="p">,</span>
+	    <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Big-Ended Input)"</span><span class="p">,</span>
+	    <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_clrs_randomized_big_ended"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_clrs_randomized_big_ended.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+<div id="outline-container-org30b2eb5" class="outline-4">
+<h4 id="org30b2eb5">Sorted</h4>
+<div class="outline-text-4" id="text-org30b2eb5">
+<div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
+	    <span class="n">sorted_things_to_partition</span><span class="p">,</span>
+	    <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Sorted Input)"</span><span class="p">,</span>
+	    <span class="n">filename</span><span class="o">=</span><span class="s2">"swaps_clrs_randomized_sorted"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="swaps_clrs_randomized_sorted.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/sorting/" rel="tag">sorting</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../clrs-partition/" rel="prev" title="CLRS Partition">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../randomized-partition/" rel="next" title="Randomized Partition">Next post</a>
+            </li>
+        </ul></nav></aside></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>

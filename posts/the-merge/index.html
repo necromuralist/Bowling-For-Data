@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="The Merge algorithm.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Merge | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/the-merge/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../binary-search/" title="Binary Search" type="text/html">
+<link rel="next" href="../divide-and-conquer/" title="Divide and Conquer" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="The Merge">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/the-merge/">
+<meta property="og:description" content="The Merge algorithm.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-01-23T17:32:22-08:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="sorting">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">The Merge</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2022-01-23T17:32:22-08:00" itemprop="datePublished" title="2022-01-23 17:32">2022-01-23 17:32</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li>
+<a href="#org92c3556">The Merge</a>
+<ul>
+<li>
+<a href="#orgdccd4d7">CLRS</a>
+<ul>
+<li><a href="#org8fab162">Implement It</a></li>
+<li><a href="#org6162a30">Runtime</a></li>
+</ul>
+</li>
+<li>
+<a href="#orgc39cf35">Levitin</a>
+<ul>
+<li><a href="#orgc495d5c">Implement It</a></li>
+<li><a href="#org23e8781">Runtime</a></li>
+</ul>
+</li>
+<li><a href="#org7b7c4c2">A Hybrid</a></li>
+</ul>
+</li>
+<li><a href="#org305c62c">End</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org92c3556" class="outline-2">
+<h2 id="org92c3556">The Merge</h2>
+<div class="outline-text-2" id="text-org92c3556">
+<p>
+This is an implementation of the merge portion of the merge-sort. It takes two sorted sections of a collection and merges them together in place.
+</p>
+</div>
+
+<div id="outline-container-orgdccd4d7" class="outline-3">
+<h3 id="orgdccd4d7">CLRS</h3>
+<div class="outline-text-3" id="text-orgdccd4d7">
+<p>
+The precondition for this to work is that there are two sections within the array passed in to the algorithm that are already sorted and that they are located by the three index-values given to the algorithm. The first sorted section starts at <code>p</code> and ends at <code>q</code> in the array and the second sorted section starts at <code>q + 1</code> and ends at <code>r</code> within the array.
+</p>
+
+<p>
+This is the CLRS version with the indexing changed to start at 0.
+</p>
+
+<pre id="the-merge" style="display:hidden;">
+\begin{algorithm}
+\caption{Merge}
+\begin{algorithmic}
+\INPUT An array and left, middle, and right locations in the array
+\REQUIRE Sub-arrays from $p$ to $q$ and from $q + 1$ to $r$ are sorted
+\OUTPUT The array with the two sections collated in order
+
+\PROCEDURE{Merge}{$A, p, q, r$}
+
+\STATE \textbf{The sizes of the sub-sections}
+\STATE $n_1 \gets q - p + 1$
+\STATE $n_2 \gets r - q$
+
+\STATE \\ \textbf{Copy the subsections to new arrays.}
+\STATE \textit{New arrays have one extra cell to hold a sentinel.}
+\STATE $L \gets Array[0\ldots n_1]$
+\STATE $R \gets Array[0 \ldots n_2]$
+
+\FOR {$i \in {0 \ldots n_1 - 1}$}
+  \STATE $L[i] \gets A[p + i - 1]$
+\ENDFOR
+
+\FOR{$j \in {0 \ldots n_2 - 1}$}
+  \STATE $R[j] \gets A[q + j]$
+\ENDFOR
+
+\STATE \\ \textbf{Add sentinel to indicate end}
+\STATE $L[n_1] \gets \infty $
+\STATE $R[n_2] \gets \infty $
+
+\STATE \\ \textbf{Collate}
+\STATE $i \gets 0$
+\STATE $j \gets 0$
+
+\FOR {$k \in {p \ldots r}$}
+ \IF {$L[i] \leq R[j]$}
+   \STATE $A[k] \gets L[i]$
+   \STATE $i' \gets i + 1$
+ \ELSE
+  \STATE $A[k] \gets R[j]$
+  \STATE $j' \gets j + 1$
+\ENDIF
+\ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+
+<p>
+One way to think about how the algorithm is like you have two stacks of cards, each of which is sorted and you want to merge them together in sorted order. Since they are already sorted, you only have to compare the top cards on the two stacks to each other, chose the lower card and put it in your output stack, and keep repeating this until you've moved all the cards from the two stacks to the output. If one stack runs out of cards you just move the other remaining cards onto the output stack.
+</p>
+
+<p>
+Our algorithm starts by copying out the values from the source array into two new arrays to create our stacks. We append an \(\infty\) onto the end of each to simulate the emptying of the stack. Then we keep looking at the top item in each stack and copying the smaller item back into the original array. Because of the copying we are going over the input twice, but that is a relatively small (linear) increase.
+</p>
+</div>
+
+<div id="outline-container-org8fab162" class="outline-4">
+<h4 id="org8fab162">Implement It</h4>
+<div class="outline-text-4" id="text-org8fab162">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">INFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">merge_clrs</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span>
+	  <span class="n">left_start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+	  <span class="n">left_end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+	  <span class="n">right_end</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""Merge the sub-sections from the collection</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     collection: list or array with sorted sub-sections</span>
+<span class="sd">     left_start: index of start of first sub-section</span>
+<span class="sd">     left_end: index of last item of first sub-section</span>
+<span class="sd">     right_end: index of the last item of second sub-section</span>
+<span class="sd">    """</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">left_size</span> <span class="o">=</span> <span class="n">left_end</span> <span class="o">-</span> <span class="n">left_start</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">right_size</span> <span class="o">=</span> <span class="n">right_end</span> <span class="o">-</span> <span class="n">left_end</span>
+    <span class="n">right_start</span> <span class="o">=</span> <span class="n">left_end</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">left_stack</span> <span class="o">=</span> <span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">left_size</span><span class="p">)</span>
+    <span class="n">right_stack</span> <span class="o">=</span> <span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">right_size</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">stack_location</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left_size</span><span class="p">):</span>
+	<span class="n">left_stack</span><span class="p">[</span><span class="n">stack_location</span><span class="p">]</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">left_start</span> <span class="o">+</span> <span class="n">stack_location</span><span class="p">]</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">stack_location</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">right_size</span><span class="p">):</span>
+	<span class="n">right_stack</span><span class="p">[</span><span class="n">stack_location</span><span class="p">]</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">right_start</span> <span class="o">+</span> <span class="n">stack_location</span><span class="p">]</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">left_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">INFINITY</span><span class="p">)</span>
+    <span class="n">right_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">INFINITY</span><span class="p">)</span>
+
+    <span class="n">next_left</span> <span class="o">=</span> <span class="n">next_right</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">put_next_item_here</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left_start</span><span class="p">,</span> <span class="n">right_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">if</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span><span class="p">]:</span>
+	    <span class="n">collection</span><span class="p">[</span><span class="n">put_next_item_here</span><span class="p">]</span> <span class="o">=</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span><span class="p">]</span>
+	    <span class="n">next_left</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">else</span><span class="p">:</span>
+	    <span class="n">collection</span><span class="p">[</span><span class="n">put_next_item_here</span><span class="p">]</span> <span class="o">=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span><span class="p">]</span>
+	    <span class="n">next_right</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">count</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">merge_check</span><span class="p">(</span><span class="n">merger</span><span class="p">):</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+    <span class="n">second</span> <span class="o">=</span> <span class="n">first</span><span class="p">[:]</span>
+    <span class="n">collection</span> <span class="o">=</span> <span class="n">first</span> <span class="o">+</span> <span class="n">second</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="n">merger</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+
+    <span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+    <span class="n">expect</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">collection</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">+</span> <span class="n">first</span> <span class="o">+</span> <span class="n">second</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">merger</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+    <span class="n">expect</span><span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">11</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">collection</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">+</span> <span class="n">first</span> <span class="o">+</span> <span class="n">second</span> <span class="o">+</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">merger</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+    <span class="n">expect</span><span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">11</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+    <span class="k">return</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">merge_check</span><span class="p">(</span><span class="n">merge_clrs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org6162a30" class="outline-4">
+<h4 id="org6162a30">Runtime</h4>
+<div class="outline-text-4" id="text-org6162a30">
+<p>
+Without doing anything fancy we can see that there's three for loops, the first two cover copying over all the sub-list items from the original list to the new lists, so together they execute once for every item (<i>n</i> times). And the loop that does the actual merge also runs once for each item so it also runs <i>n</i> times so altogether it has a run time of <i>2n</i> which we'll say is \(\Theta(n)\). This is actually going to be part of the merge-sort but I thought I'd put that in here since the post is separate.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc39cf35" class="outline-3">
+<h3 id="orgc39cf35">Levitin</h3>
+<div class="outline-text-3" id="text-orgc39cf35">
+<p>
+This is the version given in <a href="../itdaa/">Introduction to the Design &amp; Analysis of Algorithms</a> which I find a little clearer than the CLRS version. I generally prefer Levitin's versions, but, you know, CLRS is the one you <b>have to</b> have, so it's there too.
+</p>
+
+<pre id="the-merge-levitin" style="display:hidden;">
+\begin{algorithm}
+\caption{Merge}
+\begin{algorithmic}
+\INPUT $B[0 \ldots p-1]$, $C[0 \ldots q - 1]$, $A[0 \ldots p + q - 1]$
+\REQUIRE Sub-arrays $B$ and $C$ are sorted
+\OUTPUT Sorted array $A$ with the elements of $B$ and $C$.
+
+\PROCEDURE{Merge}{$B, C, A$}
+
+\STATE $i \gets 0$
+\STATE $j \gets 0$
+\STATE $k \gets 0$
+
+\WHILE {$i &lt; p$ and $j &lt; q$}
+ \IF {$B[i] \le C[j]$}
+  \STATE $A[k] \gets B[i]$
+  \STATE $i \gets i + 1$
+ \ELSE
+  \STATE $A[k] \gets C[j]$
+  \STATE $j \gets j + 1$
+ \ENDIF
+ \STATE $k \gets k + 1$
+\ENDWHILE
+
+\IF {$i=p$}
+ \STATE Copy $C[j \ldots q-1]$ to $A[k \ldots p + q - 1]$
+\ELSE
+ \STATE Copy $B[i \ldots p - 1]$ to $A[k \ldots p + q - 1]$
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+
+<p>
+There are a couple of noticeable differences between Levitin's version and the CLRS version. The first is that the lists to merge are passed into the function rather than being separated inside the function, which makes the "Divide" step separate from the "Combine" step. Additionally, instead of adding a sentinel to the end of the stacks the conditional checks to see if one of them is empty and copies over the stack that isn't empty outside of the merge-loop. This adds an additional conditional check to the main loop but then takes away the conditional check when copying over the leftovers. I might give the CLRS version a point for being more concise in handling the leftovers for the case where left and right are different sizes.
+</p>
+</div>
+<div id="outline-container-orgc495d5c" class="outline-4">
+<h4 id="orgc495d5c">Implement It</h4>
+<div class="outline-text-4" id="text-orgc495d5c">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">merge_levitin</span><span class="p">(</span><span class="n">left_stack</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">right_stack</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+		  <span class="n">target</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""Merges values from left and right stacks into target collection</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     left_stack: sorted collection of items to merge</span>
+<span class="sd">     right_stack: sorted collection of items to merge</span>
+<span class="sd">     target: collection into which to merge the items</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     count of basic operations</span>
+<span class="sd">    """</span>
+    <span class="n">left_size</span><span class="p">,</span> <span class="n">right_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_stack</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_stack</span><span class="p">)</span>
+    <span class="n">next_left</span> <span class="o">=</span> <span class="n">next_right</span> <span class="o">=</span> <span class="n">put_item_here</span> <span class="o">=</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="n">next_left</span> <span class="o">&lt;</span> <span class="n">left_size</span> <span class="ow">and</span> <span class="n">next_right</span> <span class="o">&lt;</span> <span class="n">right_size</span><span class="p">:</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">if</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span><span class="p">]:</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span><span class="p">]</span> <span class="o">=</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span><span class="p">]</span>
+	    <span class="n">next_left</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">else</span><span class="p">:</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span><span class="p">]</span> <span class="o">=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span><span class="p">]</span>
+	    <span class="n">next_right</span> <span class="o">+=</span> <span class="mi">1</span>
+
+	<span class="n">put_item_here</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">next_left</span> <span class="o">==</span> <span class="n">left_size</span> <span class="ow">and</span> <span class="n">next_right</span> <span class="o">&lt;</span> <span class="n">right_size</span><span class="p">:</span>
+	<span class="k">for</span> <span class="n">stack_offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left_size</span> <span class="o">+</span> <span class="n">right_size</span> <span class="o">-</span> <span class="n">put_item_here</span><span class="p">):</span>
+	    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span> <span class="o">+</span> <span class="n">stack_offset</span><span class="p">]</span> <span class="o">=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span> <span class="o">+</span> <span class="n">stack_offset</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">next_left</span> <span class="o">&lt;</span> <span class="n">left_size</span><span class="p">:</span>
+	<span class="k">for</span> <span class="n">stack_offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left_size</span> <span class="o">+</span> <span class="n">right_size</span> <span class="o">-</span> <span class="n">put_item_here</span><span class="p">):</span>
+	    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span> <span class="o">+</span> <span class="n">stack_offset</span><span class="p">]</span> <span class="o">=</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span> <span class="o">+</span> <span class="n">stack_offset</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">count</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">first</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">second</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="o">+</span> <span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">first</span><span class="p">)]</span>
+<span class="n">collection</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">second</span><span class="p">))</span>
+
+<span class="n">count</span> <span class="o">=</span> <span class="n">merge_levitin</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+
+<span class="n">second</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">first</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="o">+</span> <span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">second</span><span class="p">)]</span>
+<span class="n">collection</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">second</span><span class="p">))</span>
+
+<span class="n">count</span> <span class="o">=</span> <span class="n">merge_levitin</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org23e8781" class="outline-4">
+<h4 id="org23e8781">Runtime</h4>
+<div class="outline-text-4" id="text-org23e8781">
+<p>
+Since the dividing of the array is moved out of the merge the runtime for the merge is \(n\) so it's also \(\Theta(n)\).
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org7b7c4c2" class="outline-3">
+<h3 id="org7b7c4c2">A Hybrid</h3>
+<div class="outline-text-3" id="text-org7b7c4c2">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">left_stack</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">right_stack</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+	  <span class="n">target</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""Merges values from left and right stacks into target collection</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     left_stack: sorted collection of items to merge</span>
+<span class="sd">     right_stack: sorted collection of items to merge</span>
+<span class="sd">     target: collection into which to merge the items</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     count of basic operations</span>
+<span class="sd">    """</span>
+    <span class="n">target_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_stack</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_stack</span><span class="p">)</span>
+
+    <span class="c1"># since we aren't copying the lists this can be kind of dangerous</span>
+    <span class="c1"># passing in the same list more than once will append INFINITY each time</span>
+    <span class="n">left_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">INFINITY</span><span class="p">)</span>
+    <span class="n">right_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">INFINITY</span><span class="p">)</span>
+    <span class="n">next_left</span> <span class="o">=</span> <span class="n">next_right</span> <span class="o">=</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">put_item_here</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">target_size</span><span class="p">):</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">if</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span><span class="p">]:</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span><span class="p">]</span> <span class="o">=</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span><span class="p">]</span>
+	    <span class="n">next_left</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">else</span><span class="p">:</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span><span class="p">]</span> <span class="o">=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span><span class="p">]</span>
+	    <span class="n">next_right</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">count</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">first</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">second</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="o">+</span> <span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">first</span><span class="p">)]</span>
+<span class="n">collection</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">second</span><span class="p">))</span>
+
+<span class="n">count</span> <span class="o">=</span> <span class="n">merge</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+
+<span class="n">second</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">first</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="o">+</span> <span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">second</span><span class="p">)]</span>
+<span class="n">collection</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">second</span><span class="p">))</span>
+
+<span class="n">count</span> <span class="o">=</span> <span class="n">merge</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org305c62c" class="outline-2">
+<h2 id="org305c62c">End</h2>
+<div class="outline-text-2" id="text-org305c62c">
+<ul class="org-ul">
+<li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
+<li><a href="../itdaa/">Introduction to the Design &amp; Analysis of Algorithms</a></li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-merge"));
+});
+</script><script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-merge-levitin"));
+});
+</script>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/sorting/" rel="tag">sorting</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../binary-search/" rel="prev" title="Binary Search">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../divide-and-conquer/" rel="next" title="Divide and Conquer">Next post</a>
+            </li>
+        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
+             MathJax.Hub.Config({
+               tex2jax: {
+                 inlineMath: [['$','$'], ['\\(','\\)']],
+                 displayMath: [['$$','$$'], ['\\[','\\]']],
+                 processEscapes: true,
+                 processEnvironments: true,
+               },
+               displayAlign: 'center',
+               "HTML-CSS": {
+                 styles: {'.MathJax_Display': {"margin": 0}}
+               }
+             });
+            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>

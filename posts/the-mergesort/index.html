@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="The Mergesort algorithm.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Mergesort | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/the-mergesort/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../divide-and-conquer/" title="Divide and Conquer" type="text/html">
+<link rel="next" href="../the-master-theorem/" title="The Master Theorem" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="The Mergesort">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/the-mergesort/">
+<meta property="og:description" content="The Mergesort algorithm.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-01-25T17:49:38-08:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="divide-and-conquer">
+<meta property="article:tag" content="recursion">
+<meta property="article:tag" content="sorting">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">The Mergesort</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2022-01-25T17:49:38-08:00" itemprop="datePublished" title="2022-01-25 17:49">2022-01-25 17:49</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org350471a">Beginning</a></li>
+<li>
+<a href="#orgaaf64b4">Middle</a>
+<ul>
+<li><a href="#orgca80224">The CLRS Algorithm</a></li>
+<li><a href="#org0e1cdc0">Runtime</a></li>
+<li>
+<a href="#orgaf466a8">The Levitin</a>
+<ul>
+<li><a href="#org5f4b762">Implement It</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orge90fd53">Comparing Sorts</a></li>
+<li>
+<a href="#orgef20ca7">Looking at the Mergesort</a>
+<ul>
+<li><a href="#org61e5083">A Shuffle Input</a></li>
+<li><a href="#orgabea5e9">A Reversed Input</a></li>
+</ul>
+</li>
+<li><a href="#org4f9d713">End</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org350471a" class="outline-2">
+<h2 id="org350471a">Beginning</h2>
+<div class="outline-text-2" id="text-org350471a">
+<p>
+This is a look at the <a href="https://en.wikipedia.org/wiki/Merge_sort"><i>Mergesort</i></a>, an example of the <a href="../divide-and-conquer/">Divide and Conquer</a> strategy for sorting collections.
+</p>
+</div>
+</div>
+<div id="outline-container-orgaaf64b4" class="outline-2">
+<h2 id="orgaaf64b4">Middle</h2>
+<div class="outline-text-2" id="text-orgaaf64b4">
+</div>
+<div id="outline-container-orgca80224" class="outline-3">
+<h3 id="orgca80224">The CLRS Algorithm</h3>
+<div class="outline-text-3" id="text-orgca80224">
+<p>
+Our <i>Mergesort</i> repeatedly divides the given list into two parts and then recursively calls itself with the sub-problems and then takes advantage of our previously defined <a href="../the-merge/">Merge</a> function to combine the solutions together once we are down to one item to sort (\(p = r\)).
+</p>
+
+<pre id="the-mergesort" style="display:hidden;">
+\begin{algorithm}
+\caption{Mergesort}
+\begin{algorithmic}
+\INPUT An array and left and right locations of the subarray in the array
+\OUTPUT The array in sorted order
+
+\PROCEDURE{Mergesort}{$A, p, r$}
+\IF {p &lt; r}
+         \STATE \textbf{Divide}
+         \STATE $q \gets \left \lfloor \frac{p + r}{2} \right \rfloor$
+         
+         \STATE \\ \textbf{Conquer}
+         \STATE \textsc{MergeSort}(A, p, q)
+         \STATE \textsc{MergeSort}(A, q + 1, r)
+
+         \STATE \\ \textbf{Combine}
+         \STATE \textsc{Merge}(A, p, q, r)
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org0e1cdc0" class="outline-3">
+<h3 id="org0e1cdc0">Runtime</h3>
+<div class="outline-text-3" id="text-org0e1cdc0">
+<ul class="org-ul">
+<li>
+<b><b>Divide:</b></b> \(D(n) = \Theta(1)\)</li>
+<li>
+<b><b>Conquer:</b></b> \(2T\left (\frac{n}{2}\right)\)</li>
+<li>
+<b><b>Combine:</b></b> \(C(n) = \Theta(n)\)</li>
+</ul>
+
+\begin{align}
+T(n) &amp;= 2T \left( \frac{n}{2} \right) + \Theta(1) + \Theta(n) \\
+&amp;= 2T \left( \frac{n}{2} \right) + \Theta(n) \\
+&amp;= \Theta(n \log_2 n)
+\end{align}
+</div>
+</div>
+<div id="outline-container-orgaf466a8" class="outline-3">
+<h3 id="orgaf466a8">The Levitin</h3>
+<div class="outline-text-3" id="text-orgaf466a8">
+<pre id="the-mergesort-levitin" style="display:hidden;">
+\begin{algorithm}
+\caption{Levitin's Mergesort}
+\begin{algorithmic}
+\INPUT Array $A[0 \ldots n - 1]$ of orderable elements.
+\OUTPUT Array $A[0 \ldots n - 1]$ sorted in non-decreasing order.
+
+\PROCEDURE{MergeSort}{A}
+\IF {n &gt; 1}
+         \STATE \textbf{Divide}
+         \STATE Copy $A\left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$ to $B \left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$
+         \STATE Copy $A \left[\left\lfloor \frac{n}{2}\right\rfloor \ldots n - 1 \right]$ to $C \left[0 \ldots \left\lfloor \frac{n}{2} \right\rfloor - 1 \right]$
+         
+         \STATE \\ \textbf{Conquer}
+         \STATE \textsc{MergeSort}(B)
+         \STATE \textsc{MergeSort}(C)
+
+         \STATE \\ \textbf{Combine}
+         \STATE \textsc{Merge}(B, C, A)
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+
+<div id="outline-container-org5f4b762" class="outline-4">
+<h4 id="org5f4b762">Implement It</h4>
+<div class="outline-text-4" id="text-org5f4b762">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log2</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">left_stack</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+	  <span class="n">right_stack</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+	  <span class="n">target</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""Merges values from left and right stacks into target collection</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     left_stack: sorted collection of items to merge</span>
+<span class="sd">     right_stack: sorted collection of items to merge</span>
+<span class="sd">     target: collection into which to merge the items</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     count of basic operations</span>
+<span class="sd">    """</span>
+    <span class="n">left_size</span><span class="p">,</span> <span class="n">right_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_stack</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_stack</span><span class="p">)</span>
+    <span class="n">next_left</span> <span class="o">=</span> <span class="n">next_right</span> <span class="o">=</span> <span class="n">put_item_here</span> <span class="o">=</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="n">next_left</span> <span class="o">&lt;</span> <span class="n">left_size</span> <span class="ow">and</span> <span class="n">next_right</span> <span class="o">&lt;</span> <span class="n">right_size</span><span class="p">:</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">if</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span><span class="p">]:</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span><span class="p">]</span> <span class="o">=</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span><span class="p">]</span>
+	    <span class="n">next_left</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="k">else</span><span class="p">:</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span><span class="p">]</span> <span class="o">=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span><span class="p">]</span>
+	    <span class="n">next_right</span> <span class="o">+=</span> <span class="mi">1</span>
+
+	<span class="n">put_item_here</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">next_left</span> <span class="o">==</span> <span class="n">left_size</span> <span class="ow">and</span> <span class="n">next_right</span> <span class="o">&lt;</span> <span class="n">right_size</span><span class="p">:</span>
+	<span class="k">for</span> <span class="n">stack_offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left_size</span> <span class="o">+</span> <span class="n">right_size</span> <span class="o">-</span> <span class="n">put_item_here</span><span class="p">):</span>
+	    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span> <span class="o">+</span> <span class="n">stack_offset</span><span class="p">]</span> <span class="o">=</span> <span class="n">right_stack</span><span class="p">[</span><span class="n">next_right</span> <span class="o">+</span> <span class="n">stack_offset</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">next_left</span> <span class="o">&lt;</span> <span class="n">left_size</span><span class="p">:</span>
+	<span class="k">for</span> <span class="n">stack_offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left_size</span> <span class="o">+</span> <span class="n">right_size</span> <span class="o">-</span> <span class="n">put_item_here</span><span class="p">):</span>
+	    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+	    <span class="n">target</span><span class="p">[</span><span class="n">put_item_here</span> <span class="o">+</span> <span class="n">stack_offset</span><span class="p">]</span> <span class="o">=</span> <span class="n">left_stack</span><span class="p">[</span><span class="n">next_left</span> <span class="o">+</span> <span class="n">stack_offset</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">count</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mergesort</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""Sorts the collection using a recursive mergesort</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     collection: a mutable sequence</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     runtime count</span>
+<span class="sd">    """</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">items</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+	<span class="n">middle</span> <span class="o">=</span> <span class="n">items</span><span class="o">//</span><span class="mi">2</span>
+	<span class="n">left_stack</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[:</span><span class="n">middle</span><span class="p">]</span>
+	<span class="n">right_stack</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">middle</span><span class="p">:]</span>
+	<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_stack</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_stack</span><span class="p">)</span> <span class="o">==</span> <span class="n">items</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="n">mergesort</span><span class="p">(</span><span class="n">left_stack</span><span class="p">)</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="n">mergesort</span><span class="p">(</span><span class="n">right_stack</span><span class="p">)</span>
+	<span class="n">count</span> <span class="o">+=</span> <span class="n">merge</span><span class="p">(</span><span class="n">left_stack</span><span class="p">,</span> <span class="n">right_stack</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">count</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">size</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">10</span>
+<span class="n">items</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">)),</span> <span class="n">k</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+<span class="n">starting</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">runtime</span> <span class="o">=</span> <span class="n">mergesort</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">size</span> <span class="o">*</span> <span class="n">log2</span><span class="p">(</span><span class="n">size</span><span class="p">)))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">starting</span><span class="p">))))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">size</span> <span class="o">*</span> <span class="n">log2</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">runtime</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+10,240.0
+10,240
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge90fd53" class="outline-2">
+<h2 id="orge90fd53">Comparing Sorts</h2>
+<div class="outline-text-2" id="text-orge90fd53">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">default_rng</span>
+
+<span class="kn">import</span> <span class="nn">altair</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.sort.insertion</span> <span class="kn">import</span> <span class="n">insertion_sort</span>
+
+<span class="kn">from</span> <span class="nn">graeae</span> <span class="kn">import</span> <span class="n">Timer</span>
+<span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_chart</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">numba_random</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="mi">2022</span><span class="p">)</span>
+<span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
+
+<span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"the-mergesort"</span>
+<span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
+<span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">merger</span><span class="p">(</span><span class="n">thing_to_sort</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="sd">"""A thing to add the size of the input to the output</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     thing_to_sort: collection of items to sort</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     number of things to sort, count of merges</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">thing_to_sort</span><span class="p">),</span> <span class="n">mergesort</span><span class="p">(</span><span class="n">thing_to_sort</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">ninsertion</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="n">insertion_sort</span><span class="p">)</span>
+
+<span class="n">things_to_sort</span> <span class="o">=</span> <span class="p">[</span><span class="n">numba_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
+		  <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)]</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
+    <span class="n">insertion_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+	<span class="n">delayed</span><span class="p">(</span><span class="n">ninsertion</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Started: 2022-01-28 01:12:10.628102
+Ended: 2022-01-28 01:12:22.681161
+Elapsed: 0:00:12.053059
+</pre>
+
+
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
+    <span class="n">merge_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
+	<span class="n">delayed</span><span class="p">(</span><span class="n">merger</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Started: 2022-01-28 01:12:33.278574
+Ended: 2022-01-28 01:12:38.850064
+Elapsed: 0:00:05.571490
+</pre>
+
+
+<div class="highlight"><pre><span></span><span class="n">SIZE</span><span class="p">,</span> <span class="n">COMPARISONS</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+<span class="n">unzipped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">merge_output</span><span class="p">))</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Size"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">SIZE</span><span class="p">],</span>
+<span class="s2">"Mergesort"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">COMPARISONS</span><span class="p">]})</span>
+
+<span class="n">unzipped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">insertion_output</span><span class="p">))</span>
+<span class="n">frame</span><span class="p">[</span><span class="s2">"Insertion Sort"</span><span class="p">]</span> <span class="o">=</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">COMPARISONS</span><span class="p">]</span>
+
+<span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Size"</span><span class="p">],</span>
+		    <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Mergesort"</span><span class="p">,</span> <span class="s2">"Insertion Sort"</span><span class="p">],</span>
+		    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Sort Algorithm"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"Size"</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Sort Algorithm"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Size"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Comparisons"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+	     <span class="s2">"Sort Algorithm"</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Insertion vs Merge Sort"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"insertion-vs-merge"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="insertion-vs-merge.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<div class="highlight"><pre><span></span><span class="n">frame</span><span class="p">[</span><span class="s2">"nlog2(n)"</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s2">"Size"</span><span class="p">]</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="s2">"Size"</span><span class="p">])</span>
+<span class="k">del</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="s2">"Insertion Sort"</span><span class="p">])</span>
+<span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Size"</span><span class="p">],</span>
+		    <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Mergesort"</span><span class="p">,</span> <span class="s2">"nlog2(n)"</span><span class="p">],</span>
+		    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"Size"</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Size"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Comparisons"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
+	     <span class="s2">"Source"</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Merge Sort vs Theoretical"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"merge-by-logn"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="merge-by-logn.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+
+<div id="outline-container-orgef20ca7" class="outline-2">
+<h2 id="orgef20ca7">Looking at the Mergesort</h2>
+<div class="outline-text-2" id="text-orgef20ca7">
+<p>
+The version of mergesort I implemented above is based on Levitin's algorithm, which I thought was clearer, since the copying was happening outside of the merge. This makes it harder to plot the progress of the sort, though, so I'm going to use the CLRS algorithm here to get some kind of visualization (hopefully).
+</p>
+
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.sort.merge</span> <span class="kn">import</span> <span class="n">merge_clrs</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mergesort_tracer</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+		     <span class="n">tracer</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">"""Sorts the collection using a recursive mergesort</span>
+
+<span class="sd">    This uses the CLRS merge-sort to build dict of the locations of the</span>
+<span class="sd">    elements as the merging is done</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     collection: a mutable sequence</span>
+<span class="sd">     left: the index of the beginning element of the sub-array</span>
+<span class="sd">     right: the index of the ending element of the sub-array</span>
+<span class="sd">     tracer: the dictionary to track the indices of the items</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     tracer updated with post-merge locations of the items in tracer</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">tracer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">tracer</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">collection</span><span class="p">)}</span>
+
+    <span class="k">if</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
+	<span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+	<span class="n">mergesort_tracer</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">middle</span><span class="p">,</span> <span class="n">tracer</span><span class="p">)</span>
+	<span class="n">mergesort_tracer</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">tracer</span><span class="p">)</span>
+	<span class="n">merge_clrs</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">middle</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">collection</span><span class="p">):</span>
+	    <span class="n">tracer</span><span class="p">[</span><span class="n">element</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tracer</span>
+</pre></div>
+</div>
+
+<div id="outline-container-org61e5083" class="outline-3">
+<h3 id="org61e5083">A Shuffle Input</h3>
+<div class="outline-text-3" id="text-org61e5083">
+<div class="highlight"><pre><span></span><span class="n">elements</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">start</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">elements</span><span class="p">))</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+<span class="n">tracer</span> <span class="o">=</span> <span class="n">mergesort_tracer</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">))</span>
+
+<span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Merge"</span><span class="p">})</span>
+<span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Merge"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Merge"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Location"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s2">"Element"</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Merge"</span><span class="p">,</span> <span class="s2">"Location"</span><span class="p">,</span> <span class="s2">"Element"</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Mergesort Tracing"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"mergesort-trace"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="mergesort-trace.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+You can kind of see what's going on, every time you see a bunch of crossed lines it's because the merge moved items around… but maybe an artificial case will be clearer.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgabea5e9" class="outline-3">
+<h3 id="orgabea5e9">A Reversed Input</h3>
+<div class="outline-text-3" id="text-orgabea5e9">
+<p>
+Let's use an input that's sorted but backwards to see the swaps more clearly.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">elements</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">start</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">elements</span><span class="p">))</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">inputs</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+<span class="n">tracer</span> <span class="o">=</span> <span class="n">mergesort_tracer</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">))</span>
+
+<span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Merge"</span><span class="p">})</span>
+<span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Merge"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Merge"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Location"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s2">"Element"</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Merge"</span><span class="p">,</span> <span class="s2">"Location"</span><span class="p">,</span> <span class="s2">"Element"</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Mergesort Tracing (From Backwards Source)"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"mergesort-trace-backwards"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="mergesort-trace-backwards.html" style="width:100%" height="600">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-org4f9d713" class="outline-2">
+<h2 id="org4f9d713">End</h2>
+<div class="outline-text-2" id="text-org4f9d713">
+<ul class="org-ul">
+<li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
+<li><a href="../itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-mergesort"));
+});
+</script><script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("the-mergesort-levitin"));
+});
+</script>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/divide-and-conquer/" rel="tag">divide-and-conquer</a></li>
+            <li><a class="tag p-category" href="../../categories/recursion/" rel="tag">recursion</a></li>
+            <li><a class="tag p-category" href="../../categories/sorting/" rel="tag">sorting</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../divide-and-conquer/" rel="prev" title="Divide and Conquer">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../the-master-theorem/" rel="next" title="The Master Theorem">Next post</a>
+            </li>
+        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
+             MathJax.Hub.Config({
+               tex2jax: {
+                 inlineMath: [['$','$'], ['\\(','\\)']],
+                 displayMath: [['$$','$$'], ['\\[','\\]']],
+                 processEscapes: true,
+                 processEnvironments: true,
+               },
+               displayAlign: 'center',
+               "HTML-CSS": {
+                 styles: {'.MathJax_Display': {"margin": 0}}
+               }
+             });
+            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>
