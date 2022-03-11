@@ -44,11 +44,11 @@ class Node:
         """
         assert self.parent is None or type(self.parent) is Node
         if self.left is not None:
-            assert self.left <= self
+            assert self.left <= self, f"Left: {self.left}, Self: {self}"
             self.left.check_node()
     
         if self.right is not None:
-            assert self.right >= self
+            assert self.right >= self, f"Right: {self.right}, Self: {self}"
             self.right.check_node()
         return
 
