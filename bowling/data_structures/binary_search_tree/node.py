@@ -40,15 +40,15 @@ class Node:
         """Checks that the Binary Search Tree Property holds
     
         Raises:
-         AssertionError: Binary Search Tree Property was violated
+         AssertionError: Binary Search Tree Property violated or duplicates exist
         """
         assert self.parent is None or type(self.parent) is Node
         if self.left is not None:
-            assert self.left <= self, f"Left: {self.left}, Self: {self}"
+            assert self.left < self, f"Left: {self.left} not < Self: {self}"
             self.left.check_node()
     
         if self.right is not None:
-            assert self.right >= self, f"Right: {self.right}, Self: {self}"
+            assert self.right > self, f"Right: {self.right} not > Self: {self}"
             self.right.check_node()
         return
 
