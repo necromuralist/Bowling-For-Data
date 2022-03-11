@@ -12,7 +12,7 @@
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="rss.xml">
 <link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/">
 <link rel="next" href="index-3.html" type="text/html">
-<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/algorithm-problems/" type="text/html">
+<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/binary-search-tree-in-order-traversal/" type="text/html">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
 </head>
 <body>
@@ -70,7 +70,528 @@ bg-light
 
     
 <div class="postindex">
-    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/algorithm-problems/" class="u-url">Algorithm Problems</a></h1>
+    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-in-order-traversal/" class="u-url">Binary Search Tree: In-Order Traversal</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/binary-search-tree-in-order-traversal/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-10T15:21:25-08:00" itemprop="datePublished" title="2022-03-10 15:21">2022-03-10 15:21</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li>
+<a href="posts/binary-search-tree-in-order-traversal/#orgb9ba2ce">Traversing a Tree</a>
+<ul>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org058708a">The Algorithm</a></li>
+<li>
+<a href="posts/binary-search-tree-in-order-traversal/#org82ea468">Implementing It</a>
+<ul>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org9a8d349">Imports</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org05681c5">The Function</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org77e90c6">A First Sample</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#orgb5ada9a">A Little Fancier</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="posts/binary-search-tree-in-order-traversal/#org929618e">End</a>
+<ul>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org872d875">The Posts</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org1ebcc94">Sources</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgb9ba2ce" class="outline-2">
+<h2 id="orgb9ba2ce">Traversing a Tree</h2>
+<div class="outline-text-2" id="text-orgb9ba2ce">
+<p>
+There are three common ways to traverse a Binary Search Tree which can be characterized by when the root of the tree is added:
+</p>
+
+<ul class="org-ul">
+<li>Pre-Order Tree Walk
+<ol class="org-ol">
+<li>root</li>
+<li>sub-trees</li>
+</ol>
+</li>
+<li>In-Order Tree Walk
+<ol class="org-ol">
+<li>left sub-tree</li>
+<li>root</li>
+<li>right sub-tree</li>
+</ol>
+</li>
+<li>Post-Order Tree Walk
+<ol class="org-ol">
+<li>sub-trees</li>
+<li>root</li>
+</ol>
+</li>
+</ul>
+<p>
+We're going to look at how to get the nodes of the tree in sorted (non-decreasing) order, which is a characteristic of the In-Order Tree Walk.
+</p>
+</div>
+<div id="outline-container-org058708a" class="outline-3">
+<h3 id="org058708a">The Algorithm</h3>
+<div class="outline-text-3" id="text-org058708a">
+<p>
+<a href="posts/clrs/">CLRS</a> gives the In-Order Tree Walk in the context of printing the nodes of the tree in order.
+</p>
+
+<pre id="in-order-walk" style="display:hidden;">
+\begin{algorithm}
+\caption{In-Order Tree Walk}
+\begin{algorithmic}
+\INPUT Node \textit{x}
+
+\PROCEDURE{InorderTreeWalk}{\textit{x}}
+\IF {\textit{x} $\neq$ \textsc{Nil}}
+
+ \STATE \textsc{InorderTreeWalk}(\textit{x.left})
+ \STATE \textsc{Print}(\textit{x.key})
+ \STATE \textsc{InorderTreeWalk}(\textit{x.right})
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org82ea468" class="outline-3">
+<h3 id="org82ea468">Implementing It</h3>
+<div class="outline-text-3" id="text-org82ea468">
+</div>
+<div id="outline-container-org9a8d349" class="outline-4">
+<h4 id="org9a8d349">Imports</h4>
+<div class="outline-text-4" id="text-org9a8d349">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">import</span> <span class="nn">networkx</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.node</span> <span class="kn">import</span> <span class="n">Node</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org05681c5" class="outline-4">
+<h4 id="org05681c5">The Function</h4>
+<div class="outline-text-4" id="text-org05681c5">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Print the nodes in order</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     root: the root node</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">" "</span><span class="p">)</span>
+	<span class="n">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org77e90c6" class="outline-4">
+<h4 id="org77e90c6">A First Sample</h4>
+<div class="outline-text-4" id="text-org77e90c6">
+<p>
+Let's start with a simple example.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"binary-search-tree-in-order-traversal"</span>
+<span class="n">OUTPUT</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
+<span class="n">pygraph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="n">pygraph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">OUTPUT</span> <span class="o">+</span> <span class="s2">"first_tree.png"</span><span class="p">)</span>
+</pre></div>
+
+<p>
+<img src="posts/binary-search-tree-in-order-traversal/first_tree.png" alt="nil"></p>
+
+<div class="highlight"><pre><span></span><span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+<span class="n">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+1 2 3 
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgb5ada9a" class="outline-4">
+<h4 id="orgb5ada9a">A Little Fancier</h4>
+<div class="outline-text-4" id="text-orgb5ada9a">
+<div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
+<span class="n">pygraph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="n">pygraph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">OUTPUT</span> <span class="o">+</span> <span class="s2">"second_tree.png"</span><span class="p">)</span>
+</pre></div>
+
+<p>
+<img src="posts/binary-search-tree-in-order-traversal/second_tree.png" alt="nil"></p>
+
+<div class="highlight"><pre><span></span><span class="n">rootier</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">rootier</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">root</span>
+<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">right</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">right</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">right</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+<span class="n">rootier</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+<span class="n">rootier</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+<span class="n">in_order_traversal</span><span class="p">(</span><span class="n">rootier</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+1 2 3 4 5 6 7 
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org929618e" class="outline-2">
+<h2 id="org929618e">End</h2>
+<div class="outline-text-2" id="text-org929618e">
+</div>
+<div id="outline-container-org872d875" class="outline-3">
+<h3 id="org872d875">The Posts</h3>
+<div class="outline-text-3" id="text-org872d875">
+<ul class="org-ul">
+<li><a href="posts/binary-search-trees/">Previous Post</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org1ebcc94" class="outline-3">
+<h3 id="org1ebcc94">Sources</h3>
+<div class="outline-text-3" id="text-org1ebcc94">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("in-order-walk"));
+});
+</script>
+</div>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-trees/" class="u-url">Binary Search Trees</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/binary-search-trees/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-08T16:37:49-08:00" itemprop="datePublished" title="2022-03-08 16:37">2022-03-08 16:37</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="posts/binary-search-trees/#orge7ce499">What is a Binary Search Tree?</a></li>
+<li><a href="posts/binary-search-trees/#org9cf3778">The Binary Search Tree Property</a></li>
+<li>
+<a href="posts/binary-search-trees/#orgf5c565b">The Node</a>
+<ul>
+<li><a href="posts/binary-search-trees/#org80f5404">The Abstract</a></li>
+<li>
+<a href="posts/binary-search-trees/#org103dc20">The Implementation</a>
+<ul>
+<li><a href="posts/binary-search-trees/#org0ae724d">Comparisons</a></li>
+<li><a href="posts/binary-search-trees/#org4d89411">Check Nodes</a></li>
+<li><a href="posts/binary-search-trees/#org0b6879f">String Output</a></li>
+</ul>
+</li>
+<li><a href="posts/binary-search-trees/#org5fa9310">Testing</a></li>
+<li><a href="posts/binary-search-trees/#orga77ffea">Sources</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orge7ce499" class="outline-2">
+<h2 id="orge7ce499">What is a Binary Search Tree?</h2>
+<div class="outline-text-2" id="text-orge7ce499">
+<p>
+Stealing from <a href="posts/clrs/">CLRS</a>.
+</p>
+
+<ul class="org-ul">
+<li>A Binary Search Tree is a linked structure of Nodes</li>
+<li>Each Node is an object</li>
+<li>Each node has a <i>Key</i> (and <i>Data</i>)</li>
+<li>Each Node has <i>Left</i>, <i>Right</i>, and <i>Parent</i> attributes which point to the Left Child, Right-Child, and Parent of the Node.</li>
+<li>If a child is missing then it is set to <i>Nil</i>.</li>
+<li>The root Node is the only Node with a Parent set to <i>Nil</i>.</li>
+</ul>
+<p>
+When describing Binary Search Trees I'll tend to refer to the Nodes but mean the Nodes' keys (e.g. to say a Node is less than another means its key is less than the other Node's).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9cf3778" class="outline-2">
+<h2 id="org9cf3778">The Binary Search Tree Property</h2>
+<div class="outline-text-2" id="text-org9cf3778">
+<p>
+All the nodes in the left sub-tree of a node are less than or equal to the node and all the nodes in the right sub-tree of the node are greater than or equal to the node.
+</p>
+</div>
+</div>
+<div id="outline-container-orgf5c565b" class="outline-2">
+<h2 id="orgf5c565b">The Node</h2>
+<div class="outline-text-2" id="text-orgf5c565b">
+</div>
+<div id="outline-container-org80f5404" class="outline-3">
+<h3 id="org80f5404">The Abstract</h3>
+<div class="outline-text-3" id="text-org80f5404">
+<p>
+So the Binary Search Tree is a linked structure made up of Nodes that look more or less like this:
+</p>
+
+<p>
+<img src="posts/binary-search-trees/node.png" alt="nil"></p>
+
+<p>
+And in which the Binary Search Tree Property is maintained. I'm going to forego the data field and add a couple of methods to make it more convenient for me, but most of the way the tree is used will be by pass nodes (particularly the root) to functions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org103dc20" class="outline-3">
+<h3 id="org103dc20">The Implementation</h3>
+<div class="outline-text-3" id="text-org103dc20">
+<p>
+Since I'm using pypy 3.7 there's a problem with the declaration of an attribute of the Node class being a Node object (it isn't defined yet) but according to <a href="https://stackoverflow.com/questions/55320236/does-python-evaluate-type-hinting-of-a-forward-reference">this post on stackoverflow</a> we can import <code>annotations</code> from the future to fix it.
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="c1"># from pypi</span>
+<span class="c1"># https://www.attrs.org/en/stable/index.html</span>
+<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.types</span> <span class="kn">import</span> <span class="n">Orderable</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="nd">@define</span>
+<span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+    <span class="sd">"""A Node in a Binary Search Tree</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     key: item to compare nodes</span>
+<span class="sd">     parent: parent of this node</span>
+<span class="sd">     left: left child</span>
+<span class="sd">     right: right child</span>
+<span class="sd">    """</span>
+    <span class="n">key</span><span class="p">:</span> <span class="n">Orderable</span>
+    <span class="n">parent</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">left</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">right</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span>
+</pre></div>
+</div>
+<div id="outline-container-org0ae724d" class="outline-4">
+<h4 id="org0ae724d">Comparisons</h4>
+<div class="outline-text-4" id="text-org0ae724d">
+<p>
+These are convenience methods to make it so that you can compare the node-objects without referring to the key (see the <a href="https://docs.python.org/3/reference/datamodel.html#object.__lt__">python Data Model documentation</a>). In reading the documentation I thought that you had to implement everything, but after implementing <i>less than</i> and <i>less than or equal to</i> the <i>greater than</i> and <i>greater than or equal to</i> comparisons started to work. I guess if you don't implement them they just take the negative of the less than cases.
+</p>
+</div>
+
+<ul class="org-ul">
+<li>
+<a id="org4ef9364"></a>Equal<br><div class="outline-text-5" id="text-org4ef9364">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""Check if the other node has an equal key"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</li>
+
+<li>
+<a id="org0024b85"></a>Less Than<br><div class="outline-text-5" id="text-org0024b85">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""See if this key is less than the other's"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</li>
+<li>
+<a id="orgabb8650"></a>Less Than or Equal<br><div class="outline-text-5" id="text-orgabb8650">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""See if this key is less than or other's"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div id="outline-container-org4d89411" class="outline-4">
+<h4 id="org4d89411">Check Nodes</h4>
+<div class="outline-text-4" id="text-org4d89411">
+<p>
+This is a convenience method to check if a node and its sub-trees maintain the Binary Search Tree Property. It calls the children too so that the whole tree can be checked by calling this on the root. Maybe it's overkill…
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_node</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Checks that the Binary Search Tree Property holds</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError: Binary Search Tree Property was violated</span>
+<span class="sd">    """</span>
+    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Node</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2">, Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2">, Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org0b6879f" class="outline-4">
+<h4 id="org0b6879f">String Output</h4>
+<div class="outline-text-4" id="text-org0b6879f">
+<p>
+This is to make it a little easier to print.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">"""The key as a string"""</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org5fa9310" class="outline-3">
+<h3 id="org5fa9310">Testing</h3>
+<div class="outline-text-3" id="text-org5fa9310">
+<p>
+I'll have to break this up later.
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">be_above</span><span class="p">,</span>
+    <span class="n">be_above_or_equal</span><span class="p">,</span>
+    <span class="n">be_below</span><span class="p">,</span>
+    <span class="n">be_below_or_equal</span><span class="p">,</span>
+    <span class="n">be_none</span><span class="p">,</span>
+    <span class="n">equal</span><span class="p">,</span>
+    <span class="n">expect</span><span class="p">,</span>
+    <span class="n">raise_error</span>
+<span class="p">)</span>
+
+<span class="c1"># software under test</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.node</span> <span class="kn">import</span> <span class="n">Node</span>
+
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+
+<span class="n">uncle</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below_or_equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">brother</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">clone</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above_or_equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">clone</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above_or_equal</span><span class="p">(</span><span class="n">clone</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below_or_equal</span><span class="p">(</span><span class="n">clone</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="n">clone</span><span class="p">))</span>
+
+<span class="c1"># parent is root</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="c1"># parent is right child</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">uncle</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="c1"># parent is left child</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">brother</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">bad_check</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+    <span class="k">return</span>
+
+<span class="n">lefty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">righty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">righty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">righty</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="n">righty</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">righty</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="n">lefty</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)))</span>
+</pre></div>
+
+
+<p>
+The <a href="posts/binary-search-tree-in-order-traversal/">next post</a> will be about traversing the tree in the order of the nodes.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga77ffea" class="outline-3">
+<h3 id="orga77ffea">Sources</h3>
+<div class="outline-text-3" id="text-orga77ffea">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+</div>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/algorithm-problems/" class="u-url">Algorithm Problems</a></h1>
         <div class="metadata">
             <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
                 The Cloistered Monkey
@@ -1951,1349 +2472,6 @@ So we've defined the median but actually finding the median is a little more com
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("minimum"));
-});
-</script>
-</div>
-</div>
-    </div>
-    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/max-heap/" class="u-url">Heap!</a></h1>
-        <div class="metadata">
-            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
-                The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="posts/max-heap/" rel="bookmark">
-            <time class="published dt-published" datetime="2022-02-08T13:40:58-08:00" itemprop="datePublished" title="2022-02-08 13:40">2022-02-08 13:40</time></a>
-            </p>
-        </div>
-    </header><div class="e-content entry-content">
-    <div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li>
-<a href="posts/max-heap/#orgea0cfae">Beginning</a>
-<ul>
-<li><a href="posts/max-heap/#orgaf7cf64">What's a Heap?</a></li>
-<li>
-<a href="posts/max-heap/#org25b538d">Some Functions</a>
-<ul>
-<li><a href="posts/max-heap/#org66e7e34">Some Requirements</a></li>
-<li><a href="posts/max-heap/#org464a939">Heap Properties</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<a href="posts/max-heap/#org6a5c4ac">The Max Heap</a>
-<ul>
-<li><a href="posts/max-heap/#org13a7845">The Imports</a></li>
-<li>
-<a href="posts/max-heap/#orgcdc3ae8">The Class</a>
-<ul>
-<li><a href="posts/max-heap/#org6c42307">Imports</a></li>
-<li><a href="posts/max-heap/#org216f8e1">The Definition</a></li>
-<li><a href="posts/max-heap/#orgf3d1721">From List</a></li>
-<li><a href="posts/max-heap/#org1e80ca7">The Heap Size</a></li>
-<li><a href="posts/max-heap/#org98d991c">Length</a></li>
-<li><a href="posts/max-heap/#org2f7d5d1">Maximum</a></li>
-<li><a href="posts/max-heap/#org90cf79a">Finding the Parent, Left-Child, and Right-Child of a Node</a></li>
-<li><a href="posts/max-heap/#org35b2c10">Heapify A Sub Tree</a></li>
-<li><a href="posts/max-heap/#org64fc361">The Call</a></li>
-<li><a href="posts/max-heap/#org1ebc431">Increase a Key</a></li>
-<li><a href="posts/max-heap/#org562523c">Insert a Value</a></li>
-<li><a href="posts/max-heap/#orga75825f">Check the Heap Property</a></li>
-<li><a href="posts/max-heap/#orgc61a327">Get and Set Item</a></li>
-</ul>
-</li>
-<li><a href="posts/max-heap/#orgc96fbd3">The Tests</a></li>
-</ul>
-</li>
-<li>
-<a href="posts/max-heap/#org2c90df9">Heap Sort</a>
-<ul>
-<li><a href="posts/max-heap/#org1855604">Imports</a></li>
-<li><a href="posts/max-heap/#orgbf88f15">The Heap Sort Class</a></li>
-<li><a href="posts/max-heap/#org735e382">The Tests</a></li>
-</ul>
-</li>
-<li>
-<a href="posts/max-heap/#orgdc8df84">A Priority Queue</a>
-<ul>
-<li><a href="posts/max-heap/#orga535d4e">The Tests</a></li>
-</ul>
-</li>
-<li><a href="posts/max-heap/#orgc297611">Plotting</a></li>
-<li><a href="posts/max-heap/#org531fd44">End</a></li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-orgea0cfae" class="outline-2">
-<h2 id="orgea0cfae">Beginning</h2>
-<div class="outline-text-2" id="text-orgea0cfae">
-</div>
-<div id="outline-container-orgaf7cf64" class="outline-3">
-<h3 id="orgaf7cf64">What's a Heap?</h3>
-<div class="outline-text-3" id="text-orgaf7cf64">
-<p>
-This is a post that looks at <a href="https://en.wikipedia.org/wiki/Heap_(data_structure)">Heaps</a>. According to <a href="posts/clrs/">Introduction To Algorithms (CLRS)</a>, a heap is an array that can be thought of as a nearly complete binary tree which satisfies the <b><b>Heap Property</b></b>. There are actually two heap properties, one for a <b><b>Max Heap</b></b> and one for a <b><b>Min Heap</b></b>.
-</p>
-
-<ul class="org-ul">
-<li>
-<b><b>Max-Heap Property</b></b>: \(A[Parent(i)]) \ge A[i]\)</li>
-<li>
-<b><b>Min-Heap Property</b></b>: \(A[Parent(i)]) \le A[i]\)</li>
-</ul>
-<p>
-Which means that for any node in a MaxHeap, its value is greater than or equal to that of any of its children, and for any node in a MinHeap, the node's value is less than or equal to its children.
-</p>
-
-<p>
-The heap has (at least) two attributes.
-</p>
-
-<ul class="org-ul">
-<li>
-<i>A.length</i>: the number of elements in the array</li>
-<li>
-<i>A.heap-size</i>: the number of elements in the heap (not all elements in the array need to be in the heap)</li>
-</ul>
-<p>
-The first element in the heap is the root (for the Max-Heap it is the largest element, for the Min-Heap it is the smallest).
-</p>
-</div>
-</div>
-
-<div id="outline-container-org25b538d" class="outline-3">
-<h3 id="org25b538d">Some Functions</h3>
-<div class="outline-text-3" id="text-org25b538d">
-<p>
-For any Node in the Heap located at <i>i</i>:
-</p>
-
-<pre id="parent" style="display:hidden;">
-\begin{algorithm}
-\caption{Parent}
-\begin{algorithmic}
-\INPUT The index of a Child Node
-\OUTPUT The index of the Child's Parent
-\PROCEDURE{Parent}{$i$}
- \RETURN {\(\left \lfloor \frac{i}{2} \right \rfloor\)}
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-
-<pre id="left" style="display:hidden;">
-\begin{algorithm}
-\caption{Left}
-\begin{algorithmic}
-\INPUT The index of a Parent Node
-\OUTPUT The index of the Parent's left child node
-\PROCEDURE{Left}{$i$}
- \RETURN 2i
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-
-<pre id="right" style="display:hidden;">
-\begin{algorithm}
-\caption{Right}
-\begin{algorithmic}
-\INPUT The index of a Parent Node
-\OUTPUT The index of the Parent's right child node
-\PROCEDURE{Right}{$i$}
- \RETURN 2i + 1
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-
-<p>
-These Functions show the relationship between the location of a node and its children in the array that makes up the heap.
-</p>
-</div>
-
-<div id="outline-container-org66e7e34" class="outline-4">
-<h4 id="org66e7e34">Some Requirements</h4>
-<div class="outline-text-4" id="text-org66e7e34">
-<p>
-There are also two requirements:
-</p>
-
-<ul class="org-ul">
-<li>
-<b><b>Shape Requirement</b></b>: All levels but the last have to be complete (only the rightmost leaves can be incomplete)</li>
-<li>
-<b><b>Dominance Requirement</b></b>: Every node is greater than or equal to its children (in the Max-Heap, less than or equal for the Min-Heap)</li>
-</ul>
-<p>
-That Dominance Requirement is also covered by the Heap Property.
-</p>
-</div>
-</div>
-<div id="outline-container-org464a939" class="outline-4">
-<h4 id="org464a939">Heap Properties</h4>
-<div class="outline-text-4" id="text-org464a939">
-<p>
-These are from <a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a>.
-</p>
-
-<ol class="org-ol">
-<li>There exists exactly one essentially complete binary tree with <i>n</i> nodes. It's a binary tree so its height is \(\lfloor \log_2 n\rfloor\).</li>
-<li>The root of a (Max) Heap always has the largest element.</li>
-<li>A node of a heap with all its descendants is also a heap.</li>
-<li>A heap implemented as an array with the heap's elements stored at \(1 \ldots n\) can be constructed using:
-<ul class="org-ul">
-<li>the parental node keys will be the first \(\lfloor \frac{n}{2} \rfloor\) elements while the leaf nodes will be in the last \(\lceil \frac{n}{2} \rceil\) positions</li>
-<li>The childern of a parent node at position <i>i</i> will be in positions <i>2i</i> and <i>2i + 1</i>.</li>
-<li>The parent of a child node at position <i>i</i> will be in position \(\lfloor \frac{i}{2}\rfloor\).</li>
-</ul>
-</li>
-</ol>
-<p>
-Property four is what was defined in the functions up above. Levitin also gives a slightly different variation on stating the heap property.
-</p>
-
-<p>
-\[
-H[i] \ge \max{H[2i], H[2i + 1]} \textrm{ for } i= 1, \ldots, \lfloor \frac{n}{2} \rfloor.
-\]
-</p>
-
-<p>
-This is sort of an inversion of the Max-Heap Property stated above. While the Max-Heap Property was given as every node is less than or equal to its parent, this says that every parent is greater than or equal to its children.
-</p>
-</div>
-</div>
-</div>
-</div>
-<div id="outline-container-org6a5c4ac" class="outline-2">
-<h2 id="org6a5c4ac">The Max Heap</h2>
-<div class="outline-text-2" id="text-org6a5c4ac">
-</div>
-<div id="outline-container-org13a7845" class="outline-3">
-<h3 id="org13a7845">The Imports</h3>
-<div class="outline-text-3" id="text-org13a7845">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span>
-
-<span class="kn">import</span> <span class="nn">random</span>
-
-<span class="c1"># pypi</span>
-<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span><span class="p">,</span> <span class="n">raise_error</span>
-
-<span class="c1"># software under test</span>
-<span class="kn">from</span> <span class="nn">bowling.data_structures.heap</span> <span class="kn">import</span> <span class="n">MaxHeap</span>
-
-<span class="kn">from</span> <span class="nn">graeae</span> <span class="kn">import</span> <span class="n">EmbedHoloviews</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"max-heap"</span>
-<span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
-<span class="n">Embed</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">EmbedHoloviews</span><span class="p">,</span> <span class="n">folder_path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-orgcdc3ae8" class="outline-3">
-<h3 id="orgcdc3ae8">The Class</h3>
-<div class="outline-text-3" id="text-orgcdc3ae8">
-</div>
-<div id="outline-container-org6c42307" class="outline-4">
-<h4 id="org6c42307">Imports</h4>
-<div class="outline-text-4" id="text-org6c42307">
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
-<span class="c1"># https://www.attrs.org/en/stable/index.html</span>
-<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org216f8e1" class="outline-4">
-<h4 id="org216f8e1">The Definition</h4>
-<div class="outline-text-4" id="text-org216f8e1">
-<p>
-Besides declaring the class definition, the MaxHeap will hold some constants to hopefully make the code easier to read.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@define</span>
-<span class="k">class</span> <span class="nc">MaxHeap</span><span class="p">:</span>
-    <span class="sd">"""Build and maintain a max-heap</span>
-
-<span class="sd">    If you pass in the heap as a list pre-pend it with Infinity</span>
-
-<span class="sd">    Otherwise use ~heap = MaxHeap.from_list(elements)~ to build it</span>
-<span class="sd">    """</span>
-    <span class="n">INFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
-    <span class="n">NEGATIVE_INFINITY</span> <span class="o">=</span> <span class="o">-</span><span class="n">INFINITY</span>
-    <span class="n">ROOT_NODE</span> <span class="o">=</span> <span class="mi">1</span>
-
-    <span class="n">heap</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="n">INFINITY</span><span class="p">]</span>
-    <span class="n">_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-orgf3d1721" class="outline-4">
-<h4 id="orgf3d1721">From List</h4>
-<div class="outline-text-4" id="text-orgf3d1721">
-<p>
-This is a class method to create the list for the heap. The calculations for the locations in the array of parent and child nodes is easier if we have a 1-based list so I'll pad the list being passed in. Additionally, I'll set the first value to \(\infty\) so that the Heap Property will pass for the root node without needing any special consideration for what its parent is.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">from_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">heap</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
-    <span class="sd">"""Builds a max-heap instance from the starter list</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     heap: list of elements to dump on the heap</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     MaxHeap instance with the heap list added</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">heap</span> <span class="o">=</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">]</span> <span class="o">+</span> <span class="n">heap</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org1e80ca7" class="outline-4">
-<h4 id="org1e80ca7">The Heap Size</h4>
-<div class="outline-text-4" id="text-org1e80ca7">
-<p>
-Since we padded the list holding the heap the length of the list will never be the same as the number of nodes in the heap. Additionally we'll sometimes manipulate things so things that were in the heap are later excluded but still in the list so the <code>size</code> property will help us to keep track of how big we think our heap is.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""The size of the max heap"""</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span>
-
-<span class="nd">@size</span><span class="o">.</span><span class="n">setter</span>
-<span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_size</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Set the size of the max heap</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     new_size: how much of the list is in the heap</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">     AssertionError if the size is out of bounds for the list</span>
-<span class="sd">    """</span>
-    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">new_size</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="n">new_size</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org98d991c" class="outline-4">
-<h4 id="org98d991c">Length</h4>
-<div class="outline-text-4" id="text-org98d991c">
-<p>
-This is the length of the array, not necessarily of the heap. This one's a little tricky, since the padding throws it off by one it would seem that it should be lowered by one, but if you use it to figure out the last index that will mess it up a little. Since we already have the size for the number of nodes I'll just pass the length of the list on and see what happens.
-</p>
-
-<p>
-I was debating whether to use <code>__len__</code> but I decided that this is really an internal measure and <code>size</code> is meant to be the attribute to use. I'm mostly keeping this around so that it matches the CLRS attributes.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""The size of the array for the heap</span>
-
-<span class="sd">    Warning:</span>
-<span class="sd">     This includes the padding at the beginning of the list</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org2f7d5d1" class="outline-4">
-<h4 id="org2f7d5d1">Maximum</h4>
-<div class="outline-text-4" id="text-org2f7d5d1">
-<p>
-Since this is a max-heap the largest element is in the root, this just makes getting it more explicit.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">"""The value in the root node"""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ROOT_NODE</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org90cf79a" class="outline-4">
-<h4 id="org90cf79a">Finding the Parent, Left-Child, and Right-Child of a Node</h4>
-<div class="outline-text-4" id="text-org90cf79a">
-<p>
-These are the implementations of the functions at the start of the post.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Find the parent of a node</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     node: the index of the node to check</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     the index of the parent of the node</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">node</span><span class="o">//</span><span class="mi">2</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">left_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Find the left child of a parent</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     parent: the index of the parent node</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     index of the left child of the parent</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">parent</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">right_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Find the right child of a parent</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     parent: the index of the parent node</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     index of the right child of the parent</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">parent</span> <span class="o">+</span> <span class="mi">1</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org35b2c10" class="outline-4">
-<h4 id="org35b2c10">Heapify A Sub Tree</h4>
-<div class="outline-text-4" id="text-org35b2c10">
-<p>
-CLRS just calls this MaxHeapify. But then the bottoms-up heapification of the tree seemed more like it should be called heapify so I called it <code>heapify_subtree</code> to note that it starts at a specific node which might not be the root.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">heapify_subtree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-    <span class="sd">"""Heapify the tree rooted at the node</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     node: index of the node to compare to its descendants</span>
-<span class="sd">    """</span>
-    <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_child</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_child</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-    <span class="n">largest</span> <span class="o">=</span> <span class="n">node</span>
-
-    <span class="k">if</span> <span class="n">left</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">]:</span>
-	<span class="c1"># the left child was larger than the current parent node</span>
-	<span class="n">largest</span> <span class="o">=</span> <span class="n">left</span>
-
-    <span class="k">if</span> <span class="n">right</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">right</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">]:</span>
-	<span class="c1"># the right child is larger than the left and the current parent</span>
-	<span class="n">largest</span> <span class="o">=</span> <span class="n">right</span>
-
-    <span class="k">if</span> <span class="n">largest</span> <span class="o">!=</span> <span class="n">node</span><span class="p">:</span>
-	<span class="c1"># the current parent is out of place, swap it with the larger child</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">],</span>
-					       <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
-
-	<span class="c1"># after the swap the item at "largest" is the value from the </span>
-	<span class="c1"># "node" we started with so try it again with this new location</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heapify_subtree</span><span class="p">(</span><span class="n">largest</span><span class="p">)</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org64fc361" class="outline-4">
-<h4 id="org64fc361">The Call</h4>
-<div class="outline-text-4" id="text-org64fc361">
-<p>
-This makes the MaxHeap callable and heapifies the entire heap using a bottoms-up construction.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">"""Heapifies the heap</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">     AssertionError: something bad happened and the Heap Property failed</span>
-<span class="sd">    """</span>
-    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heapify_subtree</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">check_rep</span><span class="p">()</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org1ebc431" class="outline-4">
-<h4 id="org1ebc431">Increase a Key</h4>
-<div class="outline-text-4" id="text-org1ebc431">
-<p>
-When we change the value of a node, if the value is higher than the previous value it might be in the wrong place in the heap (e.g. it might be bigger than its parent) so we need to traverse upward, swapping it with parents smaller than it, until we find where it should go. CLRS made it a requirement that the new value is larger than the old one, which makes sense in light of the name <code>IncreaseKey</code>, but it seems to me that you could just call it <code>ChangeKey</code> and use a conditional instead of raise an exception, but I'll stick with the error for now.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">increase_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">"""Increase the node's value</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     node: index of node in heap to change</span>
-<span class="sd">     key: new value for the node</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">     AssertionError if new value isn't larger than the previous value</span>
-<span class="sd">    """</span>
-    <span class="k">assert</span> <span class="n">key</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> not greater than previous value </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">node</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
-
-    <span class="k">while</span> <span class="p">(</span><span class="n">node</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ROOT_NODE</span> <span class="ow">and</span>
-	   <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]):</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
-	<span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org562523c" class="outline-4">
-<h4 id="org562523c">Insert a Value</h4>
-<div class="outline-text-4" id="text-org562523c">
-<p>
-CLRS describes <code>insert</code> and <code>increase_key</code> as part of updating a priority queue, but Levitin's description of <code>top-down heap construction</code> seems to use them as an alternative way to create the heap. He describes this method of construction (top-down) as starting with an empty heap and repeatedly inserting elements from the original array until you have a heap.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">"""Insert the key into the heap</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     key: orderable item to insert into the heap</span>
-<span class="sd">    """</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NEGATIVE_INFINITY</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">increase_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-orga75825f" class="outline-4">
-<h4 id="orga75825f">Check the Heap Property</h4>
-<div class="outline-text-4" id="text-orga75825f">
-<p>
-This checks that the Heap Property holds for all the nodes.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_rep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">"""Checks the heap property</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">     AssertionError: the heap property has been violated</span>
-<span class="sd">    """</span>
-    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="p">(</span>
-	    <span class="sa">f</span><span class="s2">"Parent node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span><span class="si">}</span><span class="s2"> "</span>
-	    <span class="sa">f</span><span class="s2">"not &gt;= </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-orgc61a327" class="outline-4">
-<h4 id="orgc61a327">Get and Set Item</h4>
-<div class="outline-text-4" id="text-orgc61a327">
-<p>
-I threw these in because I kept forgetting that the heap is an attribute of the MaxHeap, but it's only for convenience.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-    <span class="sd">"""Gets an item from the heap</span>
-
-<span class="sd">    Args: </span>
-<span class="sd">     node: index of the heap to get the value</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
-
-<span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="sd">"""Sets the value at the node in the heap</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     node: index of the heap to set the value</span>
-<span class="sd">     value: what to set the location in the heap to</span>
-<span class="sd">    """</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div id="outline-container-orgc96fbd3" class="outline-3">
-<h3 id="orgc96fbd3">The Tests</h3>
-<div class="outline-text-3" id="text-orgc96fbd3">
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
-<span class="n">max_heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">heap</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">([</span><span class="n">max_heap</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">left</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">right</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-
-<span class="k">def</span> <span class="nf">failure</span><span class="p">():</span> <span class="n">max_heap</span><span class="o">.</span><span class="n">check_rep</span><span class="p">()</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">failure</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-<span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>
-
-<span class="n">heap</span><span class="o">.</span><span class="n">heapify_subtree</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">14</span><span class="p">))</span>
-
-<span class="n">heap</span><span class="o">.</span><span class="n">heapify_subtree</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">14</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">]</span>
-<span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
-<span class="n">heap</span><span class="p">()</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">40</span><span class="p">))</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
-<span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-
-<span class="n">heap</span><span class="p">()</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div id="outline-container-org2c90df9" class="outline-2">
-<h2 id="org2c90df9">Heap Sort</h2>
-<div class="outline-text-2" id="text-org2c90df9">
-<div class="highlight"><pre><span></span><span class="o">&lt;&lt;</span><span class="n">heapsort</span><span class="o">-</span><span class="n">imports</span><span class="o">&gt;&gt;</span>
-
-<span class="o">&lt;&lt;</span><span class="n">heap</span><span class="o">-</span><span class="n">sort</span><span class="o">&gt;&gt;</span>
-</pre></div>
-</div>
-
-<div id="outline-container-org1855604" class="outline-3">
-<h3 id="org1855604">Imports</h3>
-<div class="outline-text-3" id="text-org1855604">
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
-<span class="c1"># https://www.attrs.org/en/stable/index.html</span>
-<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
-
-<span class="c1"># this project</span>
-<span class="kn">from</span> <span class="nn">bowling.data_structures.heap</span> <span class="kn">import</span> <span class="n">MaxHeap</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-orgbf88f15" class="outline-3">
-<h3 id="orgbf88f15">The Heap Sort Class</h3>
-<div class="outline-text-3" id="text-orgbf88f15">
-<p>
-The HeapSort uses the fact that a Max Heap always has the largest element at the root and repeatedly puts the root at the end of the list then shrinks the heap so it doesn't include the value that was moved over.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@define</span>
-<span class="k">class</span> <span class="nc">HeapSort</span><span class="p">:</span>
-    <span class="sd">"""Sort using a heap</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     items: collection of items for the sort</span>
-<span class="sd">    """</span>
-    <span class="n">items</span><span class="p">:</span> <span class="nb">list</span>
-    <span class="n">_heap</span><span class="p">:</span> <span class="n">MaxHeap</span><span class="o">=</span><span class="kc">None</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">heap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MaxHeap</span><span class="p">:</span>
-	<span class="sd">"""The heap of items"""</span>
-	<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span><span class="p">()</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">without_root</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-	<span class="sd">"""The items without the root """</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">ROOT_NODE</span><span class="p">:]</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-	<span class="sd">"""sorts the items"""</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">()</span>
-	<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">ROOT_NODE</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">size</span> <span class="o">-=</span> <span class="mi">1</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">()</span>
-	<span class="k">return</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org735e382" class="outline-3">
-<h3 id="org735e382">The Tests</h3>
-<div class="outline-text-3" id="text-org735e382">
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.sort.heap</span> <span class="kn">import</span> <span class="n">HeapSort</span>
-<span class="n">k</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">items</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
-<span class="n">sorter</span> <span class="o">=</span> <span class="n">HeapSort</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-
-<span class="n">sorter</span><span class="p">()</span>
-
-<span class="n">items</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">sorter</span><span class="o">.</span><span class="n">without_root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">items</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div id="outline-container-orgdc8df84" class="outline-2">
-<h2 id="orgdc8df84">A Priority Queue</h2>
-<div class="outline-text-2" id="text-orgdc8df84">
-<p>
-Although some books mention that MinHeaps are used for priority queues, CLRS shows a MaxHeap version. This involves adding a couple of methods to the MaxHeap so there's no special class.
-</p>
-</div>
-
-<div id="outline-container-orga535d4e" class="outline-3">
-<h3 id="orga535d4e">The Tests</h3>
-<div class="outline-text-3" id="text-orga535d4e">
-<div class="highlight"><pre><span></span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
-<span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-<span class="n">heap</span><span class="p">()</span>
-
-<span class="k">def</span> <span class="nf">failure</span><span class="p">():</span> <span class="n">heap</span><span class="o">.</span><span class="n">increase_key</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">failure</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
-
-<span class="n">heap</span><span class="o">.</span><span class="n">increase_key</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
-
-<span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
-<span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-<span class="n">heap</span><span class="p">()</span>
-<span class="n">heap</span><span class="o">.</span><span class="n">increase_key</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="p">[</span><span class="n">heap</span><span class="o">.</span><span class="n">left</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span>
-
-<span class="n">heap</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">size</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div id="outline-container-orgc297611" class="outline-2">
-<h2 id="orgc297611">Plotting</h2>
-<div class="outline-text-2" id="text-orgc297611">
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">networkx</span> <span class="kn">import</span> <span class="n">Graph</span>
-<span class="kn">import</span> <span class="nn">holoviews</span>
-
-<span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">heap</span><span class="o">.</span><span class="n">left</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">heap</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
-	<span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">heap</span><span class="o">.</span><span class="n">left</span><span class="p">(</span><span class="n">node</span><span class="p">)])</span>
-    <span class="k">if</span> <span class="n">heap</span><span class="o">.</span><span class="n">right</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">heap</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
-	<span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">heap</span><span class="o">.</span><span class="n">right</span><span class="p">(</span><span class="n">node</span><span class="p">)])</span>
-<span class="n">positions</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">drawing</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">graphviz_layout</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"dot"</span><span class="p">)</span>
-
-<span class="n">plot</span> <span class="o">=</span> <span class="n">holoviews</span><span class="o">.</span><span class="n">Graph</span><span class="o">.</span><span class="n">from_networkx</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
-
-<span class="n">output</span> <span class="o">=</span> <span class="n">Embed</span><span class="p">(</span><span class="n">plot</span><span class="o">=</span><span class="n">plot</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">"heap-plot"</span><span class="p">)()</span>
-</pre></div>
-
-<object type="text/html" data="posts/max-heap/heap-plot.html" style="width:100%" height="800">
-  <p>Figure Missing</p>
-</object>
-</div>
-</div>
-
-<div id="outline-container-org531fd44" class="outline-2">
-<h2 id="org531fd44">End</h2>
-<div class="outline-text-2" id="text-org531fd44">
-<script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("parent"));
-});
-</script><script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("left"));
-});
-</script><script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("right"));
-});
-</script>
-</div>
-</div>
-    </div>
-    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/quicksort/" class="u-url">Quicksort</a></h1>
-        <div class="metadata">
-            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
-                The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="posts/quicksort/" rel="bookmark">
-            <time class="published dt-published" datetime="2022-02-02T16:26:27-08:00" itemprop="datePublished" title="2022-02-02 16:26">2022-02-02 16:26</time></a>
-            </p>
-        </div>
-    </header><div class="e-content entry-content">
-    <div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="posts/quicksort/#org570410e">The Algorithm</a></li>
-<li>
-<a href="posts/quicksort/#orgfdbf544">Implementing It</a>
-<ul>
-<li>
-<ul>
-<li><a href="posts/quicksort/#org6b855d1">Some Imports</a></li>
-</ul>
-</li>
-<li><a href="posts/quicksort/#orgb5b826b">Some Setup</a></li>
-<li><a href="posts/quicksort/#orge466843">The Partition</a></li>
-<li>
-<a href="posts/quicksort/#org6c9f3b3">Some Checks</a>
-<ul>
-<li><a href="posts/quicksort/#org5110bc3">The First Example</a></li>
-<li><a href="posts/quicksort/#org20a1ac1">The Pivot Is the Biggest Element</a></li>
-</ul>
-</li>
-<li>
-<a href="posts/quicksort/#orgde082c6">The QuickSort</a>
-<ul>
-<li><a href="posts/quicksort/#orgc94fe2f">Check It Out</a></li>
-</ul>
-</li>
-<li>
-<a href="posts/quicksort/#org6911f73">Plotting The Quicksort Runtimes</a>
-<ul>
-<li><a href="posts/quicksort/#orgde6097c">With Random Input</a></li>
-<li><a href="posts/quicksort/#org6ee8b93">Worst-Case Input</a></li>
-</ul>
-</li>
-<li><a href="posts/quicksort/#orgd27592f">Looking At the Sort In Progress</a></li>
-</ul>
-</li>
-<li><a href="posts/quicksort/#org652b565">End</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org570410e" class="outline-2">
-<h2 id="org570410e">The Algorithm</h2>
-<div class="outline-text-2" id="text-org570410e">
-<p>
-I covered the <code>Partition</code> function in <a href="posts/the-partition/">The Road To Partition</a> and now I'll use it to implement a quicksort. This is the <a href="posts/clrs/">CLRS</a> version.
-</p>
-
-<pre id="the-quicksort" style="display:hidden;">
-\begin{algorithm}
-\caption{QuickSort}
-\begin{algorithmic}
-\INPUT An array and left and right locations defining a subarray
-\OUTPUT The subarray is sorted
-
-\PROCEDURE{QuickSort}{A, left, right}
-
-\IF {left &lt; right} 
-
-\STATE pivot $\gets$ \textsc{Partition}(A, left, right)
-\STATE \textsc{QuickSort}(A, left, pivot - 1)
-\STATE \textsc{QuickSort}(A, pivot + 1, right)
-
-\ENDIF
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-</div>
-</div>
-<div id="outline-container-orgfdbf544" class="outline-2">
-<h2 id="orgfdbf544">Implementing It</h2>
-<div class="outline-text-2" id="text-orgfdbf544">
-</div>
-<div id="outline-container-org6b855d1" class="outline-4">
-<h4 id="org6b855d1">Some Imports</h4>
-<div class="outline-text-4" id="text-org6b855d1">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log2</span>
-
-<span class="kn">import</span> <span class="nn">random</span>
-
-<span class="c1"># pypi</span>
-<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-
-<span class="kn">import</span> <span class="nn">altair</span>
-<span class="kn">import</span> <span class="nn">pandas</span>
-
-<span class="c1"># this project</span>
-<span class="kn">from</span> <span class="nn">bowling.sort.insertion</span> <span class="kn">import</span> <span class="n">insertion_sort</span>
-<span class="kn">from</span> <span class="nn">bowling.sort.merge</span> <span class="kn">import</span> <span class="n">mergesort</span>
-
-<span class="c1"># other monkey stuff</span>
-<span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_chart</span>
-<span class="kn">from</span> <span class="nn">graeae</span> <span class="kn">import</span> <span class="n">Timer</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-orgb5b826b" class="outline-3">
-<h3 id="orgb5b826b">Some Setup</h3>
-<div class="outline-text-3" id="text-orgb5b826b">
-<div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">PartitionOutput</span><span class="p">:</span>
-    <span class="sd">"""Keeps the output for the partition funcion"""</span>
-    <span class="n">pivot</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span>
-
-<span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
-
-<span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"quicksort"</span>
-<span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
-<span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-orge466843" class="outline-3">
-<h3 id="orge466843">The Partition</h3>
-<div class="outline-text-3" id="text-orge466843">
-<p>
-Even though I implemented it in that other post I didn't make it so it returns counts so we can estimate the runtime so I'll do that here.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">partition</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span>
-	      <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PartitionOutput</span><span class="p">:</span>
-    <span class="sd">"""Partitions the collection around the last element</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     collection: the list to partition</span>
-<span class="sd">     left: index of the first element in the sub-list to partition</span>
-<span class="sd">     right: index of the last element in the sub-list to partition</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     PartitionOutput(pivot, count)</span>
-<span class="sd">    """</span>
-    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">pivot_element</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
-    <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">left</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="k">for</span> <span class="n">upper_bound</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
-	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-	<span class="k">if</span> <span class="n">collection</span><span class="p">[</span><span class="n">upper_bound</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pivot_element</span><span class="p">:</span>
-	    <span class="n">lower_bound</span> <span class="o">+=</span> <span class="mi">1</span>
-	    <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">lower_bound</span><span class="p">],</span>
-	     <span class="n">collection</span><span class="p">[</span><span class="n">upper_bound</span><span class="p">])</span> <span class="o">=</span> <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">upper_bound</span><span class="p">],</span>
-					 <span class="n">collection</span><span class="p">[</span><span class="n">lower_bound</span><span class="p">])</span>
-    <span class="n">pivot</span> <span class="o">=</span> <span class="n">lower_bound</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">pivot</span><span class="p">],</span>
-     <span class="n">collection</span><span class="p">[</span><span class="n">right</span><span class="p">])</span> <span class="o">=</span> <span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="n">right</span><span class="p">],</span>
-			   <span class="n">collection</span><span class="p">[</span><span class="n">pivot</span><span class="p">])</span>
-    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">PartitionOutput</span><span class="p">(</span><span class="n">pivot</span><span class="o">=</span><span class="n">pivot</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org6c9f3b3" class="outline-3">
-<h3 id="org6c9f3b3">Some Checks</h3>
-<div class="outline-text-3" id="text-org6c9f3b3">
-</div>
-<div id="outline-container-org5110bc3" class="outline-4">
-<h4 id="org5110bc3">The First Example</h4>
-<div class="outline-text-4" id="text-org5110bc3">
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
-<span class="n">test</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">expected</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>
-<span class="n">first_expected_pivot</span> <span class="o">=</span> <span class="mi">2</span>
-
-<span class="n">output</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">pivot</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">first_expected_pivot</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">expected</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)))</span>
-</pre></div>
-
-<p>
-And to make sure the sub-list works.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">999</span><span class="p">,</span> <span class="mi">888</span><span class="p">,</span> <span class="mi">777</span><span class="p">]</span>
-<span class="n">test</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">+</span> <span class="n">right</span>
-
-<span class="n">output</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-
-<span class="c1"># all we did was shift the sub-list to spots to the right</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">pivot</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">first_expected_pivot</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
-
-<span class="c1"># only the sub-list should be partitioned</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">expected</span> <span class="o">+</span> <span class="n">right</span><span class="p">)))</span>
-
-<span class="c1"># the count should match our sub-array</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org20a1ac1" class="outline-4">
-<h4 id="org20a1ac1">The Pivot Is the Biggest Element</h4>
-<div class="outline-text-4" id="text-org20a1ac1">
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
-<span class="n">test</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-<span class="n">output</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-
-<span class="c1"># the pivot should be the last element</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">pivot</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
-
-<span class="c1"># nothing changes in the list</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">))</span>
-
-<span class="c1"># once again, count should match the size of the input</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div id="outline-container-orgde082c6" class="outline-3">
-<h3 id="orgde082c6">The QuickSort</h3>
-<div class="outline-text-3" id="text-orgde082c6">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">quicksort</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Recursive quicksort</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     collection: list to sort</span>
-<span class="sd">     left: index of start of sub-list in collection to sort</span>
-<span class="sd">     right: index of end of sub-list in collection to sort</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     count of comparisons</span>
-<span class="sd">    """</span>
-    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">if</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
-	<span class="n">output</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-
-	<span class="n">count</span> <span class="o">+=</span> <span class="n">output</span><span class="o">.</span><span class="n">count</span>
-	<span class="n">count</span> <span class="o">+=</span> <span class="n">quicksort</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">pivot</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-	<span class="n">count</span> <span class="o">+=</span> <span class="n">quicksort</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">pivot</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">count</span>
-</pre></div>
-</div>
-<div id="outline-container-orgc94fe2f" class="outline-4">
-<h4 id="orgc94fe2f">Check It Out</h4>
-<div class="outline-text-4" id="text-orgc94fe2f">
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-<span class="n">items</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-<span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-
-<span class="n">count</span> <span class="o">=</span> <span class="n">quicksort</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"count: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Theoretical Average: </span><span class="si">{</span><span class="n">length</span> <span class="o">*</span> <span class="n">log2</span><span class="p">(</span><span class="n">length</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Theoretical Worst: </span><span class="si">{</span><span class="n">length</span><span class="o">**</span><span class="mi">2</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">start</span><span class="p">))</span>
-</pre></div>
-
-<pre class="example">
-count: 37
-Theoretical Average: 33.22
-Theoretical Worst: 100
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org6911f73" class="outline-3">
-<h3 id="org6911f73">Plotting The Quicksort Runtimes</h3>
-<div class="outline-text-3" id="text-org6911f73">
-<div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">QuicksortOutput</span><span class="p">:</span>
-    <span class="sd">"""Holds the output of the quicksort counts"""</span>
-    <span class="n">comparisons</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span>
-
-
-<span class="k">def</span> <span class="nf">quicksorter</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QuicksortOutput</span><span class="p">:</span>
-    <span class="sd">"""runs the quicksort and outputs count and size of collection</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     collection: thing to sort</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     QuicksortOutput(count, size)</span>
-<span class="sd">    """</span>
-    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
-    <span class="n">count</span> <span class="o">=</span> <span class="n">quicksort</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">QuicksortOutput</span><span class="p">(</span><span class="n">comparisons</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
-</pre></div>
-</div>
-<div id="outline-container-orgde6097c" class="outline-4">
-<h4 id="orgde6097c">With Random Input</h4>
-<div class="outline-text-4" id="text-orgde6097c">
-<div class="highlight"><pre><span></span><span class="n">things_to_sort</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">))</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)]</span>
-<span class="k">for</span> <span class="n">things</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">:</span>
-    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">things</span><span class="p">)</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
-    <span class="n">quick_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-    <span class="n">delayed</span><span class="p">(</span><span class="n">quicksorter</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
-</pre></div>
-
-<pre class="example">
-Started: 2022-02-05 00:57:12.120397
-Ended: 2022-02-05 00:57:14.397235
-Elapsed: 0:00:02.276838
-</pre>
-
-
-<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
-    <span class="n">merge_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-    <span class="n">delayed</span><span class="p">(</span><span class="n">mergesort</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
-</pre></div>
-
-<pre class="example">
-Started: 2022-02-05 00:58:40.087042
-Ended: 2022-02-05 00:58:42.326204
-Elapsed: 0:00:02.239162
-</pre>
-
-
-<p>
-<b><b>Note to future self:</b></b> Pypy is much faster with the python inputs and much slower with numpy inputs.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">comparisons</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">quick_output</span><span class="p">]</span>
-<span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">quick_output</span><span class="p">]</span>
-<span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Size"</span><span class="p">:</span> <span class="n">sizes</span><span class="p">,</span> <span class="s2">"QuickSort"</span><span class="p">:</span> <span class="n">counts</span><span class="p">})</span>
-<span class="n">frame</span><span class="p">[</span><span class="s2">"Merge Sort"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">merge_output</span><span class="p">]</span>
-
-<span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Size"</span><span class="p">],</span>
-		    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Sort Algorithm"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">)</span>
-
-<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s2">"Size"</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">"Sort Algorithm"</span><span class="p">,</span>
-    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Size"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
-	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Comparisons"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
-	     <span class="s2">"Sort Algorithm"</span><span class="p">]</span>
-<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"QuickSort vs Merge Sort"</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"quicksort-runtime"</span><span class="p">)</span>
-</pre></div>
-
-<object type="text/html" data="posts/quicksort/quicksort-runtime.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
-
-<p>
-I originally had Insertion Sort in the plot too, but it does so poorly that it just squashes both the Merge Sort and Quick Sort runtimes to a flat line. This is kind of an interesting plot. Quick Sort does much, much better than Insertion Sort, but it still doesn't quite keep up with Merge Sort. The trade-off being that Quick Sort does its sorting in place while Merge Sort creates all these temporary copies. 
-</p>
-</div>
-</div>
-
-<div id="outline-container-org6ee8b93" class="outline-4">
-<h4 id="org6ee8b93">Worst-Case Input</h4>
-<div class="outline-text-4" id="text-org6ee8b93">
-<p>
-Remember that case in the <a href="posts/the-partition/">the partition</a> post where the last item (the pivot) was the largest item, and how it resulted in nothing being moved around? What if no matter what sub-array you picked, the last item was always the largest? In other words, what if it's already sorted?
-</p>
-
-<p>
-For one thing with really big inputs the interpreter throws an error because you've made too many recursive calls, so that tells you that something bad is happening.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">things_to_sort</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">))</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">100</span><span class="p">)]</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
-    <span class="n">quick_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-    <span class="n">delayed</span><span class="p">(</span><span class="n">quicksorter</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
-</pre></div>
-
-<pre class="example">
-Started: 2022-02-05 01:06:19.614254
-Ended: 2022-02-05 01:06:20.159874
-Elapsed: 0:00:00.545620
-</pre>
-
-
-<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
-    <span class="n">merge_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-    <span class="n">delayed</span><span class="p">(</span><span class="n">mergesort</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
-</pre></div>
-
-<pre class="example">
-Started: 2022-02-05 01:06:23.592928
-Ended: 2022-02-05 01:06:23.661150
-Elapsed: 0:00:00.068222
-</pre>
-
-
-<p>
-<b><b>Note to future self:</b></b> Pypy is much faster with the python inputs and much slower with numpy inputs.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">comparisons</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">quick_output</span><span class="p">]</span>
-<span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">quick_output</span><span class="p">]</span>
-<span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Size"</span><span class="p">:</span> <span class="n">sizes</span><span class="p">,</span> <span class="s2">"QuickSort"</span><span class="p">:</span> <span class="n">counts</span><span class="p">})</span>
-<span class="n">frame</span><span class="p">[</span><span class="s2">"Merge Sort"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">merge_output</span><span class="p">]</span>
-
-<span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Size"</span><span class="p">],</span>
-		    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Sort Algorithm"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">)</span>
-
-<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s2">"Size"</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s2">"Comparisons"</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">"Sort Algorithm"</span><span class="p">,</span>
-    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Size"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
-	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Comparisons"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
-	     <span class="s2">"Sort Algorithm"</span><span class="p">]</span>
-<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"QuickSort vs Merge Sort (Worst-Case)"</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"quicksort-runtime-worst"</span><span class="p">)</span>
-</pre></div>
-
-<object type="text/html" data="posts/quicksort/quicksort-runtime-worst.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
-</div>
-</div>
-</div>
-<div id="outline-container-orgd27592f" class="outline-3">
-<h3 id="orgd27592f">Looking At the Sort In Progress</h3>
-<div class="outline-text-3" id="text-orgd27592f">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">quicksort_tracer</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span>
-		     <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tracer</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Recursive quicksort</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     collection: list to sort</span>
-<span class="sd">     left: index of start of sub-list in collection to sort</span>
-<span class="sd">     right: index of end of sub-list in collection to sort</span>
-<span class="sd">     tracer: dict of element: list of locations</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     tracer dict</span>
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">tracer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">tracer</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">collection</span><span class="p">)}</span>
-
-    <span class="k">if</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
-	<span class="n">output</span> <span class="o">=</span> <span class="n">partition</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-
-	<span class="n">quicksort_tracer</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">pivot</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tracer</span><span class="p">)</span>
-	<span class="n">quicksort_tracer</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">pivot</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">tracer</span><span class="p">)</span>
-
-	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">collection</span><span class="p">):</span>
-	    <span class="n">tracer</span><span class="p">[</span><span class="n">element</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">tracer</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">size</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">start</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">))</span>
-<span class="n">inputs</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">inputs</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-
-<span class="n">tracer</span> <span class="o">=</span> <span class="n">quicksort_tracer</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
-<span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Quicksort Call"</span><span class="p">})</span>
-<span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Quicksort Call"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">)</span>
-
-<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s2">"Quicksort Call"</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span>
-    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Quicksort Call"</span><span class="p">,</span> <span class="s2">"Location"</span><span class="p">,</span> <span class="s2">"Element"</span><span class="p">]</span>
-<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"Quicksort Trace (Reversed Input)"</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"quicksort-trace-backwards"</span><span class="p">)</span>
-</pre></div>
-
-<object type="text/html" data="posts/quicksort/quicksort-trace-backwards.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
-
-<div class="highlight"><pre><span></span><span class="n">size</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">start</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">))</span>
-<span class="n">inputs</span> <span class="o">=</span> <span class="n">start</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-
-<span class="n">tracer</span> <span class="o">=</span> <span class="n">quicksort_tracer</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
-<span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Quicksort Call"</span><span class="p">})</span>
-<span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Quicksort Call"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">)</span>
-
-<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s2">"Quicksort Call"</span><span class="p">,</span>
-    <span class="n">y</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">,</span>
-    <span class="n">color</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span>
-    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Quicksort Call"</span><span class="p">,</span> <span class="s2">"Location"</span><span class="p">,</span> <span class="s2">"Element"</span><span class="p">]</span>
-<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-    <span class="n">title</span><span class="o">=</span><span class="s2">"Quicksort Trace (Shuffled Input)"</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
-    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"quicksort-trace-shuffled"</span><span class="p">)</span>
-</pre></div>
-
-<object type="text/html" data="posts/quicksort/quicksort-trace-shuffled.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
-</div>
-</div>
-</div>
-
-
-<div id="outline-container-org652b565" class="outline-2">
-<h2 id="org652b565">End</h2>
-<div class="outline-text-2" id="text-org652b565">
-<ul class="org-ul">
-<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
-<li><a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
-</ul>
-<script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("the-quicksort"));
 });
 </script>
 </div>

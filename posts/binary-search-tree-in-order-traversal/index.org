@@ -1,0 +1,144 @@
+#+BEGIN_COMMENT
+.. title: Binary Search Tree: In-Order Traversal
+.. slug: binary-search-tree-in-order-traversal
+.. date: 2022-03-10 15:21:25 UTC-08:00
+.. tags: data structures,binary search trees,algorithms
+.. category: Data Structures
+.. link: 
+.. description: Traversing a tree in order.
+.. type: text
+.. has_pseudocode: yes indeed
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-1e28dbad-9d2e-41fd-88aa-8747eba6f174-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* Traversing a Tree
+There are three common ways to traverse a Binary Search Tree which can be characterized by when the root of the tree is added:
+
+- Pre-Order Tree Walk
+  1. root
+  2. sub-trees
+- In-Order Tree Walk
+  1. left sub-tree
+  2. root
+  3. right sub-tree
+- Post-Order Tree Walk
+  1. sub-trees
+  2. root
+
+We're going to look at how to get the nodes of the tree in sorted (non-decreasing) order, which is a characteristic of the In-Order Tree Walk.
+** The Algorithm
+{{% lancelot "CLRS" %}}clrs{{% /lancelot %}} gives the In-Order Tree Walk in the context of printing the nodes of the tree in order.
+
+#+begin_export html
+<pre id="in-order-walk" style="display:hidden;">
+\begin{algorithm}
+\caption{In-Order Tree Walk}
+\begin{algorithmic}
+\INPUT Node \textit{x}
+
+\PROCEDURE{InorderTreeWalk}{\textit{x}}
+\IF {\textit{x} $\neq$ \textsc{Nil}}
+
+ \STATE \textsc{InorderTreeWalk}(\textit{x.left})
+ \STATE \textsc{Print}(\textit{x.key})
+ \STATE \textsc{InorderTreeWalk}(\textit{x.right})
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+** Implementing It
+*** Imports
+#+begin_src python :results none
+# pypi
+import networkx
+
+# this project
+from bowling.data_structures.binary_search_tree.node import Node
+#+end_src
+
+*** The Function
+#+begin_src python :results none
+def in_order_traversal(root: Node) -> None:
+    """Print the nodes in order
+
+    Args:
+     root: the root node
+    """
+    if root is not None:
+        in_order_traversal(root.left)
+        print(root, end=" ")
+        in_order_traversal(root.right)
+    return
+#+end_src
+*** A First Sample
+Let's start with a simple example.
+
+#+begin_src python :results none
+SLUG = "binary-search-tree-in-order-traversal"
+OUTPUT = f"files/posts/{SLUG}/"
+graph = networkx.Graph()
+graph.add_edges_from([(2, 1), (2, 3)])
+pygraph = networkx.nx_pydot.to_pydot(graph)
+pygraph.write_png(OUTPUT + "first_tree.png")
+#+end_src
+
+[[img-url: first_tree.png]]
+
+#+begin_src python :results output :exports both
+root = Node(key=2)
+root.left = Node(key=1)
+root.right = Node(key=3)
+root.check_node()
+in_order_traversal(root)
+#+end_src
+
+#+RESULTS:
+: 1 2 3 
+
+*** A Little Fancier
+
+#+begin_src python :results none
+graph = networkx.Graph()
+graph.add_edges_from([(4, 2), (4, 6), (6, 5), (6, 7), (2, 1), (2, 3)])
+pygraph = networkx.nx_pydot.to_pydot(graph)
+pygraph.write_png(OUTPUT + "second_tree.png")
+#+end_src
+
+[[img-url:second_tree.png]]
+
+#+begin_src python :results output :exports both
+rootier = Node(key=4)
+rootier.left = root
+right = Node(key=6)
+right.left = Node(key=5)
+right.right = Node(key=7)
+right.check_node()
+rootier.right = right
+rootier.check_node()
+in_order_traversal(rootier)
+#+end_src
+
+#+RESULTS:
+: 1 2 3 4 5 6 7 
+
+* End
+** The Posts
+- {{% lancelot "Previous Post" %}}binary-search-trees{{% /lancelot %}}
+** Sources
+- {{% doc %}}clrs{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("in-order-walk"));
+});
+</script>
+#+end_export
