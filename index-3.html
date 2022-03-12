@@ -70,7 +70,182 @@ bg-light
 
     
 <div class="postindex">
-    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/max-heap/" class="u-url">Heap!</a></h1>
+    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/the-selection-problem/" class="u-url">The Selection Problem</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/the-selection-problem/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-02-20T12:23:40-08:00" itemprop="datePublished" title="2022-02-20 12:23">2022-02-20 12:23</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="posts/the-selection-problem/#org352c1e8">What is the Selection Problem?</a></li>
+<li><a href="posts/the-selection-problem/#org12c78b2">Selection Vs Sorting</a></li>
+<li>
+<a href="posts/the-selection-problem/#org793ff7f">Familiar Cases</a>
+<ul>
+<li><a href="posts/the-selection-problem/#org40e191d">Minimum and Maximum</a></li>
+<li><a href="posts/the-selection-problem/#orgeb7cf89">The Median</a></li>
+</ul>
+</li>
+<li><a href="posts/the-selection-problem/#org1aea24b">Sources</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org352c1e8" class="outline-2">
+<h2 id="org352c1e8">What is the Selection Problem?</h2>
+<div class="outline-text-2" id="text-org352c1e8">
+<p>
+The <i>Selection Problem</i> involves finding the <i>kth</i> smallest item in a collection of <i>n</i> items. This item is called an <b><b>Order Statistic</b></b>.
+</p>
+</div>
+</div>
+<div id="outline-container-org12c78b2" class="outline-2">
+<h2 id="org12c78b2">Selection Vs Sorting</h2>
+<div class="outline-text-2" id="text-org12c78b2">
+<p>
+If the collection is already sorted then you can just pull the order statistic out directly (assuming it's accessible by its index) and if it isn't you could sort it first and then retrieve the order statistic. Since Mergesort and Heapsort have a runtime of \(\Theta(n \log n)\) we know that this would be the runtime using this method, but since we are only choosing one item we don't need to sort the collection, so we can find the item with less computation, and thus selection is its own problem.
+</p>
+</div>
+</div>
+<div id="outline-container-org793ff7f" class="outline-2">
+<h2 id="org793ff7f">Familiar Cases</h2>
+<div class="outline-text-2" id="text-org793ff7f">
+<p>
+While you might search for any ranked item (the third item, say), there are three special cases that are common enough to have been given names.
+</p>
+
+<ul class="org-ul">
+<li>the <i>Minimum</i>
+</li>
+<li>the <i>Maximum</i>
+</li>
+<li>the <i>Median</i>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-org40e191d" class="outline-3">
+<h3 id="org40e191d">Minimum and Maximum</h3>
+<div class="outline-text-3" id="text-org40e191d">
+<p>
+The <i>Minimum</i> and <i>Maximum</i> are probably self-explanatory, but to be complete: the <i>Minimum</i> is the order statistic when \(k = 1\) and the <i>Maximum</i> is the order statistic when \(k=n\). As an example of the <i>Selection Problem</i> requiring fewer comparisons than the <i>Sorting Problem</i> we can look at finding the <i>Minimum</i> by traversing the array.
+</p>
+
+<pre id="minimum" style="display:hidden;">
+\begin{algorithm}
+\caption{Minimum}
+\begin{algorithmic}
+\INPUT An array of comparable items
+\OUTPUT The smallest item
+\PROCEDURE{Minimum}{$A$}
+  \STATE minimum $\gets$ A[0]
+  \FOR{$i \in \{ 1 \ldots A.length - 1\}$}
+   \IF {minimum &gt; A[i]}
+    \STATE minimum $\gets$ A[i]
+   \ENDIF
+  \ENDFOR
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+
+<p>
+Since we're traversing the collection once it will always have a runtime of \(\Theta(n)\). The <i>Maximum</i> can be found the same way but with the greater than sign in the if-statement.
+</p>
+</div>
+</div>
+<div id="outline-container-orgeb7cf89" class="outline-3">
+<h3 id="orgeb7cf89">The Median</h3>
+<div class="outline-text-3" id="text-orgeb7cf89">
+<p>
+While most people know what the median is (I once worked with an engineer who thought it was the middle item of the unsorted items, not the item whose value was in the middle, so it might not be true that <i>all</i> people know what it is) but since we're talking about Order Statistics and not <i>Statistics</i> like in <a href="https://en.wikipedia.org/wiki/How_to_Lie_with_Statistics">"How to Lie With Statistics"</a> we'll make it a little more confusing by using a similar but not exactly the same definition.
+</p>
+
+<p>
+\[
+k = \left \lceil \frac{n}{2} \right \rceil
+\]
+</p>
+
+<p>
+This definition comes from <a href="posts/itdaa/">Levitin</a>. In his description he defines the median as the value with half the remaining values less than it and half the remaining values above it, which suggests that he's defining the case where there are an odd number of items only.
+</p>
+
+<p>
+<a href="posts/clrs/">CLRS</a> gives a two-part definition with the odd case:
+</p>
+
+<p>
+\[
+k = \frac{n + 1}{2}
+\]
+</p>
+
+<p>
+and the case where there are an even number of items broken up into two:
+</p>
+
+<p>
+\[
+\textbf{Lower Median} = \left \lfloor \frac{n + 1}{2} \right \rfloor \\
+\textbf{Upper Median} = \left \lceil \frac{n + 1}{2} \right \rceil \\
+\]
+</p>
+
+<p>
+With their median being the <b><b>Lower Median</b></b>. Despite the differences if you run through some numbers you can see that they're basically the same (adding 1 and then taking the floor after dividing by 2 is the same as the ceiling of dividing by 2 without adding 1).
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ceiling</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">a</span><span class="o">//-</span><span class="n">b</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n=</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">: </span><span class="se">\t</span><span class="s2">Levitin: </span><span class="si">{</span><span class="n">ceiling</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="se">\t</span><span class="s2">Lower Median: </span><span class="si">{</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+n=1: 	Levitin: 1	Lower Median: 1
+n=2: 	Levitin: 1	Lower Median: 1
+n=3: 	Levitin: 2	Lower Median: 2
+n=4: 	Levitin: 2	Lower Median: 2
+n=5: 	Levitin: 3	Lower Median: 3
+n=6: 	Levitin: 3	Lower Median: 3
+n=7: 	Levitin: 4	Lower Median: 4
+n=8: 	Levitin: 4	Lower Median: 4
+n=9: 	Levitin: 5	Lower Median: 5
+</pre>
+
+
+<p>
+So we've defined the median but actually finding the median is a little more complicated than finding the minimum or maximum so I'll save that for later.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1aea24b" class="outline-2">
+<h2 id="org1aea24b">Sources</h2>
+<div class="outline-text-2" id="text-org1aea24b">
+<ul class="org-ul">
+<li><a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("minimum"));
+});
+</script>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/max-heap/" class="u-url">Heap!</a></h1>
         <div class="metadata">
             <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
                 The Cloistered Monkey

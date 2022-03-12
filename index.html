@@ -12,7 +12,7 @@
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="rss.xml">
 <link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/">
 <link rel="next" href="index-3.html" type="text/html">
-<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/binary-search-tree-in-order-traversal/" type="text/html">
+<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/binary-search-tree-node/" type="text/html">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
 </head>
 <body>
@@ -70,7 +70,562 @@ bg-light
 
     
 <div class="postindex">
-    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-in-order-traversal/" class="u-url">Binary Search Tree: In-Order Traversal</a></h1>
+    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-node/" class="u-url">Binary Search Tree Node</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/binary-search-tree-node/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-11T14:19:09-08:00" itemprop="datePublished" title="2022-03-11 14:19">2022-03-11 14:19</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="posts/binary-search-tree-node/#org7a39b38">The Abstract</a></li>
+<li>
+<a href="posts/binary-search-tree-node/#orgea99740">The Implementation</a>
+<ul>
+<li>
+<a href="posts/binary-search-tree-node/#org221755b">Properties</a>
+<ul>
+<li><a href="posts/binary-search-tree-node/#org031acba">Parent</a></li>
+<li><a href="posts/binary-search-tree-node/#org1d98c00">Left</a></li>
+<li><a href="posts/binary-search-tree-node/#org80483e7">Right</a></li>
+</ul>
+</li>
+<li>
+<a href="posts/binary-search-tree-node/#orgc612898">Comparisons</a>
+<ul>
+<li><a href="posts/binary-search-tree-node/#org664dbe9">Equal</a></li>
+<li><a href="posts/binary-search-tree-node/#org213d26b">Less Than</a></li>
+<li><a href="posts/binary-search-tree-node/#orgb9c05c6">Less Than or Equal</a></li>
+</ul>
+</li>
+<li><a href="posts/binary-search-tree-node/#orgf7cb253">Check Nodes</a></li>
+<li><a href="posts/binary-search-tree-node/#org5838516">String Output</a></li>
+<li>
+<a href="posts/binary-search-tree-node/#org22d31cf">Testing</a>
+<ul>
+<li><a href="posts/binary-search-tree-node/#org86ab71e">Imports</a></li>
+<li><a href="posts/binary-search-tree-node/#org85e00bf">One Node</a></li>
+<li><a href="posts/binary-search-tree-node/#org490d681">Check the Comparisons</a></li>
+<li><a href="posts/binary-search-tree-node/#org6a9a4c7">Check the Two-Way Updates.</a></li>
+<li><a href="posts/binary-search-tree-node/#org3025f12">The Check Node Method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="posts/binary-search-tree-node/#org23880fc">Sources</a></li>
+</ul>
+</div>
+</div>
+<p>
+This is the next post in a series on Binary Search Trees that start with <a href="posts/binary-search-trees/">this post</a>.
+</p>
+
+<div id="outline-container-org7a39b38" class="outline-2">
+<h2 id="org7a39b38">The Abstract</h2>
+<div class="outline-text-2" id="text-org7a39b38">
+<p>
+As mentioned in the <a href="posts/binary-search-trees/">first post</a>, the Binary Search Tree is a linked structure made up of Nodes that look more or less like this:
+</p>
+
+<p>
+<img src="posts/binary-search-tree-node/node.png" alt="nil"></p>
+
+<p>
+And which maintain the Binary Search Tree Property. I'm going to forego the data field and add a couple of methods to make it more convenient for me, but most of the way this will work will be to pass nodes (particularly the root) to functions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgea99740" class="outline-2">
+<h2 id="orgea99740">The Implementation</h2>
+<div class="outline-text-2" id="text-orgea99740">
+<p>
+Since I'm using pypy 3.7 there's a problem with the declaration of an attribute of the Node class being a Node object (it isn't defined yet) but according to <a href="https://stackoverflow.com/questions/55320236/does-python-evaluate-type-hinting-of-a-forward-reference">this post on stackoverflow</a> we can import <code>annotations</code> from the future to fix it.
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.types</span> <span class="kn">import</span> <span class="n">Orderable</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+    <span class="sd">"""A Node in a Binary Search Tree</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     key: item to compare nodes</span>
+<span class="sd">     parent: parent of this node</span>
+<span class="sd">     left: left child</span>
+<span class="sd">     right: right child</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Orderable</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+		 <span class="n">left</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+	<span class="k">return</span>
+</pre></div>
+</div>
+<div id="outline-container-org221755b" class="outline-3">
+<h3 id="org221755b">Properties</h3>
+<div class="outline-text-3" id="text-org221755b">
+</div>
+<div id="outline-container-org031acba" class="outline-4">
+<h4 id="org031acba">Parent</h4>
+<div class="outline-text-4" id="text-org031acba">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""The parent of this node"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+
+<span class="nd">@parent</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Sets the parent and updates the parent</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">     this will clobber the parent's child if there's a node where this should</span>
+<span class="sd">    be</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     parent: to add to self</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError if parent and self have same key</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">parent_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent_</span>
+	<span class="k">return</span>
+
+    <span class="k">if</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">parent_</span><span class="p">:</span>
+	<span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Self (</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">) cannot equal parent (</span><span class="si">{</span><span class="n">parent_</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+
+    <span class="c1"># since the left and right assignments update the parent</span>
+    <span class="c1"># we need a hack to get around the setters or you end up</span>
+    <span class="c1"># with an infinite loop - we set left, they set parent, we set left,...</span>
+    <span class="k">if</span> <span class="bp">self</span> <span class="o">&lt;</span> <span class="n">parent_</span><span class="p">:</span>
+	<span class="n">parent_</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="k">else</span><span class="p">:</span>
+	<span class="n">parent_</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="bp">self</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent_</span>        
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org1d98c00" class="outline-4">
+<h4 id="org1d98c00">Left</h4>
+<div class="outline-text-4" id="text-org1d98c00">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""The left child"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span>
+
+<span class="nd">@left</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_left</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Sets the left and its parent</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError if left isn't less than self</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     new_left: a node to be the left child or None</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">new_left</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">new_left</span>
+	<span class="k">return</span>
+
+    <span class="k">assert</span> <span class="n">new_left</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left (</span><span class="si">{</span><span class="n">new_left</span><span class="si">}</span><span class="s2"> not &lt; self </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="n">new_left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">new_left</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org80483e7" class="outline-4">
+<h4 id="org80483e7">Right</h4>
+<div class="outline-text-4" id="text-org80483e7">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">right</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""The right child"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right</span>
+
+<span class="nd">@right</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">right</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_right</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Sets the right and its parent</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError if right isn't greater than self</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     new_right: a node to be the right child or None</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">new_right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">new_right</span>
+	<span class="k">return</span>
+
+    <span class="k">assert</span> <span class="n">new_right</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"right (</span><span class="si">{</span><span class="n">new_right</span><span class="si">}</span><span class="s2"> not &gt; self (</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="n">new_right</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">new_right</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc612898" class="outline-3">
+<h3 id="orgc612898">Comparisons</h3>
+<div class="outline-text-3" id="text-orgc612898">
+<p>
+These are convenience methods to make it so that you can compare the node-objects without referring to the key (see the <a href="https://docs.python.org/3/reference/datamodel.html#object.__lt__">python Data Model documentation</a>). In reading the documentation I thought that you had to implement everything, but after implementing <i>less than</i> and <i>less than or equal to</i> the <i>greater than</i> and <i>greater than or equal to</i> comparisons started to work. I guess if you don't implement them they just take the negative of the less than cases.
+</p>
+</div>
+
+<div id="outline-container-org664dbe9" class="outline-4">
+<h4 id="org664dbe9">Equal</h4>
+<div class="outline-text-4" id="text-org664dbe9">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""Check if the other node has an equal key</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org213d26b" class="outline-4">
+<h4 id="org213d26b">Less Than</h4>
+<div class="outline-text-4" id="text-org213d26b">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""See if this key is less than the other's</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     TypeError: the other thing doesn't have a key</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+	<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'&lt;' not supported between '</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">' "</span>
+			<span class="s2">"and '{type(other)}'"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgb9c05c6" class="outline-4">
+<h4 id="orgb9c05c6">Less Than or Equal</h4>
+<div class="outline-text-4" id="text-orgb9c05c6">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""See if this key is less than or equal to other's"""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+	<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'&lt;' not supported between '</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">' "</span>
+			<span class="s2">"and '{type(other)}'"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf7cb253" class="outline-3">
+<h3 id="orgf7cb253">Check Nodes</h3>
+<div class="outline-text-3" id="text-orgf7cb253">
+<p>
+This is a convenience method to check if a node and its sub-trees maintain the Binary Search Tree Property. It calls the children too so that the whole tree can be checked by calling this on the root. Now that there's checks when the attributes are set this isn't quite as necessary. The only time you might need it is if the attributes are set directly instead of using the setter.
+</p>
+
+<p>
+<b><b>Note:</b></b> Although the <i>Binary Search Tree Property</i> allows duplicate keys, once you start doing things with the tree like inserting and deleting nodes it causes problems. Also, it's not likely that the keys are what you would be most interested in when using a tree, it would be the data associated with the node, so what would it mean to have two different items associated with the same key? There are probably uses for this, but to make it simpler I'm going to treat the keys more like dictionary keys and say that it's a mistake to have duplicates.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_node</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Checks that the Binary Search Tree Property holds</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError: Binary Search Tree Property violated or duplicates exist</span>
+<span class="sd">    """</span>
+    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Node</span><span class="p">,</span>\
+	<span class="sa">f</span><span class="s2">"self.parent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2">, type=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2"> not &lt; Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2"> not &gt; Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org5838516" class="outline-3">
+<h3 id="org5838516">String Output</h3>
+<div class="outline-text-3" id="text-org5838516">
+<p>
+This is to make it a little easier to print.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">"""The key as a string"""</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org22d31cf" class="outline-3">
+<h3 id="org22d31cf">Testing</h3>
+<div class="outline-text-3" id="text-org22d31cf">
+<p>
+I'll have to break this up later.
+</p>
+</div>
+<div id="outline-container-org86ab71e" class="outline-4">
+<h4 id="org86ab71e">Imports</h4>
+<div class="outline-text-4" id="text-org86ab71e">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">be_above</span><span class="p">,</span>
+    <span class="n">be_above_or_equal</span><span class="p">,</span>
+    <span class="n">be_below</span><span class="p">,</span>
+    <span class="n">be_below_or_equal</span><span class="p">,</span>
+    <span class="n">be_none</span><span class="p">,</span>
+    <span class="n">equal</span><span class="p">,</span>
+    <span class="n">expect</span><span class="p">,</span>
+    <span class="n">raise_error</span>
+<span class="p">)</span>
+
+<span class="c1"># software under test</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.node</span> <span class="kn">import</span> <span class="n">Node</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org85e00bf" class="outline-4">
+<h4 id="org85e00bf">One Node</h4>
+<div class="outline-text-4" id="text-org85e00bf">
+<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org490d681" class="outline-4">
+<h4 id="org490d681">Check the Comparisons</h4>
+<div class="outline-text-4" id="text-org490d681">
+<div class="highlight"><pre><span></span><span class="n">uncle</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below_or_equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">brother</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above_or_equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="c1"># I'm still deciding who's responsible for checking if a node exists</span>
+<span class="c1"># for now I'll copy what happens when None is compared to ints</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">uncle</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">brother</span> <span class="o">&lt;</span> <span class="n">uncle</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">brother</span><span class="o">.</span><span class="n">parent</span> <span class="o">&gt;</span> <span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org6a9a4c7" class="outline-4">
+<h4 id="org6a9a4c7">Check the Two-Way Updates.</h4>
+<div class="outline-text-4" id="text-org6a9a4c7">
+</div>
+<ul class="org-ul">
+<li>
+<a id="org7c40aaa"></a>Set the Parent<br><div class="outline-text-5" id="text-org7c40aaa">
+<p>
+In the constructor.
+</p>
+<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+
+<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">bad_parent</span><span class="p">():</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+    <span class="k">return</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+</pre></div>
+
+<p>
+On the object
+</p>
+<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+
+<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">right</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">bad_parent</span><span class="p">():</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="k">return</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li>
+<a id="org67b9f1a"></a>Set The Left Child<br><div class="outline-text-5" id="text-org67b9f1a">
+<div class="highlight"><pre><span></span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">left</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li>
+<a id="org2450181"></a>Set The Right Child<br><div class="outline-text-5" id="text-org2450181">
+<div class="highlight"><pre><span></span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">right</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div id="outline-container-org3025f12" class="outline-4">
+<h4 id="org3025f12">The Check Node Method</h4>
+<div class="outline-text-4" id="text-org3025f12">
+<div class="highlight"><pre><span></span><span class="n">uncle</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+
+<span class="c1"># parent is root</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="c1"># parent is right child</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">uncle</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="c1"># parent is left child</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">brother</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">bad_check</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+    <span class="k">return</span>
+
+<span class="c1"># left node is greater than the parent</span>
+<span class="n">lefty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span> 
+    <span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="c1"># left node is less than the parent</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="c1"># right node is less than the parent</span>
+<span class="n">righty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">righty</span>
+    <span class="k">return</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">righty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="c1"># right and left are okay</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">righty</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># children of parent's children</span>
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">lefty</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="c1"># disallow duplicates</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">parent</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)))</span>
+</pre></div>
+
+<p>
+The <a href="posts/binary-search-tree-in-order-traversal/">next post</a> will be about traversing the tree in the order of the nodes.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org23880fc" class="outline-2">
+<h2 id="org23880fc">Sources</h2>
+<div class="outline-text-2" id="text-org23880fc">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-in-order-traversal/" class="u-url">Binary Search Tree: In-Order Traversal</a></h1>
         <div class="metadata">
             <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
                 The Cloistered Monkey
@@ -86,33 +641,35 @@ bg-light
 <div id="text-table-of-contents">
 <ul>
 <li>
-<a href="posts/binary-search-tree-in-order-traversal/#orgb9ba2ce">Traversing a Tree</a>
+<a href="posts/binary-search-tree-in-order-traversal/#org783bd69">Traversing a Tree</a>
 <ul>
-<li><a href="posts/binary-search-tree-in-order-traversal/#org058708a">The Algorithm</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#orgc11e06a">The Algorithm</a></li>
 <li>
-<a href="posts/binary-search-tree-in-order-traversal/#org82ea468">Implementing It</a>
+<a href="posts/binary-search-tree-in-order-traversal/#orga321950">Implementing It</a>
 <ul>
-<li><a href="posts/binary-search-tree-in-order-traversal/#org9a8d349">Imports</a></li>
-<li><a href="posts/binary-search-tree-in-order-traversal/#org05681c5">The Function</a></li>
-<li><a href="posts/binary-search-tree-in-order-traversal/#org77e90c6">A First Sample</a></li>
-<li><a href="posts/binary-search-tree-in-order-traversal/#orgb5ada9a">A Little Fancier</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org3f4e172">The Function</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#orgf7186b8">A First Sample</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org6dac0ff">A Little Fancier</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li>
-<a href="posts/binary-search-tree-in-order-traversal/#org929618e">End</a>
+<a href="posts/binary-search-tree-in-order-traversal/#org77e6efc">End</a>
 <ul>
-<li><a href="posts/binary-search-tree-in-order-traversal/#org872d875">The Posts</a></li>
-<li><a href="posts/binary-search-tree-in-order-traversal/#org1ebcc94">Sources</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org148ecc2">The Posts</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#orgc59fc27">Sources</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgb9ba2ce" class="outline-2">
-<h2 id="orgb9ba2ce">Traversing a Tree</h2>
-<div class="outline-text-2" id="text-orgb9ba2ce">
+<p>
+This is the next post in a series on Binary Search Trees that start with <a href="posts/binary-search-trees/">this post</a>.
+</p>
+<div id="outline-container-org783bd69" class="outline-2">
+<h2 id="org783bd69">Traversing a Tree</h2>
+<div class="outline-text-2" id="text-org783bd69">
 <p>
 There are three common ways to traverse a Binary Search Tree which can be characterized by when the root of the tree is added:
 </p>
@@ -142,9 +699,9 @@ There are three common ways to traverse a Binary Search Tree which can be charac
 We're going to look at how to get the nodes of the tree in sorted (non-decreasing) order, which is a characteristic of the In-Order Tree Walk.
 </p>
 </div>
-<div id="outline-container-org058708a" class="outline-3">
-<h3 id="org058708a">The Algorithm</h3>
-<div class="outline-text-3" id="text-org058708a">
+<div id="outline-container-orgc11e06a" class="outline-3">
+<h3 id="orgc11e06a">The Algorithm</h3>
+<div class="outline-text-3" id="text-orgc11e06a">
 <p>
 <a href="posts/clrs/">CLRS</a> gives the In-Order Tree Walk in the context of printing the nodes of the tree in order.
 </p>
@@ -169,25 +726,13 @@ We're going to look at how to get the nodes of the tree in sorted (non-decreasin
 </div>
 </div>
 
-<div id="outline-container-org82ea468" class="outline-3">
-<h3 id="org82ea468">Implementing It</h3>
-<div class="outline-text-3" id="text-org82ea468">
+<div id="outline-container-orga321950" class="outline-3">
+<h3 id="orga321950">Implementing It</h3>
+<div class="outline-text-3" id="text-orga321950">
 </div>
-<div id="outline-container-org9a8d349" class="outline-4">
-<h4 id="org9a8d349">Imports</h4>
-<div class="outline-text-4" id="text-org9a8d349">
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
-<span class="kn">import</span> <span class="nn">networkx</span>
-
-<span class="c1"># this project</span>
-<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.node</span> <span class="kn">import</span> <span class="n">Node</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org05681c5" class="outline-4">
-<h4 id="org05681c5">The Function</h4>
-<div class="outline-text-4" id="text-org05681c5">
+<div id="outline-container-org3f4e172" class="outline-4">
+<h4 id="org3f4e172">The Function</h4>
+<div class="outline-text-4" id="text-org3f4e172">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">"""Print the nodes in order</span>
 
@@ -202,20 +747,12 @@ We're going to look at how to get the nodes of the tree in sorted (non-decreasin
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org77e90c6" class="outline-4">
-<h4 id="org77e90c6">A First Sample</h4>
-<div class="outline-text-4" id="text-org77e90c6">
+<div id="outline-container-orgf7186b8" class="outline-4">
+<h4 id="orgf7186b8">A First Sample</h4>
+<div class="outline-text-4" id="text-orgf7186b8">
 <p>
 Let's start with a simple example.
 </p>
-
-<div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"binary-search-tree-in-order-traversal"</span>
-<span class="n">OUTPUT</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
-<span class="n">graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
-<span class="n">graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
-<span class="n">pygraph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
-<span class="n">pygraph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">OUTPUT</span> <span class="o">+</span> <span class="s2">"first_tree.png"</span><span class="p">)</span>
-</pre></div>
 
 <p>
 <img src="posts/binary-search-tree-in-order-traversal/first_tree.png" alt="nil"></p>
@@ -233,15 +770,9 @@ Let's start with a simple example.
 </div>
 </div>
 
-<div id="outline-container-orgb5ada9a" class="outline-4">
-<h4 id="orgb5ada9a">A Little Fancier</h4>
-<div class="outline-text-4" id="text-orgb5ada9a">
-<div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
-<span class="n">graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">([(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span>
-<span class="n">pygraph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
-<span class="n">pygraph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">OUTPUT</span> <span class="o">+</span> <span class="s2">"second_tree.png"</span><span class="p">)</span>
-</pre></div>
-
+<div id="outline-container-org6dac0ff" class="outline-4">
+<h4 id="org6dac0ff">A Little Fancier</h4>
+<div class="outline-text-4" id="text-org6dac0ff">
 <p>
 <img src="posts/binary-search-tree-in-order-traversal/second_tree.png" alt="nil"></p>
 
@@ -264,21 +795,21 @@ Let's start with a simple example.
 </div>
 </div>
 
-<div id="outline-container-org929618e" class="outline-2">
-<h2 id="org929618e">End</h2>
-<div class="outline-text-2" id="text-org929618e">
+<div id="outline-container-org77e6efc" class="outline-2">
+<h2 id="org77e6efc">End</h2>
+<div class="outline-text-2" id="text-org77e6efc">
 </div>
-<div id="outline-container-org872d875" class="outline-3">
-<h3 id="org872d875">The Posts</h3>
-<div class="outline-text-3" id="text-org872d875">
+<div id="outline-container-org148ecc2" class="outline-3">
+<h3 id="org148ecc2">The Posts</h3>
+<div class="outline-text-3" id="text-org148ecc2">
 <ul class="org-ul">
 <li><a href="posts/binary-search-trees/">Previous Post</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org1ebcc94" class="outline-3">
-<h3 id="org1ebcc94">Sources</h3>
-<div class="outline-text-3" id="text-org1ebcc94">
+<div id="outline-container-orgc59fc27" class="outline-3">
+<h3 id="orgc59fc27">Sources</h3>
+<div class="outline-text-3" id="text-orgc59fc27">
 <ul class="org-ul">
 <li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
 </ul>
@@ -306,32 +837,18 @@ window.addEventListener('load', function () {
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="posts/binary-search-trees/#orge7ce499">What is a Binary Search Tree?</a></li>
-<li><a href="posts/binary-search-trees/#org9cf3778">The Binary Search Tree Property</a></li>
-<li>
-<a href="posts/binary-search-trees/#orgf5c565b">The Node</a>
-<ul>
-<li><a href="posts/binary-search-trees/#org80f5404">The Abstract</a></li>
-<li>
-<a href="posts/binary-search-trees/#org103dc20">The Implementation</a>
-<ul>
-<li><a href="posts/binary-search-trees/#org0ae724d">Comparisons</a></li>
-<li><a href="posts/binary-search-trees/#org4d89411">Check Nodes</a></li>
-<li><a href="posts/binary-search-trees/#org0b6879f">String Output</a></li>
-</ul>
-</li>
-<li><a href="posts/binary-search-trees/#org5fa9310">Testing</a></li>
-<li><a href="posts/binary-search-trees/#orga77ffea">Sources</a></li>
-</ul>
-</li>
+<li><a href="posts/binary-search-trees/#orgda35141">What is a Binary Search Tree?</a></li>
+<li><a href="posts/binary-search-trees/#org8e4afc5">The Binary Search Tree Property</a></li>
+<li><a href="posts/binary-search-trees/#org101cf0a">The Posts</a></li>
+<li><a href="posts/binary-search-trees/#org9858e8d">Sources</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orge7ce499" class="outline-2">
-<h2 id="orge7ce499">What is a Binary Search Tree?</h2>
-<div class="outline-text-2" id="text-orge7ce499">
+<div id="outline-container-orgda35141" class="outline-2">
+<h2 id="orgda35141">What is a Binary Search Tree?</h2>
+<div class="outline-text-2" id="text-orgda35141">
 <p>
-Stealing from <a href="posts/clrs/">CLRS</a>.
+Using <a href="posts/clrs/">CLRS</a>:
 </p>
 
 <ul class="org-ul">
@@ -348,246 +865,31 @@ When describing Binary Search Trees I'll tend to refer to the Nodes but mean the
 </div>
 </div>
 
-<div id="outline-container-org9cf3778" class="outline-2">
-<h2 id="org9cf3778">The Binary Search Tree Property</h2>
-<div class="outline-text-2" id="text-org9cf3778">
+<div id="outline-container-org8e4afc5" class="outline-2">
+<h2 id="org8e4afc5">The Binary Search Tree Property</h2>
+<div class="outline-text-2" id="text-org8e4afc5">
 <p>
 All the nodes in the left sub-tree of a node are less than or equal to the node and all the nodes in the right sub-tree of the node are greater than or equal to the node.
 </p>
 </div>
 </div>
-<div id="outline-container-orgf5c565b" class="outline-2">
-<h2 id="orgf5c565b">The Node</h2>
-<div class="outline-text-2" id="text-orgf5c565b">
-</div>
-<div id="outline-container-org80f5404" class="outline-3">
-<h3 id="org80f5404">The Abstract</h3>
-<div class="outline-text-3" id="text-org80f5404">
-<p>
-So the Binary Search Tree is a linked structure made up of Nodes that look more or less like this:
-</p>
 
-<p>
-<img src="posts/binary-search-trees/node.png" alt="nil"></p>
-
-<p>
-And in which the Binary Search Tree Property is maintained. I'm going to forego the data field and add a couple of methods to make it more convenient for me, but most of the way the tree is used will be by pass nodes (particularly the root) to functions.
-</p>
-</div>
-</div>
-
-<div id="outline-container-org103dc20" class="outline-3">
-<h3 id="org103dc20">The Implementation</h3>
-<div class="outline-text-3" id="text-org103dc20">
-<p>
-Since I'm using pypy 3.7 there's a problem with the declaration of an attribute of the Node class being a Node object (it isn't defined yet) but according to <a href="https://stackoverflow.com/questions/55320236/does-python-evaluate-type-hinting-of-a-forward-reference">this post on stackoverflow</a> we can import <code>annotations</code> from the future to fix it.
-</p>
-
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-
-<span class="c1"># from pypi</span>
-<span class="c1"># https://www.attrs.org/en/stable/index.html</span>
-<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
-
-<span class="c1"># this project</span>
-<span class="kn">from</span> <span class="nn">bowling.types</span> <span class="kn">import</span> <span class="n">Orderable</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="nd">@define</span>
-<span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
-    <span class="sd">"""A Node in a Binary Search Tree</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     key: item to compare nodes</span>
-<span class="sd">     parent: parent of this node</span>
-<span class="sd">     left: left child</span>
-<span class="sd">     right: right child</span>
-<span class="sd">    """</span>
-    <span class="n">key</span><span class="p">:</span> <span class="n">Orderable</span>
-    <span class="n">parent</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span>
-    <span class="n">left</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span>
-    <span class="n">right</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span>
-</pre></div>
-</div>
-<div id="outline-container-org0ae724d" class="outline-4">
-<h4 id="org0ae724d">Comparisons</h4>
-<div class="outline-text-4" id="text-org0ae724d">
-<p>
-These are convenience methods to make it so that you can compare the node-objects without referring to the key (see the <a href="https://docs.python.org/3/reference/datamodel.html#object.__lt__">python Data Model documentation</a>). In reading the documentation I thought that you had to implement everything, but after implementing <i>less than</i> and <i>less than or equal to</i> the <i>greater than</i> and <i>greater than or equal to</i> comparisons started to work. I guess if you don't implement them they just take the negative of the less than cases.
-</p>
-</div>
-
+<div id="outline-container-org101cf0a" class="outline-2">
+<h2 id="org101cf0a">The Posts</h2>
+<div class="outline-text-2" id="text-org101cf0a">
 <ul class="org-ul">
-<li>
-<a id="org4ef9364"></a>Equal<br><div class="outline-text-5" id="text-org4ef9364">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">"""Check if the other node has an equal key"""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
-</pre></div>
-</div>
-</li>
-
-<li>
-<a id="org0024b85"></a>Less Than<br><div class="outline-text-5" id="text-org0024b85">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">"""See if this key is less than the other's"""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
-</pre></div>
-</div>
-</li>
-<li>
-<a id="orgabb8650"></a>Less Than or Equal<br><div class="outline-text-5" id="text-orgabb8650">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">"""See if this key is less than or other's"""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
-</pre></div>
-</div>
-</li>
+<li><a href="posts/binary-search-tree-node/">Binary Search Tree Node</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/">Binary Search Tree: In-Order Traversal</a></li>
 </ul>
 </div>
-<div id="outline-container-org4d89411" class="outline-4">
-<h4 id="org4d89411">Check Nodes</h4>
-<div class="outline-text-4" id="text-org4d89411">
-<p>
-This is a convenience method to check if a node and its sub-trees maintain the Binary Search Tree Property. It calls the children too so that the whole tree can be checked by calling this on the root. Maybe it's overkill…
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_node</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">"""Checks that the Binary Search Tree Property holds</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">     AssertionError: Binary Search Tree Property was violated</span>
-<span class="sd">    """</span>
-    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Node</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2">, Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2">, Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org0b6879f" class="outline-4">
-<h4 id="org0b6879f">String Output</h4>
-<div class="outline-text-4" id="text-org0b6879f">
-<p>
-This is to make it a little easier to print.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">"""The key as a string"""</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div id="outline-container-org5fa9310" class="outline-3">
-<h3 id="org5fa9310">Testing</h3>
-<div class="outline-text-3" id="text-org5fa9310">
-<p>
-I'll have to break this up later.
-</p>
-
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
-<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">be_above</span><span class="p">,</span>
-    <span class="n">be_above_or_equal</span><span class="p">,</span>
-    <span class="n">be_below</span><span class="p">,</span>
-    <span class="n">be_below_or_equal</span><span class="p">,</span>
-    <span class="n">be_none</span><span class="p">,</span>
-    <span class="n">equal</span><span class="p">,</span>
-    <span class="n">expect</span><span class="p">,</span>
-    <span class="n">raise_error</span>
-<span class="p">)</span>
-
-<span class="c1"># software under test</span>
-<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.node</span> <span class="kn">import</span> <span class="n">Node</span>
-
-<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
-
-<span class="n">uncle</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below_or_equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
-
-<span class="n">brother</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="n">clone</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above_or_equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">clone</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above_or_equal</span><span class="p">(</span><span class="n">clone</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below_or_equal</span><span class="p">(</span><span class="n">clone</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="n">clone</span><span class="p">))</span>
-
-<span class="c1"># parent is root</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
-
-<span class="c1"># parent is right child</span>
-<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">uncle</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
-
-<span class="c1"># parent is left child</span>
-<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">brother</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">bad_check</span><span class="p">():</span>
-    <span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
-    <span class="k">return</span>
-
-<span class="n">lefty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
-<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">lefty</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
-
-<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
-
-<span class="n">righty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">righty</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
-
-<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">righty</span>
-<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
-
-<span class="n">righty</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
-
-<span class="n">righty</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
-
-<span class="n">lefty</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
-
-<span class="n">expect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)))</span>
-</pre></div>
-
-
-<p>
-The <a href="posts/binary-search-tree-in-order-traversal/">next post</a> will be about traversing the tree in the order of the nodes.
-</p>
-</div>
 </div>
 
-<div id="outline-container-orga77ffea" class="outline-3">
-<h3 id="orga77ffea">Sources</h3>
-<div class="outline-text-3" id="text-orga77ffea">
+<div id="outline-container-org9858e8d" class="outline-2">
+<h2 id="org9858e8d">Sources</h2>
+<div class="outline-text-2" id="text-org9858e8d">
 <ul class="org-ul">
 <li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
 </ul>
-</div>
 </div>
 </div>
     </div>
@@ -2299,181 +2601,6 @@ window.addEventListener('load', function () {
 <li><a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Quicksort">Wikipedia on Quicksort</a></li>
 </ul>
-</div>
-</div>
-    </div>
-    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/the-selection-problem/" class="u-url">The Selection Problem</a></h1>
-        <div class="metadata">
-            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
-                The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="posts/the-selection-problem/" rel="bookmark">
-            <time class="published dt-published" datetime="2022-02-20T12:23:40-08:00" itemprop="datePublished" title="2022-02-20 12:23">2022-02-20 12:23</time></a>
-            </p>
-        </div>
-    </header><div class="e-content entry-content">
-    <div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li><a href="posts/the-selection-problem/#org352c1e8">What is the Selection Problem?</a></li>
-<li><a href="posts/the-selection-problem/#org12c78b2">Selection Vs Sorting</a></li>
-<li>
-<a href="posts/the-selection-problem/#org793ff7f">Familiar Cases</a>
-<ul>
-<li><a href="posts/the-selection-problem/#org40e191d">Minimum and Maximum</a></li>
-<li><a href="posts/the-selection-problem/#orgeb7cf89">The Median</a></li>
-</ul>
-</li>
-<li><a href="posts/the-selection-problem/#org1aea24b">Sources</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org352c1e8" class="outline-2">
-<h2 id="org352c1e8">What is the Selection Problem?</h2>
-<div class="outline-text-2" id="text-org352c1e8">
-<p>
-The <i>Selection Problem</i> involves finding the <i>kth</i> smallest item in a collection of <i>n</i> items. This item is called an <b><b>Order Statistic</b></b>.
-</p>
-</div>
-</div>
-<div id="outline-container-org12c78b2" class="outline-2">
-<h2 id="org12c78b2">Selection Vs Sorting</h2>
-<div class="outline-text-2" id="text-org12c78b2">
-<p>
-If the collection is already sorted then you can just pull the order statistic out directly (assuming it's accessible by its index) and if it isn't you could sort it first and then retrieve the order statistic. Since Mergesort and Heapsort have a runtime of \(\Theta(n \log n)\) we know that this would be the runtime using this method, but since we are only choosing one item we don't need to sort the collection, so we can find the item with less computation, and thus selection is its own problem.
-</p>
-</div>
-</div>
-<div id="outline-container-org793ff7f" class="outline-2">
-<h2 id="org793ff7f">Familiar Cases</h2>
-<div class="outline-text-2" id="text-org793ff7f">
-<p>
-While you might search for any ranked item (the third item, say), there are three special cases that are common enough to have been given names.
-</p>
-
-<ul class="org-ul">
-<li>the <i>Minimum</i>
-</li>
-<li>the <i>Maximum</i>
-</li>
-<li>the <i>Median</i>
-</li>
-</ul>
-</div>
-
-<div id="outline-container-org40e191d" class="outline-3">
-<h3 id="org40e191d">Minimum and Maximum</h3>
-<div class="outline-text-3" id="text-org40e191d">
-<p>
-The <i>Minimum</i> and <i>Maximum</i> are probably self-explanatory, but to be complete: the <i>Minimum</i> is the order statistic when \(k = 1\) and the <i>Maximum</i> is the order statistic when \(k=n\). As an example of the <i>Selection Problem</i> requiring fewer comparisons than the <i>Sorting Problem</i> we can look at finding the <i>Minimum</i> by traversing the array.
-</p>
-
-<pre id="minimum" style="display:hidden;">
-\begin{algorithm}
-\caption{Minimum}
-\begin{algorithmic}
-\INPUT An array of comparable items
-\OUTPUT The smallest item
-\PROCEDURE{Minimum}{$A$}
-  \STATE minimum $\gets$ A[0]
-  \FOR{$i \in \{ 1 \ldots A.length - 1\}$}
-   \IF {minimum &gt; A[i]}
-    \STATE minimum $\gets$ A[i]
-   \ENDIF
-  \ENDFOR
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-
-<p>
-Since we're traversing the collection once it will always have a runtime of \(\Theta(n)\). The <i>Maximum</i> can be found the same way but with the greater than sign in the if-statement.
-</p>
-</div>
-</div>
-<div id="outline-container-orgeb7cf89" class="outline-3">
-<h3 id="orgeb7cf89">The Median</h3>
-<div class="outline-text-3" id="text-orgeb7cf89">
-<p>
-While most people know what the median is (I once worked with an engineer who thought it was the middle item of the unsorted items, not the item whose value was in the middle, so it might not be true that <i>all</i> people know what it is) but since we're talking about Order Statistics and not <i>Statistics</i> like in <a href="https://en.wikipedia.org/wiki/How_to_Lie_with_Statistics">"How to Lie With Statistics"</a> we'll make it a little more confusing by using a similar but not exactly the same definition.
-</p>
-
-<p>
-\[
-k = \left \lceil \frac{n}{2} \right \rceil
-\]
-</p>
-
-<p>
-This definition comes from <a href="posts/itdaa/">Levitin</a>. In his description he defines the median as the value with half the remaining values less than it and half the remaining values above it, which suggests that he's defining the case where there are an odd number of items only.
-</p>
-
-<p>
-<a href="posts/clrs/">CLRS</a> gives a two-part definition with the odd case:
-</p>
-
-<p>
-\[
-k = \frac{n + 1}{2}
-\]
-</p>
-
-<p>
-and the case where there are an even number of items broken up into two:
-</p>
-
-<p>
-\[
-\textbf{Lower Median} = \left \lfloor \frac{n + 1}{2} \right \rfloor \\
-\textbf{Upper Median} = \left \lceil \frac{n + 1}{2} \right \rceil \\
-\]
-</p>
-
-<p>
-With their median being the <b><b>Lower Median</b></b>. Despite the differences if you run through some numbers you can see that they're basically the same (adding 1 and then taking the floor after dividing by 2 is the same as the ceiling of dividing by 2 without adding 1).
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ceiling</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">a</span><span class="o">//-</span><span class="n">b</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n=</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">: </span><span class="se">\t</span><span class="s2">Levitin: </span><span class="si">{</span><span class="n">ceiling</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="se">\t</span><span class="s2">Lower Median: </span><span class="si">{</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</pre></div>
-
-<pre class="example">
-n=1: 	Levitin: 1	Lower Median: 1
-n=2: 	Levitin: 1	Lower Median: 1
-n=3: 	Levitin: 2	Lower Median: 2
-n=4: 	Levitin: 2	Lower Median: 2
-n=5: 	Levitin: 3	Lower Median: 3
-n=6: 	Levitin: 3	Lower Median: 3
-n=7: 	Levitin: 4	Lower Median: 4
-n=8: 	Levitin: 4	Lower Median: 4
-n=9: 	Levitin: 5	Lower Median: 5
-</pre>
-
-
-<p>
-So we've defined the median but actually finding the median is a little more complicated than finding the minimum or maximum so I'll save that for later.
-</p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org1aea24b" class="outline-2">
-<h2 id="org1aea24b">Sources</h2>
-<div class="outline-text-2" id="text-org1aea24b">
-<ul class="org-ul">
-<li><a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
-<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
-</ul>
-<script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("minimum"));
-});
-</script>
 </div>
 </div>
     </div>
