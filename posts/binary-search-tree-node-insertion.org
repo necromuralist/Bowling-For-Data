@@ -23,6 +23,8 @@
 <<the-tree>>
 
     <<insert>>
+
+    <<transplant>>
 #+end_src
 This is the next post in a series on Binary Search Trees that start with {{% lancelot "this post" %}}binary-search-trees{{% /lancelot %}}. In this post we'll be looking at creating a Tree class and the method of inserting a node into the tree.
 
@@ -35,15 +37,16 @@ Although {{% lancelot "CLRS" %}}clrs{{% /lancelot %}} use a *T* (as in tree) cla
 class Tree {
  Node root
  insert(Node node)
+ transplant(Node node, Node replacement)
 }
 #+end_src
+
+#+RESULTS:
+[[file:../files/posts/binary-search-tree-node-insertion/tree.png]]
 
 [[img-url:tree.png]]
 
 #+begin_src python :noweb-ref imports
-# pypi
-from attrs import define
-
 # this project
 from .node import Node
 #+end_src
@@ -164,6 +167,85 @@ tree.insert(Node(10))
 expect(tree.root.left.right).to(equal(Node(10)))
 #+end_src
 
+** Transplant
+This is an implementation of what CLRS calls ~Transplant~ (although I kind of think ~replace~ might be more to the point) where we are given two nodes - one to remove from the tree and the other to take its place. It might not seem obvious by itself why you would need it but it's used when you delete nodes.
+
+#+begin_export html
+<pre id="transplant-node" style="display:hidden;">
+\begin{algorithm}
+\caption{Transplant Node}
+\begin{algorithmic}
+
+\INPUT Tree, Node to replace, Node to insert.
+\PROCEDURE{Transplant}{\textit{T, u, v}}
+
+\IF {\textit{u}.parent = \textsc{NIL}}
+  \STATE \textit{T}.root $\gets$ \textsc{v}
+\ELIF {\textit{u} = \textit{u}.parent.left}
+  \STATE \textit{u}.parent.left = \textit{v}
+ \ELSE
+   \STATE \textit{u}.parent.right $\gets$ \textit{v}
+ \ENDIF
+
+\IF {\textit{v} $\neq$ \textsc{NIL}} 
+ \STATE \textit{v}.parent $\gets$ \textit{u}.parent
+\ENDIF
+
+\ENDPROCEDURE
+
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+#+begin_src python :noweb-ref transplant
+def transplant(self, to_be_replaced: Node, replacement: Node) -> None:
+    """Replace node with another
+
+    Args:
+     to_be_replaced: current holder of the position to be replaced
+     replacement: node to replace the incumbent
+    """
+    if to_be_replaced.parent is None:
+        self.root = replacement
+    elif to_be_replaced == to_be_replaced.parent.left:
+        to_be_replaced.parent.left = replacement
+    else:
+        to_be_replaced.parent.right = replacement
+
+    if replacement is not None:
+        replacement.parent = to_be_replaced.parent
+    return
+#+end_src
+
+#+begin_src python :results none
+root = Node(50)
+tree = Tree(root)
+transplant = Node(666)
+tree.transplant(root, transplant)
+expect(tree.root).to(be(transplant))
+
+root = Node(50)
+tree = Tree(root)
+lefty = Node(25)
+tree.insert(lefty)
+
+# the transplant doesn't check the Binary Search Tree Property
+# before doing its thing so we have to make sure our transplant
+# is less than the parent when setting the left node
+smaller_transplant = Node(32)
+tree.transplant(lefty, smaller_transplant)
+expect(lefty.parent.left).to(equal(smaller_transplant))
+expect(smaller_transplant.parent).to(be(lefty.parent))
+
+# similarly we need to make sure the right transplant is bigger
+righty = Node(42)
+tree.insert(righty)
+bigger_transplant = Node(48)
+tree.transplant(righty, bigger_transplant)
+expect(righty.parent.right).to(equal(bigger_transplant))
+expect(righty.parent).to(be(bigger_transplant.parent))
+#+end_src
 * Plotting
 #+begin_src python :results output :exports both
 tree = Tree(Node(10))
@@ -218,6 +300,13 @@ This is sort of an artificial example in that in order to get the plot right I h
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("insert-node"));
+});
+</script>
+#+end_export
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("transplant-node"));
 });
 </script>
 #+end_export

@@ -1,6 +1,3 @@
-# pypi
-from attrs import define
-
 # this project
 from .node import Node
 
@@ -34,4 +31,22 @@ class Tree:
             hunter.left = node
         else:
             hunter.right = node
+        return
+
+    def transplant(self, to_be_replaced: Node, replacement: Node) -> None:
+        """Replace node with another
+    
+        Args:
+         to_be_replaced: current holder of the position to be replaced
+         replacement: node to replace the incumbent
+        """
+        if to_be_replaced.parent is None:
+            self.root = replacement
+        elif to_be_replaced == to_be_replaced.parent.left:
+            to_be_replaced.parent.left = replacement
+        else:
+            to_be_replaced.parent.right = replacement
+    
+        if replacement is not None:
+            replacement.parent = to_be_replaced.parent
         return
