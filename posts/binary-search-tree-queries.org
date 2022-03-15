@@ -1,0 +1,350 @@
+#+BEGIN_COMMENT
+.. title: Binary Search Tree Queries
+.. slug: binary-search-tree-queries
+.. date: 2022-03-14 14:47:08 UTC-07:00
+.. tags: data structures,binary search trees,algorithms
+.. category: Data Structures
+.. link: 
+.. description: Querying the Search Tree
+.. type: text
+.. has_pseudocode: yas
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-7054c640-a93a-41c2-b015-a9a1305a2d85-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+This is the next post in a series on Binary Search Trees that start with {{% lancelot "this post" %}}binary-search-trees{{% /lancelot %}}. In this post we'll look at some basic queries we can make using the tree.
+
+#+begin_src python :tangle ../bowling/data_structures/binary_search_tree/query.py
+<<imports>>
+
+
+<<tree-query>>
+
+    <<search>>
+
+    <<minimum>>
+
+    <<maximum>>
+
+    <<successor>>
+#+end_src
+* A Query Class
+The textbook(s) treat these as functions, but they seem to suggest to me methods of a class, so I'll make one.
+
+#+begin_src python :noweb-ref imports
+# pypi
+from attrs import define
+
+# this project
+from bowling.data_structures.binary_search_tree import Node, Tree
+#+end_src
+
+#+begin_src python :noweb-ref tree-query
+
+class Query:
+    """Holds a tree and performs queries on it
+
+    Args:
+     tree: A Binary Search Tree
+    """
+    def __init__(self, tree: Tree):
+        self.tree = tree
+        return
+#+end_src
+* Search
+The first thing we'll look at is searching for a Node in a Binary Search Tree. Because of the way the tree is structured the search looks a lot like a {{% doc %}}binary-search{{% /doc %}} where we start at the root of the tree and then work our way downwards, picking the next child to follow based on whether the key we're searching for is greater than the right child's key or less than the left child's key. If it's equal then we've found the node we want.
+
+** The Algorithm
+#+begin_export html
+<pre id="tree-search" style="display:hidden;">
+\begin{algorithm}
+\caption{TreeSearch}
+\begin{algorithmic}
+\INPUT The Node to start searching from and the key to search for.
+\OUTPUT If a node with the key is in the tree, then it will output the node.
+\PROCEDURE{TreeSearch}{x, key}
+\IF {\textit{x} = \textsc{NIL} or key = \textit{x}.key}
+  \RETURN \textit{x}
+\ENDIF
+
+\IF {key < \textit{x}.key}
+    \RETURN \textsc{TreeSearch}(\textit{x}.left, key)
+\ELSE
+    \RETURN \textsc{TreeSearch}(\textit{x}.right, key)
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+** The Iterative Version
+The recursive version of ~TreeSearch~ is quite nice, but it also translates easily to an iterative version if for some reason performance or size becomes a problem.
+
+#+begin_export html
+<pre id="iterative-tree-search" style="display:hidden;">
+\begin{algorithm}
+\caption{IterativeTreeSearch}
+\begin{algorithmic}
+\INPUT The Node to start searching from and the key to search for.
+\OUTPUT If a node with the key is in the tree, then it will output the node.
+\PROCEDURE{IterativeTreeSearch}{x, key}
+\WHILE {\textit{x} $\neq$ \textsc{NIL} and key $\neq$ \textit{x}.key}
+  \IF {key < \textit{x}.key}
+   \STATE \textit{x} $\gets$ \textit{x}.left
+  \ELSE
+   \STATE \textit{x} $\gets$ \textit{x}.right
+  \ENDIF
+\ENDWHILE
+\RETURN \textit{x}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+** The Implementation
+I'll add the iterative version of the Tree Search as a method for our Query class.
+
+#+begin_src python :noweb-ref search
+def search(self, key) -> Node:
+    """Searches the tree for the node with the matching key
+
+    Args:
+     key: node's key to search for
+
+    Returns:
+     the node with the key or None if it isn't in the tree
+    """
+    node = self.tree.root
+    while node is not None and key != node.key:
+        if key < node.key:
+            node = node.left
+        else:
+           node = node.right
+    return node
+#+end_src
+*** Testing
+#+begin_src python :results none
+# pypi
+from expects import be,be_none, equal, expect
+from bowling.data_structures.binary_search_tree import Node, Tree
+from bowling.data_structures.binary_search_tree.query import Query
+
+root = Node(10)
+tree = Tree(root)
+query = Query(tree)
+output = query.search(5)
+expect(output).to(be_none)
+expect(query.search(10)).to(equal(root))
+
+five = Node(5)
+tree.insert(five)
+expect(query.search(5)).to(be(five))
+
+fifteen = Node(15)
+tree.insert(fifteen)
+expect(query.search(15)).to(be(fifteen))
+#+end_src
+
+I'll have to think of something more interesting to show for this...
+* Miminum and Maximum
+** Mimimum
+#+begin_export html
+<pre id="tree-minimum" style="display:hidden;">
+\begin{algorithm}
+\caption{TreeMinimum}
+\begin{algorithmic}
+\INPUT The Node to start the search from.
+\OUTPUT The Node with the smallest key.
+\PROCEDURE{TreeMinimum}{x}
+\WHILE {\textit{x}.left $\neq$ \textsc{NIL}}
+   \STATE \textit{x} $\gets$ \textit{x}.left
+\ENDWHILE
+\RETURN \textit{x}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** The Implementation
+I originally didn't take the root node as an argument, since I thought the minimum of the tree is always the smallest item. But this method gets used later on in the ~successor~ method where we want to find the smallest item in the right-subtree of a particular node, so the outcome won't necessarily be the smallest item in the tree.
+
+#+begin_src python :noweb-ref minimum
+def min(self, node: Node=None) -> Node:
+    """Returns the node with the smallest key
+
+    Args:
+     node: a node to use as the starting root
+    """
+    if node is None:
+        node = self.tree.root
+
+    while node.left is not None:
+        node = node.left
+    return node
+#+end_src
+
+*** Testing
+#+begin_src python :results none
+tree = Tree(Node(10))
+query = Query(tree)
+tree.insert(Node(5))
+tree.insert(Node(2))
+tree.insert(Node(15))
+tree.insert(Node(17))
+tree.insert(Node(11))
+expect(query.min()).to(equal(Node(2)))
+
+tree.insert(Node(1))
+expect(query.min()).to(equal(Node(1)))
+
+expect(query.min(tree.root.right)).to(equal(Node(11)))
+#+end_src
+
+** Maximum
+#+begin_export html
+<pre id="tree-maximum" style="display:hidden;">
+\begin{algorithm}
+\caption{TreeMaximum}
+\begin{algorithmic}
+\INPUT The Node to start the search from.
+\OUTPUT The Node with the largest key.
+\PROCEDURE{TreeMaximum}{x}
+\WHILE {\textit{x}.right $\neq$ \textsc{NIL}}
+   \STATE \textit{x} $\gets$ \textit{x}.right
+\ENDWHILE
+\RETURN \textit{x}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** The Implementation
+#+begin_src python :noweb-ref maximum
+def max(self) -> Node:
+    """Returns the node with the largest key"""
+    node = self.tree.root
+    while node.right is not None:
+        node = node.right
+    return node
+#+end_src
+*** Testing
+#+begin_src python :results none
+tree = Tree(Node(10))
+query = Query(tree)
+tree.insert(Node(5))
+tree.insert(Node(2))
+tree.insert(Node(15))
+
+expect(query.max()).to(equal(Node(15)))
+
+tree.insert(Node(17))
+expect(query.max()).to(equal(Node(17)))
+expect(query.min()).to(equal(Node(2)))
+#+end_src
+* Tree Successor
+A "Successor" node is the next largest node after a given node. Since all the nodes in a right subtree are greater than the node, it's the smallest node in the right (if it exists). If the right subtree is empty then we traverse up the ancestors of the node until we find the first one that is greater than our node.
+
+#+begin_export html
+<pre id="tree-successor" style="display:hidden;">
+\begin{algorithm}
+\caption{TreeSuccessor}
+\begin{algorithmic}
+\INPUT The Node to start the search from.
+\OUTPUT The Node with the next largest key.
+\PROCEDURE{TreeSuccessor}{x}
+\IF {\textit{x}.right $\neq$ \textsc{NIL}}
+  \RETURN \textsc{TreeMinimum}(\textit{x}.right)
+\ENDIF
+
+\STATE \textit{y} $\gets$ \textit{x}.parent
+
+\WHILE {\textit{y} $\neq$ \textsc{NIL} and \textit{x} = \textit{y}.right}
+   \STATE \textit{x} $\gets$ \textit{y}
+   \STATE \textit{y} $\gets$ \textit{y}.parent
+\ENDWHILE
+\RETURN \textit{y}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+#+begin_src python :noweb-ref successor
+def successor(self, node: Node) -> Node:
+    """Returns the next largest node
+
+    Args:
+     node: the node who's successor to find
+
+    Returns:
+     successor node to the input node
+    """
+    if node.right is not None:
+        return self.min(node.right)
+
+    successor = node.parent
+    while successor is not None and node == successor.right:
+        node = successor
+        successor = successor.parent
+    return successor
+#+end_src
+
+#+begin_src python :results none
+tree = Tree(Node(10))
+query = Query(tree)
+tree.insert(Node(5))
+tree.insert(Node(2))
+tree.insert(Node(15))
+tree.insert(Node(17))
+expect(query.successor(query.search(15))).to(equal(Node(17)))
+expect(query.successor(query.search(2))).to(equal(Node(5)))
+expect(query.successor(query.search(5))).to(equal(tree.root))
+expect(query.successor(tree.root)).to(equal(Node(15)))
+#+end_src
+* Sources
+- {{% doc %}}clrs{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-search"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("iterative-tree-search"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-minimum"));
+});
+</script>
+#+end_export
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-maximum"));
+});
+</script>
+#+end_export
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-successor"));
+});
+</script>
+#+end_export
+
