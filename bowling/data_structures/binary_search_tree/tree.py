@@ -5,14 +5,15 @@ from attrs import define
 from .node import Node
 
 
-@define
 class Tree:
     """Binary Search Tree
 
     Args:
      root: the root node for the tree
     """
-    root: Node = None
+    def __init__(self, root: Node=None) -> None:
+        self.root = root
+        return
 
     def insert(self, node: Node) -> None:
         """Insert the node as a new leaf in the tree
