@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-46ad764e-4574-4f8b-9fed-b9c893ab236b-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-ccef39fe-b101-4a7d-8516-782fca30d522-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -49,14 +49,15 @@ from .node import Node
 #+end_src
 
 #+begin_src python :noweb-ref the-tree
-@define
 class Tree:
     """Binary Search Tree
 
     Args:
      root: the root node for the tree
     """
-    root: Node = None
+    def __init__(self, root: Node=None) -> None:
+        self.root = root
+        return
 #+end_src
 
 #+begin_src python :results none :exports none
@@ -166,7 +167,7 @@ expect(tree.root.left.right).to(equal(Node(10)))
 * Plotting
 #+begin_src python :results output :exports both
 tree = Tree(Node(10))
-for key in (5, 2, 3, 20, 14, 1, 7, 6, 8, 15, 11, 12, 17, 16):
+for key in (5, 2, 3, 1, 7, 6, 8, 15, 12, 11, 14, 17, 16, 20):
     tree.insert(Node(key))
 adjacencies = dict()
 
@@ -192,7 +193,7 @@ print(adjacencies)
 #+end_src
 
 #+RESULTS:
-: {2: (1, 3), 5: (2, 7), 7: (6, 8), 10: (5, 20), 11: (12,), 14: (11, 15), 15: (17,), 17: (16,), 20: (14,)}
+: {2: (1, 3), 5: (2, 7), 7: (6, 8), 10: (5, 15), 12: (11, 14), 15: (12, 17), 17: (16, 20)}
 
 Now that we have an adjacency list, let's try and plot it.
 #+begin_src python :results none
@@ -209,7 +210,7 @@ pygraph.write_png(OUTPUT + "first_tree.png")
 
 [[img-url: first_tree.png]]
 
-Well, it isn't quite right, since NetworkX didn't really preserve the left and right orientation for some of the children, but it's something.
+This is sort of an artificial example in that in order to get the plot right I had to insert nodes until they all had two (except the leaves), but it hopefully shows that it works.
 * Sources
 - {{% doc %}}clrs{{% /doc %}}
 
@@ -220,4 +221,3 @@ window.addEventListener('load', function () {
 });
 </script>
 #+end_export
-

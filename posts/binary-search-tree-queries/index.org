@@ -11,14 +11,14 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-7054c640-a93a-41c2-b015-a9a1305a2d85-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-ccef39fe-b101-4a7d-8516-782fca30d522-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
 This is the next post in a series on Binary Search Trees that start with {{% lancelot "this post" %}}binary-search-trees{{% /lancelot %}}. In this post we'll look at some basic queries we can make using the tree.
 
-#+begin_src python :tangle ../bowling/data_structures/binary_search_tree/query.py
+#+begin_src python :tangle ../bowling/data_structures/binary_search_tree/query.py :exports none
 <<imports>>
 
 
@@ -31,20 +31,18 @@ This is the next post in a series on Binary Search Trees that start with {{% lan
     <<maximum>>
 
     <<successor>>
+
+    <<predecessor>>
 #+end_src
 * A Query Class
 The textbook(s) treat these as functions, but they seem to suggest to me methods of a class, so I'll make one.
 
 #+begin_src python :noweb-ref imports
-# pypi
-from attrs import define
-
 # this project
 from bowling.data_structures.binary_search_tree import Node, Tree
 #+end_src
 
 #+begin_src python :noweb-ref tree-query
-
 class Query:
     """Holds a tree and performs queries on it
 
@@ -226,12 +224,20 @@ expect(query.min(tree.root.right)).to(equal(Node(11)))
 
 *** The Implementation
 #+begin_src python :noweb-ref maximum
-def max(self) -> Node:
-    """Returns the node with the largest key"""
-    node = self.tree.root
-    while node.right is not None:
-        node = node.right
-    return node
+def max(self, root: Node=None) -> Node:
+    """Returns the node with the largest key
+
+    Args:
+     root: subtree root to start at
+
+    Returns:
+     node with the largest key in tree/subtree
+    """
+    if root is None:
+        root = self.tree.root
+    while root.right is not None:
+        root = root.right
+    return root
 #+end_src
 *** Testing
 #+begin_src python :results none
@@ -246,6 +252,8 @@ expect(query.max()).to(equal(Node(15)))
 tree.insert(Node(17))
 expect(query.max()).to(equal(Node(17)))
 expect(query.min()).to(equal(Node(2)))
+
+expect(query.max(tree.root.left)).to(equal(Node(5)))
 #+end_src
 * Tree Successor
 A "Successor" node is the next largest node after a given node. Since all the nodes in a right subtree are greater than the node, it's the smallest node in the right (if it exists). If the right subtree is empty then we traverse up the ancestors of the node until we find the first one that is greater than our node.
@@ -307,6 +315,65 @@ expect(query.successor(query.search(2))).to(equal(Node(5)))
 expect(query.successor(query.search(5))).to(equal(tree.root))
 expect(query.successor(tree.root)).to(equal(Node(15)))
 #+end_src
+* Tree Predecessor
+Similar in concept to a node successor, a node /predecessor/ is the largest node less than the given node.
+
+#+begin_export html
+<pre id="tree-predecessor" style="display:hidden;">
+\begin{algorithm}
+\caption{TreePredecessor}
+\begin{algorithmic}
+\INPUT The Node to start the search from.
+\OUTPUT The Node with the next smallest key.
+\PROCEDURE{TreePredecessor}{x}
+\IF {\textit{x}.left $\neq$ \textsc{NIL}}
+  \RETURN \textsc{TreeMaximum}(\textit{x}.right)
+\ENDIF
+
+\STATE \textit{y} $\gets$ \textit{x}.parent
+
+\WHILE {\textit{y} $\neq$ \textsc{NIL} and \textit{x} = \textit{y}.left}
+   \STATE \textit{x} $\gets$ \textit{y}
+   \STATE \textit{y} $\gets$ \textit{y}.parent
+\ENDWHILE
+\RETURN \textit{y}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+#+begin_src python :noweb-ref predecessor
+def predecessor(self, node: Node) -> Node:
+    """Returns the predecessor node
+
+    Args:
+     node: the node whose predecessor we want
+
+    Returns:
+     largest node smaller than given node
+    """
+    if node.left is not None:
+        return self.max(node.left)
+    predecessor = node.parent
+    while predecessor is not None and node == predecessor.left:
+        node, predecessor = predecessor, predecessor.parent
+    return predecessor
+#+end_src
+
+#+begin_src python :results none
+tree = Tree(Node(10))
+query = Query(tree)
+expect(query.predecessor(tree.root)).to(be_none)
+expect(query.predecessor(Node(5))).to(be_none)
+tree.insert(Node(12))
+expect(query.predecessor(query.search(12))).to(be(query.search(10)))
+
+tree.insert(Node(8))
+expect(query.predecessor(query.tree.root)).to(be(query.search(8)))
+tree.insert(Node(4))
+expect(query.predecessor(query.search(8))).to(equal(Node(4)))
+#+end_src
 * Sources
 - {{% doc %}}clrs{{% /doc %}}
 
@@ -347,4 +414,10 @@ window.addEventListener('load', function () {
 });
 </script>
 #+end_export
-
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-predecessor"));
+});
+</script>
+#+end_export
