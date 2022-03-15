@@ -103,14 +103,15 @@ bg-light
 <div id="text-table-of-contents">
 <ul>
 <li>
-<a href="#org3a14876">The Tree</a>
+<a href="#orgea92e2f">The Tree</a>
 <ul>
-<li><a href="#org79b7611">The Insertion Algorithm</a></li>
-<li><a href="#org6d8bbfa">The Insert Method</a></li>
+<li><a href="#orgcb3af0a">The Insertion Algorithm</a></li>
+<li><a href="#orgcdf95b0">The Insert Method</a></li>
+<li><a href="#orgec01ee3">Transplant</a></li>
 </ul>
 </li>
-<li><a href="#org6a9c920">Plotting</a></li>
-<li><a href="#org303d76b">Sources</a></li>
+<li><a href="#orgd8a0670">Plotting</a></li>
+<li><a href="#orga14fd90">Sources</a></li>
 </ul>
 </div>
 </div>
@@ -118,9 +119,9 @@ bg-light
 This is the next post in a series on Binary Search Trees that start with <a href="../binary-search-trees/">this post</a>. In this post we'll be looking at creating a Tree class and the method of inserting a node into the tree.
 </p>
 
-<div id="outline-container-org3a14876" class="outline-2">
-<h2 id="org3a14876">The Tree</h2>
-<div class="outline-text-2" id="text-org3a14876">
+<div id="outline-container-orgea92e2f" class="outline-2">
+<h2 id="orgea92e2f">The Tree</h2>
+<div class="outline-text-2" id="text-orgea92e2f">
 <p>
 Although <a href="../clrs/">CLRS</a> use a <b>T</b> (as in tree) class in their algorithms, they only use it to store a <b>root</b> attribute. To make it a little more object-oriented I'll create a Tree class and add the <code>insert</code> method to it, rather than passing the tree to a function. Not a big change, but one that might be useful.
 </p>
@@ -128,10 +129,7 @@ Although <a href="../clrs/">CLRS</a> use a <b>T</b> (as in tree) class in their 
 <p>
 <img src="tree.png" alt="nil"></p>
 
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
-<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
-
-<span class="c1"># this project</span>
+<div class="highlight"><pre><span></span><span class="c1"># this project</span>
 <span class="kn">from</span> <span class="nn">.node</span> <span class="kn">import</span> <span class="n">Node</span>
 </pre></div>
 
@@ -147,9 +145,9 @@ Although <a href="../clrs/">CLRS</a> use a <b>T</b> (as in tree) class in their 
 </pre></div>
 </div>
 
-<div id="outline-container-org79b7611" class="outline-3">
-<h3 id="org79b7611">The Insertion Algorithm</h3>
-<div class="outline-text-3" id="text-org79b7611">
+<div id="outline-container-orgcb3af0a" class="outline-3">
+<h3 id="orgcb3af0a">The Insertion Algorithm</h3>
+<div class="outline-text-3" id="text-orgcb3af0a">
 <p>
 This is the <a href="../clrs/">CLRS</a> insert algorithm. As I noted above they consider it a function, rather than a method of the tree.
 </p>
@@ -200,9 +198,9 @@ What we have here is sort of a hunter and hound scenario. The hunter <code>y</co
 </div>
 </div>
 
-<div id="outline-container-org6d8bbfa" class="outline-3">
-<h3 id="org6d8bbfa">The Insert Method</h3>
-<div class="outline-text-3" id="text-org6d8bbfa">
+<div id="outline-container-orgcdf95b0" class="outline-3">
+<h3 id="orgcdf95b0">The Insert Method</h3>
+<div class="outline-text-3" id="text-orgcdf95b0">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">"""Insert the node as a new leaf in the tree</span>
 
@@ -242,11 +240,92 @@ What we have here is sort of a hunter and hound scenario. The hunter <code>y</co
 </pre></div>
 </div>
 </div>
-</div>
 
-<div id="outline-container-org6a9c920" class="outline-2">
-<h2 id="org6a9c920">Plotting</h2>
-<div class="outline-text-2" id="text-org6a9c920">
+<div id="outline-container-orgec01ee3" class="outline-3">
+<h3 id="orgec01ee3">Transplant</h3>
+<div class="outline-text-3" id="text-orgec01ee3">
+<p>
+This is an implementation of what CLRS calls <code>Transplant</code> (although I kind of think <code>replace</code> might be more to the point) where we are given two nodes - one to remove from the tree and the other to take its place. It might not seem obvious by itself why you would need it but it's used when you delete nodes.
+</p>
+
+<pre id="transplant-node" style="display:hidden;">
+\begin{algorithm}
+\caption{Transplant Node}
+\begin{algorithmic}
+
+\INPUT Tree, Node to replace, Node to insert.
+\PROCEDURE{Transplant}{\textit{T, u, v}}
+
+\IF {\textit{u}.parent = \textsc{NIL}}
+  \STATE \textit{T}.root $\gets$ \textsc{v}
+\ELIF {\textit{u} = \textit{u}.parent.left}
+  \STATE \textit{u}.parent.left = \textit{v}
+ \ELSE
+   \STATE \textit{u}.parent.right $\gets$ \textit{v}
+ \ENDIF
+
+\IF {\textit{v} $\neq$ \textsc{NIL}} 
+ \STATE \textit{v}.parent $\gets$ \textit{u}.parent
+\ENDIF
+
+\ENDPROCEDURE
+
+\end{algorithmic}
+\end{algorithm}
+</pre>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">transplant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_be_replaced</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Replace node with another</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     to_be_replaced: current holder of the position to be replaced</span>
+<span class="sd">     replacement: node to replace the incumbent</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">replacement</span>
+    <span class="k">elif</span> <span class="n">to_be_replaced</span> <span class="o">==</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">:</span>
+	<span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">replacement</span>
+    <span class="k">else</span><span class="p">:</span>
+	<span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">replacement</span>
+
+    <span class="k">if</span> <span class="n">replacement</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">replacement</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">return</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="n">transplant</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">666</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">transplant</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">transplant</span><span class="p">))</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="n">lefty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">lefty</span><span class="p">)</span>
+
+<span class="c1"># the transplant doesn't check the Binary Search Tree Property</span>
+<span class="c1"># before doing its thing so we have to make sure our transplant</span>
+<span class="c1"># is less than the parent when setting the left node</span>
+<span class="n">smaller_transplant</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">lefty</span><span class="p">,</span> <span class="n">smaller_transplant</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">lefty</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">smaller_transplant</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">smaller_transplant</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">lefty</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="c1"># similarly we need to make sure the right transplant is bigger</span>
+<span class="n">righty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">righty</span><span class="p">)</span>
+<span class="n">bigger_transplant</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">48</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">righty</span><span class="p">,</span> <span class="n">bigger_transplant</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">righty</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">bigger_transplant</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">righty</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">bigger_transplant</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd8a0670" class="outline-2">
+<h2 id="orgd8a0670">Plotting</h2>
+<div class="outline-text-2" id="text-orgd8a0670">
 <div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
     <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
@@ -300,15 +379,19 @@ This is sort of an artificial example in that in order to get the plot right I h
 </p>
 </div>
 </div>
-<div id="outline-container-org303d76b" class="outline-2">
-<h2 id="org303d76b">Sources</h2>
-<div class="outline-text-2" id="text-org303d76b">
+<div id="outline-container-orga14fd90" class="outline-2">
+<h2 id="orga14fd90">Sources</h2>
+<div class="outline-text-2" id="text-orga14fd90">
 <ul class="org-ul">
 <li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("insert-node"));
+});
+</script><script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("transplant-node"));
 });
 </script>
 </div>
