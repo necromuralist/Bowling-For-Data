@@ -11,8 +11,8 @@
 <meta name="generator" content="Nikola (getnikola.com)">
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="rss.xml">
 <link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/">
-<link rel="next" href="index-3.html" type="text/html">
-<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/binary-search-tree-node/" type="text/html">
+<link rel="next" href="index-4.html" type="text/html">
+<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/binary-search-tree-queries/" type="text/html">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
 </head>
 <body>
@@ -70,7 +70,657 @@ bg-light
 
     
 <div class="postindex">
-    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-node/" class="u-url">Binary Search Tree Node</a></h1>
+    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-queries/" class="u-url">Binary Search Tree Queries</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/binary-search-tree-queries/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-14T14:47:08-07:00" itemprop="datePublished" title="2022-03-14 14:47">2022-03-14 14:47</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="posts/binary-search-tree-queries/#org944d670">A Query Class</a></li>
+<li>
+<a href="posts/binary-search-tree-queries/#orge4dbdaa">Search</a>
+<ul>
+<li><a href="posts/binary-search-tree-queries/#org5665ea5">The Algorithm</a></li>
+<li><a href="posts/binary-search-tree-queries/#org935c75d">The Iterative Version</a></li>
+<li>
+<a href="posts/binary-search-tree-queries/#org94cf9d7">The Implementation</a>
+<ul>
+<li><a href="posts/binary-search-tree-queries/#orgb7d78b1">Testing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="posts/binary-search-tree-queries/#orgdd6ab75">Miminum and Maximum</a>
+<ul>
+<li>
+<a href="posts/binary-search-tree-queries/#orge3c8b94">Mimimum</a>
+<ul>
+<li><a href="posts/binary-search-tree-queries/#org38ca914">The Implementation</a></li>
+<li><a href="posts/binary-search-tree-queries/#orga3e01ce">Testing</a></li>
+</ul>
+</li>
+<li>
+<a href="posts/binary-search-tree-queries/#org9bcccab">Maximum</a>
+<ul>
+<li><a href="posts/binary-search-tree-queries/#org2be5d81">The Implementation</a></li>
+<li><a href="posts/binary-search-tree-queries/#org01aa434">Testing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="posts/binary-search-tree-queries/#org6800c1a">Tree Successor</a></li>
+<li><a href="posts/binary-search-tree-queries/#org9c6bfcd">Sources</a></li>
+</ul>
+</div>
+</div>
+<p>
+This is the next post in a series on Binary Search Trees that start with <a href="posts/binary-search-trees/">this post</a>. In this post we'll look at some basic queries we can make using the tree.
+</p>
+
+<div class="highlight"><pre><span></span><span class="o">&lt;&lt;</span><span class="n">imports</span><span class="o">&gt;&gt;</span>
+
+
+<span class="o">&lt;&lt;</span><span class="n">tree</span><span class="o">-</span><span class="n">query</span><span class="o">&gt;&gt;</span>
+
+    <span class="o">&lt;&lt;</span><span class="n">search</span><span class="o">&gt;&gt;</span>
+
+    <span class="o">&lt;&lt;</span><span class="n">minimum</span><span class="o">&gt;&gt;</span>
+
+    <span class="o">&lt;&lt;</span><span class="n">maximum</span><span class="o">&gt;&gt;</span>
+
+    <span class="o">&lt;&lt;</span><span class="n">successor</span><span class="o">&gt;&gt;</span>
+</pre></div>
+<div id="outline-container-org944d670" class="outline-2">
+<h2 id="org944d670">A Query Class</h2>
+<div class="outline-text-2" id="text-org944d670">
+<p>
+The textbook(s) treat these as functions, but they seem to suggest to me methods of a class, so I'll make one.
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree</span> <span class="kn">import</span> <span class="n">Node</span><span class="p">,</span> <span class="n">Tree</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Query</span><span class="p">:</span>
+    <span class="sd">"""Holds a tree and performs queries on it</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     tree: A Binary Search Tree</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">Tree</span><span class="p">):</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
+	<span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orge4dbdaa" class="outline-2">
+<h2 id="orge4dbdaa">Search</h2>
+<div class="outline-text-2" id="text-orge4dbdaa">
+<p>
+The first thing we'll look at is searching for a Node in a Binary Search Tree. Because of the way the tree is structured the search looks a lot like a <a href="posts/binary-search/">Binary Search</a> where we start at the root of the tree and then work our way downwards, picking the next child to follow based on whether the key we're searching for is greater than the right child's key or less than the left child's key. If it's equal then we've found the node we want.
+</p>
+</div>
+
+<div id="outline-container-org5665ea5" class="outline-3">
+<h3 id="org5665ea5">The Algorithm</h3>
+<div class="outline-text-3" id="text-org5665ea5">
+<pre id="tree-search" style="display:hidden;">
+\begin{algorithm}
+\caption{TreeSearch}
+\begin{algorithmic}
+\INPUT The Node to start searching from and the key to search for.
+\OUTPUT If a node with the key is in the tree, then it will output the node.
+\PROCEDURE{TreeSearch}{x, key}
+\IF {\textit{x} = \textsc{NIL} or key = \textit{x}.key}
+  \RETURN \textit{x}
+\ENDIF
+
+\IF {key &lt; \textit{x}.key}
+    \RETURN \textsc{TreeSearch}(\textit{x}.left, key)
+\ELSE
+    \RETURN \textsc{TreeSearch}(\textit{x}.right, key)
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+</div>
+<div id="outline-container-org935c75d" class="outline-3">
+<h3 id="org935c75d">The Iterative Version</h3>
+<div class="outline-text-3" id="text-org935c75d">
+<p>
+The recursive version of <code>TreeSearch</code> is quite nice, but it also translates easily to an iterative version if for some reason performance or size becomes a problem.
+</p>
+
+<pre id="iterative-tree-search" style="display:hidden;">
+\begin{algorithm}
+\caption{IterativeTreeSearch}
+\begin{algorithmic}
+\INPUT The Node to start searching from and the key to search for.
+\OUTPUT If a node with the key is in the tree, then it will output the node.
+\PROCEDURE{IterativeTreeSearch}{x, key}
+\WHILE {\textit{x} $\neq$ \textsc{NIL} and key $\neq$ \textit{x}.key}
+  \IF {key &lt; \textit{x}.key}
+   \STATE \textit{x} $\gets$ \textit{x}.left
+  \ELSE
+   \STATE \textit{x} $\gets$ \textit{x}.right
+  \ENDIF
+\ENDWHILE
+\RETURN \textit{x}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+</div>
+<div id="outline-container-org94cf9d7" class="outline-3">
+<h3 id="org94cf9d7">The Implementation</h3>
+<div class="outline-text-3" id="text-org94cf9d7">
+<p>
+I'll add the iterative version of the Tree Search as a method for our Query class.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""Searches the tree for the node with the matching key</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     key: node's key to search for</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     the node with the key or None if it isn't in the tree</span>
+<span class="sd">    """</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+    <span class="k">while</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
+	<span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
+	    <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
+	<span class="k">else</span><span class="p">:</span>
+	   <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span>
+    <span class="k">return</span> <span class="n">node</span>
+</pre></div>
+</div>
+<div id="outline-container-orgb7d78b1" class="outline-4">
+<h4 id="orgb7d78b1">Testing</h4>
+<div class="outline-text-4" id="text-orgb7d78b1">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span><span class="n">be_none</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree</span> <span class="kn">import</span> <span class="n">Node</span><span class="p">,</span> <span class="n">Tree</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.query</span> <span class="kn">import</span> <span class="n">Query</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+
+<span class="n">five</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">five</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">five</span><span class="p">))</span>
+
+<span class="n">fifteen</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">fifteen</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">fifteen</span><span class="p">))</span>
+</pre></div>
+
+<p>
+I'll have to think of something more interesting to show for this…
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgdd6ab75" class="outline-2">
+<h2 id="orgdd6ab75">Miminum and Maximum</h2>
+<div class="outline-text-2" id="text-orgdd6ab75">
+</div>
+<div id="outline-container-orge3c8b94" class="outline-3">
+<h3 id="orge3c8b94">Mimimum</h3>
+<div class="outline-text-3" id="text-orge3c8b94">
+<pre id="tree-minimum" style="display:hidden;">
+\begin{algorithm}
+\caption{TreeMinimum}
+\begin{algorithmic}
+\INPUT The Node to start the search from.
+\OUTPUT The Node with the smallest key.
+\PROCEDURE{TreeMinimum}{x}
+\WHILE {\textit{x}.left $\neq$ \textsc{NIL}}
+   \STATE \textit{x} $\gets$ \textit{x}.left
+\ENDWHILE
+\RETURN \textit{x}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+
+<div id="outline-container-org38ca914" class="outline-4">
+<h4 id="org38ca914">The Implementation</h4>
+<div class="outline-text-4" id="text-org38ca914">
+<p>
+I originally didn't take the root node as an argument, since I thought the minimum of the tree is always the smallest item. But this method gets used later on in the <code>successor</code> method where we want to find the smallest item in the right-subtree of a particular node, so the outcome won't necessarily be the smallest item in the tree.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""Returns the node with the smallest key</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     node: a node to use as the starting root</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+
+    <span class="k">while</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
+    <span class="k">return</span> <span class="n">node</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-orga3e01ce" class="outline-4">
+<h4 id="orga3e01ce">Testing</h4>
+<div class="outline-text-4" id="text-orga3e01ce">
+<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">17</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9bcccab" class="outline-3">
+<h3 id="org9bcccab">Maximum</h3>
+<div class="outline-text-3" id="text-org9bcccab">
+<pre id="tree-maximum" style="display:hidden;">
+\begin{algorithm}
+\caption{TreeMaximum}
+\begin{algorithmic}
+\INPUT The Node to start the search from.
+\OUTPUT The Node with the largest key.
+\PROCEDURE{TreeMaximum}{x}
+\WHILE {\textit{x}.right $\neq$ \textsc{NIL}}
+   \STATE \textit{x} $\gets$ \textit{x}.right
+\ENDWHILE
+\RETURN \textit{x}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+
+<div id="outline-container-org2be5d81" class="outline-4">
+<h4 id="org2be5d81">The Implementation</h4>
+<div class="outline-text-4" id="text-org2be5d81">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""Returns the node with the largest key"""</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+    <span class="k">while</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span>
+    <span class="k">return</span> <span class="n">node</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org01aa434" class="outline-4">
+<h4 id="org01aa434">Testing</h4>
+<div class="outline-text-4" id="text-org01aa434">
+<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)))</span>
+
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">17</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">17</span><span class="p">)))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org6800c1a" class="outline-2">
+<h2 id="org6800c1a">Tree Successor</h2>
+<div class="outline-text-2" id="text-org6800c1a">
+<p>
+A "Successor" node is the next largest node after a given node. Since all the nodes in a right subtree are greater than the node, it's the smallest node in the right (if it exists). If the right subtree is empty then we traverse up the ancestors of the node until we find the first one that is greater than our node.
+</p>
+
+<pre id="tree-successor" style="display:hidden;">
+\begin{algorithm}
+\caption{TreeSuccessor}
+\begin{algorithmic}
+\INPUT The Node to start the search from.
+\OUTPUT The Node with the next largest key.
+\PROCEDURE{TreeSuccessor}{x}
+\IF {\textit{x}.right $\neq$ \textsc{NIL}}
+  \RETURN \textsc{TreeMinimum}(\textit{x}.right)
+\ENDIF
+
+\STATE \textit{y} $\gets$ \textit{x}.parent
+
+\WHILE {\textit{y} $\neq$ \textsc{NIL} and \textit{x} = \textit{y}.right}
+   \STATE \textit{x} $\gets$ \textit{y}
+   \STATE \textit{y} $\gets$ \textit{y}.parent
+\ENDWHILE
+\RETURN \textit{y}
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">successor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""Returns the next largest node</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     node: the node who's successor to find</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     successor node to the input node</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+
+    <span class="n">successor</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">while</span> <span class="n">successor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span> <span class="o">==</span> <span class="n">successor</span><span class="o">.</span><span class="n">right</span><span class="p">:</span>
+	<span class="n">node</span> <span class="o">=</span> <span class="n">successor</span>
+	<span class="n">successor</span> <span class="o">=</span> <span class="n">successor</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">return</span> <span class="n">successor</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">17</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">successor</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="mi">15</span><span class="p">)))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">17</span><span class="p">)))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">successor</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">successor</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">successor</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org9c6bfcd" class="outline-2">
+<h2 id="org9c6bfcd">Sources</h2>
+<div class="outline-text-2" id="text-org9c6bfcd">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-search"));
+});
+</script><script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("iterative-tree-search"));
+});
+</script><script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-minimum"));
+});
+</script><script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-maximum"));
+});
+</script><script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("tree-successor"));
+});
+</script>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-node-insertion/" class="u-url">Binary Search Tree Node Insertion</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/binary-search-tree-node-insertion/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-12T15:23:47-08:00" itemprop="datePublished" title="2022-03-12 15:23">2022-03-12 15:23</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li>
+<a href="posts/binary-search-tree-node-insertion/#org1ff68a8">The Tree</a>
+<ul>
+<li><a href="posts/binary-search-tree-node-insertion/#orgee5280e">The Insertion Algorithm</a></li>
+<li><a href="posts/binary-search-tree-node-insertion/#orgc6fba20">The Insert Method</a></li>
+</ul>
+</li>
+<li><a href="posts/binary-search-tree-node-insertion/#orgd4a5374">Plotting</a></li>
+<li><a href="posts/binary-search-tree-node-insertion/#orge05e1ca">Sources</a></li>
+</ul>
+</div>
+</div>
+<p>
+This is the next post in a series on Binary Search Trees that start with <a href="posts/binary-search-trees/">this post</a>. In this post we'll be looking at creating a Tree class and the method of inserting a node into the tree.
+</p>
+
+<div id="outline-container-org1ff68a8" class="outline-2">
+<h2 id="org1ff68a8">The Tree</h2>
+<div class="outline-text-2" id="text-org1ff68a8">
+<p>
+Although <a href="posts/clrs/">CLRS</a> use a <b>T</b> (as in tree) class in their algorithms, they only use it to store a <b>root</b> attribute. To make it a little more object-oriented I'll create a Tree class and add the <code>insert</code> method to it, rather than passing the tree to a function. Not a big change, but one that might be useful.
+</p>
+
+<p>
+<img src="posts/binary-search-tree-node-insertion/tree.png" alt="nil"></p>
+
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">.node</span> <span class="kn">import</span> <span class="n">Node</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="nd">@define</span>
+<span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
+    <span class="sd">"""Binary Search Tree</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     root: the root node for the tree</span>
+<span class="sd">    """</span>
+    <span class="n">root</span><span class="p">:</span> <span class="n">Node</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+
+<div id="outline-container-orgee5280e" class="outline-3">
+<h3 id="orgee5280e">The Insertion Algorithm</h3>
+<div class="outline-text-3" id="text-orgee5280e">
+<p>
+This is the <a href="posts/clrs/">CLRS</a> insert algorithm. As I noted above they consider it a function, rather than a method of the tree.
+</p>
+
+<p>
+One thing that tripped me up initially was the term "insert". I thought that it would put the new node in between existing nodes, but it instead adds it as a leaf. The job of the algorithm is to find the correct leaf to add the new node to and which side to put it on (left or right).
+</p>
+
+<pre id="insert-node" style="display:hidden;">
+\begin{algorithm}
+\caption{Insert Node}
+\begin{algorithmic}
+
+\INPUT Tree and Node to insert.
+\PROCEDURE{TreeInsert}{\textit{T, z}}
+
+\STATE \textit{y} $\gets$ \textsc{NIL}
+\STATE \textit{x} $\gets$ T.root
+
+\WHILE {\textit{x} $\neq$ \textsc{NIL}}
+ \STATE \textit{y} = \textit{x}
+ \IF {\textit{z}.key &lt; \textit{x}.key}
+   \STATE \textit{x} $\gets$ \textit{x}.left
+ \ELSE
+   \STATE \textit{x} $\gets$ \textit{x}.right
+ \ENDIF
+\ENDWHILE
+\STATE
+\STATE \textit{z}.parent $\gets$ \textit{y}
+\STATE
+\IF {\textit{y} = \textsc{NIL}} 
+ \STATE T.root $\gets$ \textit{z}
+\ELIF {\textit{z}.key &lt; \textit{y}.key}
+  \STATE \textit{y}.left $\gets$ \textit{z}
+\ELSE
+  \STATE \textit{y}.right $\gets$ \textit{z}
+\ENDIF
+
+\ENDPROCEDURE
+
+\end{algorithmic}
+\end{algorithm}
+</pre>
+
+<p>
+What we have here is sort of a hunter and hound scenario. The hunter <code>y</code> is pulled along by the hound <code>x</code> as the hound chases down the path to find the spot for the new node. Once the hound falls into the spot where there's no node, the hunter is in the location of the leaf that should be the new node's parent and the hound is where the new node should be inserted.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc6fba20" class="outline-3">
+<h3 id="orgc6fba20">The Insert Method</h3>
+<div class="outline-text-3" id="text-orgc6fba20">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Insert the node as a new leaf in the tree</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     node: a node to insert into the tree</span>
+<span class="sd">    """</span>
+    <span class="n">hunter</span><span class="p">,</span> <span class="n">hound</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span>
+
+    <span class="k">while</span> <span class="n">hound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">hunter</span><span class="p">,</span> <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="p">,</span> <span class="n">hound</span><span class="o">.</span><span class="n">left</span> <span class="k">if</span> <span class="n">node</span> <span class="o">&lt;</span> <span class="n">hound</span> <span class="k">else</span> <span class="n">hound</span><span class="o">.</span><span class="n">right</span>
+
+    <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">hunter</span>
+
+    <span class="k">if</span> <span class="n">hunter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">node</span>
+    <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">hunter</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
+	<span class="n">hunter</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span>
+    <span class="k">else</span><span class="p">:</span>
+	<span class="n">hunter</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span>
+    <span class="k">return</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.tree</span> <span class="kn">import</span> <span class="n">Tree</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">()</span>
+
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">12</span><span class="p">)))</span>
+
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">7</span><span class="p">)))</span>
+
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">20</span><span class="p">)))</span>
+
+<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd4a5374" class="outline-2">
+<h2 id="orgd4a5374">Plotting</h2>
+<div class="outline-text-2" id="text-orgd4a5374">
+<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">16</span><span class="p">):</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+<span class="n">adjacencies</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">inorder</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">"""Traverse the nodes and build an adjancency dictionary</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">)</span>
+	<span class="n">left</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="k">else</span> <span class="kc">None</span>
+	<span class="n">right</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="k">else</span> <span class="kc">None</span>
+	<span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)):</span>
+	    <span class="k">if</span> <span class="n">left</span> <span class="ow">and</span> <span class="n">right</span><span class="p">:</span>
+		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+	    <span class="k">elif</span> <span class="n">left</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
+		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="p">)</span>
+	    <span class="k">else</span><span class="p">:</span>
+		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span><span class="p">,)</span>
+	    <span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">)</span>
+    <span class="k">return</span>
+
+<span class="n">inorder</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">adjacencies</span><span class="o">=</span><span class="n">adjacencies</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adjacencies</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+{2: (1, 3), 5: (2, 7), 7: (6, 8), 10: (5, 20), 11: (12,), 14: (11, 15), 15: (17,), 17: (16,), 20: (14,)}
+</pre>
+
+
+<p>
+Now that we have an adjacency list, let's try and plot it.
+</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span>
+
+<span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"binary-search-tree-node-insertion"</span>
+<span class="n">OUTPUT</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">(</span><span class="n">adjacencies</span><span class="p">)</span>
+
+<span class="n">pygraph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="n">pygraph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">OUTPUT</span> <span class="o">+</span> <span class="s2">"first_tree.png"</span><span class="p">)</span>
+</pre></div>
+
+<p>
+<img src="posts/binary-search-tree-node-insertion/first_tree.png" alt="nil"></p>
+
+<p>
+Well, it isn't quite right, since NetworkX didn't really preserve the left and right orientation for some of the children, but it's something.
+</p>
+</div>
+</div>
+<div id="outline-container-orge05e1ca" class="outline-2">
+<h2 id="orge05e1ca">Sources</h2>
+<div class="outline-text-2" id="text-orge05e1ca">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("insert-node"));
+});
+</script>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-node/" class="u-url">Binary Search Tree Node</a></h1>
         <div class="metadata">
             <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
                 The Cloistered Monkey
@@ -837,16 +1487,16 @@ window.addEventListener('load', function () {
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="posts/binary-search-trees/#orgda35141">What is a Binary Search Tree?</a></li>
-<li><a href="posts/binary-search-trees/#org8e4afc5">The Binary Search Tree Property</a></li>
-<li><a href="posts/binary-search-trees/#org101cf0a">The Posts</a></li>
-<li><a href="posts/binary-search-trees/#org9858e8d">Sources</a></li>
+<li><a href="posts/binary-search-trees/#orgb100cb2">What is a Binary Search Tree?</a></li>
+<li><a href="posts/binary-search-trees/#orgf52c66b">The Binary Search Tree Property</a></li>
+<li><a href="posts/binary-search-trees/#org36776f6">The Posts</a></li>
+<li><a href="posts/binary-search-trees/#orgc757132">Sources</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgda35141" class="outline-2">
-<h2 id="orgda35141">What is a Binary Search Tree?</h2>
-<div class="outline-text-2" id="text-orgda35141">
+<div id="outline-container-orgb100cb2" class="outline-2">
+<h2 id="orgb100cb2">What is a Binary Search Tree?</h2>
+<div class="outline-text-2" id="text-orgb100cb2">
 <p>
 Using <a href="posts/clrs/">CLRS</a>:
 </p>
@@ -865,30 +1515,31 @@ When describing Binary Search Trees I'll tend to refer to the Nodes but mean the
 </div>
 </div>
 
-<div id="outline-container-org8e4afc5" class="outline-2">
-<h2 id="org8e4afc5">The Binary Search Tree Property</h2>
-<div class="outline-text-2" id="text-org8e4afc5">
+<div id="outline-container-orgf52c66b" class="outline-2">
+<h2 id="orgf52c66b">The Binary Search Tree Property</h2>
+<div class="outline-text-2" id="text-orgf52c66b">
 <p>
 All the nodes in the left sub-tree of a node are less than or equal to the node and all the nodes in the right sub-tree of the node are greater than or equal to the node.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org101cf0a" class="outline-2">
-<h2 id="org101cf0a">The Posts</h2>
-<div class="outline-text-2" id="text-org101cf0a">
+<div id="outline-container-org36776f6" class="outline-2">
+<h2 id="org36776f6">The Posts</h2>
+<div class="outline-text-2" id="text-org36776f6">
 <ul class="org-ul">
 <li><a href="posts/binary-search-tree-node/">Binary Search Tree Node</a></li>
+<li><a href="posts/binary-search-tree-node-insertion/">Binary Search Tree Node Insertion</a></li>
 <li><a href="posts/binary-search-tree-in-order-traversal/">Binary Search Tree: In-Order Traversal</a></li>
+<li><span class="error text-error" style="color: red;">Invalid link: binary-search-tree-queries{{% doc %}}</span></li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-org9858e8d" class="outline-2">
-<h2 id="org9858e8d">Sources</h2>
-<div class="outline-text-2" id="text-org9858e8d">
+<div id="outline-container-orgc757132" class="outline-2">
+<h2 id="orgc757132">Sources</h2>
+<div class="outline-text-2" id="text-orgc757132">
 <ul class="org-ul">
-<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+<li>{{% doc %}}clrs</li>
 </ul>
 </div>
 </div>
@@ -2165,450 +2816,11 @@ window.addEventListener('load', function () {
 </div>
 </div>
     </div>
-    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/levitins-partition/" class="u-url">Levitin's Partition</a></h1>
-        <div class="metadata">
-            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
-                The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="posts/levitins-partition/" rel="bookmark">
-            <time class="published dt-published" datetime="2022-02-23T17:13:44-08:00" itemprop="datePublished" title="2022-02-23 17:13">2022-02-23 17:13</time></a>
-            </p>
-        </div>
-    </header><div class="e-content entry-content">
-    <div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li>
-<a href="posts/levitins-partition/#org72ff2a5">Introduction</a>
-<ul>
-<li><a href="posts/levitins-partition/#orga6ecb51">The Algorithm</a></li>
-<li>
-<a href="posts/levitins-partition/#orge1c5be2">The Implementation</a>
-<ul>
-<li><a href="posts/levitins-partition/#org91a8542">Imports</a></li>
-<li><a href="posts/levitins-partition/#org286b707">Some Checks</a></li>
-</ul>
-</li>
-<li>
-<a href="posts/levitins-partition/#org0db842e">A Levitin Tracker</a>
-<ul>
-<li><a href="posts/levitins-partition/#org64e3b79">A Backwards Case</a></li>
-<li><a href="posts/levitins-partition/#org1f5af99">A More Random Case</a></li>
-</ul>
-</li>
-<li><a href="posts/levitins-partition/#org33fbc47">A Sketch Of The Implementation</a></li>
-</ul>
-</li>
-<li><a href="posts/levitins-partition/#org0563ec8">Sources</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org72ff2a5" class="outline-2">
-<h2 id="org72ff2a5">Introduction</h2>
-<div class="outline-text-2" id="text-org72ff2a5">
-<p>
-This is part of a series that starts with <a href="posts/the-partition/">this post</a>.
-</p>
-</div>
-<div id="outline-container-orga6ecb51" class="outline-3">
-<h3 id="orga6ecb51">The Algorithm</h3>
-<div class="outline-text-3" id="text-orga6ecb51">
-<p>
-The Levitin version of the Partition function is a little more complicated than the CLRS version. It uses an outer loop with two inner loops. The outer loop continues until the indices for the partitions cross-over (or meet) and the inner loops move the boundaries until they find a value that needs to be swapped to the other partition (e.g. the loop sweeping upwards finds an element that's greater than or equal to the pivot element and so it needs to be moved to the upper partition). It uses the first element in the array as the value around which to partition the array.
-</p>
-
-<pre id="the-levitin-partition" style="display:hidden;">
-\begin{algorithm}
-\caption{Partition (Levitin)}
-\begin{algorithmic}
-\INPUT An array and left and right locations defining a subarray
-\OUTPUT The sub-array from left to right is partitioned and the partition location is returned
-
-\PROCEDURE{Partition}{A, left, right}
-
-\STATE PivotElement $\gets$ A[left]
-\STATE PartitionLeft $\gets$ left
-\STATE PartitionRight $\gets$ right + 1
-\STATE \\
-\REPEAT
-  \REPEAT
-    \STATE PartitionLeft $\gets$ PartitionLeft + 1
-  \UNTIL {A[PartitionLeft] $\geq$ PivotElement}
-  \STATE \\
-  \REPEAT
-    \STATE PartitionRight $\gets$ PartitionRight - 1
-  \UNTIL {A[PartitionRight] $\leq$ PivotElement}
-
-  \STATE \\ Swap(A[PartitionLeft], A[PartitionRight])
-
-\UNTIL {PartitionLeft $\geq$ PartitionRight}
-\STATE \\ Swap(A[PartitionLeft], A[PartitionRight])
-\STATE Swap(A[left], A[PartitionRight])
-
-\RETURN PartitionRight
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-</div>
-</div>
-
-<div id="outline-container-orge1c5be2" class="outline-3">
-<h3 id="orge1c5be2">The Implementation</h3>
-<div class="outline-text-3" id="text-orge1c5be2">
-</div>
-<div id="outline-container-org91a8542" class="outline-4">
-<h4 id="org91a8542">Imports</h4>
-<div class="outline-text-4" id="text-org91a8542">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-
-<span class="kn">import</span> <span class="nn">random</span>
-
-<span class="c1"># pypi</span>
-<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
-
-<span class="kn">import</span> <span class="nn">altair</span>
-<span class="kn">import</span> <span class="nn">pandas</span>
-
-<span class="c1"># software under test</span>
-<span class="kn">from</span> <span class="nn">bowling.sort.quick</span> <span class="kn">import</span> <span class="n">levitins_partition</span>
-
-<span class="c1"># monkey</span>
-<span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_chart</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"levitins-partition"</span>
-<span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
-<span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
-</pre></div>
-
-<p>
-The version <a href="posts/itdaa/">Levitin</a> uses appears to be closer to the <a href="https://en.wikipedia.org/wiki/Quicksort#Hoare_partition_scheme">version given by Tony Hoare</a>, the creator of Quicksort. A notable difference between Wikipedia's pseudocode for Hoare's version and this version is that Hoare uses the middle element in the sub-array as the pivot while Levitin uses the left-most element as the pivot.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">partition_levitin</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span>
-		      <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Partitions the collection around the first element</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     collection: the list to partition</span>
-<span class="sd">     left: index of the first element in the sub-list to partition</span>
-<span class="sd">     right: index of the last element in the sub-list to partition</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     the index of the pivot element</span>
-<span class="sd">    """</span>
-    <span class="n">pivot_element</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
-    <span class="n">partition_left</span> <span class="o">=</span> <span class="n">left</span>
-    <span class="n">partition_right</span> <span class="o">=</span> <span class="n">right</span> <span class="o">+</span> <span class="mi">1</span>
-
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-	<span class="c1"># if the pivot element is the largest element this loop</span>
-	<span class="c1"># will try to go past the end of the list so we need a</span>
-	<span class="c1"># check in the loop before we increment the partition_left</span>
-	<span class="k">while</span> <span class="n">partition_left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
-	    <span class="n">partition_left</span> <span class="o">+=</span> <span class="mi">1</span>
-	    <span class="k">if</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">pivot_element</span><span class="p">:</span>
-		<span class="k">break</span>
-
-	<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-	    <span class="n">partition_right</span> <span class="o">-=</span> <span class="mi">1</span>
-	    <span class="k">if</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pivot_element</span><span class="p">:</span>
-		<span class="k">break</span>
-
-	<span class="k">if</span> <span class="n">partition_left</span> <span class="o">&gt;=</span> <span class="n">partition_right</span><span class="p">:</span>
-	    <span class="k">break</span>
-
-	<span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-	    <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">]</span>
-	<span class="p">)</span>
-
-    <span class="c1"># move the pivot element from the far left to its final place</span>
-    <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-	<span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">partition_right</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-org286b707" class="outline-4">
-<h4 id="org286b707">Some Checks</h4>
-<div class="outline-text-4" id="text-org286b707">
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">levitins_partition</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span> <span class="p">,</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">levitins_partition</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">))</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">levitins_partition</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">levitins_partition</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">prefix</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">middle</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">suffix</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">test</span> <span class="o">=</span> <span class="p">[</span><span class="n">middle</span><span class="p">]</span> <span class="o">+</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">suffix</span>
-
-<span class="n">output</span> <span class="o">=</span> <span class="n">levitins_partition</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">middle</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="n">output</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">middle</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="o">&lt;</span> <span class="n">middle</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">test</span><span class="p">[:</span><span class="n">output</span><span class="p">]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span> <span class="o">&gt;</span> <span class="n">middle</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">test</span><span class="p">[</span><span class="n">output</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org0db842e" class="outline-3">
-<h3 id="org0db842e">A Levitin Tracker</h3>
-<div class="outline-text-3" id="text-org0db842e">
-<p>
-This is the same function (hopefully) as <code>levitins_partition</code> but it collects the position of the elements in the list as things get swapped around so that we can plot it.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">levitin_tracker</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span> 
-		    <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-    <span class="sd">"""Partitions the collection around the last element</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     collection: the list to partition</span>
-<span class="sd">     left: index of the first element in the sub-list to partition</span>
-<span class="sd">     right: index of the last element in the sub-list to partition</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">     locations dict, lower_bounds, upper_bounds</span>
-<span class="sd">    """</span>
-    <span class="c1"># for the plotting</span>
-    <span class="n">locations</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">collection</span><span class="p">)}</span>
-    <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">right</span>
-    <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">left</span>
-
-    <span class="n">lower_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">lower_bound</span><span class="p">]</span>
-    <span class="n">upper_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">upper_bound</span><span class="p">]</span>
-
-    <span class="c1"># the algorithm</span>
-    <span class="n">pivot_element</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
-    <span class="n">partition_left</span> <span class="o">=</span> <span class="n">left</span>
-    <span class="n">partition_right</span> <span class="o">=</span> <span class="n">right</span> <span class="o">+</span> <span class="mi">1</span>
-
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-	<span class="k">while</span> <span class="n">partition_left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
-	    <span class="n">partition_left</span> <span class="o">+=</span> <span class="mi">1</span>
-	    <span class="k">if</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">pivot_element</span><span class="p">:</span>
-		<span class="k">break</span>
-
-	<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-	    <span class="n">partition_right</span> <span class="o">-=</span> <span class="mi">1</span>
-	    <span class="k">if</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">pivot_element</span><span class="p">:</span>
-		<span class="k">break</span>
-
-	<span class="k">if</span> <span class="n">partition_left</span> <span class="o">&gt;=</span> <span class="n">partition_right</span><span class="p">:</span>
-	    <span class="k">break</span>
-
-	<span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-	    <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_left</span><span class="p">]</span>
-	<span class="p">)</span>
-
-	<span class="c1"># update the plotting</span>
-	<span class="n">upper_bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partition_right</span><span class="p">)</span>
-	<span class="n">lower_bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partition_left</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">collection</span><span class="p">):</span>
-	    <span class="n">locations</span><span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-
-    <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-	<span class="n">collection</span><span class="p">[</span><span class="n">partition_right</span><span class="p">],</span> <span class="n">collection</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="c1"># update the plotting</span>
-    <span class="n">upper_bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partition_right</span><span class="p">)</span>
-    <span class="n">lower_bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partition_left</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">collection</span><span class="p">):</span>
-	<span class="n">locations</span><span class="p">[</span><span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">locations</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">levitin_track_plotter</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-    <span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span>
-    <span class="n">re_indexed</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Step"</span><span class="p">})</span>
-
-    <span class="n">melted</span> <span class="o">=</span> <span class="n">re_indexed</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Step"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span>
-			     <span class="n">value_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">)</span>
-
-    <span class="n">lower_frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Lower Bound"</span><span class="p">:</span> <span class="n">lower_bounds</span><span class="p">})</span>
-    <span class="n">re_lowered</span> <span class="o">=</span> <span class="n">lower_frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Step"</span><span class="p">})</span>
-    <span class="n">low_melted</span> <span class="o">=</span> <span class="n">re_lowered</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Step"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span>
-				 <span class="n">value_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">)</span>
-
-    <span class="n">upper_frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Lower Bound"</span><span class="p">:</span> <span class="n">upper_bounds</span><span class="p">})</span>
-    <span class="n">re_uppered</span> <span class="o">=</span> <span class="n">upper_frame</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Step"</span><span class="p">})</span>
-    <span class="n">up_melted</span> <span class="o">=</span> <span class="n">re_uppered</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Step"</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Element"</span><span class="p">,</span>
-				<span class="n">value_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">)</span>
-
-    <span class="n">last_location</span> <span class="o">=</span> <span class="n">melted</span><span class="o">.</span><span class="n">Location</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-
-    <span class="n">elements</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-	<span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Step:Q"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
-	<span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Location:Q"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-		   <span class="n">scale</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">last_location</span><span class="p">))),</span>
-	<span class="n">color</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s2">"Element:O"</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
-	<span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Step"</span><span class="p">,</span> <span class="s2">"Element"</span><span class="p">,</span> <span class="s2">"Location"</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="n">lower</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">low_melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-	<span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Step:Q"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
-	<span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Location:Q"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-		   <span class="n">scale</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">last_location</span><span class="p">))),</span>
-	<span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Step"</span><span class="p">,</span> <span class="s2">"Location"</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="n">upper</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">up_melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-	<span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Step:Q"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
-	<span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Location:Q"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-		   <span class="n">scale</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">last_location</span><span class="p">))),</span>
-	<span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Step"</span><span class="p">,</span> <span class="s2">"Location"</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="n">chart</span> <span class="o">=</span> <span class="p">(</span><span class="n">elements</span> <span class="o">+</span> <span class="n">lower</span> <span class="o">+</span> <span class="n">upper</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
-    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">520</span>
-    <span class="p">)</span>
-
-    <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-    <span class="k">return</span>
-</pre></div>
-</div>
-<div id="outline-container-org64e3b79" class="outline-4">
-<h4 id="org64e3b79">A Backwards Case</h4>
-<div class="outline-text-4" id="text-org64e3b79">
-<div class="highlight"><pre><span></span><span class="n">middle</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">first_half</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span><span class="p">))</span>
-<span class="n">second_half</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">middle</span><span class="p">))</span>
-
-<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">first_half</span><span class="p">)</span>
-<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">second_half</span><span class="p">)</span>
-
-<span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">middle</span><span class="p">]</span> <span class="o">+</span> <span class="n">second_half</span> <span class="o">+</span> <span class="n">first_half</span>
-
-<span class="n">locations</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">levitin_tracker</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">levitin_track_plotter</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">,</span>
-		      <span class="s2">"Levitin Worst Case Swaps"</span><span class="p">,</span> <span class="s2">"levitin-worst-plot"</span><span class="p">)</span>
-</pre></div>
-
-<object type="text/html" data="posts/levitins-partition/levitin-worst-plot.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
-</div>
-</div>
-
-
-<div id="outline-container-org1f5af99" class="outline-4">
-<h4 id="org1f5af99">A More Random Case</h4>
-<div class="outline-text-4" id="text-org1f5af99">
-<p>
-Let's try something a little more random.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">middle</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">first_half</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span><span class="p">))</span>
-<span class="n">second_half</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">middle</span><span class="p">))</span>
-<span class="n">items</span> <span class="o">=</span> <span class="n">first_half</span> <span class="o">+</span> <span class="n">second_half</span>
-<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-<span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">middle</span><span class="p">)</span>
-
-<span class="n">locations</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">levitin_tracker</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">levitin_track_plotter</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">,</span>
-		      <span class="n">title</span><span class="o">=</span><span class="s2">"Randomized Input"</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">"levitin-randomized-input"</span><span class="p">)</span>
-</pre></div>
-
-<object type="text/html" data="posts/levitins-partition/levitin-randomized-input.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org33fbc47" class="outline-3">
-<h3 id="org33fbc47">A Sketch Of The Implementation</h3>
-<div class="outline-text-3" id="text-org33fbc47">
-<p>
-<img src="posts/levitins-partition/levitins-partition-cleaned.webp" alt="nil"></p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org0563ec8" class="outline-2">
-<h2 id="org0563ec8">Sources</h2>
-<div class="outline-text-2" id="text-org0563ec8">
-<ul class="org-ul">
-<li><a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Quicksort">Wikipedia on Quicksort</a></li>
-</ul>
-<script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("the-levitin-partition"));
-});
-</script>
-</div>
-</div>
-    </div>
-    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/the-partition/" class="u-url">The Road To Partition</a></h1>
-        <div class="metadata">
-            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
-                The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="posts/the-partition/" rel="bookmark">
-            <time class="published dt-published" datetime="2022-02-21T17:46:07-08:00" itemprop="datePublished" title="2022-02-21 17:46">2022-02-21 17:46</time></a>
-            </p>
-        </div>
-    </header><div class="e-content entry-content">
-    <div id="outline-container-orgd52650d" class="outline-2">
-<h2 id="orgd52650d">The Beginning</h2>
-<div class="outline-text-2" id="text-orgd52650d">
-<ul class="org-ul">
-<li><a href="posts/levitins-partition/">Levitin's Partition</a></li>
-<li><a href="posts/clrs-partition/">CLRS Partition</a></li>
-<li><a href="posts/randomized-partition/">Randomized Partition</a></li>
-<li><a href="posts/comparing-the-partition-swaps/">Comparing the Partition Swaps</a></li>
-</ul>
-</div>
-</div>
-<div id="outline-container-org2a34149" class="outline-2">
-<h2 id="org2a34149">Sources</h2>
-<div class="outline-text-2" id="text-org2a34149">
-<ul class="org-ul">
-<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
-<li><a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Quicksort">Wikipedia on Quicksort</a></li>
-</ul>
-</div>
-</div>
-    </div>
     </article>
 </div>
 
         <ul class="pager postindexpager clearfix">
-<li class="next"><a href="index-3.html" rel="next">Older posts</a></li>
+<li class="next"><a href="index-4.html" rel="next">Older posts</a></li>
         </ul>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
              MathJax.Hub.Config({
