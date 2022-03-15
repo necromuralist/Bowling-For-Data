@@ -46,12 +46,20 @@ class Query:
             node = node.left
         return node
 
-    def max(self) -> Node:
-        """Returns the node with the largest key"""
-        node = self.tree.root
-        while node.right is not None:
-            node = node.right
-        return node
+    def max(self, root: Node=None) -> Node:
+        """Returns the node with the largest key
+    
+        Args:
+         root: subtree root to start at
+    
+        Returns:
+         node with the largest key in tree/subtree
+        """
+        if root is None:
+            root = self.tree.root
+        while root.right is not None:
+            root = root.right
+        return root
 
     def successor(self, node: Node) -> Node:
         """Returns the next largest node
@@ -70,3 +78,19 @@ class Query:
             node = successor
             successor = successor.parent
         return successor
+
+    def predecessor(self, node: Node) -> Node:
+        """Returns the predecessor node
+    
+        Args:
+         node: the node whose predecessor we want
+    
+        Returns:
+         largest node smaller than given node
+        """
+        if node.left is not None:
+            return self.max(node.left)
+        predecessor = node.parent
+        while predecessor is not None and node == predecessor.left:
+            node, predecessor = predecessor, predecessor.parent
+        return predecessor
