@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-ccef39fe-b101-4a7d-8516-782fca30d522-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-56d3ad01-229c-4402-95bb-50e068495726-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -33,13 +33,23 @@ This is the next post in a series on Binary Search Trees that start with {{% lan
     <<successor>>
 
     <<predecessor>>
+
+    <<height>>
+
+    <<tree-height>>
 #+end_src
 * A Query Class
 The textbook(s) treat these as functions, but they seem to suggest to me methods of a class, so I'll make one.
 
 #+begin_src python :noweb-ref imports
+# python
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 # this project
-from bowling.data_structures.binary_search_tree import Node, Tree
+if TYPE_CHECKING:
+    from .node import Node
+    from .tree import Tree
 #+end_src
 
 #+begin_src python :noweb-ref tree-query
@@ -129,7 +139,7 @@ def search(self, key) -> Node:
 # pypi
 from expects import be,be_none, equal, expect
 from bowling.data_structures.binary_search_tree import Node, Tree
-from bowling.data_structures.binary_search_tree.query import Query
+from bowling.data_structures.binary_search_tree import Query
 
 root = Node(10)
 tree = Tree(root)
@@ -373,6 +383,63 @@ tree.insert(Node(8))
 expect(query.predecessor(query.tree.root)).to(be(query.search(8)))
 tree.insert(Node(4))
 expect(query.predecessor(query.search(8))).to(equal(Node(4)))
+#+end_src
+* Height
+The height of the Binary Search Tree is the number of edges from the root of the tree to the furthest node. The algorithms we're looking at here don't use them but I'm going to use height to look at how the order you insert nodes in the tree affects the height. 
+
+#+begin_src python :noweb-ref height
+@property
+def height(self) -> int:
+    """The length of the longest path starting at the root
+    
+    Returns:
+     number of edges from root to furthest leaf
+    """
+    return self.tree_height(self.tree.root)
+#+end_src
+
+#+begin_src python :noweb-ref tree-height
+def tree_height(self, node: Node=None) -> int:
+    """The length of the longest path starting at the node
+
+    Args:
+     the node to start the measurement from
+
+    Returns:
+     number of edges from root to furthest leaf
+    """
+    if node is None:
+        return -1
+
+    left = self.tree_height(node.left) + 1
+    right = self.tree_height(node.right) + 1
+    return max(left, right)
+#+end_src
+
+#+begin_src python :results none
+tree = Tree()
+query = Query(tree)
+
+expect(query.height).to(equal(-1))
+tree.insert(Node(10))
+expect(query.height).to(equal(0))
+tree.insert(Node(8))
+expect(query.height).to(equal(1))
+tree.insert(Node(12))
+expect(query.height).to(equal(1))
+tree.insert(Node(4))
+expect(query.height).to(equal(2))
+tree.insert(Node(2))
+expect(query.height).to(equal(3))
+
+tree = Tree()
+query = Query(tree)
+
+n = 20
+for key in range(n):
+    tree.insert(Node(key))
+
+expect(query.height).to(equal(n - 1))
 #+end_src
 * Sources
 - {{% doc %}}clrs{{% /doc %}}

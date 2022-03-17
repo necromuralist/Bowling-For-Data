@@ -1,5 +1,11 @@
+# python
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 # this project
-from bowling.data_structures.binary_search_tree import Node, Tree
+if TYPE_CHECKING:
+    from .node import Node
+    from .tree import Tree
 
 
 class Query:
@@ -90,3 +96,28 @@ class Query:
         while predecessor is not None and node == predecessor.left:
             node, predecessor = predecessor, predecessor.parent
         return predecessor
+
+    @property
+    def height(self) -> int:
+        """The length of the longest path starting at the root
+        
+        Returns:
+         number of edges from root to furthest leaf
+        """
+        return self.tree_height(self.tree.root)
+
+    def tree_height(self, node: Node=None) -> int:
+        """The length of the longest path starting at the node
+    
+        Args:
+         the node to start the measurement from
+    
+        Returns:
+         number of edges from root to furthest leaf
+        """
+        if node is None:
+            return -1
+    
+        left = self.tree_height(node.left) + 1
+        right = self.tree_height(node.right) + 1
+        return max(left, right)
