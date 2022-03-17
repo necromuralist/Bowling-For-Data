@@ -22,9 +22,13 @@
 
 <<the-tree>>
 
+    <<query>>
+
     <<insert>>
 
     <<transplant>>
+
+    <<delete>>
 #+end_src
 This is the next post in a series on Binary Search Trees that start with {{% lancelot "this post" %}}binary-search-trees{{% /lancelot %}}. In this post we'll be looking at creating a Tree class and the method of inserting a node into the tree.
 
@@ -49,6 +53,7 @@ class Tree {
 #+begin_src python :noweb-ref imports
 # this project
 from .node import Node
+from .query import Query
 #+end_src
 
 #+begin_src python :noweb-ref the-tree
@@ -60,6 +65,7 @@ class Tree:
     """
     def __init__(self, root: Node=None) -> None:
         self.root = root
+        self._query = None        
         return
 #+end_src
 
@@ -81,6 +87,17 @@ tree.root = root
 expect(tree.root).to(equal(root))
 #+end_src
 
+** The Query
+We have kind of a chicken and the egg problem here in that I defined the Query to contain the Tree, but we need to use its ~min~ function to delete nodes. We'll see how it goes.
+
+#+begin_src python :noweb-ref query
+@property
+def query(self) -> Query:
+    """A Tree Query"""
+    if self._query is None:
+        self._query = Query(self)
+    return self._query
+#+end_src
 ** The Insertion Algorithm
 This is the {{% lancelot "CLRS" %}}clrs{{% /lancelot %}} insert algorithm. As I noted above they consider it a function, rather than a method of the tree.
 
@@ -246,6 +263,112 @@ tree.transplant(righty, bigger_transplant)
 expect(righty.parent.right).to(equal(bigger_transplant))
 expect(righty.parent).to(be(bigger_transplant.parent))
 #+end_src
+** Deletion
+The uses for the ~transplant~ method might seem a little obscure, but it's a necessary function for our ~delete~ method to delete a node from the tree. There are three cases (four-ish really) to take care of:
+
+1. The node to delete has no left child: transplant the right child with the node
+2. The node to delete has no right child: transplant the left child with the node
+3. The node to delete has both children: transplant the children with the node
+
+#+begin_export html
+<pre id="delete-node" style="display:hidden;">
+\begin{algorithm}
+\caption{Delete Node}
+\begin{algorithmic}
+
+\INPUT Tree, Node to delete.
+\PROCEDURE{Delete}{\textit{T, z}}
+\IF {\textit{z}.left = \textsc{NIL}}
+  \STATE \textsc{Transplant}(\textit{T, z, z.right})
+\ELIF {\textit{z}.right = \textsc{NIL}}
+  \STATE \textsc{Transplant}(\textit{T, z, z.left})
+\ELSE
+   \STATE \textit{y} $\gets$ \textsc{TreeMinimum}(\textit{z}.right)
+   \IF {\textit{y}.parent $\neq$ \textit{z}}
+     \STATE \textsc{Transplant}(\textit{T, y, y.right})
+     \STATE \textit{y}.right $\gets$ \textit{z}.right
+     \STATE \textit{y}.right.parent $\gets$ \textit{y}
+   \ENDIF
+
+  \STATE \textsc{Transplant}(\textit{T, z, y})
+  \STATE \textit{y}.left $\gets$ \textit{z}.left
+  \STATE \textit{y}.left.parent $\gets$ \textit{y}
+\ENDIF
+\ENDPROCEDURE
+
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+#+begin_src python :noweb-ref delete
+def delete(self, node: Node) -> None:
+    """Remove the node from the tree
+
+    Args:
+     node: node to remove from the tree
+    """
+    if node.left is None:
+        self.transplant(node, node.right)
+    elif node.right is None:
+        self.transplant(node, node.left)
+    else:
+        replacement = self.query.min(node.right)
+        if replacement.parent != node:
+            self.transplant(replacement, replacement.right)
+            replacement.right = node.right
+            replacement.right.parent = replacement
+        self.transplant(node, replacement)
+        replacement.left = node.left
+        replacement.left.parent = replacement
+    return
+#+end_src
+
+#+begin_src python :results none
+tree = Tree(Node(50))
+child = Node(25)
+tree.insert(child)
+left = Node(10)
+right = Node(30)
+
+tree.insert(right)
+expect(tree.root.left).to(be(child))
+tree.delete(child)
+expect(tree.root.left).not_to(be(child))
+expect(tree.root.left).to(be(right))
+
+tree = Tree(Node(50))
+child = Node(25)
+tree.insert(child)
+left = Node(10)
+right = Node(30)
+tree.insert(left)
+tree.delete(child)
+expect(tree.root.left).to(be(left))
+
+root = Node(50)
+tree = Tree(root)
+child = Node(25)
+tree.insert(child)
+left = Node(10)
+right = Node(30)
+tree.insert(left)
+tree.insert(right)
+tree.delete(root)
+expect(tree.root).to(be(child))
+
+root = Node(50)
+tree = Tree(root)
+child = Node(25)
+tree.insert(child)
+left = Node(10)
+right = Node(30)
+tree.insert(left)
+tree.insert(right)
+tree.delete(child)
+expect(tree.root.left).to(be(right))
+#+end_src
+
 * Plotting
 #+begin_src python :results output :exports both
 tree = Tree(Node(10))
@@ -307,6 +430,13 @@ window.addEventListener('load', function () {
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("transplant-node"));
+});
+</script>
+#+end_export
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("delete-node"));
 });
 </script>
 #+end_export
