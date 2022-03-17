@@ -1,9 +1,5 @@
-# pypi
-from attrs import define
-
 # this project
 from bowling.data_structures.binary_search_tree import Node, Tree
-
 
 
 class Query:
