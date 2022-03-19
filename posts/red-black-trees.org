@@ -1,0 +1,50 @@
+#+BEGIN_COMMENT
+.. title: Red-Black Trees
+.. slug: red-black-trees
+.. date: 2022-03-19 14:43:23 UTC-07:00
+.. tags: data structures,binary search trees,algorithms,red-black trees
+.. category: Data Structures
+.. link: 
+.. description: A look at Red-Black Trees.
+.. type: text
+.. has_math: True
+#+END_COMMENT
+* What are Red-Black Trees?
+A *Red-Black Tree* is a variation of a {{% lancelot "Binary Search Tree" %}}binary-search-trees{{% /lancelot %}} that adds an extra attribute to each node - the node's *color*, which can be either ~RED~ or ~BLACK~.
+
+#+begin_src plantuml :file ../files/posts/red-black-trees/node.png :exports none
+!theme materia-outline
+
+class Node {
+ Key
+ Color
+ Node Left
+ Node Right
+ Node Parent
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/red-black-trees/node.png]]
+
+[[img-url: node.png]]
+
+** Why Do We Need Red-Black Trees?
+The basic operations done on a Binary Search Tree (e.g. search, insert, etc.) are \(O(h)\) - they perform based on the height of the tree, so when the tree is balanced they perform optimally, but the height depends on the order that the nodes are inserted (and deleted) so the tree can end up being taller than we want it to be. Red-Black Trees use the colors and the *Red-Black Properties* to ensure that the tree is more balanced.
+** What are the *Red-Black Properties*?
+These are the properties that need to be maintained for a Red-Black Tree to work correctly (from {{% lancelot "CLRS" %}}clrs{{% /lancelot %}}).
+
+1. Every Node is either Red or Black.
+2. The Root is Black.
+3. Every Leaf (Nil) is Black
+4. If a Node is Red then both of its children are Black.
+5. For each Node, all simple paths from the node to descendant leaves contain the same number of Black Nodes.
+
+When the properties are true the height of a tree with *n* nodes is \(O(\log(n))\).
+** What's the deal with the Nil Leaves?
+CLRS define the leaves of a binary tree as Nil values (not the end nodes with keys like I tend to do) and for Red-Black Trees, unlike Binary Search Trees they use a special Node object that is colored Black and has arbitrary values for the other attributes. To save space the Nil Node is a singleton and besides being used as the leaves it also is the parent of the root.
+
+** Anything Else?
+One last bit of terminology: the *Black-Height* of a node is the count of the Black Nodes on a simple path from the node to a leaf, not counting the node itself but counting the leaf. This is basically a name for property five of the Red-Black Properties.
+* Sources
+- {{% doc %}}clrs{{% /doc %}}
