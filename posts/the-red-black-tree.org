@@ -1,0 +1,589 @@
+#+BEGIN_COMMENT
+.. title: The Red-Black Tree
+.. slug: the-red-black-tree
+.. date: 2022-03-19 15:58:42 UTC-07:00
+.. tags: data structures,binary search trees,algorithms,red-black trees
+.. category: Data Structures
+.. link: 
+.. description: 
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-3971ad91-a1a1-4d59-8a86-5b1b2f557b05-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+#+begin_src python :tangle ../bowling/data_structures/red_black_tree/tree.py :exports none
+<<imports>>
+
+
+<<color>>
+
+
+<<the-nil>>
+
+
+<<the-node>>
+
+    <<parent>>
+
+    <<left>>
+
+    <<right>>
+
+    <<equal>>
+
+    <<less-than>>
+
+    <<less-than-or-equal>>
+
+    <<check-rep>>
+
+    <<string-output>>
+#+end_src
+This is a post that implements the Node and a Red-Black Tree it is a continuation of {{% lancelot "this post" %}}red-black-trees{{% /lancelot %}}.
+* Beginning
+I'm going to implement a Node and Red-Black Tree so that I can explore it further in other posts. 
+** Imports
+#+begin_src python :results none
+# python
+from pathlib import Path
+#+end_src
+** Set Up
+#+begin_src python :results none
+SLUG = "the-red-black-tree"
+OUTPUT_PATH = Path(f"files/posts/")/SLUG
+if not OUTPUT_PATH.is_dir():
+    OUTPUT_PATH.mkdir()
+#+end_src
+* Middle
+#+begin_src python :results none :exports none
+from expects import be, expect
+#+end_src
+
+This is the basic structure of our tree.
+
+#+begin_src plantuml :file ../files/posts/the-red-black-tree/rb-tree.png :exports none
+!theme materia-outline
+
+class RedBlackTree {
+ Node Nil
+ Node Root
+}
+
+RedBlackTree <|-  Node
+
+class Node {
+ Key
+ Color
+ Node Left
+ Node Right
+ Node Parent
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/the-red-black-tree/rb-tree.png]]
+
+[[img-url:rb-tree.png]]
+
+** Imports
+#+begin_src python :noweb-ref imports
+# python
+from __future__ import annotations
+from collections import namedtuple
+from enum import IntEnum
+
+# this project
+from bowling.types import Orderable
+#+end_src
+** The Nil Node and Colors
+I'm going to set up an Enum for the Colors and instead of using an actual Node object I'll use a namedtuple to (hopefully) make it simpler.
+
+*** Color
+#+begin_src python :noweb-ref color
+class Color(IntEnum):
+    """red or black"""
+    RED = 1
+    BLACK = 2
+#+end_src
+
+#+begin_src python :results none
+from bowling.data_structures.red_black_tree.tree import Color
+#+end_src
+
+#+begin_src python :results output :exports both
+print(Color.RED)
+print(Color.BLACK)
+
+red = Color.RED
+print(red is Color.RED)
+print(red == Color.RED)
+print(red == 1)
+#+end_src
+
+#+RESULTS:
+: Color.RED
+: Color.BLACK
+: True
+: True
+: False
+
+*** The Nil Node
+#+begin_src python :noweb-ref the-nil
+NIL_KEY = "NIL"
+NIL = namedtuple("NIL", ["key", "color"],
+                 defaults=[NIL_KEY, Color.BLACK])()
+#+end_src
+
+**Warning**
+
+Since I keep re-loading the module but jupyter keeps the same session the ~Color~ enum object changes, breaking the equality checks. For this to work the Color has to be imported right before it's used (or not in an asynchronous environment like this).
+
+#+begin_src python :results output :exports both
+from bowling.data_structures.red_black_tree.tree import Color, NIL
+
+print(NIL)
+print(NIL.color == Color.BLACK)
+#+end_src
+
+#+RESULTS:
+: NIL(key=None, color=<Color.BLACK: 2>, parent=None, left=None, right=None)
+: True
+
+* The Node
+The Node for a red-black tree is the same as the {{% doc %}}binary-search-tree-node{{% /doc %}} except that it has the ~color~ attribute. But, since I'm doing integrity checks in the object that also means that the checks have to be updated to take into consideration the Red-Black Tree Properties.
+
+#+begin_src python :noweb-ref the-node
+class Node:
+    """A Node in a Binary Search Tree
+
+    Args:
+     key: item to compare nodes
+     color: RED or BLACK
+     parent: parent of this node
+     left: left child
+     right: right child
+    """
+    def __init__(self, key: Orderable, color: Color,
+                 parent: Node=NIL,
+                 left: Node=NIL, right: Node=NIL) -> None:
+        self.key = key
+        self.color = color
+        self._parent = None
+        self.parent = parent
+        self._left = None
+        self.left = left
+        self._right = None
+        self.right = right
+        return
+#+end_src
+
+#+begin_src python :results none
+from bowling.data_structures.red_black_tree.tree import Node
+
+node = Node(key=1, color=Color.RED)
+expect(node.color).to(be(Color.RED))
+#+end_src
+
+** Properties
+*** Parent
+#+begin_src python :noweb-ref parent
+@property
+def parent(self) -> Node:
+    """The parent of this node"""
+    return self._parent
+
+@parent.setter
+def parent(self, parent_: Node) -> None:
+    """Sets the parent and updates the parent
+
+    Warning:
+     this will clobber the parent's child if there's a node where this should
+    be
+
+    Args:
+     parent: to add to self
+
+    Raises:
+     AssertionError if parent and self have same key
+    """
+    if parent_.key == NIL_KEY:
+        self._parent = parent_
+        return
+
+    if self == parent_:
+        raise AssertionError(f"Self ({self}) cannot equal parent ({parent_})")
+    
+    # since the left and right assignments update the parent
+    # we need a hack to get around the setters or you end up
+    # with an infinite loop - we set left, they set parent, we set left,...
+    if self < parent_:
+        parent_._left = self
+    else:
+        parent_._right = self
+
+    self._parent = parent_        
+    return
+#+end_src
+*** Left
+#+begin_src python :noweb-ref left
+@property
+def left(self) -> Node:
+    """The left child"""
+    return self._left
+
+@left.setter
+def left(self, new_left: Node) -> None:
+    """Sets the left and its parent
+
+    Raises:
+     AssertionError if left isn't less than self
+
+    Args:
+     new_left: a node to be the left child or None
+    """
+    if new_left.key == NIL_KEY:
+        self._left = new_left
+        return
+        
+    assert new_left < self, f"Left ({new_left} not < self {self})"
+    new_left.parent = self
+    self._left = new_left
+    return
+#+end_src
+*** Right
+#+begin_src python :noweb-ref right
+@property
+def right(self) -> Node:
+    """The right child"""
+    return self._right
+
+@right.setter
+def right(self, new_right: Node) -> None:
+    """Sets the right and its parent
+
+    Raises:
+     AssertionError if right isn't greater than self
+
+    Args:
+     new_right: a node to be the right child or None
+    """
+    if new_right is NIL:
+        self._right = new_right
+        return
+        
+    assert new_right > self, f"right ({new_right} not > self ({self})"
+    new_right.parent = self
+    self._right = new_right
+    return
+#+end_src
+** Comparisons
+These are convenience methods to make it so that you can compare the node-objects without referring to the key (see the [[https://docs.python.org/3/reference/datamodel.html#object.__lt__][python Data Model documentation]]). In reading the documentation I thought that you had to implement everything, but after implementing /less than/ and /less than or equal to/ the /greater than/ and /greater than or equal to/ comparisons started to work. I guess if you don't implement them they just take the negative of the less than cases.
+
+*** Equal
+#+begin_src python :noweb-ref equal
+def __eq__(self, other: Node) -> bool:
+    """Check if the other node has an equal key
+        
+    """
+    return hasattr(other, "key") and self.key == other.key
+#+end_src
+
+*** Less Than
+#+begin_src python :noweb-ref less-than
+def __lt__(self, other: Node) -> bool:
+    """See if this key is less than the other's
+     
+    Raises:
+     AttributeError: the other thing doesn't have a key
+
+    Returns:
+     self < other
+    """
+    if not hasattr(other, "key"):
+        raise AttributeError(f"'<' not supported between '{type(self)}' "
+                        "and '{type(other)}'")
+    return self.key < other.key
+#+end_src
+*** Less Than or Equal
+#+begin_src python :noweb-ref less-than-or-equal
+def __le__(self, other: Node) -> bool:
+    """See if this key is less than or equal to other's
+
+    Raises:
+     AttributeError: other doesn't have key
+
+    Returns:
+     self <= other
+    """
+    if not hasattr(other, "key"):
+        raise AttributeError(f"'<' not supported between '{type(self)}' "
+                        "and '{type(other)}'")
+    return self.key <= other.key
+#+end_src
+** Check Nodes
+This is a convenience method to check if a node and its sub-trees maintain the Binary Search Tree Property. It calls the children too so that the whole tree can be checked by calling this on the root. Now that there's checks when the attributes are set this isn't quite as necessary. The only time you might need it is if the attributes are set directly instead of using the setter.
+
+**Note:** Although the /Binary Search Tree Property/ allows duplicate keys, once you start doing things with the tree like inserting and deleting nodes it causes problems. Also, it's not likely that the keys are what you would be most interested in when using a tree, it would be the data associated with the node, so what would it mean to have two different items associated with the same key? There are probably uses for this, but to make it simpler I'm going to treat the keys more like dictionary keys and say that it's a mistake to have duplicates.
+
+#+begin_src python :noweb-ref  check-rep
+def check_node(self) -> None:
+    """Checks that the Binary Search Tree Property holds
+
+    Raises:
+     AssertionError: Binary Search Tree Property violated or duplicates exist
+    """
+    # red-black property 1: every node is either red or black
+    assert self.color in (Color.RED, Color.BLACK), f"Invalid Color: {self.color}"
+
+    # red-black property 4: if a node is red, both children are black
+    if self.color == Color.RED:
+        assert Color.RED not in (self.left.color, self.right.color)
+
+    if self.left is not NIL:
+        assert self.left < self, f"Left: {self.left} not < Self: {self}"
+        self.left.check_node()
+
+    if self.right is not NIL:
+        assert self.right > self, f"Right: {self.right} not > Self: {self}"
+        self.right.check_node()
+    return
+#+end_src
+** String Output
+This is to make it a little easier to print.
+
+#+begin_src python :noweb-ref string-output
+def __str__(self) -> str:
+    """The key as a string"""
+    return str(self.key)
+#+end_src
+** Testing
+I'll have to break this up later.
+*** Imports
+#+begin_src python :results none
+# pypi
+from expects import (
+    be_above,
+    be_above_or_equal,
+    be_below,
+    be_below_or_equal,
+    be_none,
+    equal,
+    expect,
+    raise_error
+)
+
+# software under test
+from bowling.data_structures.red_black_tree.tree import Node
+from bowling.data_structures.red_black_tree import tree
+#+end_src
+
+*** One Node
+#+begin_src python :results none
+parent = Node(key=10, color=Color.RED)
+parent.check_node()
+
+expect(parent.key).to(equal(10))
+expect(parent.color).to(be(Color.RED))
+expect(parent.left).to(be(tree.NIL))
+expect(parent.right).to(be(tree.NIL))
+expect(parent.parent).to(be(tree.NIL))
+#+end_src
+
+*** Check the Comparisons
+#+begin_src python :results none
+uncle = Node(key=9, color=tree.Color.BLACK)
+
+expect(uncle).to(equal(Node(key=9, color=tree.Color.RED)))
+expect(uncle).to(be_below(parent))
+expect(uncle).to(be_below_or_equal(parent))
+
+brother = Node(key=20, color=tree.Color.BLACK)
+
+expect(brother).to(be_above(parent))
+expect(brother).to(be_above_or_equal(parent))
+
+# I'm still deciding who's responsible for checking if a node exists
+# for now I'll copy what happens when None is compared to ints
+expect(brother).not_to(equal(uncle.parent))
+
+expect(lambda: brother < uncle.parent).to(raise_error(TypeError))
+expect(lambda: brother.parent > uncle).to(raise_error(TypeError))
+#+end_src
+*** Check the Two-Way Updates.
+**** Set the Parent
+In the constructor.
+#+begin_src python :results none
+parent = Node(key=10, color=Color.BLACK)
+
+left = Node(5, parent=parent, color=Color.RED)
+expect(left.parent).to(equal(parent))
+expect(parent.left).to(equal(left))
+
+right = Node(15, parent=parent, color=Color.BLACK)
+expect(right.parent).to(equal(parent))
+expect(parent.right).to(equal(right))
+
+def bad_parent():
+    left = Node(key=10, parent=Node(10, color=Color.BLACK), color=Color.BLACK)
+    return
+
+expect(bad_parent).to(raise_error(AssertionError))
+#+end_src
+
+#+begin_src python :results none
+parent = Node(key=10, color=Color.BLACK)
+left = Node(5, color=Color.RED)
+left.parent = parent
+
+expect(left.parent).to(equal(parent))
+expect(parent.left).to(equal(left))
+
+right = Node(15, color=Color.BLACK)
+right.parent = parent
+expect(right.parent).to(equal(parent))
+expect(parent.right).to(equal(right))
+
+def bad_parent():
+    parent = Node(key=10, color=Color.RED)
+    left = Node(key=10, color=Color.BLACK)
+    left.parent = parent
+    return
+
+expect(bad_parent).to(raise_error(AssertionError))
+#+end_src
+**** Set The Left Child
+#+begin_src python :results none
+left = Node(5, Color.RED)
+parent = Node(key=10, left=left, color=Color.BLACK)
+
+expect(parent.left).to(equal(left))
+expect(left.parent).to(equal(parent))
+
+parent = Node(key=10, color=Color.RED)
+parent.left = left
+expect(parent.left).to(equal(left))
+expect(left.parent).to(equal(parent))
+#+end_src
+**** Set The Right Child
+#+begin_src python :results none
+right = Node(15, Color.RED)
+parent = Node(key=10, right=right, color=Color.BLACK)
+
+expect(parent.right).to(equal(right))
+expect(right.parent).to(equal(parent))
+
+parent = Node(key=10, color=Color.RED)
+parent.right = right
+expect(parent.right).to(equal(right))
+expect(right.parent).to(equal(parent))
+#+end_src
+*** The Check Node Method
+#+begin_src python :results none
+uncle = Node(key=9, color=Color.RED)
+parent = Node(key=10, color=Color.BLACK)
+parent.check_node()
+
+# parent is root
+expect(parent.check_node).not_to(raise_error)
+
+# parent is right child
+parent.parent = uncle
+expect(parent.check_node).not_to(raise_error)
+
+# parent is left child
+parent.parent = brother
+expect(parent.check_node).not_to(raise_error)
+
+def bad_check():
+    parent.check_node()
+    return
+
+# left node is greater than the parent
+lefty = Node(15, color=Color.RED)
+def bad(): 
+    parent.left = lefty
+expect(bad).to(raise_error(AssertionError))
+parent._left = lefty
+expect(bad_check).to(raise_error(AssertionError))
+
+# left node is less than the parent
+parent.left = tree.NIL
+parent.right = lefty
+expect(parent.check_node).not_to(raise_error(AssertionError))
+
+# right node is less than the parent
+righty = Node(key=2, color=Color.BLACK)
+def bad():
+    parent.right = righty
+    return
+expect(bad).to(raise_error(AssertionError))
+parent._right = righty
+expect(bad_check).to(raise_error(AssertionError))
+
+# right and left are okay
+parent.left = righty
+parent.right = lefty
+expect(parent.check_node).not_to(raise_error)
+#+end_src
+
+#+begin_src python :results none
+parent = Node(key=10, color=Color.BLACK)
+parent.left = Node(key=2, color=Color.RED)
+# children of parent's children
+def bad():
+    parent.left.left = Node(key=100, color=Color.BLACK)
+expect(bad).to(raise_error(AssertionError))
+
+parent.left.left = Node(key=0, color=Color.BLACK)
+expect(parent.check_node).not_to(raise_error)
+#+end_src
+
+#+begin_src python :results none
+lefty = Node(15, color=Color.RED)
+def bad():
+    lefty.right = Node(key=0, color=Color.BLACK)
+expect(bad).to(raise_error(AssertionError))
+
+# disallow duplicates
+parent = Node(10, color=Color.RED)
+def bad():
+    parent.left = Node(10, color=Color.BLACK)
+expect(bad).to(raise_error(AssertionError))
+
+parent.key = 11
+expect(parent.check_node).not_to(raise_error(AssertionError))
+
+def bad():
+    parent.right = Node(11, color=Color.BLACK)
+expect(bad).to(raise_error(AssertionError))
+
+parent.right = Node(12, color=Color.BLACK)
+expect(parent.check_node).not_to(raise_error(AssertionError))
+
+expect(str(parent)).to(equal(str(parent.key)))
+#+end_src
+
+*** Check the Red-Black Properties
+#+begin_src python :results none
+node = Node(5, color=3)
+
+def bad():
+    node.check_node()
+
+expect(bad).to(raise_error(AssertionError))
+
+left = Node(5, color=Color.RED)
+node = Node(10, color=Color.RED, left=left)
+
+def bad():
+    node.check_node()
+expect(bad).to(raise_error(AssertionError))
+#+end_src
+
+The {{% lancelot "next post" %}}binary-search-tree-in-order-traversal{{% /lancelot %}} will be about traversing the tree in the order of the nodes.
+* End
