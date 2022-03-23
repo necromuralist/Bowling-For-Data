@@ -1,21 +1,21 @@
 # python
 from __future__ import annotations
 from collections import namedtuple
-from enum import IntEnum
+from enum import Enum
 
 # this project
 from bowling.types import Orderable
 
 
-class Color(IntEnum):
+class Color(Enum):
     """red or black"""
     RED = 1
     BLACK = 2
 
 
 NIL_KEY = "NIL"
-NIL = namedtuple("NIL", ["key", "color"],
-                 defaults=[NIL_KEY, Color.BLACK])()
+NIL = namedtuple("NIL", ["key", "color", "parent", "left", "right"],
+                 defaults=[NIL_KEY, Color.BLACK, None, None, None])()
 
 
 class Node:
@@ -28,7 +28,7 @@ class Node:
      left: left child
      right: right child
     """
-    def __init__(self, key: Orderable, color: Color,
+    def __init__(self, key: Orderable, color: Color=None,
                  parent: Node=NIL,
                  left: Node=NIL, right: Node=NIL) -> None:
         self.key = key
@@ -60,7 +60,7 @@ class Node:
         Raises:
          AssertionError if parent and self have same key
         """
-        if parent_.key == NIL_KEY:
+        if parent_ is NIL:
             self._parent = parent_
             return
     
@@ -93,7 +93,7 @@ class Node:
         Args:
          new_left: a node to be the left child or None
         """
-        if new_left.key == NIL_KEY:
+        if new_left is NIL:
             self._left = new_left
             return
             
@@ -143,7 +143,7 @@ class Node:
         """
         if not hasattr(other, "key"):
             raise AttributeError(f"'<' not supported between '{type(self)}' "
-                            "and '{type(other)}'")
+                                 f"and '({other}): {type(other)}'")
         return self.key < other.key
 
     def __le__(self, other: Node) -> bool:
@@ -170,8 +170,12 @@ class Node:
         assert self.color in (Color.RED, Color.BLACK), f"Invalid Color: {self.color}"
     
         # red-black property 4: if a node is red, both children are black
-        if self.color == Color.RED:
-            assert Color.RED not in (self.left.color, self.right.color)
+        if self.color is Color.RED:
+            assert (self.left.color is Color.BLACK and
+                    self.right.color is Color.BLACK),\
+                (f"Parent: {self.color} Left: {self.left.color} "
+                 f"Right: {self.right.color}. "
+                 "Both Children of a Red parent must be Black")
     
         if self.left is not NIL:
             assert self.left < self, f"Left: {self.left} not < Self: {self}"
