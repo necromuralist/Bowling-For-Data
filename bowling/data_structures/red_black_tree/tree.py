@@ -12,10 +12,12 @@ class Color(Enum):
     RED = 1
     BLACK = 2
 
-
 NIL_KEY = "NIL"
-NIL = namedtuple("NIL", ["key", "color", "parent", "left", "right"],
-                 defaults=[NIL_KEY, Color.BLACK, None, None, None])()
+NIL = namedtuple(
+    "NIL", "key color parent left right is_red is_black",
+    defaults=[NIL_KEY, Color.BLACK, None, None, None, False, True])()
+LEAF = NIL
+ROOT_PARENT = NIL
 
 
 class Node:
@@ -44,6 +46,8 @@ class Node:
     @property
     def parent(self) -> Node:
         """The parent of this node"""
+        if self._parent is None:
+            self._parent = NIL
         return self._parent
     
     @parent.setter
@@ -81,6 +85,8 @@ class Node:
     @property
     def left(self) -> Node:
         """The left child"""
+        if self._left is None:
+            self._left = NIL
         return self._left
     
     @left.setter
@@ -105,6 +111,8 @@ class Node:
     @property
     def right(self) -> Node:
         """The right child"""
+        if self._right is None:
+            self._right = NIL
         return self._right
     
     @right.setter
@@ -160,7 +168,32 @@ class Node:
                             "and '{type(other)}'")
         return self.key <= other.key
 
-    def check_node(self) -> None:
+    @property
+    def is_left(self) -> bool:
+        """True if this node is a left child"""
+        return self is self.parent.left
+
+    @property
+    def is_right(self) -> bool:
+        """True if this node is a right child"""
+        return self.parent.right is self
+
+    @property
+    def is_red(self) -> bool:
+        """True if the node is colored red"""
+        return self.color is Color.RED
+
+    @property
+    def is_black(self) -> bool:
+        """True if the node is colored black"""
+        return self.color is Color.BLACK
+
+    @property
+    def is_root(self) -> bool:
+        """True if the node is the root"""
+        return self.parent is NIL
+
+    def check_state(self) -> None:
         """Checks that the Binary Search Tree Property holds
     
         Raises:
@@ -179,13 +212,24 @@ class Node:
     
         if self.left is not NIL:
             assert self.left < self, f"Left: {self.left} not < Self: {self}"
-            self.left.check_node()
+            self.left.check_state()
     
         if self.right is not NIL:
             assert self.right > self, f"Right: {self.right} not > Self: {self}"
-            self.right.check_node()
+            self.right.check_state()
         return
 
     def __str__(self) -> str:
         """The key as a string"""
         return str(self.key)
+
+
+class RedBlackTree:
+    """The Holder of the Red-Black Tree
+
+    Args:
+     root: the root node of the tree
+    """
+    def __init__(self, root: Node=NIL):
+        self.root = root
+        return
