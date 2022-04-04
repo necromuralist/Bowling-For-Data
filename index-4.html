@@ -70,7 +70,865 @@ bg-light
 
     
 <div class="postindex">
-    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/sources/" class="u-url">Sources</a></h1>
+    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-node/" class="u-url">Binary Search Tree Node</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/binary-search-tree-node/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-11T14:19:09-08:00" itemprop="datePublished" title="2022-03-11 14:19">2022-03-11 14:19</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="posts/binary-search-tree-node/#org3774e44">The Abstract</a></li>
+<li>
+<a href="posts/binary-search-tree-node/#org9f0ad61">The Implementation</a>
+<ul>
+<li>
+<a href="posts/binary-search-tree-node/#orgc665708">Properties</a>
+<ul>
+<li><a href="posts/binary-search-tree-node/#orgbcce763">Parent</a></li>
+<li><a href="posts/binary-search-tree-node/#org5db5cf1">Left</a></li>
+<li><a href="posts/binary-search-tree-node/#org48338e0">Right</a></li>
+</ul>
+</li>
+<li>
+<a href="posts/binary-search-tree-node/#org3dd5a12">Comparisons</a>
+<ul>
+<li><a href="posts/binary-search-tree-node/#org1abf420">Equal</a></li>
+<li><a href="posts/binary-search-tree-node/#org881716b">Less Than</a></li>
+<li><a href="posts/binary-search-tree-node/#org2d0c11b">Less Than or Equal</a></li>
+</ul>
+</li>
+<li><a href="posts/binary-search-tree-node/#org0481e50">Check Nodes</a></li>
+<li><a href="posts/binary-search-tree-node/#orga5110ac">String Output</a></li>
+<li>
+<a href="posts/binary-search-tree-node/#org6731634">Testing</a>
+<ul>
+<li><a href="posts/binary-search-tree-node/#org47b30f6">Imports</a></li>
+<li><a href="posts/binary-search-tree-node/#orgd1e00fa">One Node</a></li>
+<li><a href="posts/binary-search-tree-node/#org5c587bc">Check the Comparisons</a></li>
+<li><a href="posts/binary-search-tree-node/#org82b91cf">Check the Two-Way Updates.</a></li>
+<li><a href="posts/binary-search-tree-node/#orgd9f6ebe">The Check Node Method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="posts/binary-search-tree-node/#org0125680">Sources</a></li>
+</ul>
+</div>
+</div>
+<p>
+This is the next post in a series on Binary Search Trees that start with <a href="posts/binary-search-trees/">this post</a>.
+</p>
+
+<div id="outline-container-org3774e44" class="outline-2">
+<h2 id="org3774e44">The Abstract</h2>
+<div class="outline-text-2" id="text-org3774e44">
+<p>
+As mentioned in the <a href="posts/binary-search-trees/">first post</a>, the Binary Search Tree is a linked structure made up of Nodes that look more or less like this:
+</p>
+
+<p>
+<img src="posts/binary-search-tree-node/node.png" alt="nil"></p>
+
+<p>
+And which maintain the Binary Search Tree Property. I'm going to forego the data field and add a couple of methods to make it more convenient for me, but most of the way this will work will be to pass nodes (particularly the root) to functions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9f0ad61" class="outline-2">
+<h2 id="org9f0ad61">The Implementation</h2>
+<div class="outline-text-2" id="text-org9f0ad61">
+<p>
+Since I'm using pypy 3.7 there's a problem with the declaration of an attribute of the Node class being a Node object (it isn't defined yet) but according to <a href="https://stackoverflow.com/questions/55320236/does-python-evaluate-type-hinting-of-a-forward-reference">this post on stackoverflow</a> we can import <code>annotations</code> from the future to fix it.
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.types</span> <span class="kn">import</span> <span class="n">Orderable</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+    <span class="sd">"""A Node in a Binary Search Tree</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     key: item to compare nodes</span>
+<span class="sd">     parent: parent of this node</span>
+<span class="sd">     left: left child</span>
+<span class="sd">     right: right child</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Orderable</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+		 <span class="n">left</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+	<span class="k">return</span>
+</pre></div>
+</div>
+<div id="outline-container-orgc665708" class="outline-3">
+<h3 id="orgc665708">Properties</h3>
+<div class="outline-text-3" id="text-orgc665708">
+</div>
+<div id="outline-container-orgbcce763" class="outline-4">
+<h4 id="orgbcce763">Parent</h4>
+<div class="outline-text-4" id="text-orgbcce763">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""The parent of this node"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+
+<span class="nd">@parent</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Sets the parent and updates the parent</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">     this will clobber the parent's child if there's a node where this should</span>
+<span class="sd">    be</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     parent: to add to self</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError if parent and self have same key</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">parent_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent_</span>
+	<span class="k">return</span>
+
+    <span class="k">if</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">parent_</span><span class="p">:</span>
+	<span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Self (</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">) cannot equal parent (</span><span class="si">{</span><span class="n">parent_</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+
+    <span class="c1"># since the left and right assignments update the parent</span>
+    <span class="c1"># we need a hack to get around the setters or you end up</span>
+    <span class="c1"># with an infinite loop - we set left, they set parent, we set left,...</span>
+    <span class="k">if</span> <span class="bp">self</span> <span class="o">&lt;</span> <span class="n">parent_</span><span class="p">:</span>
+	<span class="n">parent_</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="k">else</span><span class="p">:</span>
+	<span class="n">parent_</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="bp">self</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent_</span>        
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org5db5cf1" class="outline-4">
+<h4 id="org5db5cf1">Left</h4>
+<div class="outline-text-4" id="text-org5db5cf1">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""The left child"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span>
+
+<span class="nd">@left</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_left</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Sets the left and its parent</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError if left isn't less than self</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     new_left: a node to be the left child or None</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">new_left</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">new_left</span>
+	<span class="k">return</span>
+
+    <span class="k">assert</span> <span class="n">new_left</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left (</span><span class="si">{</span><span class="n">new_left</span><span class="si">}</span><span class="s2"> not &lt; self </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="n">new_left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">new_left</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org48338e0" class="outline-4">
+<h4 id="org48338e0">Right</h4>
+<div class="outline-text-4" id="text-org48338e0">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">right</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+    <span class="sd">"""The right child"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right</span>
+
+<span class="nd">@right</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">right</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_right</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Sets the right and its parent</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError if right isn't greater than self</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     new_right: a node to be the right child or None</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">new_right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">new_right</span>
+	<span class="k">return</span>
+
+    <span class="k">assert</span> <span class="n">new_right</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"right (</span><span class="si">{</span><span class="n">new_right</span><span class="si">}</span><span class="s2"> not &gt; self (</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="n">new_right</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">new_right</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org3dd5a12" class="outline-3">
+<h3 id="org3dd5a12">Comparisons</h3>
+<div class="outline-text-3" id="text-org3dd5a12">
+<p>
+These are convenience methods to make it so that you can compare the node-objects without referring to the key (see the <a href="https://docs.python.org/3/reference/datamodel.html#object.__lt__">python Data Model documentation</a>). In reading the documentation I thought that you had to implement everything, but after implementing <i>less than</i> and <i>less than or equal to</i> the <i>greater than</i> and <i>greater than or equal to</i> comparisons started to work. I guess if you don't implement them they just take the negative of the less than cases.
+</p>
+</div>
+
+<div id="outline-container-org1abf420" class="outline-4">
+<h4 id="org1abf420">Equal</h4>
+<div class="outline-text-4" id="text-org1abf420">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""Check if the other node has an equal key</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org881716b" class="outline-4">
+<h4 id="org881716b">Less Than</h4>
+<div class="outline-text-4" id="text-org881716b">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""See if this key is less than the other's</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     TypeError: the other thing doesn't have a key</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+	<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'&lt;' not supported between '</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">' "</span>
+			<span class="s2">"and '{type(other)}'"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org2d0c11b" class="outline-4">
+<h4 id="org2d0c11b">Less Than or Equal</h4>
+<div class="outline-text-4" id="text-org2d0c11b">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""See if this key is less than or equal to other's"""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+	<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'&lt;' not supported between '</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">' "</span>
+			<span class="s2">"and '{type(other)}'"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org0481e50" class="outline-3">
+<h3 id="org0481e50">Check Nodes</h3>
+<div class="outline-text-3" id="text-org0481e50">
+<p>
+This is a convenience method to check if a node and its sub-trees maintain the Binary Search Tree Property. It calls the children too so that the whole tree can be checked by calling this on the root. Now that there's checks when the attributes are set this isn't quite as necessary. The only time you might need it is if the attributes are set directly instead of using the setter.
+</p>
+
+<p>
+<b><b>Note:</b></b> Although the <i>Binary Search Tree Property</i> allows duplicate keys, once you start doing things with the tree like inserting and deleting nodes it causes problems. Also, it's not likely that the keys are what you would be most interested in when using a tree, it would be the data associated with the node, so what would it mean to have two different items associated with the same key? There are probably uses for this, but to make it simpler I'm going to treat the keys more like dictionary keys and say that it's a mistake to have duplicates.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_node</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Checks that the Binary Search Tree Property holds</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">     AssertionError: Binary Search Tree Property violated or duplicates exist</span>
+<span class="sd">    """</span>
+    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Node</span><span class="p">,</span>\
+	<span class="sa">f</span><span class="s2">"self.parent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2">, type=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2"> not &lt; Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2"> not &gt; Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orga5110ac" class="outline-3">
+<h3 id="orga5110ac">String Output</h3>
+<div class="outline-text-3" id="text-orga5110ac">
+<p>
+This is to make it a little easier to print.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">"""The key as a string"""</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org6731634" class="outline-3">
+<h3 id="org6731634">Testing</h3>
+<div class="outline-text-3" id="text-org6731634">
+<p>
+I'll have to break this up later.
+</p>
+</div>
+<div id="outline-container-org47b30f6" class="outline-4">
+<h4 id="org47b30f6">Imports</h4>
+<div class="outline-text-4" id="text-org47b30f6">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">be_above</span><span class="p">,</span>
+    <span class="n">be_above_or_equal</span><span class="p">,</span>
+    <span class="n">be_below</span><span class="p">,</span>
+    <span class="n">be_below_or_equal</span><span class="p">,</span>
+    <span class="n">be_none</span><span class="p">,</span>
+    <span class="n">equal</span><span class="p">,</span>
+    <span class="n">expect</span><span class="p">,</span>
+    <span class="n">raise_error</span>
+<span class="p">)</span>
+
+<span class="c1"># software under test</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.node</span> <span class="kn">import</span> <span class="n">Node</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-orgd1e00fa" class="outline-4">
+<h4 id="orgd1e00fa">One Node</h4>
+<div class="outline-text-4" id="text-orgd1e00fa">
+<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org5c587bc" class="outline-4">
+<h4 id="org5c587bc">Check the Comparisons</h4>
+<div class="outline-text-4" id="text-org5c587bc">
+<div class="highlight"><pre><span></span><span class="n">uncle</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below_or_equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">brother</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above_or_equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="c1"># I'm still deciding who's responsible for checking if a node exists</span>
+<span class="c1"># for now I'll copy what happens when None is compared to ints</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">brother</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">uncle</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">brother</span> <span class="o">&lt;</span> <span class="n">uncle</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">brother</span><span class="o">.</span><span class="n">parent</span> <span class="o">&gt;</span> <span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org82b91cf" class="outline-4">
+<h4 id="org82b91cf">Check the Two-Way Updates.</h4>
+<div class="outline-text-4" id="text-org82b91cf">
+</div>
+<ul class="org-ul">
+<li>
+<a id="org8f497b0"></a>Set the Parent<br><div class="outline-text-5" id="text-org8f497b0">
+<p>
+In the constructor.
+</p>
+<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+
+<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">bad_parent</span><span class="p">():</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+    <span class="k">return</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+</pre></div>
+
+<p>
+On the object
+</p>
+<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+
+<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">right</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">bad_parent</span><span class="p">():</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="k">return</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li>
+<a id="org1afd156"></a>Set The Left Child<br><div class="outline-text-5" id="text-org1afd156">
+<div class="highlight"><pre><span></span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">left</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li>
+<a id="org352132f"></a>Set The Right Child<br><div class="outline-text-5" id="text-org352132f">
+<div class="highlight"><pre><span></span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">right</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div id="outline-container-orgd9f6ebe" class="outline-4">
+<h4 id="orgd9f6ebe">The Check Node Method</h4>
+<div class="outline-text-4" id="text-orgd9f6ebe">
+<div class="highlight"><pre><span></span><span class="n">uncle</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+
+<span class="c1"># parent is root</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="c1"># parent is right child</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">uncle</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="c1"># parent is left child</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">brother</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">bad_check</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+    <span class="k">return</span>
+
+<span class="c1"># left node is greater than the parent</span>
+<span class="n">lefty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span> 
+    <span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="c1"># left node is less than the parent</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="c1"># right node is less than the parent</span>
+<span class="n">righty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">righty</span>
+    <span class="k">return</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">righty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="c1"># right and left are okay</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">righty</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># children of parent's children</span>
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_node</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">lefty</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="c1"># disallow duplicates</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">parent</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">bad_check</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)))</span>
+</pre></div>
+
+<p>
+The <a href="posts/binary-search-tree-in-order-traversal/">next post</a> will be about traversing the tree in the order of the nodes.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0125680" class="outline-2">
+<h2 id="org0125680">Sources</h2>
+<div class="outline-text-2" id="text-org0125680">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-in-order-traversal/" class="u-url">Binary Search Tree: In-Order Traversal</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/binary-search-tree-in-order-traversal/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-10T15:21:25-08:00" itemprop="datePublished" title="2022-03-10 15:21">2022-03-10 15:21</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li>
+<a href="posts/binary-search-tree-in-order-traversal/#org2891983">Traversing a Tree</a>
+<ul>
+<li><a href="posts/binary-search-tree-in-order-traversal/#orga344dc0">The Algorithm</a></li>
+<li>
+<a href="posts/binary-search-tree-in-order-traversal/#orga299bbe">Implementing It</a>
+<ul>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org3995798">The Function</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org8b17634">A First Sample</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org311cb33">A Little Fancier</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="posts/binary-search-tree-in-order-traversal/#orgd964d56">End</a>
+<ul>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org0d4af12">The Posts</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/#org9a88727">Sources</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+This is the next post in a series on Binary Search Trees that start with <a href="posts/binary-search-trees/">this post</a>.
+</p>
+<div id="outline-container-org2891983" class="outline-2">
+<h2 id="org2891983">Traversing a Tree</h2>
+<div class="outline-text-2" id="text-org2891983">
+<p>
+There are three common ways to traverse a Binary Search Tree which can be characterized by when the root of the tree is added:
+</p>
+
+<ul class="org-ul">
+<li>Pre-Order Tree Walk
+<ol class="org-ol">
+<li>root</li>
+<li>sub-trees</li>
+</ol>
+</li>
+<li>In-Order Tree Walk
+<ol class="org-ol">
+<li>left sub-tree</li>
+<li>root</li>
+<li>right sub-tree</li>
+</ol>
+</li>
+<li>Post-Order Tree Walk
+<ol class="org-ol">
+<li>sub-trees</li>
+<li>root</li>
+</ol>
+</li>
+</ul>
+<p>
+We're going to look at how to get the nodes of the tree in sorted (non-decreasing) order, which is a characteristic of the In-Order Tree Walk.
+</p>
+</div>
+<div id="outline-container-orga344dc0" class="outline-3">
+<h3 id="orga344dc0">The Algorithm</h3>
+<div class="outline-text-3" id="text-orga344dc0">
+<p>
+<a href="posts/clrs/">CLRS</a> gives the In-Order Tree Walk in the context of printing the nodes of the tree in order.
+</p>
+
+<pre id="in-order-walk" style="display:hidden;">
+\begin{algorithm}
+\caption{In-Order Tree Walk}
+\begin{algorithmic}
+\INPUT Node \textit{x}
+
+\PROCEDURE{InorderTreeWalk}{\textit{x}}
+\IF {\textit{x} $\neq$ \textsc{Nil}}
+
+ \STATE \textsc{InorderTreeWalk}(\textit{x.left})
+ \STATE \textsc{Print}(\textit{x.key})
+ \STATE \textsc{InorderTreeWalk}(\textit{x.right})
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orga299bbe" class="outline-3">
+<h3 id="orga299bbe">Implementing It</h3>
+<div class="outline-text-3" id="text-orga299bbe">
+</div>
+<div id="outline-container-org3995798" class="outline-4">
+<h4 id="org3995798">The Function</h4>
+<div class="outline-text-4" id="text-org3995798">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Print the nodes in order</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     root: the root node</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="n">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">" "</span><span class="p">)</span>
+	<span class="n">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org8b17634" class="outline-4">
+<h4 id="org8b17634">A First Sample</h4>
+<div class="outline-text-4" id="text-org8b17634">
+<p>
+Let's start with a simple example.
+</p>
+
+<p>
+<img src="posts/binary-search-tree-in-order-traversal/first_tree.png" alt="nil"></p>
+
+<div class="highlight"><pre><span></span><span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+<span class="n">in_order_traversal</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+1 2 3 
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org311cb33" class="outline-4">
+<h4 id="org311cb33">A Little Fancier</h4>
+<div class="outline-text-4" id="text-org311cb33">
+<p>
+<img src="posts/binary-search-tree-in-order-traversal/second_tree.png" alt="nil"></p>
+
+<div class="highlight"><pre><span></span><span class="n">rootier</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">rootier</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">root</span>
+<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">right</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">right</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">right</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+<span class="n">rootier</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+<span class="n">rootier</span><span class="o">.</span><span class="n">check_node</span><span class="p">()</span>
+<span class="n">in_order_traversal</span><span class="p">(</span><span class="n">rootier</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+1 2 3 4 5 6 7 
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd964d56" class="outline-2">
+<h2 id="orgd964d56">End</h2>
+<div class="outline-text-2" id="text-orgd964d56">
+</div>
+<div id="outline-container-org0d4af12" class="outline-3">
+<h3 id="org0d4af12">The Posts</h3>
+<div class="outline-text-3" id="text-org0d4af12">
+<ul class="org-ul">
+<li><a href="posts/binary-search-trees/">Previous Post</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org9a88727" class="outline-3">
+<h3 id="org9a88727">Sources</h3>
+<div class="outline-text-3" id="text-org9a88727">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("in-order-walk"));
+});
+</script>
+</div>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-trees/" class="u-url">Binary Search Trees</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/binary-search-trees/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-08T16:37:49-08:00" itemprop="datePublished" title="2022-03-08 16:37">2022-03-08 16:37</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="posts/binary-search-trees/#orgf621b29">What is a Binary Search Tree?</a></li>
+<li><a href="posts/binary-search-trees/#org4aa2762">The Binary Search Tree Property</a></li>
+<li><a href="posts/binary-search-trees/#org616d526">The Posts</a></li>
+<li><a href="posts/binary-search-trees/#org8cc3deb">Sources</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf621b29" class="outline-2">
+<h2 id="orgf621b29">What is a Binary Search Tree?</h2>
+<div class="outline-text-2" id="text-orgf621b29">
+<p>
+Using <a href="posts/clrs/">CLRS</a>:
+</p>
+
+<ul class="org-ul">
+<li>A Binary Search Tree is a linked structure of Nodes</li>
+<li>Each Node is an object</li>
+<li>Each node has a <i>Key</i> (and <i>Data</i>)</li>
+<li>Each Node has <i>Left</i>, <i>Right</i>, and <i>Parent</i> attributes which point to the Left Child, Right-Child, and Parent of the Node.</li>
+<li>If a child is missing then it is set to <i>Nil</i>.</li>
+<li>The root Node is the only Node with a Parent set to <i>Nil</i>.</li>
+</ul>
+<p>
+When describing Binary Search Trees I'll tend to refer to the Nodes but mean the Nodes' keys (e.g. to say a Node is less than another means its key is less than the other Node's).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4aa2762" class="outline-2">
+<h2 id="org4aa2762">The Binary Search Tree Property</h2>
+<div class="outline-text-2" id="text-org4aa2762">
+<p>
+All the nodes in the left sub-tree of a node are less than or equal to the node and all the nodes in the right sub-tree of the node are greater than or equal to the node.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org616d526" class="outline-2">
+<h2 id="org616d526">The Posts</h2>
+<div class="outline-text-2" id="text-org616d526">
+<ul class="org-ul">
+<li><a href="posts/binary-search-tree-node/">Binary Search Tree Node</a></li>
+<li><a href="posts/binary-search-tree-node-insertion/">Binary Search Tree Node Insertion</a></li>
+<li><a href="posts/binary-search-tree-in-order-traversal/">Binary Search Tree: In-Order Traversal</a></li>
+<li><a href="posts/binary-search-tree-queries/">Binary Search Tree Queries</a></li>
+<li><a href="posts/binary-search-tree-randomized/">Binary Search Tree: Randomized</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org8cc3deb" class="outline-2">
+<h2 id="org8cc3deb">Sources</h2>
+<div class="outline-text-2" id="text-org8cc3deb">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/algorithm-problems/" class="u-url">Algorithm Problems</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/algorithm-problems/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-03T18:33:06-08:00" itemprop="datePublished" title="2022-03-03 18:33">2022-03-03 18:33</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="outline-container-org4faa276" class="outline-2">
+<h2 id="org4faa276">By Problem</h2>
+<div class="outline-text-2" id="text-org4faa276">
+<ul class="org-ul">
+<li><a href="posts/the-sorting-problem/">The Sorting Problem</a></li>
+<li><a href="posts/the-selection-problem/">The Selection Problem</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org306e013" class="outline-2">
+<h2 id="org306e013">By Algorithm Type</h2>
+<div class="outline-text-2" id="text-org306e013">
+<ul class="org-ul">
+<li><a href="posts/more-of-the-output/">More of the Output</a></li>
+<li><a href="posts/iterative-algorithms/">Iterative Algorithms</a></li>
+<li><a href="posts/divide-and-conquer/">Divide and Conquer</a></li>
+<li><a href="posts/decrease-and-conquer/">Decrease And Conquer</a></li>
+</ul>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/sources/" class="u-url">Sources</a></h1>
         <div class="metadata">
             <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
                 The Cloistered Monkey
@@ -81,9 +939,9 @@ bg-light
             </p>
         </div>
     </header><div class="e-content entry-content">
-    <div id="outline-container-org5a79507" class="outline-2">
-<h2 id="org5a79507">Algorithms</h2>
-<div class="outline-text-2" id="text-org5a79507">
+    <div id="outline-container-org0a2b099" class="outline-2">
+<h2 id="org0a2b099">Algorithms</h2>
+<div class="outline-text-2" id="text-org0a2b099">
 <ul class="org-ul">
 <li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
 <li><a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
@@ -103,17 +961,17 @@ bg-light
             </p>
         </div>
     </header><div class="e-content entry-content">
-    <div id="outline-container-org44392ef" class="outline-2">
-<h2 id="org44392ef">Introduction</h2>
-<div class="outline-text-2" id="text-org44392ef">
+    <div id="outline-container-orgfdf5303" class="outline-2">
+<h2 id="orgfdf5303">Introduction</h2>
+<div class="outline-text-2" id="text-orgfdf5303">
 <p>
 This is part of a series about the Partition algorithm that starts with <a href="posts/the-partition/">this post</a>.
 </p>
 </div>
 
-<div id="outline-container-org1e431ae" class="outline-3">
-<h3 id="org1e431ae">Imports and Setup</h3>
-<div class="outline-text-3" id="text-org1e431ae">
+<div id="outline-container-org5467eb6" class="outline-3">
+<h3 id="org5467eb6">Imports and Setup</h3>
+<div class="outline-text-3" id="text-org5467eb6">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="c1"># For python 3.9 and newer you want to import </span>
 <span class="c1"># the typing classes from collections.abc</span>
@@ -147,9 +1005,9 @@ This is part of a series about the Partition algorithm that starts with <a href=
 </div>
 </div>
 </div>
-<div id="outline-container-org0b38268" class="outline-2">
-<h2 id="org0b38268">The Algorithm</h2>
-<div class="outline-text-2" id="text-org0b38268">
+<div id="outline-container-orgeb3feee" class="outline-2">
+<h2 id="orgeb3feee">The Algorithm</h2>
+<div class="outline-text-2" id="text-orgeb3feee">
 <p>
 The randomized partition just swaps the pivot element for a random element, but since the CLRS version uses the last element as the pivot and the Levitin version uses the first element (and Hoare used the middle) I'm going to pass in the pivot and the function explicitly so I don't have to implement different versions of the randomized partition.
 </p>
@@ -180,9 +1038,9 @@ The downside to this approach is that to use it you have to remember where the p
 </p>
 </div>
 </div>
-<div id="outline-container-org8d57af5" class="outline-2">
-<h2 id="org8d57af5">The Implementation</h2>
-<div class="outline-text-2" id="text-org8d57af5">
+<div id="outline-container-orga0636f8" class="outline-2">
+<h2 id="orga0636f8">The Implementation</h2>
+<div class="outline-text-2" id="text-orga0636f8">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">partition_randomized</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">],</span>
 			 <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 			 <span class="n">pivot</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -206,9 +1064,9 @@ The downside to this approach is that to use it you have to remember where the p
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgd2ed0d7" class="outline-2">
-<h2 id="orgd2ed0d7">Some Checks</h2>
-<div class="outline-text-2" id="text-orgd2ed0d7">
+<div id="outline-container-orgecad04c" class="outline-2">
+<h2 id="orgecad04c">Some Checks</h2>
+<div class="outline-text-2" id="text-orgecad04c">
 <div class="highlight"><pre><span></span><span class="n">randomized_clrs</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">randomized_partition</span><span class="p">,</span> <span class="n">pivot</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
 			  <span class="n">partition</span><span class="o">=</span><span class="n">clrs_partition</span><span class="p">)</span>
 <span class="n">randomized_levitin</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">randomized_partition</span><span class="p">,</span> <span class="n">pivot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -236,9 +1094,9 @@ The downside to this approach is that to use it you have to remember where the p
 </div>
 </div>
 
-<div id="outline-container-org9b7b81b" class="outline-2">
-<h2 id="org9b7b81b">Sources</h2>
-<div class="outline-text-2" id="text-org9b7b81b">
+<div id="outline-container-org15f525e" class="outline-2">
+<h2 id="org15f525e">Sources</h2>
+<div class="outline-text-2" id="text-org15f525e">
 <ul class="org-ul">
 <li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
 </ul>
@@ -261,17 +1119,17 @@ window.addEventListener('load', function () {
             </p>
         </div>
     </header><div class="e-content entry-content">
-    <div id="outline-container-org6c78d4b" class="outline-2">
-<h2 id="org6c78d4b">Introduction</h2>
-<div class="outline-text-2" id="text-org6c78d4b">
+    <div id="outline-container-org2622324" class="outline-2">
+<h2 id="org2622324">Introduction</h2>
+<div class="outline-text-2" id="text-org2622324">
 <p>
 This is part of a series of posts about the Partition algorithm that starts with <a href="posts/the-partition/">this post</a>.
 </p>
 </div>
 
-<div id="outline-container-orgf6cc201" class="outline-3">
-<h3 id="orgf6cc201">Imports and Setup</h3>
-<div class="outline-text-3" id="text-orgf6cc201">
+<div id="outline-container-orga541997" class="outline-3">
+<h3 id="orga541997">Imports and Setup</h3>
+<div class="outline-text-3" id="text-orga541997">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
@@ -301,25 +1159,25 @@ This is part of a series of posts about the Partition algorithm that starts with
 </div>
 </div>
 
-<div id="outline-container-orge823b97" class="outline-2">
-<h2 id="orge823b97">Comparing  the Swaps</h2>
-<div class="outline-text-2" id="text-orge823b97">
+<div id="outline-container-orgda8bbf6" class="outline-2">
+<h2 id="orgda8bbf6">Comparing  the Swaps</h2>
+<div class="outline-text-2" id="text-orgda8bbf6">
 <p>
 Both of the versions of partition shown here traverse the collection once, so looking at the number of comparisons doesn't seem so interesting. According to the <a href="https://en.wikipedia.org/wiki/Quicksort">Wikipedia page on Quicksort</a>, the swaps for Hoare's method (which is slightly different from Levitin's) is better for the worst cases, so let's see if this matters for Levitin's and CLRS's swaps.
 </p>
 </div>
 
-<div id="outline-container-org24e8d8f" class="outline-3">
-<h3 id="org24e8d8f">Some Swap Counters</h3>
-<div class="outline-text-3" id="text-org24e8d8f">
+<div id="outline-container-orgb5d7a6d" class="outline-3">
+<h3 id="orgb5d7a6d">Some Swap Counters</h3>
+<div class="outline-text-3" id="text-orgb5d7a6d">
 <p>
 Since we're only calling the partitioners once rather than repeatedly using them to partition sub-lists in the collection we can get rid of the <code>left</code> and <code>right</code> arguments to the functions.
 </p>
 </div>
 
-<div id="outline-container-orgbd79292" class="outline-4">
-<h4 id="orgbd79292">A Levitin Swap Counter</h4>
-<div class="outline-text-4" id="text-orgbd79292">
+<div id="outline-container-org426aa5c" class="outline-4">
+<h4 id="org426aa5c">A Levitin Swap Counter</h4>
+<div class="outline-text-4" id="text-org426aa5c">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">levitin_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">"""Partitions the collection using a variation of Hoare's method</span>
 
@@ -374,9 +1232,9 @@ Since we're only calling the partitioners once rather than repeatedly using them
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org3913979" class="outline-4">
-<h4 id="org3913979">A CLRS Swap Counter</h4>
-<div class="outline-text-4" id="text-org3913979">
+<div id="outline-container-org0352868" class="outline-4">
+<h4 id="org0352868">A CLRS Swap Counter</h4>
+<div class="outline-text-4" id="text-org0352868">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">clrs_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">"""Partitions the collection around the last element</span>
 
@@ -418,9 +1276,9 @@ Since we're only calling the partitioners once rather than repeatedly using them
 </div>
 </div>
 </div>
-<div id="outline-container-org2089354" class="outline-3">
-<h3 id="org2089354">A Parallelizer Function</h3>
-<div class="outline-text-3" id="text-org2089354">
+<div id="outline-container-org3c1a1d0" class="outline-3">
+<h3 id="org3c1a1d0">A Parallelizer Function</h3>
+<div class="outline-text-3" id="text-org3c1a1d0">
 <p>
 This is what I'll pass to joblib to run the two swap-counter functions.
 </p>
@@ -552,9 +1410,9 @@ This is what I'll pass to joblib to run the two swap-counter functions.
 </div>
 </div>
 
-<div id="outline-container-orge6c1794" class="outline-3">
-<h3 id="orge6c1794">Random Inputs</h3>
-<div class="outline-text-3" id="text-orge6c1794">
+<div id="outline-container-org7316967" class="outline-3">
+<h3 id="org7316967">Random Inputs</h3>
+<div class="outline-text-3" id="text-org7316967">
 <div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">random_things_to_partition</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
 			      <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
@@ -578,9 +1436,9 @@ This is what I'll pass to joblib to run the two swap-counter functions.
 </div>
 </div>
 
-<div id="outline-container-org58d4eab" class="outline-3">
-<h3 id="org58d4eab">Biggest Item Last</h3>
-<div class="outline-text-3" id="text-org58d4eab">
+<div id="outline-container-orge6d5cce" class="outline-3">
+<h3 id="orge6d5cce">Biggest Item Last</h3>
+<div class="outline-text-3" id="text-orge6d5cce">
 <p>
 What happens if the input has the biggest item at the end of the list?
 </p>
@@ -601,9 +1459,9 @@ What happens if the input has the biggest item at the end of the list?
 </div>
 </div>
 
-<div id="outline-container-orgcbd193f" class="outline-3">
-<h3 id="orgcbd193f">Sorted</h3>
-<div class="outline-text-3" id="text-orgcbd193f">
+<div id="outline-container-org0ca971b" class="outline-3">
+<h3 id="org0ca971b">Sorted</h3>
+<div class="outline-text-3" id="text-org0ca971b">
 <p>
 What happens if the input is already sorted?
 </p>
@@ -623,9 +1481,9 @@ What happens if the input is already sorted?
 </div>
 </div>
 
-<div id="outline-container-orgde702b4" class="outline-3">
-<h3 id="orgde702b4">All The Same</h3>
-<div class="outline-text-3" id="text-orgde702b4">
+<div id="outline-container-org911dd8c" class="outline-3">
+<h3 id="org911dd8c">All The Same</h3>
+<div class="outline-text-3" id="text-org911dd8c">
 <div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">same_things_to_partition</span> <span class="o">=</span> <span class="p">[[</span><span class="n">count</span><span class="p">]</span> <span class="o">*</span> <span class="n">count</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
 
@@ -650,13 +1508,13 @@ What happens if the input is already sorted?
 </div>
 </div>
 
-<div id="outline-container-orgb843d9d" class="outline-2">
-<h2 id="orgb843d9d">Randomized Swaps</h2>
-<div class="outline-text-2" id="text-orgb843d9d">
+<div id="outline-container-org3099242" class="outline-2">
+<h2 id="org3099242">Randomized Swaps</h2>
+<div class="outline-text-2" id="text-org3099242">
 </div>
-<div id="outline-container-org0f2dbd8" class="outline-3">
-<h3 id="org0f2dbd8">A Randomized Swap Counter</h3>
-<div class="outline-text-3" id="text-org0f2dbd8">
+<div id="outline-container-orgee5ba78" class="outline-3">
+<h3 id="orgee5ba78">A Randomized Swap Counter</h3>
+<div class="outline-text-3" id="text-orgee5ba78">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">randomized_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">],</span>
 		     <span class="n">partition</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">pivot</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">"""Partitions the collection around the last element</span>
@@ -680,13 +1538,13 @@ What happens if the input is already sorted?
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgb56a7b0" class="outline-3">
-<h3 id="orgb56a7b0">Randomized Levitin Swaps</h3>
-<div class="outline-text-3" id="text-orgb56a7b0">
+<div id="outline-container-orgaad27de" class="outline-3">
+<h3 id="orgaad27de">Randomized Levitin Swaps</h3>
+<div class="outline-text-3" id="text-orgaad27de">
 </div>
-<div id="outline-container-org400fa40" class="outline-4">
-<h4 id="org400fa40">Shuffled Input</h4>
-<div class="outline-text-4" id="text-org400fa40">
+<div id="outline-container-org1936ec6" class="outline-4">
+<h4 id="org1936ec6">Shuffled Input</h4>
+<div class="outline-text-4" id="text-org1936ec6">
 <div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">levitin_swaps</span><span class="p">,</span> <span class="n">randomized_levitin</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="s2">"Randomized Levitin"</span><span class="p">,</span>
 	    <span class="n">random_things_to_partition</span><span class="p">,</span>
 	   <span class="n">title</span><span class="o">=</span><span class="s2">"Levitin vs Randomized Levitin Partition Swap Count (Randomized Input)"</span><span class="p">,</span>
@@ -699,9 +1557,9 @@ What happens if the input is already sorted?
 </div>
 </div>
 
-<div id="outline-container-orgcac08a7" class="outline-4">
-<h4 id="orgcac08a7">Smallest Item At the End</h4>
-<div class="outline-text-4" id="text-orgcac08a7">
+<div id="outline-container-org04fb20f" class="outline-4">
+<h4 id="org04fb20f">Smallest Item At the End</h4>
+<div class="outline-text-4" id="text-org04fb20f">
 <div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">backwards_things_to_partition</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">count</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 				 <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
@@ -719,9 +1577,9 @@ What happens if the input is already sorted?
 </div>
 
 
-<div id="outline-container-org1c2762f" class="outline-4">
-<h4 id="org1c2762f">All The Same Input</h4>
-<div class="outline-text-4" id="text-org1c2762f">
+<div id="outline-container-orgba41239" class="outline-4">
+<h4 id="orgba41239">All The Same Input</h4>
+<div class="outline-text-4" id="text-orgba41239">
 <p>
 Since only difference between the randomized and the non-randomized input is that the pivot was (probably) swapped out, the input will look the same when all the values are the same to start with so I'm not going to re-plot those.
 </p>
@@ -729,13 +1587,13 @@ Since only difference between the randomized and the non-randomized input is tha
 </div>
 </div>
 
-<div id="outline-container-orga79366a" class="outline-3">
-<h3 id="orga79366a">Randomized CLRS Swaps</h3>
-<div class="outline-text-3" id="text-orga79366a">
+<div id="outline-container-org753907b" class="outline-3">
+<h3 id="org753907b">Randomized CLRS Swaps</h3>
+<div class="outline-text-3" id="text-org753907b">
 </div>
-<div id="outline-container-orgb8018b7" class="outline-4">
-<h4 id="orgb8018b7">Shuffled Input</h4>
-<div class="outline-text-4" id="text-orgb8018b7">
+<div id="outline-container-orgd365ef1" class="outline-4">
+<h4 id="orgd365ef1">Shuffled Input</h4>
+<div class="outline-text-4" id="text-orgd365ef1">
 <div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
 	    <span class="n">random_things_to_partition</span><span class="p">,</span>
 	   <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Randomized Input)"</span><span class="p">,</span>
@@ -748,9 +1606,9 @@ Since only difference between the randomized and the non-randomized input is tha
 </div>
 </div>
 
-<div id="outline-container-orgb7ffaf6" class="outline-4">
-<h4 id="orgb7ffaf6">Biggest Item at the End</h4>
-<div class="outline-text-4" id="text-orgb7ffaf6">
+<div id="outline-container-orge64edee" class="outline-4">
+<h4 id="orge64edee">Biggest Item at the End</h4>
+<div class="outline-text-4" id="text-orge64edee">
 <div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
 	    <span class="n">big_ended_things_to_partition</span><span class="p">,</span>
 	    <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Big-Ended Input)"</span><span class="p">,</span>
@@ -763,9 +1621,9 @@ Since only difference between the randomized and the non-randomized input is tha
 </div>
 </div>
 
-<div id="outline-container-org30b2eb5" class="outline-4">
-<h4 id="org30b2eb5">Sorted</h4>
-<div class="outline-text-4" id="text-org30b2eb5">
+<div id="outline-container-org5f90079" class="outline-4">
+<h4 id="org5f90079">Sorted</h4>
+<div class="outline-text-4" id="text-org5f90079">
 <div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
 	    <span class="n">sorted_things_to_partition</span><span class="p">,</span>
 	    <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Sorted Input)"</span><span class="p">,</span>
@@ -791,17 +1649,17 @@ Since only difference between the randomized and the non-randomized input is tha
             </p>
         </div>
     </header><div class="e-content entry-content">
-    <div id="outline-container-orgab24c6c" class="outline-2">
-<h2 id="orgab24c6c">Introduction</h2>
-<div class="outline-text-2" id="text-orgab24c6c">
+    <div id="outline-container-org50d45f3" class="outline-2">
+<h2 id="org50d45f3">Introduction</h2>
+<div class="outline-text-2" id="text-org50d45f3">
 <p>
 This is part of a series that starts with <a href="posts/the-partition/">this post</a>.
 </p>
 </div>
 
-<div id="outline-container-org63227ab" class="outline-3">
-<h3 id="org63227ab">Imports and Setup</h3>
-<div class="outline-text-3" id="text-org63227ab">
+<div id="outline-container-orge24cebe" class="outline-3">
+<h3 id="orge24cebe">Imports and Setup</h3>
+<div class="outline-text-3" id="text-orge24cebe">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
@@ -829,9 +1687,9 @@ This is part of a series that starts with <a href="posts/the-partition/">this po
 </div>
 </div>
 
-<div id="outline-container-org405eea4" class="outline-2">
-<h2 id="org405eea4">The Algorithm</h2>
-<div class="outline-text-2" id="text-org405eea4">
+<div id="outline-container-orgf4bfd61" class="outline-2">
+<h2 id="orgf4bfd61">The Algorithm</h2>
+<div class="outline-text-2" id="text-orgf4bfd61">
 <p>
 The CLRS version seems a little clearer to follow although they use the last element as the pivot element instead of the first which threw me off for a bit. It uses a single for loop which moves anything less than the pivot element to the lower partition as it traverses the elements.
 </p>
@@ -871,9 +1729,9 @@ The <i>LowerBound</i> is the index of the last element less than or equal to the
 The <i>LowerBound</i> is like a demon that guards the lower partition and the <i>UpperBound</i> is another demon that plows through the array, throwing any elements that belong in the lower partition back to the <i>LowerBound</i> demon who throws the first element in the upper partition back up to the <i>UpperBound</i> and moves up to guard the expanded lower partition.
 </p>
 </div>
-<div id="outline-container-orgaaffc0c" class="outline-3">
-<h3 id="orgaaffc0c">A Worked Example</h3>
-<div class="outline-text-3" id="text-orgaaffc0c">
+<div id="outline-container-org96ebc43" class="outline-3">
+<h3 id="org96ebc43">A Worked Example</h3>
+<div class="outline-text-3" id="text-org96ebc43">
 <p>
 We can take a look at how this works using a table. I'll use <i>LB</i> for the <i>LowerBound</i> index, <i>UB</i> for the <i>UpperBound</i> index, and <i>x</i> for the <i>PivotElement</i> to keep the table from getting too wide (hopefully). The array to partition is <code>[5, 7, 9, 4, 6]</code> with a zero-based index so <i>left</i> = 0, <i>right</i> = 4 and <i>x</i> (the pivot element) is 6.
 </p>
@@ -943,9 +1801,9 @@ Once we're out of the loop we then swap out the Pivot Element and the element to
 </div>
 </div>
 
-<div id="outline-container-org814caa7" class="outline-3">
-<h3 id="org814caa7">An Odd Case</h3>
-<div class="outline-text-3" id="text-org814caa7">
+<div id="outline-container-org43ed8f5" class="outline-3">
+<h3 id="org43ed8f5">An Odd Case</h3>
+<div class="outline-text-3" id="text-org43ed8f5">
 <p>
 What happens if the last element is the largest element?
 </p>
@@ -1010,9 +1868,9 @@ Since nothing happens when an element being checked is greater than the pivot el
 </div>
 </div>
 </div>
-<div id="outline-container-org782cb14" class="outline-2">
-<h2 id="org782cb14">The Implementation</h2>
-<div class="outline-text-2" id="text-org782cb14">
+<div id="outline-container-org72de477" class="outline-2">
+<h2 id="org72de477">The Implementation</h2>
+<div class="outline-text-2" id="text-org72de477">
 <p>
 According to wikipedia, the version <a href="posts/clrs/">CLRS</a> uses is a version of the <a href="https://en.wikipedia.org/wiki/Quicksort#Lomuto_partition_scheme">Lomuto Partition Scheme</a>, created by Nico Lomuto.
 </p>
@@ -1045,13 +1903,13 @@ According to wikipedia, the version <a href="posts/clrs/">CLRS</a> uses is a ver
 </div>
 </div>
 
-<div id="outline-container-orgd083d49" class="outline-2">
-<h2 id="orgd083d49">Some Checks</h2>
-<div class="outline-text-2" id="text-orgd083d49">
+<div id="outline-container-org30aa7c7" class="outline-2">
+<h2 id="org30aa7c7">Some Checks</h2>
+<div class="outline-text-2" id="text-org30aa7c7">
 </div>
-<div id="outline-container-org64e9df9" class="outline-3">
-<h3 id="org64e9df9">The First Example</h3>
-<div class="outline-text-3" id="text-org64e9df9">
+<div id="outline-container-orgf95bd96" class="outline-3">
+<h3 id="orgf95bd96">The First Example</h3>
+<div class="outline-text-3" id="text-orgf95bd96">
 <p>
 This is the worked example I gave.
 </p>
@@ -1085,9 +1943,9 @@ And to make sure the sub-list works (as opposed to using the whole list).
 </div>
 </div>
 
-<div id="outline-container-org63e6674" class="outline-3">
-<h3 id="org63e6674">The Pivot Is the Biggest Element</h3>
-<div class="outline-text-3" id="text-org63e6674">
+<div id="outline-container-orgb185da9" class="outline-3">
+<h3 id="orgb185da9">The Pivot Is the Biggest Element</h3>
+<div class="outline-text-3" id="text-orgb185da9">
 <p>
 If the last element (the pivot) is the biggest element then partitioning doesn't do anything to the list.
 </p>
@@ -1105,9 +1963,9 @@ If the last element (the pivot) is the biggest element then partitioning doesn't
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org7998ca9" class="outline-3">
-<h3 id="org7998ca9">Small Inputs</h3>
-<div class="outline-text-3" id="text-org7998ca9">
+<div id="outline-container-org0e4f6d5" class="outline-3">
+<h3 id="org0e4f6d5">Small Inputs</h3>
+<div class="outline-text-3" id="text-org0e4f6d5">
 <p>
 Make sure it can handle collections of small size.
 </p>
@@ -1123,9 +1981,9 @@ Make sure it can handle collections of small size.
 </div>
 </div>
 
-<div id="outline-container-org18bce78" class="outline-3">
-<h3 id="org18bce78">Big Inputs</h3>
-<div class="outline-text-3" id="text-org18bce78">
+<div id="outline-container-org036fcb3" class="outline-3">
+<h3 id="org036fcb3">Big Inputs</h3>
+<div class="outline-text-3" id="text-org036fcb3">
 <p>
 This is the same test as given to the Levitin version except we need to move the test-value to the end of the input list.
 </p>
@@ -1144,9 +2002,9 @@ This is the same test as given to the Levitin version except we need to move the
 </div>
 </div>
 </div>
-<div id="outline-container-orgd74b441" class="outline-2">
-<h2 id="orgd74b441">A CLRS Tracker</h2>
-<div class="outline-text-2" id="text-orgd74b441">
+<div id="outline-container-org205b7ae" class="outline-2">
+<h2 id="org205b7ae">A CLRS Tracker</h2>
+<div class="outline-text-2" id="text-org205b7ae">
 <p>
 This should be the same function (as <code>clrs_partition</code>) but it collects the locations of the elements within the list as they get swapped around.
 </p>
@@ -1227,9 +2085,9 @@ This should be the same function (as <code>clrs_partition</code>) but it collect
     <span class="k">return</span>
 </pre></div>
 </div>
-<div id="outline-container-orgb28b539" class="outline-3">
-<h3 id="orgb28b539">A Backwards Case</h3>
-<div class="outline-text-3" id="text-orgb28b539">
+<div id="outline-container-org2a2cf63" class="outline-3">
+<h3 id="org2a2cf63">A Backwards Case</h3>
+<div class="outline-text-3" id="text-org2a2cf63">
 <p>
 First, a plot of a list that starts out with all the elements greater than the pivot followed by all the elements less than the pivot.
 </p>
@@ -1262,9 +2120,9 @@ The red-line marks the last item in the lower partition. Even though I randomize
 </div>
 </div>
 
-<div id="outline-container-org9231b89" class="outline-3">
-<h3 id="org9231b89">A More Random Case</h3>
-<div class="outline-text-3" id="text-org9231b89">
+<div id="outline-container-org0ccf44d" class="outline-3">
+<h3 id="org0ccf44d">A More Random Case</h3>
+<div class="outline-text-3" id="text-org0ccf44d">
 <p>
 Let's try something a little more random.
 </p>
@@ -1294,9 +2152,9 @@ Not a whole lot more interesting, but it shows how it normally works with the fu
 </div>
 </div>
 </div>
-<div id="outline-container-orgc99edd0" class="outline-2">
-<h2 id="orgc99edd0">Sources</h2>
-<div class="outline-text-2" id="text-orgc99edd0">
+<div id="outline-container-org6d1571e" class="outline-2">
+<h2 id="org6d1571e">Sources</h2>
+<div class="outline-text-2" id="text-org6d1571e">
 <ul class="org-ul">
 <li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Quicksort">Wikipedia on Quicksort</a></li>
@@ -1325,40 +2183,40 @@ window.addEventListener('load', function () {
 <div id="text-table-of-contents">
 <ul>
 <li>
-<a href="posts/levitins-partition/#org72ff2a5">Introduction</a>
+<a href="posts/levitins-partition/#org9765681">Introduction</a>
 <ul>
-<li><a href="posts/levitins-partition/#orga6ecb51">The Algorithm</a></li>
+<li><a href="posts/levitins-partition/#orgfd094da">The Algorithm</a></li>
 <li>
-<a href="posts/levitins-partition/#orge1c5be2">The Implementation</a>
+<a href="posts/levitins-partition/#orgaa42294">The Implementation</a>
 <ul>
-<li><a href="posts/levitins-partition/#org91a8542">Imports</a></li>
-<li><a href="posts/levitins-partition/#org286b707">Some Checks</a></li>
+<li><a href="posts/levitins-partition/#orgf432823">Imports</a></li>
+<li><a href="posts/levitins-partition/#org653f989">Some Checks</a></li>
 </ul>
 </li>
 <li>
-<a href="posts/levitins-partition/#org0db842e">A Levitin Tracker</a>
+<a href="posts/levitins-partition/#org23ed199">A Levitin Tracker</a>
 <ul>
-<li><a href="posts/levitins-partition/#org64e3b79">A Backwards Case</a></li>
-<li><a href="posts/levitins-partition/#org1f5af99">A More Random Case</a></li>
+<li><a href="posts/levitins-partition/#org4d40662">A Backwards Case</a></li>
+<li><a href="posts/levitins-partition/#org06bc044">A More Random Case</a></li>
 </ul>
 </li>
-<li><a href="posts/levitins-partition/#org33fbc47">A Sketch Of The Implementation</a></li>
+<li><a href="posts/levitins-partition/#org12bdb30">A Sketch Of The Implementation</a></li>
 </ul>
 </li>
-<li><a href="posts/levitins-partition/#org0563ec8">Sources</a></li>
+<li><a href="posts/levitins-partition/#org8c2ae54">Sources</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org72ff2a5" class="outline-2">
-<h2 id="org72ff2a5">Introduction</h2>
-<div class="outline-text-2" id="text-org72ff2a5">
+<div id="outline-container-org9765681" class="outline-2">
+<h2 id="org9765681">Introduction</h2>
+<div class="outline-text-2" id="text-org9765681">
 <p>
 This is part of a series that starts with <a href="posts/the-partition/">this post</a>.
 </p>
 </div>
-<div id="outline-container-orga6ecb51" class="outline-3">
-<h3 id="orga6ecb51">The Algorithm</h3>
-<div class="outline-text-3" id="text-orga6ecb51">
+<div id="outline-container-orgfd094da" class="outline-3">
+<h3 id="orgfd094da">The Algorithm</h3>
+<div class="outline-text-3" id="text-orgfd094da">
 <p>
 The Levitin version of the Partition function is a little more complicated than the CLRS version. It uses an outer loop with two inner loops. The outer loop continues until the indices for the partitions cross-over (or meet) and the inner loops move the boundaries until they find a value that needs to be swapped to the other partition (e.g. the loop sweeping upwards finds an element that's greater than or equal to the pivot element and so it needs to be moved to the upper partition). It uses the first element in the array as the value around which to partition the array.
 </p>
@@ -1399,13 +2257,13 @@ The Levitin version of the Partition function is a little more complicated than 
 </div>
 </div>
 
-<div id="outline-container-orge1c5be2" class="outline-3">
-<h3 id="orge1c5be2">The Implementation</h3>
-<div class="outline-text-3" id="text-orge1c5be2">
+<div id="outline-container-orgaa42294" class="outline-3">
+<h3 id="orgaa42294">The Implementation</h3>
+<div class="outline-text-3" id="text-orgaa42294">
 </div>
-<div id="outline-container-org91a8542" class="outline-4">
-<h4 id="org91a8542">Imports</h4>
-<div class="outline-text-4" id="text-org91a8542">
+<div id="outline-container-orgf432823" class="outline-4">
+<h4 id="orgf432823">Imports</h4>
+<div class="outline-text-4" id="text-orgf432823">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
@@ -1481,9 +2339,9 @@ The version <a href="posts/itdaa/">Levitin</a> uses appears to be closer to the 
 </div>
 </div>
 
-<div id="outline-container-org286b707" class="outline-4">
-<h4 id="org286b707">Some Checks</h4>
-<div class="outline-text-4" id="text-org286b707">
+<div id="outline-container-org653f989" class="outline-4">
+<h4 id="org653f989">Some Checks</h4>
+<div class="outline-text-4" id="text-org653f989">
 <div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
 <span class="n">output</span> <span class="o">=</span> <span class="n">levitins_partition</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
@@ -1522,9 +2380,9 @@ The version <a href="posts/itdaa/">Levitin</a> uses appears to be closer to the 
 </div>
 </div>
 
-<div id="outline-container-org0db842e" class="outline-3">
-<h3 id="org0db842e">A Levitin Tracker</h3>
-<div class="outline-text-3" id="text-org0db842e">
+<div id="outline-container-org23ed199" class="outline-3">
+<h3 id="org23ed199">A Levitin Tracker</h3>
+<div class="outline-text-3" id="text-org23ed199">
 <p>
 This is the same function (hopefully) as <code>levitins_partition</code> but it collects the position of the elements in the list as things get swapped around so that we can plot it.
 </p>
@@ -1641,9 +2499,9 @@ This is the same function (hopefully) as <code>levitins_partition</code> but it 
     <span class="k">return</span>
 </pre></div>
 </div>
-<div id="outline-container-org64e3b79" class="outline-4">
-<h4 id="org64e3b79">A Backwards Case</h4>
-<div class="outline-text-4" id="text-org64e3b79">
+<div id="outline-container-org4d40662" class="outline-4">
+<h4 id="org4d40662">A Backwards Case</h4>
+<div class="outline-text-4" id="text-org4d40662">
 <div class="highlight"><pre><span></span><span class="n">middle</span> <span class="o">=</span> <span class="mi">20</span>
 <span class="n">first_half</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span><span class="p">))</span>
 <span class="n">second_half</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">middle</span><span class="p">))</span>
@@ -1665,9 +2523,9 @@ This is the same function (hopefully) as <code>levitins_partition</code> but it 
 </div>
 
 
-<div id="outline-container-org1f5af99" class="outline-4">
-<h4 id="org1f5af99">A More Random Case</h4>
-<div class="outline-text-4" id="text-org1f5af99">
+<div id="outline-container-org06bc044" class="outline-4">
+<h4 id="org06bc044">A More Random Case</h4>
+<div class="outline-text-4" id="text-org06bc044">
 <p>
 Let's try something a little more random.
 </p>
@@ -1691,18 +2549,18 @@ Let's try something a little more random.
 </div>
 </div>
 
-<div id="outline-container-org33fbc47" class="outline-3">
-<h3 id="org33fbc47">A Sketch Of The Implementation</h3>
-<div class="outline-text-3" id="text-org33fbc47">
+<div id="outline-container-org12bdb30" class="outline-3">
+<h3 id="org12bdb30">A Sketch Of The Implementation</h3>
+<div class="outline-text-3" id="text-org12bdb30">
 <p>
 <img src="posts/levitins-partition/levitins-partition-cleaned.webp" alt="nil"></p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org0563ec8" class="outline-2">
-<h2 id="org0563ec8">Sources</h2>
-<div class="outline-text-2" id="text-org0563ec8">
+<div id="outline-container-org8c2ae54" class="outline-2">
+<h2 id="org8c2ae54">Sources</h2>
+<div class="outline-text-2" id="text-org8c2ae54">
 <ul class="org-ul">
 <li><a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Quicksort">Wikipedia on Quicksort</a></li>

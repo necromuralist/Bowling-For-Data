@@ -12,7 +12,8 @@
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
 <link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/red-black-trees-rotation/">
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../the-red-black-tree-nodes/" title="The Red-Black Tree: Nodes" type="text/html">
+<link rel="prev" href="../the-red-black-tree/" title="The Red-Black Tree" type="text/html">
+<link rel="next" href="../red-black-trees-insertion/" title="Red-Black Trees: Insertion" type="text/html">
 <meta property="og:site_name" content="Bowling For Data">
 <meta property="og:title" content="Red-Black Trees: Rotation">
 <meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/red-black-trees-rotation/">
@@ -102,44 +103,45 @@ bg-light
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org6300fdc">What are Rotations?</a></li>
+<li><a href="#org7389f2f">What are Rotations?</a></li>
 <li>
-<a href="#orgd545c0a">Left Rotate</a>
+<a href="#org13e098d">Left Rotate</a>
 <ul>
-<li><a href="#orgc1c6721">Pseudocode</a></li>
+<li><a href="#org1a38d1e">Pseudocode</a></li>
 <li>
-<a href="#org6cb5064">Some Code</a>
+<a href="#org4681289">Some Code</a>
 <ul>
-<li><a href="#orgb2bb0c9">A Fake Tree</a></li>
-<li><a href="#orgf1bf053">The Left-Rotate</a></li>
-<li><a href="#org939fe89">Testing It Out</a></li>
+<li><a href="#org1df3b5c">The Imports</a></li>
+<li><a href="#orge1279b2">The Rotator</a></li>
+<li><a href="#orgf6bb9ec">The Left-Rotate</a></li>
+<li><a href="#org10c3984">Testing It Out</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li>
-<a href="#org6ee0951">Right Rotate</a>
+<a href="#org71ba9f4">Right Rotate</a>
 <ul>
-<li><a href="#org1e10c34">Pseudocode</a></li>
+<li><a href="#org16234f6">Pseudocode</a></li>
 <li>
-<a href="#orgc0783a8">Some Code</a>
+<a href="#orge7d93cf">Some Code</a>
 <ul>
-<li><a href="#org0c2b39e">The Right-Rotate</a></li>
-<li><a href="#org8bcd417">Testing It Out</a></li>
+<li><a href="#orgaea5fa3">The Right-Rotate</a></li>
+<li><a href="#org7c4c531">Testing It Out</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org7ae4906">Sources</a></li>
+<li><a href="#org2923e0b">Sources</a></li>
 </ul>
 </div>
 </div>
 <p>
 This is a post on rotating nodes in a tree. It is a continuation of <a href="../red-black-trees/">this post</a>.
 </p>
-<div id="outline-container-org6300fdc" class="outline-2">
-<h2 id="org6300fdc">What are Rotations?</h2>
-<div class="outline-text-2" id="text-org6300fdc">
+<div id="outline-container-org7389f2f" class="outline-2">
+<h2 id="org7389f2f">What are Rotations?</h2>
+<div class="outline-text-2" id="text-org7389f2f">
 <p>
 In the context of a Red-Black Tree, a Rotation involves swapping the position of two nodes (a parent and one of its children) while maintaining the Binary Search Tree Properties. There are two kinds of rotation:
 </p>
@@ -152,16 +154,16 @@ In the context of a Red-Black Tree, a Rotation involves swapping the position of
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd545c0a" class="outline-2">
-<h2 id="orgd545c0a">Left Rotate</h2>
-<div class="outline-text-2" id="text-orgd545c0a">
+<div id="outline-container-org13e098d" class="outline-2">
+<h2 id="org13e098d">Left Rotate</h2>
+<div class="outline-text-2" id="text-org13e098d">
 <p>
 <a href="../clrs/">CLRS</a> gives the Left Rotate function so we'll start with that.
 </p>
 </div>
-<div id="outline-container-orgc1c6721" class="outline-3">
-<h3 id="orgc1c6721">Pseudocode</h3>
-<div class="outline-text-3" id="text-orgc1c6721">
+<div id="outline-container-org1a38d1e" class="outline-3">
+<h3 id="org1a38d1e">Pseudocode</h3>
+<div class="outline-text-3" id="text-org1a38d1e">
 <pre id="left-rotate" style="display:hidden;">
 \begin{algorithm}
 \caption{LeftRotate}
@@ -195,9 +197,9 @@ In the context of a Red-Black Tree, a Rotation involves swapping the position of
 </div>
 </div>
 
-<div id="outline-container-org6cb5064" class="outline-3">
-<h3 id="org6cb5064">Some Code</h3>
-<div class="outline-text-3" id="text-org6cb5064">
+<div id="outline-container-org4681289" class="outline-3">
+<h3 id="org4681289">Some Code</h3>
+<div class="outline-text-3" id="text-org4681289">
 <div class="highlight"><pre><span></span><span class="c1"># pypi</span>
 <span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
 
@@ -205,6 +207,7 @@ In the context of a Red-Black Tree, a Rotation involves swapping the position of
 
 <span class="c1"># this project</span>
 <span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree</span> <span class="kn">import</span> <span class="n">tree</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree.arborist</span> <span class="kn">import</span> <span class="n">Arborist</span><span class="p">,</span> <span class="n">Rotator</span>
 </pre></div>
 
 <div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"red-black-trees-rotation"</span>
@@ -212,33 +215,42 @@ In the context of a Red-Black Tree, a Rotation involves swapping the position of
 </pre></div>
 </div>
 
-<div id="outline-container-orgb2bb0c9" class="outline-4">
-<h4 id="orgb2bb0c9">A Fake Tree</h4>
-<div class="outline-text-4" id="text-orgb2bb0c9">
-<p>
-I don't have a tree class yet so I'll make one here so that we can run the rotation.
-</p>
+<div id="outline-container-org1df3b5c" class="outline-4">
+<h4 id="org1df3b5c">The Imports</h4>
+<div class="outline-text-4" id="text-org1df3b5c">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
 
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
-	<span class="k">return</span>
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree</span> <span class="kn">import</span> <span class="n">tree</span> <span class="k">as</span> <span class="n">rb_tree</span>
 </pre></div>
 </div>
 </div>
+<div id="outline-container-orge1279b2" class="outline-4">
+<h4 id="orge1279b2">The Rotator</h4>
+<div class="outline-text-4" id="text-orge1279b2">
+<div class="highlight"><pre><span></span><span class="nd">@define</span>
+<span class="k">class</span> <span class="nc">Rotator</span><span class="p">:</span>
+    <span class="sd">"""A rotator of nodes and their children</span>
 
-<div id="outline-container-orgf1bf053" class="outline-4">
-<h4 id="orgf1bf053">The Left-Rotate</h4>
-<div class="outline-text-4" id="text-orgf1bf053">
+<span class="sd">    Args:</span>
+<span class="sd">     tree: the tree that the parent belongs to</span>
+<span class="sd">    """</span>
+    <span class="n">tree</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgf6bb9ec" class="outline-4">
+<h4 id="orgf6bb9ec">The Left-Rotate</h4>
+<div class="outline-text-4" id="text-orgf6bb9ec">
 <p>
 This is more-or-less a straight implementation of the Left-Rotate algorithm given above. The main difference is that our Node object automatically sets the parent for a child when the child is set on the node so you won't see the parent
 </p>
 
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">left_rotate</span><span class="p">(</span><span class="n">source_tree</span><span class="p">:</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">"""Rotates the node with its right child</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">     source_tree: the binary search tree containing the node</span>
 <span class="sd">     node: the parent node to rotate</span>
 <span class="sd">    """</span>
     <span class="n">new_parent</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span>
@@ -246,8 +258,8 @@ This is more-or-less a straight implementation of the Left-Rotate algorithm give
 
     <span class="n">new_parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
 
-    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">:</span>
-	<span class="n">source_tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">new_parent</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_root</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">new_parent</span>
     <span class="n">new_parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span>
     <span class="k">return</span>
 </pre></div>
@@ -258,9 +270,9 @@ This is more-or-less a straight implementation of the Left-Rotate algorithm give
 </div>
 </div>
 
-<div id="outline-container-org939fe89" class="outline-4">
-<h4 id="org939fe89">Testing It Out</h4>
-<div class="outline-text-4" id="text-org939fe89">
+<div id="outline-container-org10c3984" class="outline-4">
+<h4 id="org10c3984">Testing It Out</h4>
+<div class="outline-text-4" id="text-org10c3984">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">preorder</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="sd">"""Traverse the nodes and build an adjancency dictionary</span>
 <span class="sd">    """</span>
@@ -292,7 +304,7 @@ This is more-or-less a straight implementation of the Left-Rotate algorithm give
     <span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">root_parent</span><span class="p">)</span>
 
     <span class="n">root</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="k">if</span> <span class="n">root_parent</span> <span class="ow">is</span> <span class="n">tree</span><span class="o">.</span><span class="n">NIL</span> <span class="k">else</span> <span class="n">root_parent</span>
-    <span class="n">test_tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+    <span class="n">test_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
 
     <span class="n">nodes</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
     <span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
@@ -309,14 +321,15 @@ This is more-or-less a straight implementation of the Left-Rotate algorithm give
 </div>
 <ul class="org-ul">
 <li>
-<a id="orgd916779"></a>Nil Parent<br><div class="outline-text-5" id="text-orgd916779">
+<a id="org4d02d78"></a>Nil Parent<br><div class="outline-text-5" id="text-org4d02d78">
 <p>
 Our first case will be when the node to swap with its child is root.
 </p>
 
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_nodes</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_nodes</span><span class="p">(</span><span class="n">arborist</span><span class="p">:</span> <span class="n">Arborist</span><span class="p">,</span> <span class="n">nodes</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="n">root_parent</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
-    <span class="n">left_rotate</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+
+    <span class="n">arborist</span><span class="o">.</span><span class="n">rotate</span><span class="o">.</span><span class="n">left</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">root_parent</span> <span class="ow">is</span> <span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">:</span>
 	<span class="n">expect</span><span class="p">(</span><span class="n">test_tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span>
@@ -352,7 +365,8 @@ Our first case will be when the node to swap with its child is root.
 <p>
 <img src="root_left_rotate.png" alt="nil"></p>
 
-<div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="n">arborist</span> <span class="o">=</span> <span class="n">Arborist</span><span class="p">(</span><span class="n">test_tree</span><span class="p">)</span>
+<span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes</span><span class="p">(</span><span class="n">arborist</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
 </pre></div>
 
 <div class="highlight"><pre><span></span><span class="n">plot_graph</span><span class="p">(</span><span class="n">test_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s2">"root-left-rotated"</span><span class="p">)</span>
@@ -363,7 +377,7 @@ Our first case will be when the node to swap with its child is root.
 </div>
 </li>
 <li>
-<a id="org6318506"></a>Left Child<br><div class="outline-text-5" id="text-org6318506">
+<a id="org42556ba"></a>Left Child<br><div class="outline-text-5" id="text-org42556ba">
 <p>
 This is the case where the parent node being demoted is the left-child of its parent.
 </p>
@@ -377,7 +391,7 @@ This is the case where the parent node being demoted is the left-child of its pa
 <img src="root_left_left_rotate.png" alt="nil"></p>
 
 <div class="highlight"><pre><span></span><span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
-<span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+<span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes</span><span class="p">(</span><span class="n">Arborist</span><span class="p">(</span><span class="n">test_tree</span><span class="p">),</span> <span class="n">nodes</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span>
 <span class="n">plot_graph</span><span class="p">(</span><span class="n">test_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s2">"root_left_left_rotated"</span><span class="p">)</span>
 </pre></div>
@@ -388,7 +402,7 @@ This is the case where the parent node being demoted is the left-child of its pa
 </li>
 
 <li>
-<a id="org28a8411"></a>Right Child<br><div class="outline-text-5" id="text-org28a8411">
+<a id="orga6c1bd6"></a>Right Child<br><div class="outline-text-5" id="text-orga6c1bd6">
 <p>
 This is the case where the parent node being demoted is the right-child of its parent.
 </p>
@@ -402,7 +416,7 @@ This is the case where the parent node being demoted is the right-child of its p
 <p>
 <img src="root_parent_right_rotate.png" alt="nil"></p>
 
-<div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes</span><span class="p">(</span><span class="n">Arborist</span><span class="p">(</span><span class="n">test_tree</span><span class="p">),</span> <span class="n">nodes</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span>
 <span class="n">plot_graph</span><span class="p">(</span><span class="n">test_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s2">"root_parent_right_rotated"</span><span class="p">)</span>
 </pre></div>
@@ -416,16 +430,16 @@ This is the case where the parent node being demoted is the right-child of its p
 </div>
 </div>
 
-<div id="outline-container-org6ee0951" class="outline-2">
-<h2 id="org6ee0951">Right Rotate</h2>
-<div class="outline-text-2" id="text-org6ee0951">
+<div id="outline-container-org71ba9f4" class="outline-2">
+<h2 id="org71ba9f4">Right Rotate</h2>
+<div class="outline-text-2" id="text-org71ba9f4">
 <p>
-This will be the Right-Rotate version. Since we saw with the Left Rotate that the <a href="../the-red-black-tree-nodes/">Node definition</a> reduces some of the code needed for the rotation I'll leave those lines out of this version
+This will be the Right-Rotate version. Since we saw with the Left Rotate that the <a href="../the-red-black-tree/">Node definition</a> reduces some of the code needed for the rotation I'll leave those lines out of this version
 </p>
 </div>
-<div id="outline-container-org1e10c34" class="outline-3">
-<h3 id="org1e10c34">Pseudocode</h3>
-<div class="outline-text-3" id="text-org1e10c34">
+<div id="outline-container-org16234f6" class="outline-3">
+<h3 id="org16234f6">Pseudocode</h3>
+<div class="outline-text-3" id="text-org16234f6">
 <pre id="right-rotate" style="display:hidden;">
 \begin{algorithm}
 \caption{RightRotate}
@@ -461,39 +475,38 @@ This makes it a little clearer, I think. What the algorithm is doing is pretty s
 </div>
 </div>
 
-<div id="outline-container-orgc0783a8" class="outline-3">
-<h3 id="orgc0783a8">Some Code</h3>
-<div class="outline-text-3" id="text-orgc0783a8">
+<div id="outline-container-orge7d93cf" class="outline-3">
+<h3 id="orge7d93cf">Some Code</h3>
+<div class="outline-text-3" id="text-orge7d93cf">
 </div>
-<div id="outline-container-org0c2b39e" class="outline-4">
-<h4 id="org0c2b39e">The Right-Rotate</h4>
-<div class="outline-text-4" id="text-org0c2b39e">
+<div id="outline-container-orgaea5fa3" class="outline-4">
+<h4 id="orgaea5fa3">The Right-Rotate</h4>
+<div class="outline-text-4" id="text-orgaea5fa3">
 <p>
 This is more-or-less a straight implementation of the Right-Rotate algorithm given above. 
 </p>
 
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">right_rotate</span><span class="p">(</span><span class="n">source_tree</span><span class="p">:</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">right</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">"""Rotates the node with its left child</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">     source_tree: the binary search tree containing the node</span>
 <span class="sd">     node: the parent node to rotate</span>
 <span class="sd">    """</span>
     <span class="n">previous_child</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
     <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">previous_child</span><span class="o">.</span><span class="n">right</span>
     <span class="n">previous_child</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
 
-    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">:</span>
-	<span class="n">source_tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">previous_child</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_root</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">previous_child</span>
     <span class="n">previous_child</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span>
     <span class="k">return</span>
 </pre></div>
 </div>
 </div>
 
-<div id="outline-container-org8bcd417" class="outline-4">
-<h4 id="org8bcd417">Testing It Out</h4>
-<div class="outline-text-4" id="text-org8bcd417">
+<div id="outline-container-org7c4c531" class="outline-4">
+<h4 id="org7c4c531">Testing It Out</h4>
+<div class="outline-text-4" id="text-org7c4c531">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">build_right_rotate_tree</span><span class="p">(</span><span class="n">root_parent</span><span class="p">:</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
     <span class="sd">"""Build the test-tree</span>
 
@@ -507,7 +520,7 @@ This is more-or-less a straight implementation of the Right-Rotate algorithm giv
     <span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">root_parent</span><span class="p">)</span>
 
     <span class="n">root</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="k">if</span> <span class="n">root_parent</span> <span class="ow">is</span> <span class="n">tree</span><span class="o">.</span><span class="n">NIL</span> <span class="k">else</span> <span class="n">root_parent</span>
-    <span class="n">test_tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+    <span class="n">test_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
 
     <span class="n">nodes</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
     <span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
@@ -524,14 +537,14 @@ This is more-or-less a straight implementation of the Right-Rotate algorithm giv
 </div>
 <ul class="org-ul">
 <li>
-<a id="org2159bd3"></a>Nil Parent<br><div class="outline-text-5" id="text-org2159bd3">
+<a id="org7727866"></a>Nil Parent<br><div class="outline-text-5" id="text-org7727866">
 <p>
 Our first case will be when the node to swap with its child is root.
 </p>
 
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_nodes_right</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_nodes_right</span><span class="p">(</span><span class="n">arborist</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="n">root_parent</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span>
-    <span class="n">right_rotate</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+    <span class="n">arborist</span><span class="o">.</span><span class="n">rotate</span><span class="o">.</span><span class="n">right</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
 
     <span class="c1"># check the new root</span>
     <span class="n">expect</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">root_parent</span><span class="p">))</span>
@@ -554,7 +567,7 @@ Our first case will be when the node to swap with its child is root.
 <p>
 <img src="root_right_rotate.png" alt="nil"></p>
 
-<div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes_right</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes_right</span><span class="p">(</span><span class="n">Arborist</span><span class="p">(</span><span class="n">test_tree</span><span class="p">),</span> <span class="n">nodes</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">test_tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
 <span class="n">plot_graph</span><span class="p">(</span><span class="n">test_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s2">"root_right_rotated"</span><span class="p">)</span>
 </pre></div>
@@ -564,7 +577,7 @@ Our first case will be when the node to swap with its child is root.
 </div>
 </li>
 <li>
-<a id="org4682f3f"></a>Left Child<br><div class="outline-text-5" id="text-org4682f3f">
+<a id="org6909dd3"></a>Left Child<br><div class="outline-text-5" id="text-org6909dd3">
 <p>
 This is the case where the parent node being demoted is the left-child of its parent.
 </p>
@@ -578,7 +591,7 @@ This is the case where the parent node being demoted is the left-child of its pa
 <img src="root_right_left_rotate.png" alt="nil"></p>
 
 <div class="highlight"><pre><span></span><span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
-<span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes_right</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+<span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes_right</span><span class="p">(</span><span class="n">Arborist</span><span class="p">(</span><span class="n">test_tree</span><span class="p">),</span> <span class="n">nodes</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
 <span class="n">plot_graph</span><span class="p">(</span><span class="n">test_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s2">"root-right-left-rotated"</span><span class="p">)</span>
 </pre></div>
@@ -589,7 +602,7 @@ This is the case where the parent node being demoted is the left-child of its pa
 </li>
 
 <li>
-<a id="orga4bd556"></a>Right Child<br><div class="outline-text-5" id="text-orga4bd556">
+<a id="orgd09ed71"></a>Right Child<br><div class="outline-text-5" id="text-orgd09ed71">
 <p>
 This is the case where the parent node being demoted is the right-child of its parent.
 </p>
@@ -603,7 +616,7 @@ This is the case where the parent node being demoted is the right-child of its p
 <img src="root_right_right_rotate.png" alt="nil"></p>
 
 <div class="highlight"><pre><span></span><span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
-<span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes_right</span><span class="p">(</span><span class="n">test_tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
+<span class="n">nodes</span> <span class="o">=</span> <span class="n">test_nodes_right</span><span class="p">(</span><span class="n">Arborist</span><span class="p">(</span><span class="n">test_tree</span><span class="p">),</span> <span class="n">nodes</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
 <span class="n">plot_graph</span><span class="p">(</span><span class="n">test_tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s2">"root_right_right_rotated"</span><span class="p">)</span>
 </pre></div>
@@ -617,9 +630,9 @@ This is the case where the parent node being demoted is the right-child of its p
 </div>
 </div>
 
-<div id="outline-container-org7ae4906" class="outline-2">
-<h2 id="org7ae4906">Sources</h2>
-<div class="outline-text-2" id="text-org7ae4906">
+<div id="outline-container-org2923e0b" class="outline-2">
+<h2 id="org2923e0b">Sources</h2>
+<div class="outline-text-2" id="text-org2923e0b">
 <ul class="org-ul">
 <li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
 </ul>
@@ -643,7 +656,10 @@ window.addEventListener('load', function () {
         </ul>
 <ul class="pager hidden-print">
 <li class="previous">
-                <a href="../the-red-black-tree-nodes/" rel="prev" title="The Red-Black Tree: Nodes">Previous post</a>
+                <a href="../the-red-black-tree/" rel="prev" title="The Red-Black Tree">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../red-black-trees-insertion/" rel="next" title="Red-Black Trees: Insertion">Next post</a>
             </li>
         </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
              MathJax.Hub.Config({

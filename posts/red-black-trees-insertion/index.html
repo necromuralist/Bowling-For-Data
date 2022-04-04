@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Inserting Nodes.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red-Black Trees: Insertion | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/red-black-trees-insertion/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../red-black-trees-rotation/" title="Red-Black Trees: Rotation" type="text/html">
+<link rel="next" href="../red-black-properties/" title="Red-Black Properties" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="Red-Black Trees: Insertion">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/red-black-trees-insertion/">
+<meta property="og:description" content="Inserting Nodes.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-03-23T16:37:50-07:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="binary search trees">
+<meta property="article:tag" content="data structures">
+<meta property="article:tag" content="red-black trees">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Red-Black Trees: Insertion</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2022-03-23T16:37:50-07:00" itemprop="datePublished" title="2022-03-23 16:37">2022-03-23 16:37</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgc19e8fe">Insertion</a></li>
+<li>
+<a href="#orgb939f4c">The Inserter</a>
+<ul>
+<li><a href="#org6adbc9c">The Tree Properties</a></li>
+<li><a href="#org13fb175">The Rotator</a></li>
+<li>
+<a href="#orgfa1dfef">Insert</a>
+<ul>
+<li><a href="#org9d14141">The Pseudocode</a></li>
+<li><a href="#orgd8e6781">Some Code</a></li>
+</ul>
+</li>
+<li>
+<a href="#org20749b5">Insert Fixup</a>
+<ul>
+<li><a href="#org531c730">The Pseudocode</a></li>
+<li><a href="#orgf99bc04">The Implementation</a></li>
+<li><a href="#org4414aa0">Some Testing</a></li>
+</ul>
+</li>
+<li><a href="#orgd41b19b">The Call</a></li>
+<li><a href="#org25b164b">All Together Now</a></li>
+</ul>
+</li>
+<li>
+<a href="#org4f9bc0c">The Arborist</a>
+<ul>
+<li>
+<ul>
+<li><a href="#org4658007">The Inserter Attribute</a></li>
+</ul>
+</li>
+<li><a href="#org1ca2141">Testing</a></li>
+</ul>
+</li>
+<li><a href="#org65d18c0">Sources</a></li>
+</ul>
+</div>
+</div>
+<p>
+This is a post on inserting nodes into a tree. It is part of a series of posts starting with <a href="../red-black-trees/">this post</a>.
+</p>
+
+<div id="outline-container-orgc19e8fe" class="outline-2">
+<h2 id="orgc19e8fe">Insertion</h2>
+<div class="outline-text-2" id="text-orgc19e8fe">
+<p>
+Because we need to maintain the <a href="../red-black-properties/">Red-Black Properties</a> inserting a node into a Red-Black Tree is similar to inserting a node into a Binary Search Tree, but it involves a second function that restores the Red-Black properties if needed.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb939f4c" class="outline-2">
+<h2 id="orgb939f4c">The Inserter</h2>
+<div class="outline-text-2" id="text-orgb939f4c">
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Inserter</span><span class="p">:</span>
+    <span class="sd">"""Insert a node into the tree</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      tree: Red-Black-Tree to insert nodes into</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span><span class="p">:</span> <span class="n">Rotator</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="k">return</span>
+</pre></div>
+</div>
+<div id="outline-container-org6adbc9c" class="outline-3">
+<h3 id="org6adbc9c">The Tree Properties</h3>
+<div class="outline-text-3" id="text-org6adbc9c">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">:</span>
+    <span class="sd">"""The tree we're inserting nodes into"""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="nd">@tree</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sapling</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""stores the tree, resets other objects that used the prior tree"""</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="n">sapling</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org13fb175" class="outline-3">
+<h3 id="org13fb175">The Rotator</h3>
+<div class="outline-text-3" id="text-org13fb175">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Rotator</span><span class="p">:</span>
+    <span class="sd">"""A rotator for inserts"""</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span> <span class="o">=</span> <span class="n">Rotator</span><span class="p">(</span><span class="n">tree</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgfa1dfef" class="outline-3">
+<h3 id="orgfa1dfef">Insert</h3>
+<div class="outline-text-3" id="text-orgfa1dfef">
+</div>
+<div id="outline-container-org9d14141" class="outline-4">
+<h4 id="org9d14141">The Pseudocode</h4>
+<div class="outline-text-4" id="text-org9d14141">
+<pre id="rb-insert" style="display:hidden;">
+\begin{algorithm}
+\caption{RBInsert}
+\begin{algorithmic}
+\INPUT The Tree and the Node to insert
+\PROCEDURE{RBInsert}{\textit{T}, \textit{z}}
+
+\STATE \textit{y} $\gets$ \textit{T}.\textsc{NIL}
+\STATE \textit{x} $\gets$ \textit{T}.root
+
+\WHILE {\textit{x} $\neq$ \textit{T}.\textsc{NIL}}
+  \STATE \textit{y} $\gets$ \textit{x}
+
+  \IF {\textit{z}.key &lt; \textit{x}.key}
+    \STATE \textit{x} $\gets$ \textit{x}.left
+  \ELSE
+    \STATE \textit{x} $\gets$ \textit{x}.right
+  \ENDIF
+\ENDWHILE
+
+\STATE \textit{z}.parent $\gets$ \textit{y}
+
+\IF {\textit{y} = \textit{T}.\textsc{NIL}}
+  \STATE \textit{T}.root $\gets$ \textit{z}
+\ELIF {\textit{z}.key &lt; \textit{y}.key}
+  \STATE \textit{y}.left $\gets$ \textit{z}
+\ELSE
+  \STATE \textit{y}.right $\gets$ \textit{z}
+\ENDIF
+
+\STATE \textit{z}.left $\gets$ \textit{T}.\textsc{NIL}
+\STATE \textit{z}.right $\gets$ \textit{T}.\textsc{NIL}
+\STATE \textit{z}.color $\gets$ \textbf{RED}
+\STATE \textsc{RBInsertFixup}(\textit{T}, \textit{z})
+
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+</div>
+<div id="outline-container-orgd8e6781" class="outline-4">
+<h4 id="orgd8e6781">Some Code</h4>
+<div class="outline-text-4" id="text-orgd8e6781">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Insert the node into to the tree</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     node: node to insert into the tree</span>
+<span class="sd">    """</span>
+    <span class="n">hunter</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">ROOT_PARENT</span>
+    <span class="n">hound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+
+    <span class="k">while</span> <span class="n">hound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">LEAF</span><span class="p">:</span>
+	<span class="n">hunter</span> <span class="o">=</span> <span class="n">hound</span>
+	<span class="k">if</span> <span class="n">node</span> <span class="o">&gt;</span> <span class="n">hound</span><span class="p">:</span>
+	    <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="o">.</span><span class="n">right</span>
+	<span class="k">else</span><span class="p">:</span>
+	    <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="o">.</span><span class="n">left</span>
+
+    <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">hunter</span>
+
+    <span class="k">if</span> <span class="n">hunter</span> <span class="ow">is</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">ROOT_PARENT</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">node</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">LEAF</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">LEAF</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fixup</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree</span> <span class="kn">import</span> <span class="n">tree</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree.arborist</span> <span class="kn">import</span> <span class="n">Arborist</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree.forester</span> <span class="kn">import</span> <span class="n">Forester</span>
+
+<span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">node_5</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">node_15</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node_5</span>
+<span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node_15</span>
+<span class="n">rb_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">()</span>
+<span class="n">arborist</span> <span class="o">=</span> <span class="n">Arborist</span><span class="p">(</span><span class="n">rb_tree</span><span class="p">)</span>
+
+<span class="c1"># case: Root is NIL and new-node's parent is NIL</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">rb_tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+
+<span class="c1"># case: Root isn't NIL</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">rb_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">rb_tree</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">rb_tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+
+<span class="c1"># root is less than inserted node</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">rb_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">rb_tree</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">rb_tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+
+<span class="c1"># in all cases</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">is_red</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org20749b5" class="outline-3">
+<h3 id="org20749b5">Insert Fixup</h3>
+<div class="outline-text-3" id="text-org20749b5">
+</div>
+<div id="outline-container-org531c730" class="outline-4">
+<h4 id="org531c730">The Pseudocode</h4>
+<div class="outline-text-4" id="text-org531c730">
+<p>
+This is a separate function to restore the red-black properties (if we messed them up with the insert). It's mostly from <a href="../clrs/">CLRS</a> but they used some kind of weird formatting that made it hard for me to tell what their first <code>else</code> conditional was supposed to contain so I'm using a slightly clearer version that I found at <a href="https://gcallah.github.io/algorithms/RedBlackTrees.html">https://gcallah.github.io/algorithms/RedBlackTrees.html</a>.
+</p>
+
+<pre id="rb-insert-fixup" style="display:hidden;">
+\begin{algorithm}
+\caption{RBInsertFixup}
+\begin{algorithmic}
+\INPUT The Tree and the Node to insert
+\PROCEDURE{RBInsertFixup}{\textit{T}, \textit{z}}
+
+\WHILE {\textit{z.parent.color} = \textbf{RED} }
+  \IF {\textit{z}.parent = \textit{z}.parent.parent.left}
+    \STATE \textit{y} $\gets$ \textit{z}.parent.parent.right
+
+    \IF {\textit{y}.color = \textbf{RED}}
+      \STATE \textit{z}.parent.color $\gets$ \textbf{BLACK}
+      \STATE \textit{y}.color $\gets$ \textbf{BLACK}
+      \STATE \textit{z} $\gets$ \textit{z}.parent.parent
+    \ELSE
+      \IF {\textit{z} = \textit{z}.parent.right}
+        \STATE \textit{z} $\gets$ \textit{z}.parent
+        \STATE \textsc{LeftRotate}(\textit{T}, \textit{z})
+      \ENDIF
+      \STATE \textit{z}.parent.color $\gets$ \textbf{BLACK}
+      \STATE \textit{z}.parent.parent.color $\gets$ \textbf{RED}
+      \STATE \textsc{RightRotate}(\textit{T}, \textit{z})
+    \ENDIF
+    
+  \ELSE
+    \STATE Same as when the parent is left case but with left/right switched
+  \ENDIF
+  \STATE \textit{T}.root.color $\gets$ \textbf{BLACK}
+\ENDWHILE
+
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgf99bc04" class="outline-4">
+<h4 id="orgf99bc04">The Implementation</h4>
+<div class="outline-text-4" id="text-orgf99bc04">
+</div>
+<ul class="org-ul">
+<li>
+<a id="orge8bee63"></a>One Side<br><div class="outline-text-5" id="text-orge8bee63">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fixup_side</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span>
+	       <span class="n">swap_and_rotate</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Fixup either the left or the right sides</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     node: the node that we're fixing</span>
+<span class="sd">     uncle: the node's parent's sibling</span>
+<span class="sd">     swap_and_rotate: whether we need to do a swap and rotation</span>
+<span class="sd">     left: if the node's parent is a left child</span>
+<span class="sd">    """</span>
+    <span class="n">first_rotate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="o">.</span><span class="n">left</span> <span class="k">if</span> <span class="n">left</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="o">.</span><span class="n">right</span>
+    <span class="n">final_rotate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="o">.</span><span class="n">right</span> <span class="k">if</span> <span class="n">left</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="o">.</span><span class="n">left</span>
+
+    <span class="k">if</span> <span class="n">uncle</span><span class="o">.</span><span class="n">is_red</span><span class="p">:</span>
+	<span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+	<span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
+	<span class="n">uncle</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+	<span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+    <span class="k">else</span><span class="p">:</span>
+	<span class="k">if</span> <span class="n">swap_and_rotate</span><span class="p">:</span>
+	    <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+	    <span class="n">first_rotate</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+	<span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+	<span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
+
+	<span class="n">final_rotate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</li>
+
+<li>
+<a id="org1b2483b"></a>Both Sides<br><div class="outline-text-5" id="text-org1b2483b">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fixup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Fix-up the red-black properties after an insert</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     node: the node that was just inserted</span>
+<span class="sd">    """</span>
+    <span class="k">while</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_red</span><span class="p">:</span>
+	<span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_left</span><span class="p">:</span>
+	    <span class="n">uncle</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span>
+	    <span class="bp">self</span><span class="o">.</span><span class="n">fixup_side</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">,</span>
+			    <span class="n">swap_and_rotate</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">is_right</span><span class="p">,</span>
+			    <span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+	    <span class="n">uncle</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span>
+	    <span class="bp">self</span><span class="o">.</span><span class="n">fixup_side</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">,</span>
+			    <span class="n">swap_and_rotate</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">is_left</span><span class="p">,</span>
+			    <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-org4414aa0" class="outline-4">
+<h4 id="org4414aa0">Some Testing</h4>
+<div class="outline-text-4" id="text-org4414aa0">
+<div class="highlight"><pre><span></span><span class="c1"># the parent is black</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root</span>
+<span class="n">child</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<span class="n">child</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+<span class="n">uncle</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">uncle</span>
+<span class="n">rb_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">rb_tree</span>
+<span class="n">forester</span> <span class="o">=</span> <span class="n">Forester</span><span class="p">(</span><span class="n">rb_tree</span><span class="p">,</span> <span class="n">enforce_properties</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="o">.</span><span class="n">fixup</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="c1"># the parent is a RED left child and the uncle is red</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root</span>
+<span class="n">child</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<span class="n">child</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+<span class="n">uncle</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">uncle</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+<span class="n">forester</span> <span class="o">=</span> <span class="n">Forester</span><span class="p">(</span><span class="n">arborist</span><span class="o">.</span><span class="n">tree</span><span class="p">,</span> <span class="n">enforce_properties</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="o">.</span><span class="n">fixup</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">is_black</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="o">.</span><span class="n">is_black</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="c1"># the parent is a RED left child, the uncle is black, and the node is the left child</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
+<span class="n">uncle</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+<span class="n">child</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
+<span class="n">child</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">child</span>
+<span class="n">node_6</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node_6</span>
+<span class="n">node_1</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">child</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node_1</span>
+<span class="n">node_3</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">child</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node_3</span>
+
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="o">.</span><span class="n">fixup</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">arborist</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_3</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_6</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">uncle</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="c1"># the parent is a RED left child, the uncle is black, and the node is the right child</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<span class="n">uncle</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">child</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root</span>
+<span class="n">uncle</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root</span>
+
+<span class="n">node_4</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node_4</span>
+<span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">child</span>
+<span class="n">node_7</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">node_9</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<span class="n">child</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node_7</span>
+<span class="n">child</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node_9</span>
+
+<span class="n">arborist</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="n">forester</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">arborist</span><span class="o">.</span><span class="n">tree</span>
+
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="o">.</span><span class="n">fixup</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">arborist</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_4</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_7</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_9</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">uncle</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd41b19b" class="outline-3">
+<h3 id="orgd41b19b">The Call</h3>
+<div class="outline-text-3" id="text-orgd41b19b">
+<p>
+This is just a thing to make it look more like a function than a class.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Inserts the node into the tree</span>
+
+<span class="sd">    this is an alias for the ``insert`` method</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     node: the node to insert </span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org25b164b" class="outline-3">
+<h3 id="org25b164b">All Together Now</h3>
+<div class="outline-text-3" id="text-org25b164b">
+<div class="highlight"><pre><span></span><span class="n">rb_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">()</span>
+<span class="n">arborist</span> <span class="o">=</span> <span class="n">Arborist</span><span class="p">(</span><span class="n">rb_tree</span><span class="p">)</span>
+<span class="n">forester</span> <span class="o">=</span> <span class="n">Forester</span><span class="p">(</span><span class="n">rb_tree</span><span class="p">)</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">node_5</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node_5</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_5</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+
+<span class="n">node_11</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node_11</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_11</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+
+<span class="n">node_6</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node_6</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_11</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_5</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_6</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+
+<span class="n">node_3</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node_3</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_3</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_5</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">node_1</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node_1</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_1</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_1</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_6</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_5</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+
+<span class="n">node_4</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node_4</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_4</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+
+<span class="n">node_0</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">arborist</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">node_0</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_3</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_1</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_4</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_0</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">inorder</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">tree</span><span class="o">.</span><span class="n">LEAF</span><span class="p">:</span>
+	<span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">", "</span><span class="p">)</span>
+	<span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org4f9bc0c" class="outline-2">
+<h2 id="org4f9bc0c">The Arborist</h2>
+<div class="outline-text-2" id="text-org4f9bc0c">
+<p>
+The arborist takes care of trees.
+</p>
+
+<div class="highlight"><pre><span></span><span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree</span> <span class="kn">import</span> <span class="n">tree</span> <span class="k">as</span> <span class="n">rb_tree</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree.rotator</span> <span class="kn">import</span> <span class="n">Rotator</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Arborist</span><span class="p">:</span>
+    <span class="sd">"""An arborist to take care of trees</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     tree: tree to take care of</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_delete</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="k">return</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="nd">@tree</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sapling</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Sets the tree and wipes out other attributes that use it</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     sapling: new tree</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="n">sapling</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_delete</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+
+<div id="outline-container-org4658007" class="outline-4">
+<h4 id="org4658007">The Inserter Attribute</h4>
+<div class="outline-text-4" id="text-org4658007">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Inserter</span><span class="p">:</span>
+    <span class="sd">"""Something to insert nodes"""</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="o">=</span> <span class="n">Inserter</span><span class="p">(</span><span class="n">tree</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_insert</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org1ca2141" class="outline-3">
+<h3 id="org1ca2141">Testing</h3>
+<div class="outline-text-3" id="text-org1ca2141">
+<div class="highlight"><pre><span></span><span class="n">arborist</span> <span class="o">=</span> <span class="n">Arborist</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org65d18c0" class="outline-2">
+<h2 id="org65d18c0">Sources</h2>
+<div class="outline-text-2" id="text-org65d18c0">
+<p>
+The Main Source:
+</p>
+
+<ul class="org-ul">
+<li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+<p>
+The Clearer RB-Insert-Fixup Pseudocode:
+</p>
+
+<ul class="org-ul">
+<li>Design and Analysis of Algorithms: Red-Black Trees [Internet]. [cited 2022 Mar 23]. Available from: <a href="https://gcallah.github.io/algorithms/RedBlackTrees.html">https://gcallah.github.io/algorithms/RedBlackTrees.html</a>
+</li>
+</ul>
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("rb-insert"));
+});
+</script><script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("rb-insert-fixup"));
+});
+</script>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/binary-search-trees/" rel="tag">binary search trees</a></li>
+            <li><a class="tag p-category" href="../../categories/data-structures/" rel="tag">data structures</a></li>
+            <li><a class="tag p-category" href="../../categories/red-black-trees/" rel="tag">red-black trees</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../red-black-trees-rotation/" rel="prev" title="Red-Black Trees: Rotation">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../red-black-properties/" rel="next" title="Red-Black Properties">Next post</a>
+            </li>
+        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
+             MathJax.Hub.Config({
+               tex2jax: {
+                 inlineMath: [['$','$'], ['\\(','\\)']],
+                 displayMath: [['$$','$$'], ['\\[','\\]']],
+                 processEscapes: true,
+                 processEnvironments: true,
+               },
+               displayAlign: 'center',
+               "HTML-CSS": {
+                 styles: {'.MathJax_Display': {"margin": 0}}
+               }
+             });
+            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>
