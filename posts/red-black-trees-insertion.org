@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-2dfc71c9-ba82-47a4-915c-94ec32c3813d-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-a8bb1404-9116-4c18-a850-48544d7efad4-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -20,27 +20,75 @@
 <<arborist-imports>>
 
 
-<<the-arborist>>
+<<the-inserter>>
 
-    <<left-rotate>>
+    <<inserter-tree-getter>>
 
-    <<right-rotate>>
+    <<inserter-tree-setter>>
+
+    <<inserter-rotate>>
 
     <<insert>>
 
-    <<insert-fixup>>
-
     <<fixup-one-side>>
+
+    <<insert-fixup>>    
+
+    <<insert-call>>
+
+
+<<the-arborist>>
+
+    <<tree-getter>>
+
+    <<tree-setter>>
+
+    <<inserter>>
 #+end_src
 This is a post on inserting nodes into a tree. It is part of a series of posts starting with {{% lancelot "this post" %}}red-black-trees{{% /lancelot %}}.
 
-# When you export for tangling, uncomment these two lines
-# When you build the page with nikola, comment them out
-# #+INCLUDE: "./red-black-trees-rotation.org::*Left Rotate"
-# #+INCLUDE: "./red-black-trees-rotation.org::*Right Rotate"
-
 * Insertion
 Because we need to maintain the {{% doc %}}red-black-properties{{% /doc %}} inserting a node into a Red-Black Tree is similar to inserting a node into a Binary Search Tree, but it involves a second function that restores the Red-Black properties if needed.
+
+* The Inserter
+#+begin_src python :noweb-ref the-inserter
+class Inserter:
+    """Insert a node into the tree
+
+    Args:
+      tree: Red-Black-Tree to insert nodes into
+    """
+    def __init__(self, tree: rb_tree.RedBlackTree) -> None:
+        self._tree = None
+        self.tree = tree
+        self._rotate: Rotator = None
+        return
+#+end_src
+** The Tree Properties
+#+begin_src python :noweb-ref tree-getter
+@property
+def tree(self) -> rb_tree.RedBlackTree:
+    """The tree we're inserting nodes into"""
+    return self._tree
+#+end_src
+
+#+begin_src python :noweb-ref inserter-tree-setter
+@tree.setter
+def tree(self, sapling: rb_tree.RedBlackTree) -> None:
+    """stores the tree, resets other objects that used the prior tree"""
+    self._tree = sapling
+    self._rotate = None
+    return
+#+end_src
+** The Rotator
+#+begin_src python :noweb-ref inserter-rotate
+@property
+def rotate(self) -> Rotator:
+    """A rotator for inserts"""
+    if self._rotate is None:
+        self._rotate = Rotator(tree=self.tree)
+    return self._rotate
+#+end_src
 ** Insert
 *** The Pseudocode
 #+begin_export html
@@ -109,7 +157,7 @@ def insert(self, node: rb_tree.Node) -> None:
     node.left = rb_tree.LEAF
     node.right = rb_tree.LEAF
     node.color = rb_tree.Color.RED
-    self.insert_fixup(node)
+    self.fixup(node)
     return
 #+end_src
 
@@ -134,6 +182,7 @@ expect(rb_tree.root).to(be(node))
 
 # case: Root isn't NIL
 root = tree.Node(20)
+node = tree.Node(10)
 rb_tree = tree.RedBlackTree(root=root)
 arborist.tree = rb_tree
 arborist.insert(node)
@@ -143,6 +192,7 @@ expect(root.left).to(be(node))
 
 # root is less than inserted node
 root = tree.Node(5)
+node = tree.Node(11)
 rb_tree = tree.RedBlackTree(root=root)
 arborist.tree = rb_tree
 arborist.insert(node)
@@ -211,8 +261,8 @@ def fixup_side(self, node: rb_tree.Node, uncle: rb_tree.Node,
      swap_and_rotate: whether we need to do a swap and rotation
      left: if the node's parent is a left child
     """
-    first_rotate = self.left_rotate if left else self.right_rotate
-    final_rotate = self.right_rotate if left else self.left_rotate
+    first_rotate = self.rotate.left if left else self.rotate.right
+    final_rotate = self.rotate.right if left else self.rotate.left
     
     if uncle.is_red:
         node.parent.color = rb_tree.Color.BLACK
@@ -232,7 +282,7 @@ def fixup_side(self, node: rb_tree.Node, uncle: rb_tree.Node,
 
 **** Both Sides
 #+begin_src python :noweb-ref insert-fixup
-def insert_fixup(self, node: rb_tree.Node) -> None:
+def fixup(self, node: rb_tree.Node) -> None:
     """Fix-up the red-black properties after an insert
 
     Args:
@@ -267,7 +317,7 @@ rb_tree = tree.RedBlackTree(root=root)
 arborist.tree = rb_tree
 forester = Forester(rb_tree, enforce_properties=True)
 
-arborist.insert_fixup(child)
+arborist.insert.fixup(child)
 
 expect(root.color).to(be(tree.Color.BLACK))
 expect(parent.color).to(be(tree.Color.BLACK))
@@ -290,7 +340,7 @@ arborist.tree = tree.RedBlackTree(root=root)
 forester = Forester(arborist.tree, enforce_properties=True)
 
 expect(forester.black_height).to(equal(1))
-arborist.insert_fixup(child)
+arborist.insert.fixup(child)
 expect(parent.is_black).to(be_true)
 expect(uncle.is_black).to(be_true)
 expect(forester.black_height).to(equal(2))
@@ -308,7 +358,7 @@ child.left = node_1
 node_3 = tree.Node(3, tree.Color.BLACK)
 child.right = node_3
 
-arborist.insert_fixup(child)
+arborist.insert.fixup(child)
 
 expect(arborist.tree.root).to(be(parent))
 expect(parent.color).to(be(tree.Color.BLACK))
@@ -340,7 +390,7 @@ child.right = node_9
 arborist.tree = tree.RedBlackTree(root)
 forester.tree = arborist.tree
 
-arborist.insert_fixup(child)
+arborist.insert.fixup(child)
 
 expect(child).to(be(arborist.tree.root))
 expect(child.color).to(be(tree.Color.BLACK))
@@ -354,6 +404,20 @@ expect(root.left).to(be(node_9))
 expect(root.right).to(be(uncle))
 expect(forester.height).to(equal(2))
 expect(forester.black_height).to(equal(2))
+#+end_src
+** The Call
+This is just a thing to make it look more like a function than a class.
+
+#+begin_src python :noweb-ref insert-call
+def __call__(self, node: rb_tree.Node) -> None:
+    """Inserts the node into the tree
+
+    this is an alias for the ``insert`` method
+
+    Args:
+     node: the node to insert 
+    """
+    return self.insert(node)
 #+end_src
 ** All Together Now
 #+begin_src python :results none
@@ -425,6 +489,59 @@ def inorder(node: tree.Node):
         print(f"{node.key} ({node.color})", end=", ")
         inorder(node.right)
     return
+#+end_src
+* The Arborist
+The arborist takes care of trees.
+
+#+begin_src python :noweb-ref arborist-imports
+# this project
+from bowling.data_structures.red_black_tree import tree as rb_tree
+from bowling.data_structures.red_black_tree.rotator import Rotator
+#+end_src
+
+#+begin_src python :noweb-ref the-arborist
+class Arborist:
+    """An arborist to take care of trees
+
+    Args:
+     tree: tree to take care of
+    """
+    def __init__(self, tree: rb_tree.RedBlackTree) -> None:
+        self._tree = None
+        self.tree = tree
+        self._insert = None
+        self._delete = None
+        return
+#+end_src
+
+
+#+begin_src python :noweb-ref arborist-tree-setter
+@tree.setter
+def tree(self, sapling: rb_tree.RedBlackTree) -> None:
+    """Sets the tree and wipes out other attributes that use it
+
+    Args:
+     sapling: new tree
+    """
+    self._tree = sapling
+    self._insert = None
+    self._delete = None
+    return
+#+end_src
+
+*** The Inserter Attribute
+#+begin_src python :noweb-ref inserter
+@property
+def insert(self) -> Inserter:
+    """Something to insert nodes"""
+    if self._insert is None:
+        self._insert = Inserter(tree=self.tree)
+    return self._insert
+#+end_src
+
+** Testing
+#+begin_src python :results none
+arborist = Arborist(tree.RedBlackTree())
 #+end_src
 * Sources
 The Main Source:
