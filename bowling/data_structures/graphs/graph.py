@@ -16,10 +16,10 @@ class Vertex:
     """A single node in a graph
 
     Args:
+     identifier: something to identify the node
      color: the 'discovery' state of the node
      distance: The number of edges to the root
      predecessor: The 'parent' of the node in a tree
-     identifier: identifier to distinguish the node
     """
     def __init__(self, identifier, color: Enum=Color.WHITE,
                  distance: float=INFINITY,
@@ -31,18 +31,16 @@ class Vertex:
         return
 
     def __str__(self) -> str:
-        return str(self.identifier)
+        return (f"{self.identifier}: {self.color}, "
+                f"distance: {self.distance}, predecessor: {self.predecessor}")
 
 
 class Graph:
     """A graph implementation
 
-    Args:
-     adjacent: dict of vertex to adjacent node set
     """
-    def __init__(self, adjacent: dict=None) -> None:
+    def __init__(self) -> None:
         self._adjacent = None
-        self.adjacent = adjacent
         return
 
     @property
