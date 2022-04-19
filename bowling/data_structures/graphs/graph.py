@@ -3,6 +3,9 @@ from __future__ import annotations
 from collections import defaultdict
 from enum import Enum
 
+# pypi
+from attrs import define
+
 
 class Color(Enum):
     WHITE = 1
@@ -12,6 +15,7 @@ class Color(Enum):
 INFINITY = float("inf")
 
 
+@define(eq=False)
 class Vertex:
     """A single node in a graph
 
@@ -21,15 +25,11 @@ class Vertex:
      distance: The number of edges to the root
      predecessor: The 'parent' of the node in a tree
     """
-    def __init__(self, identifier, color: Enum=Color.WHITE,
-                 distance: float=INFINITY,
-                 predecessor: Vertex=None) -> None:
-        self.identifier = identifier
-        self.color = color
-        self.distance = distance
-        self.predecessor = predecessor
-        return
-
+    identifier: int
+    color: Enum=Color.WHITE
+    distance: float=INFINITY
+    predecessor: Vertex=None
+    
     def __str__(self) -> str:
         return (f"{self.identifier}: {self.color}, "
                 f"distance: {self.distance}, predecessor: {self.predecessor}")
@@ -41,6 +41,7 @@ class Graph:
     """
     def __init__(self) -> None:
         self._adjacent = None
+        self._vertices = None
         return
 
     @property
@@ -65,13 +66,25 @@ class Graph:
         self._adjacent = new_adjacent
         return
 
+    @property
+    def vertices(self) -> set:
+        """The vertices in this graph"""
+        if self._vertices is None:
+            self._vertices = set()
+        return self._vertices
+
     def add(self, node_1: Vertex, node_2: Vertex) -> None:
-        """Add (bidirectional) edge
+        """Add edge 
+    
+        Warning:
+         This assumes an undirected graph, change it for a directed graph
     
         Args:
          node_1: node on one end of the edge
          node_2: Node on the other end of the edge
         """
+        self.vertices.add(node_1)
+        self.vertices.add(node_2)
         self.adjacent[node_1].add(node_2)
         self.adjacent[node_2].add(node_1)
         return

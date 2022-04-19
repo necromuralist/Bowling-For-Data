@@ -30,6 +30,8 @@
 
     <<adjacencies>>
 
+    <<vertices>>
+
     <<add-element>>
 
     <<getitem>>
@@ -44,6 +46,9 @@ This is a starter post for an introduction to Graphs.
 from __future__ import annotations
 from collections import defaultdict
 from enum import Enum
+
+# pypi
+from attrs import define
 #+end_src
 
 ** Constants
@@ -58,7 +63,10 @@ INFINITY = float("inf")
 
 * A Vertex Implementation
 
+Note to future self: the default setting for ~attrs.define~ makes the object to unhashable, to make it hashable by object identity pass in ~eq=False~ otherwise trying to add the object to a set will raise an error.
+
 #+begin_src python :noweb-ref the-vertex
+@define(eq=False)
 class Vertex:
     """A single node in a graph
 
@@ -68,15 +76,11 @@ class Vertex:
      distance: The number of edges to the root
      predecessor: The 'parent' of the node in a tree
     """
-    def __init__(self, identifier, color: Enum=Color.WHITE,
-                 distance: float=INFINITY,
-                 predecessor: Vertex=None) -> None:
-        self.identifier = identifier
-        self.color = color
-        self.distance = distance
-        self.predecessor = predecessor
-        return
-
+    identifier: int
+    color: Enum=Color.WHITE
+    distance: float=INFINITY
+    predecessor: Vertex=None
+    
     def __str__(self) -> str:
         return (f"{self.identifier}: {self.color}, "
                 f"distance: {self.distance}, predecessor: {self.predecessor}")
@@ -89,6 +93,7 @@ class Graph:
     """
     def __init__(self) -> None:
         self._adjacent = None
+        self._vertices = None
         return
 #+end_src
 ** Adjacencies
@@ -117,15 +122,31 @@ def adjacent(self, new_adjacent: dict) -> None:
     self._adjacent = new_adjacent
     return
 #+end_src
+** Vertices
+The representation we're using is an adjacency list, but sometimes you need to traverse the vertices. So I'm going to make an alias to the adjacency list keys, in the assumption that every node in the graph is a key in the dict. This might not be true in a directed graph, so I'll have to revisit it later.
+
+#+begin_src python :noweb-ref vertices
+@property
+def vertices(self) -> set:
+    """The vertices in this graph"""
+    if self._vertices is None:
+        self._vertices = set()
+    return self._vertices
+#+end_src
 ** Add Item
 #+begin_src python :noweb-ref add-element
 def add(self, node_1: Vertex, node_2: Vertex) -> None:
-    """Add (bidirectional) edge
+    """Add edge 
+
+    Warning:
+     This assumes an undirected graph, change it for a directed graph
 
     Args:
      node_1: node on one end of the edge
      node_2: Node on the other end of the edge
     """
+    self.vertices.add(node_1)
+    self.vertices.add(node_2)
     self.adjacent[node_1].add(node_2)
     self.adjacent[node_2].add(node_1)
     return
