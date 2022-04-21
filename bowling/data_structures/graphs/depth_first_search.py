@@ -26,6 +26,7 @@ class DFSVertex(graph.Vertex):
     """
     discovered: int = None
     finished: int = None
+
     def __str__(self) -> str:
         return (super().__str__() + 
         f", discovered: {self.discovered}, finished: {self.finished}")
