@@ -1,6 +1,7 @@
 # python
 from __future__ import annotations
-from dataclass import dataclass, field
+from collections import defaultdict
+from dataclasses import dataclass, field
 
 INFINITE = INFINITY = float("inf")
 
@@ -16,10 +17,13 @@ class Vertex:
     """
     identifier: str=field(compare=False)
     path_estimate: float=INFINITE
-    predecessor: Vertex=field(None, compare=False)
+    predecessor: Vertex=field(default=None, compare=False)
 
     def __repr__(self) -> str:
         return f"{self.identifier} (path-estimate={self.path_estimate})"
+
+    def __hash__(self) -> int:
+        return hash(self.identifier)
 
 
 class Edge:
@@ -45,6 +49,7 @@ class Graph:
     def __init__(self) -> None:
         self.vertices = set()
         self.edges = set()
+        self.adjacent = defaultdict(set)
         return
 
     def add_edge(self, edge: Edge) -> None:
@@ -56,6 +61,7 @@ class Graph:
         self.edges.add(edge)
         self.vertices.add(edge.source)
         self.vertices.add(edge.target)
+        self.adjacent[edge.source].add(edge)
         return
 
 

@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-5c26b1e3-5210-4b57-8434-5ba1c391eb23-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-a56a942a-85a4-42b0-bacb-94db45409923-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -24,6 +24,8 @@
 <<the-vertex>>
 
     <<vertex-representation>>
+
+    <<vertex-hash>>
 
 
 <<the-edge>>
@@ -45,7 +47,8 @@
 #+begin_src python :noweb-ref constants
 # python
 from __future__ import annotations
-from dataclass import dataclass, field
+from collections import defaultdict
+from dataclasses import dataclass, field
 
 INFINITE = INFINITY = float("inf")
 #+end_src
@@ -62,12 +65,17 @@ class Vertex:
     """
     identifier: str=field(compare=False)
     path_estimate: float=INFINITE
-    predecessor: Vertex=field(None, compare=False)
+    predecessor: Vertex=field(default=None, compare=False)
 #+end_src
 ** Object Representation
 #+begin_src python :noweb-ref vertex-representation
 def __repr__(self) -> str:
     return f"{self.identifier} (path-estimate={self.path_estimate})"
+#+end_src
+** Vertex Hash
+#+begin_src python :noweb-ref vertex-hash
+def __hash__(self) -> int:
+    return hash(self.identifier)
 #+end_src
 * The Edge
 #+begin_src python :noweb-ref the-edge
@@ -97,6 +105,7 @@ class Graph:
     def __init__(self) -> None:
         self.vertices = set()
         self.edges = set()
+        self.adjacent = defaultdict(set)
         return
 #+end_src
 ** Add Edge
@@ -110,6 +119,7 @@ def add_edge(self, edge: Edge) -> None:
     self.edges.add(edge)
     self.vertices.add(edge.source)
     self.vertices.add(edge.target)
+    self.adjacent[edge.source].add(edge)
     return
 #+end_src
 * Initialize Single Source

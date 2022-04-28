@@ -1,0 +1,100 @@
+#+BEGIN_COMMENT
+.. title: Shortest Paths: Dijkstra's Algorithm
+.. slug: shortest-paths-dijkstras-algorithm
+.. date: 2022-04-27 19:59:56 UTC-07:00
+.. tags: 
+.. category: 
+.. link: 
+.. description: 
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-a56a942a-85a4-42b0-bacb-94db45409923-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* Setup
+#+begin_src python :results none
+# python
+from pprint import pprint
+from queue import PriorityQueue
+
+# pypi
+from expects import be, equal, expect 
+# this project
+from bowling.data_structures.graphs.shortest_paths import (
+    Edge,
+    Graph,
+    Vertex,
+    initialize_single_source,
+    relax,
+    )
+#+end_src
+* Dijkstra's Algorithm
+#+begin_src python :results none
+def dijkstras_shortest_paths(graph: Graph, source: Vertex) -> None:
+    """Find the shortest paths beginning at the source
+
+    Args:
+     graph: the vertices and edges to use
+     source: the starting vertex for the paths
+    """
+    initialize_single_source(graph, source)
+    shortest = set()
+    queue = PriorityQueue()
+    for vertex in graph.vertices:
+        queue.put(vertex)
+    while not queue.empty():
+        vertex = queue.get()
+        shortest.add(vertex)
+        for edge in graph.adjacent[vertex]:
+            relax(edge)
+    return
+#+end_src
+* Test It
+#+begin_src python :results output :exports both
+nodes = dict()
+for node in "stxyz":
+    nodes[node] = Vertex(identifier=node)
+
+graph = Graph()
+
+graph.add_edge(Edge(nodes["s"], nodes["t"], 10))
+graph.add_edge(Edge(nodes["s"], nodes["y"], 5))
+graph.add_edge(Edge(nodes["t"], nodes["x"], 1))
+graph.add_edge(Edge(nodes["t"], nodes["y"], 2))
+
+graph.add_edge(Edge(nodes["x"], nodes["z"], 4))
+
+graph.add_edge(Edge(nodes["y"], nodes["t"], 3))
+graph.add_edge(Edge(nodes["y"], nodes["x"], 9))
+graph.add_edge(Edge(nodes["y"], nodes["z"], 2))
+
+graph.add_edge(Edge(nodes["z"], nodes["s"], 7))
+graph.add_edge(Edge(nodes["z"], nodes["x"], 6))
+
+dijkstras_shortest_paths(graph, nodes["s"])
+
+pprint(graph.vertices)
+
+expected = (("s", 0, None),
+            ("y", 5, "s"),
+            ("z", 7, "y"),
+            ("t", 8, "y"),
+            ("x", 9, "t"))
+
+for node, path_estimate, predecessor in expected:
+    parent = nodes[predecessor] if predecessor is not None else predecessor
+    expect(nodes[node].path_estimate).to(equal(path_estimate))
+    expect(nodes[node].predecessor).to(be(parent))
+#+end_src
+
+#+RESULTS:
+: {s (path-estimate=0),
+:  y (path-estimate=5),
+:  z (path-estimate=7),
+:  t (path-estimate=8),
+:  x (path-estimate=9)}
