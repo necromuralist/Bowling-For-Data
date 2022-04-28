@@ -1,0 +1,227 @@
+#+BEGIN_COMMENT
+.. title: Shortest Paths: Bellman-Ford
+.. slug: shortest-paths-bellman-ford
+.. date: 2022-04-27 18:25:23 UTC-07:00
+.. tags: graphs,shortest paths,trees,algorithms,data structures
+.. category: Graphs
+.. link: 
+.. description: The Bellman-Ford Algorithm for finding the shortest paths in a graph from a single source.
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-5c26b1e3-5210-4b57-8434-5ba1c391eb23-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+#+begin_src python :tangle ../bowling/data_structures/graphs/shortest_paths.py
+<<constants>>
+
+
+<<the-vertex>>
+
+    <<vertex-representation>>
+
+
+<<the-edge>>
+
+    <<edge-representation>>
+
+
+<<the-graph>>
+
+    <<add-edge>>
+
+
+<<initialize-single-source>>
+
+
+<<relax>>
+#+end_src
+* Set Up
+#+begin_src python :noweb-ref constants
+# python
+from __future__ import annotations
+from dataclass import dataclass, field
+
+INFINITE = INFINITY = float("inf")
+#+end_src
+* The Vertex
+#+begin_src python :noweb-ref the-vertex
+@dataclass(order=True)
+class Vertex:
+    """A vertex for the single-source shortest paths problem
+
+    Args:
+     identifier: something to distinguish the vertex
+     path_estimate: the estimate of the path weight
+     predecessor: the vertex that precedes this one in the path
+    """
+    identifier: str=field(compare=False)
+    path_estimate: float=INFINITE
+    predecessor: Vertex=field(None, compare=False)
+#+end_src
+** Object Representation
+#+begin_src python :noweb-ref vertex-representation
+def __repr__(self) -> str:
+    return f"{self.identifier} (path-estimate={self.path_estimate})"
+#+end_src
+* The Edge
+#+begin_src python :noweb-ref the-edge
+class Edge:
+    """A directed edge
+
+    Args:
+     source: tail vertex of the edge
+     target: head vertex of the edge
+     weight: the weight of the edge
+    """
+    def __init__(self, source: Vertex, target: Vertex, weight: float) -> None:
+        self.source = source
+        self.target = target
+        self.weight = weight
+        return
+#+end_src
+** The Edge Representation
+#+begin_src python :noweb-ref edge-representation
+def __repr__(self) -> str:
+    return f"{self.source} -- {self.weight} --> {self.target}"
+#+end_src
+* The Graph
+#+begin_src python :noweb-ref the-graph
+class Graph:
+    """Directed Graph for shortest path problem"""
+    def __init__(self) -> None:
+        self.vertices = set()
+        self.edges = set()
+        return
+#+end_src
+** Add Edge
+#+begin_src python :noweb-ref add-edge
+def add_edge(self, edge: Edge) -> None:
+    """Add the edge to the graph
+
+    Args:
+     edge: the directed edge to add
+    """
+    self.edges.add(edge)
+    self.vertices.add(edge.source)
+    self.vertices.add(edge.target)
+    return
+#+end_src
+* Initialize Single Source
+#+begin_src python :noweb-ref initialize-single-source
+def initialize_single_source(graph: Graph, source: Vertex) -> None:
+    """Setup the vertices of the graphs for single-source shortest path
+
+    Args:
+     graph: graph with vertices to set up
+     source: the vertex to use as the start of the shortest paths tree
+    """
+    for vertex in graph.vertices:
+        vertex.path_estimate = INFINITY
+        vertex.predecessor = None
+    source.path_estimate = 0
+    return
+#+end_src
+* Relax
+#+begin_src python :noweb-ref relax
+def relax(edge: Edge) -> None:
+    """Check if target Vertex is improved using the source vertex
+
+    Args:
+     edge: directed edge with source, target, and weight
+    """
+    if edge.target.path_estimate > edge.source.path_estimate + edge.weight:
+        edge.target.path_estimate = edge.source.path_estimate + edge.weight
+        edge.target.predecessor = edge.source
+    return
+#+end_src
+* Bellman-Ford
+** Set Up
+#+begin_src python :results none
+# python
+from pprint import pprint
+
+# pypi
+from expects import be, be_true, equal, expect
+
+# this project
+from bowling.data_structures.graphs.shortest_paths import (
+    Edge,
+    Graph,
+    Vertex,
+    initialize_single_source,
+    relax,
+    )
+
+SUCCEEDED, NEGATIVE_WEIGHT_CYCLE = True, False
+#+end_src
+** The Function
+#+begin_src python :results none
+def bellman_ford(graph: Graph, source: Vertex) -> bool:
+    """Find the shortest paths using the Bellman-Ford algorithm
+
+    Args:
+     graph: the graph to process
+     source: the vertex to start the paths from
+
+    Returns:
+     True if finished, False if there was a negtive-weight cycle in the grahp
+    """
+    initialize_single_source(graph, source)
+    for _ in range(1, len(graph.vertices)):
+        for edge in graph.edges:
+            relax(edge)
+    for edge in graph.edges:
+        if edge.target.path_estimate > edge.source.path_estimate + edge.weight:
+            return NEGATIVE_WEIGHT_CYCLE
+    return SUCCEEDED
+#+end_src
+* Test It
+#+begin_src python :results none
+nodes = dict()
+for label in "stxyz":
+    nodes[label] = Vertex(label)
+
+graph = Graph()
+graph.add_edge(Edge(nodes["s"], nodes["t"], 6))
+graph.add_edge(Edge(nodes["s"], nodes["y"], 7))
+graph.add_edge(Edge(nodes["t"], nodes["x"], 5))
+graph.add_edge(Edge(nodes["t"], nodes["y"], 8))
+graph.add_edge(Edge(nodes["t"], nodes["z"], -4))
+graph.add_edge(Edge(nodes["x"], nodes["t"], -2))
+graph.add_edge(Edge(nodes["x"], nodes["t"], -2))
+graph.add_edge(Edge(nodes["y"], nodes["x"], -3))
+graph.add_edge(Edge(nodes["y"], nodes["z"], 9))
+graph.add_edge(Edge(nodes["z"], nodes["x"], 7))
+graph.add_edge(Edge(nodes["z"], nodes["s"], 2))
+
+expect(bellman_ford(graph, nodes["s"])).to(be_true)
+#+end_src
+
+#+begin_src python :results output :exports both
+pprint(nodes)
+
+expected = (("s", 0, None),
+            ("t", 2, "x"),
+            ("x", 4, "y"),
+            ("y", 7, "s"),
+            ("z", -2, "t")
+)
+
+for node, path_weight, predecessor in expected:
+    expect(nodes[node].path_estimate).to(equal(path_weight))
+    parent = nodes[predecessor] if predecessor is not None else predecessor
+    expect(nodes[node].predecessor).to(be(parent))
+#+end_src
+
+#+RESULTS:
+: {'s': s (path-estimate=0),
+:  't': t (path-estimate=2),
+:  'x': x (path-estimate=4),
+:  'y': y (path-estimate=7),
+:  'z': z (path-estimate=-2)}
