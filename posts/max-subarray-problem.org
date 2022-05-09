@@ -1,23 +1,23 @@
 #+BEGIN_COMMENT
 .. title: The Maximum-Subarray Problem
 .. slug: the-maximum-subarray-problem
-.. date: 2021-09-26 16:49:09 UTC-07:00
+.. date: 2022-05-07 16:49:09 UTC-07:00
 .. tags: divide-and-conquer,algorithms
 .. category: Divide-and-Conquer
 .. link: 
 .. description: 
 .. type: text
-
+.. has_pseudocode: yeah
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f0a39cb0-27b7-491a-9390-a037f1429b5a-ssh.json
+#+PROPERTY: header-args :session /ssh:BravoPypy:.local/share/jupyter/runtime/kernel-7f012fbb-90bb-4e89-80f0-7b0646aeb7fa.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
-* Beginning
+* Imports and Setup
 ** Imports
 #+begin_src python :results none
 # python
@@ -57,6 +57,8 @@ PLOT = Plot()
 Output = namedtuple("Output", ["start", "end", "gain", "runtime"])
 #+end_src
 * Implementations
+The motivation given by the text is that we have some data that varies over time and we want to find the pair of points that maximizes the gain from the first point to the second.
+
 ** Test Cases
 #+begin_src python :results none
 CASE_ONE = Case([100, 113, 110, 85, 105, 102, 86, 63, 81,
@@ -81,7 +83,7 @@ chart = altair.Chart(melted).mark_line().encode(
     x=altair.X("index", type="quantitative"),
     y=altair.Y("Data", type="quantitative"),
     color="Data Source").properties(
-        title="Sample Input One", width=800, height=525)
+        title="Sample Input One", width=PLOT.width, height=525)
 
 save_it(chart, "sample-input-one")
 #+end_src
@@ -95,6 +97,8 @@ save_it(chart, "sample-input-one")
 
 
 ** Brute Force
+The first way we're going to find the maximum gain is using Brute Force - we're going to calculate the gain for each pair of points and picking the pair with the best gain. Since this involves checking every pair we're essentially looking at a Handshake Problem so the number of comparisons should be \(\frac{n(n - 1)}{2}\) or \(\Theta(n^2)\).
+
 #+begin_src python :results none
 def brute_force_maximum_subarray(source: Sequence) -> Output:
     """Finds the subarray with maximum gain
@@ -109,7 +113,6 @@ def brute_force_maximum_subarray(source: Sequence) -> Output:
     best_gain = -infinity
     count = 0
     for left in range(len(source) - 1):
-        count += 1
         for right in range(left + 1, len(source)):
             count += 1
             gain = source[right] - source[left]
@@ -125,15 +128,30 @@ output = brute_force_maximum_subarray(CASE_ONE.inputs)
 assert output.start == CASE_ONE.left
 assert output.end == CASE_ONE.right
 assert output.gain == CASE_ONE.max
-print(f"count = {output.runtime}, n^2 = {n**2}, n(n-1)/2 = {int((n * (n - 1))/2)}")
+print(f"count = {output.runtime}")
+print(f"n(n-1)/2 = {int((n * (n - 1))/2)}")
+print(f"n^2 = {n**2}")
 #+end_src
 
 #+RESULTS:
 : n = 17
-: count = 152, n^2 = 289, n(n-1)/2 = 136
+: count = 136
+: n(n-1)/2 = 136
+: n^2 = 289
 
 ** Recursive
+Looking at the brute-force solution you might think - "That was a check of point-pairs, why is this called 'max-subarray'?". Well, we're going to improve upon the brute-force implementation by doing a data-transformation. If you look at the data that we set up you might notice that there's the point values and then there's the change in value from one point to another. The changes are there because we can re-think our problem not as the maximum of increases between pair points, but instead as the maximum of point-change-sums. 
+
+In our ~CASE_ONE~ inputs, the biggest gain came from point 7 (with a value of 63) and point 11 (with a value of 106). If we look at the difference between consecutive points from points 7 to 11 we get 
+-23, 18, 20, -7, 12 which sums to 20, which is the maximum sub-array total for this data set. To solve this problem we're going to need to find this sub-array. Since we stated that we're going to use a divide-and-conquer approach we know that we're going to repeatedly break the inputs up into (in this case) two separate sub-sets to solve. Every time we break the inputs into two groups we end up with three possibilities as to where the maximum sub-array lies:
+
+ - in the left half
+ - in the right half
+ - crossing from the left half over the split to the right half
+
 *** Max-Crossing-Subarray
+This is a function that will find the best subarray in the left and in the right halves of the sub-array and combines them to find the gain across the mid-point of the subarray.
+
 #+begin_src python :results none
 def find_max_crossing_subarray(source: Sequence,
                                low: int, mid: int,
@@ -152,28 +170,29 @@ def find_max_crossing_subarray(source: Sequence,
     count, best_left, best_right= 0, None, None
     left_gain = right_gain = -infinity
     gain = 0
-    for i in range(mid, low, -1):
+    for left in range(mid, low, -1):
         count += 1
-        gain += source[i]
+        gain += source[left]
         if gain > left_gain:
             left_gain = gain
-            best_left = i
+            best_left = left
     gain = 0
-    for j in range(mid + 1, high):
+    for right in range(mid + 1, high):
         count += 1
-        gain += source[j]
+        gain += source[right]
         if gain > right_gain:
             right_gain = gain
-            best_right = j
+            best_right = right
     return Output(best_left, best_right, left_gain + right_gain, count)
 #+end_src
 *** Max-Subarray
+The ~find_maximum_subarray~ function finds the start and end indices for the best gain.
 
 #+begin_src python :results none
 def find_maximum_subarray(source: Sequence,
                           low: int, high: int) -> Output:
     """Find the sub-array that maximizes gain
-
+ 
     Args:
      source: sequence to maximize
      low: lower-bound for indices in source
@@ -193,16 +212,20 @@ def find_maximum_subarray(source: Sequence,
         cross_mid = find_max_crossing_subarray(source, low, mid, high)
 
         count = left.runtime + right.runtime + cross_mid.runtime
+        
+        best_gain = max(left.gain, right.gain, cross_mid.gain)
 
-        if left.gain >= right.gain and left.gain >= cross_mid.gain:
+        if left.gain == best_gain:
             start, end, gain, count = left.start, left.end, left.gain, count
-        elif right.gain >= left.gain and right.gain >= cross_mid.gain:
+        elif right.gain == best_gain:
             start, end, gain, count = right.start, right.end, right.gain, count
         else:
             start, end, gain, count = (cross_mid.start, cross_mid.end,
                                        cross_mid.gain, count)
     return Output(start, end, gain, count)
 #+end_src
+
+The ~maximum_subarray~ converts our list of values to a list of changes between consecutive values so that we can use our divide-and-conquer function.
 
 #+begin_src python :results none
 def maximum_subarray(source: Sequence) -> Output:
@@ -231,14 +254,23 @@ assert output.start == CASE_ONE.left, f"Expected: {CASE_ONE.left}, Actual: {outp
 assert output.end == CASE_ONE.right, f"Expected: {CASE_ONE.right}, Actual: {output.end}"
 assert output.gain == CASE_ONE.max, f"Expected: {CASE_ONE.max}, Actual: {output.gain}"
 print(f"left: {output.start}, right: {output.end}, gain: {output.gain}")
-print(f"count = {output.runtime}, n^2 = {n**2}, n(n-1)/2 = {int((n * (n - 1))/2)}, n log n : {n * log2(n): 0.2f}")
+print(f"count = {output.runtime}")
+print(f"n(n-1)/2 = {int((n * (n - 1))/2)}")
+print(f"n log n : {n * log2(n): 0.2f}")
+print(f"n^2 = {n**2}")
 #+end_src
 
 #+RESULTS:
 : n = 17
 : left: 7, right: 11, gain: 43
-: count = 50, n^2 = 289, n(n-1)/2 = 136, n log n :  69.49
+: count = 50
+: n(n-1)/2 = 136
+: n log n :  69.49
+: n^2 = 289
+
+By transforming the problem to one that lets us use divide-and-conquer we reduced the number of comparisons from 136 to 50. More generally, if we look at ~find_maximum_subarray~ we see that we're splitting the input in half before each of the recursive calls so we're going to make \(log_2 n\) splits and at each level of the recursions tree we're going to have \(2n\) inputs (~left~ and ~right~ are each \(\frac{1}{2} n\) and ~cross_mid~ uses \(n\)) so we're going from \(\Theta(n^2)\) for the brute-force verios to \(\Theta(n \log n)\) for the divide-and-conquer version.
 ** Alternate Version
+Let's try another version that uses the idea of summing the changes between consecutive points but doesn't use recursion.
 
 #+begin_src python :results none
 def max_subarray_2(source: Sequence) -> Output:
@@ -280,17 +312,17 @@ left, right, gain, count = max_subarray_2(CASE_ONE.inputs)
 assert left == CASE_ONE.left, f"Expected: {CASE_ONE.left}, Actual: {left}"
 assert right == CASE_ONE.right, f"Expected: {CASE_ONE.right}, Actual: {right}"
 assert gain == CASE_ONE.max, f"Expected: {CASE_ONE.max}, Actual: {gain}"
-print(f"left: {left}, rigt: {right}, gain: {gain}")
+print(f"left: {left}, right: {right}, gain: {gain}")
 
 print(f"Count: {count}")
 #+end_src
 
 #+RESULTS:
 : n = 17
-: left: 7, rigt: 11, gain: 43
+: left: 7, right: 11, gain: 43
 : Count: 17
 
-The count here cheats a little because I'm not counting the conversion from the original numbers to the changes, although that would wash out with the asymtotic counts anyway.
+So, without using divide-and-conquer we get an even better runtime - it was the data transformation that was the most valuable part in improving the performance.
 
 * Comparing the Methods
 
@@ -306,8 +338,10 @@ def run_thing(thing, inputs, name):
 brutes = []
 divided = []
 linear = []
+counts = []
 
-for exponent in range(1, 6):
+UPPER = 6
+for exponent in range(1, UPPER):
     count = 10**exponent
     title = f"n = {count:,}"
     underline = "=" * len(title)
@@ -318,6 +352,7 @@ for exponent in range(1, 6):
     brutes.append(run_thing(brute_force_maximum_subarray, inputs, "Brute Force"))
     divided.append(run_thing(maximum_subarray, inputs, "Divide and Conquer"))
     linear.append(run_thing(max_subarray_2, inputs, "Linear"))
+    counts.append(count)
 #+end_src
 
 #+RESULTS:
@@ -326,87 +361,85 @@ for exponent in range(1, 6):
 n = 10
 ======
 ,*** Brute Force ***
-	Elapsed Time: 0:00:00.000174
+	Elapsed Time: 0:00:00.001054
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:00:00.000958
+	Elapsed Time: 0:00:00.000249
 ,*** Linear ***
-	Elapsed Time: 0:00:00.000112
+	Elapsed Time: 0:00:00.000127
 
 n = 100
 =======
 ,*** Brute Force ***
-	Elapsed Time: 0:00:00.002500
+	Elapsed Time: 0:00:00.002403
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:00:00.001766
+	Elapsed Time: 0:00:00.002198
 ,*** Linear ***
-	Elapsed Time: 0:00:00.000148
+	Elapsed Time: 0:00:00.000175
 
 n = 1,000
 =========
 ,*** Brute Force ***
-	Elapsed Time: 0:00:00.002426
+	Elapsed Time: 0:00:00.002527
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:00:00.018993
+	Elapsed Time: 0:00:00.017359
 ,*** Linear ***
-	Elapsed Time: 0:00:00.002295
+	Elapsed Time: 0:00:00.002204
 
 n = 10,000
 ==========
 ,*** Brute Force ***
-	Elapsed Time: 0:00:00.101919
+	Elapsed Time: 0:00:00.071900
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:00:00.046420
+	Elapsed Time: 0:00:00.044104
 ,*** Linear ***
-	Elapsed Time: 0:00:00.000206
+	Elapsed Time: 0:00:00.000224
 
 n = 100,000
 ===========
 ,*** Brute Force ***
-	Elapsed Time: 0:00:10.061145
+	Elapsed Time: 0:00:07.506323
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:00:00.029702
+	Elapsed Time: 0:00:00.023113
 ,*** Linear ***
-	Elapsed Time: 0:00:00.000691
+	Elapsed Time: 0:00:00.001233
 #+end_example
 
 *** Plot It
 
 
-#+begin_src python :results none
-tooltips = [
-    ("Algorithm", "@Variable"),
-    ("Runtime", "@value{0,}")
-]
-
-hover = HoverTool(tooltips=tooltips)
-
+#+begin_src python :results output :exports both
 runtimes = pandas.DataFrame({"Brute Force": brutes,
                              "Divide and Conquer": divided,
-                             "Linear": linear})
-line = runtimes.hvplot(tools=[hover])
-scatter = runtimes.hvplot.scatter(tools=[hover], group_label="Algorithm")
-plot = (line * scatter).opts(
-    title="Randomized Input Runtimes",
-    width=PLOT.width)
-output = Embed(plot=plot, file_name="three_runtimes")()
+                             "Linear": linear,
+                             "Input Size": counts})
+
+melted = runtimes.melt(id_vars=["Input Size"],
+                       value_vars=["Brute Force", "Divide and Conquer", "Linear"],
+                       var_name="Algorithm", value_name="Comparisons")
+
+chart = altair.Chart(melted).mark_line(point=altair.OverlayMarkDef()).encode(
+    x=altair.X("Input Size", type="quantitative"),
+    y=altair.Y("Comparisons", type="quantitative"),
+    color="Algorithm"
+).properties(
+    title="Comparison Counts", width=PLOT.width, height=525)
+
+save_it(chart, "algorithm_comparisons")
 #+end_src
 
-#+begin_src python :results output html :exports output
-print(output)
-#+end_src
-
+#+RESULTS:
 #+begin_export html
-<object type="text/html" data="three_runtimes.html" style="width:100%" height=800>
+<object type="text/html" data="algorithm_comparisons.html" style="width:100%" height=600>
   <p>Figure Missing</p>
 </object>
 #+end_export
-
 
 Stepping up to a million with Brute Force takes too long (I've never let it run to the end to see how long). Let's see if the linear and divide and conquer can handle it, though.
 
 #+begin_src python :results output :exports both
 linear_more = linear[:]
 divided_more = divided[:]
+counts_more = counts[:]
 
 for exponent in range(6, 10):
     count = 10**exponent
@@ -420,6 +453,7 @@ for exponent in range(6, 10):
     
     linear_more.append(run_thing(max_subarray_2, inputs, "Linear"))
     divided_more.append(run_thing(maximum_subarray, inputs, "Divide and Conquer"))
+    counts_more.append(count)
 #+end_src
 
 #+RESULTS:
@@ -428,51 +462,57 @@ for exponent in range(6, 10):
 n = 1,000,000
 =============
 ,*** Linear ***
-	Elapsed Time: 0:00:00.007842
+	Elapsed Time: 0:00:00.008010
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:00:00.318982
+	Elapsed Time: 0:00:00.294771
 
 n = 10,000,000
 ==============
 ,*** Linear ***
-	Elapsed Time: 0:00:00.167276
+	Elapsed Time: 0:00:00.169138
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:00:02.255432
+	Elapsed Time: 0:00:02.018406
 
 n = 100,000,000
 ===============
 ,*** Linear ***
-	Elapsed Time: 0:00:00.817743
+	Elapsed Time: 0:00:00.850640
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:00:23.932761
+	Elapsed Time: 0:00:21.290975
 
 n = 1,000,000,000
 =================
 ,*** Linear ***
-	Elapsed Time: 0:00:07.356516
+	Elapsed Time: 0:00:07.666758
 ,*** Divide and Conquer ***
-	Elapsed Time: 0:03:57.610723
+	Elapsed Time: 0:03:32.097027
 #+end_example
 
 They do pretty well, it seems to be the brute force that dies out.
 
-#+begin_src python :results none
+#+begin_src python :results output :exports both
 longtimes = pandas.DataFrame({"Linear": linear_more,
-                              "Divide & Conquer": divided_more})
-line = longtimes.hvplot.line(tools=[hover], group_label="Algorithm")
-scatter = longtimes.hvplot.scatter(tools=[hover], marker="circle")
-plot = (line * scatter).opts(title="More Runtimes",
-                             width=PLOT.width,
-                             responsive=True)
-output = Embed(plot=plot, file_name="more_runtimes")()
+                              "Divide & Conquer": divided_more,
+                              "Input Size": counts_more})
+
+melted = longtimes.melt(id_vars=["Input Size"],
+                       value_vars=["Divide & Conquer", "Linear"],
+                       var_name="Algorithm", value_name="Comparisons")
+chart = altair.Chart(melted).mark_line(point=altair.OverlayMarkDef()).encode(
+    x=altair.X("Input Size", type="quantitative"),
+    y=altair.Y("Comparisons", type="quantitative"),
+    color="Algorithm").properties(
+        title="Comparison Counts", width=PLOT.width, height=525)
+
+save_it(chart, "longer_algorithm_comparisons")
 #+end_src
 
-#+begin_src python :results output html :export output
-print(output)
-#+end_src
-
+#+RESULTS:
 #+begin_export html
-<object type="text/html" data="more_runtimes.html" style="width:100%" height=800>
+<object type="text/html" data="longer_algorithm_comparisons.html" style="width:100%" height=600>
   <p>Figure Missing</p>
 </object>
 #+end_export
+
+* Source
+- {{% doc %}}CLRS{{% /doc %}}
