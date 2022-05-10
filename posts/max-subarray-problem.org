@@ -59,7 +59,7 @@ Output = namedtuple("Output", ["start", "end", "gain", "runtime"])
 * Implementations
 The motivation given by the text is that we have some data that varies over time and we want to find the pair of points that maximizes the gain from the first point to the second.
 
-** Test Cases
+** Test Case
 #+begin_src python :results none
 CASE_ONE = Case([100, 113, 110, 85, 105, 102, 86, 63, 81,
                  101, 94, 106, 101, 79, 94, 90, 97],
@@ -94,7 +94,6 @@ save_it(chart, "sample-input-one")
   <p>Figure Missing</p>
 </object>
 #+end_export
-
 
 ** Brute Force
 The first way we're going to find the maximum gain is using Brute Force - we're going to calculate the gain for each pair of points and picking the pair with the best gain. Since this involves checking every pair we're essentially looking at a Handshake Problem so the number of comparisons should be \(\frac{n(n - 1)}{2}\) or \(\Theta(n^2)\).
@@ -270,7 +269,7 @@ print(f"n^2 = {n**2}")
 
 By transforming the problem to one that lets us use divide-and-conquer we reduced the number of comparisons from 136 to 50. More generally, if we look at ~find_maximum_subarray~ we see that we're splitting the input in half before each of the recursive calls so we're going to make \(log_2 n\) splits and at each level of the recursions tree we're going to have \(2n\) inputs (~left~ and ~right~ are each \(\frac{1}{2} n\) and ~cross_mid~ uses \(n\)) so we're going from \(\Theta(n^2)\) for the brute-force verios to \(\Theta(n \log n)\) for the divide-and-conquer version.
 ** Alternate Version
-Let's try another version that uses the idea of summing the changes between consecutive points but doesn't use recursion.
+Let's try another version that uses the idea of summing the changes between consecutive points but doesn't use recursion (see [[https://en.wikipedia.org/wiki/Maximum_subarray_problem#Computing_the_best_subarray's_position][Wikipedia: Kardane's algorithm]]).
 
 #+begin_src python :results none
 def max_subarray_2(source: Sequence) -> Output:
@@ -514,5 +513,6 @@ save_it(chart, "longer_algorithm_comparisons")
 </object>
 #+end_export
 
-* Source
+* Sources
+- [[https://en.wikipedia.org/wiki/Maximum_subarray_problem][Wikipedia: Maximum Subarray Problem]]
 - {{% doc %}}CLRS{{% /doc %}}
