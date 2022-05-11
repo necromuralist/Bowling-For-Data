@@ -1,0 +1,81 @@
+#+BEGIN_COMMENT
+.. title: Karatsuba Multiplication
+.. slug: karatsuba-multiplication
+.. date: 2022-05-10 14:53:24 UTC-07:00
+.. tags: algorithms,divide-and-conquer
+.. category: Divide-and-Conquer
+.. link: 
+.. description: A look at the Karatsuba algorithm for multiplication.
+.. type: text
+.. has_pseudocode: yeah
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-370f1415-4819-4a91-b033-220fff6e48a3-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* Imports and Setup
+** Imports
+#+begin_src python :results none
+# from pypi
+import numpy
+#+end_src
+* The Algorithm
+#+begin_export html
+<pre id="karatsuba" style="display:hidden;">
+\begin{algorithm}
+\caption{Karatsuba}
+\begin{algorithmic}
+\REQUIRE The input arrays are of the same length
+\INPUT Two arrays representing digits in integers
+\OUTPUT The product of the inputs
+
+\PROCEDURE{Karatsuba}{$number_1, number_2$}
+
+\STATE $\textit{digits} \gets $ \textsc{Length}($number_1$)
+
+\IF {$\textit{digits} = 1$}
+  \RETURN $number_1 \times number_2$
+\ENDIF
+
+\STATE $middle \gets \left\lfloor \frac{\textit{digits}}{2} \right\rfloor$
+
+\STATE \\
+\STATE $MostSignificant_1, LeastSignificant_1 \gets $ \textsc{Split}($number_1, middle$)
+\STATE $MostSignificant_2, LeastSignificant_2 \gets $ \textsc{Split}($number_2, middle$)
+\STATE \\
+\STATE $MostPlusLeast_1 \gets MostSignificant_1 + LeastSignificant_1$
+\STATE $MostPlusLeast_2 \gets MostSignificant_2 + LeastSignificant_2$
+\STATE \\
+
+\STATE \textit{left} $\gets $ \textsc{Karatsuba}($MostSignificant_1, MostSignificant_2$)
+\STATE \textit{summed} $\gets $ \textsc{Karatsuba}($MostPlusLeast_1, MostPlusLeast_2$)
+\STATE \textit{right} $\gets $ \textsc{Karatsuba}($LeastSignificant_1, LeastSignificant_2$)
+\STATE \\
+\STATE \textit{center} $\gets$ (\textit{summed} - \textit{left} - \textit{right})
+\STATE \\
+\RETURN \textit{left} $\times 10^{\textit{digits}} + \textit{center} \times 10^{\textit{middle}} + \textit{right}$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+This is a mashup of the Wikipedia version and the {{% lancelot "Algorithms Illuminated" %}}algorithms-illuminated-part-1-the-basics{{% /lancelot %}} version. It's a little tricky in that we're dealing with integers, in theory, but we have to know the number of digits and how to split it up so in code we're going to have to work with a collection instead, but hopefully this will be clearer in code.
+
+* A Numpy Implementation
+
+* Sources
+- {{% doc %}}algorithms-illuminated-part-1-the-basics{{% /doc %}}
+- [[https://en.wikipedia.org/wiki/Karatsuba_algorithm][Wikipedia: Karatsuba Algorithm]]
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("karatsuba"));
+});
+</script>
+#+end_export
