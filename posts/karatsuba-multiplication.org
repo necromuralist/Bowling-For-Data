@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-370f1415-4819-4a91-b033-220fff6e48a3-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f88d4cf7-3cd3-4d43-b42c-d05a2469c7f4-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -20,8 +20,21 @@
 * Imports and Setup
 ** Imports
 #+begin_src python :results none
+# from python
+import math
+import random
+import sys
+
 # from pypi
 import numpy
+
+from expects import (
+    be_a,
+    contain_exactly,
+    equal,
+    expect,
+    raise_error
+)
 #+end_src
 * The Algorithm
 #+begin_export html
@@ -67,7 +80,176 @@ import numpy
 This is a mashup of the Wikipedia version and the {{% lancelot "Algorithms Illuminated" %}}algorithms-illuminated-part-1-the-basics{{% /lancelot %}} version. It's a little tricky in that we're dealing with integers, in theory, but we have to know the number of digits and how to split it up so in code we're going to have to work with a collection instead, but hopefully this will be clearer in code.
 
 * A Numpy Implementation
+** Integer To List
+#+begin_src python :results none
+def to_list(integer: int) -> list:
+    """Convert an integer into a list
 
+    Args:
+     integer: non-negative integer to convert
+
+    Returns:
+     list containing the digits of the integer
+
+    Raises:
+     ValueError if the integer isn't an integer
+    """
+    return [int(digit) for digit in str(integer)]
+#+end_src
+
+*** Test
+#+begin_src python :results none
+test = 123
+expected = [1, 2, 3]
+actual = to_list(test)
+expect(list(actual)).to(contain_exactly(*expected))
+expect(actual).to(be_a(list))
+
+bad = lambda: to_list(123.5)
+
+expect(bad).to(raise_error(ValueError))
+#+end_src
+** To Arrays
+#+begin_src python :results none
+def to_arrays(integer_1: int, integer_2: int) -> tuple:
+    """Converts integers to arrays
+
+    Args:
+     integer_1, integer_2: integers to convert
+
+    Returns:
+     array_1, array_2: integers padded to be the same length array
+    """
+    digits_1, digits_2 = to_list(integer_1), to_list(integer_2)
+    length_1, length_2 = len(digits_1), len(digits_2)
+
+    # find the longest array to pad the other
+    length = max((length_1, length_2))
+
+    # make it a power of 2
+    final_length = 2**math.ceil(math.log2(length))
+
+    padding_1, padding_2 = final_length - length_1, final_length - length_2
+    
+    array_1 = numpy.array([0] * padding_1 + digits_1)
+    array_2 = numpy.array([0] * padding_2 + digits_2)
+    return array_1, array_2
+#+end_src
+
+*** Test
+#+begin_src python :results none
+a, b = 123, 456
+x, y = to_arrays(a, b)
+
+expect(x).to(be_a(numpy.ndarray))
+expect(y).to(be_a(numpy.ndarray))
+
+expect(list(x)).to(contain_exactly(0, 1, 2, 3))
+expect(list(y)).to(contain_exactly(0, 4, 5, 6))
+
+c = 2468
+x, y = to_arrays(a, c)
+expect(list(x)).to(contain_exactly(0, 1, 2, 3))
+expect(list(y)).to(contain_exactly(2, 4, 6, 8))
+#+end_src
+** Karatsuba Multiplication
+#+begin_src python :results none
+def karatsuba(integer_1: numpy.ndarray,
+              integer_2: numpy.ndarray, count: int) -> numpy.ndarray:
+    """Multiply integer_1 and integer_2
+
+    Args:
+     integer_1, integer_2: arrays with equal number of digits
+     count: number of times the base-case is reached
+
+    Returns:
+     array with the product of the integers, count
+    """
+    digits = len(integer_1)
+    if digits == 1:
+        return integer_1 * integer_2, count + 1
+    middle = digits//2
+
+    most_significant_1, least_significant_1 = integer_1[:middle], integer_1[middle:]
+    most_significant_2, least_significant_2 = integer_2[:middle], integer_2[middle:]
+
+    most_plus_least_1 = most_significant_1 + least_significant_1
+    most_plus_least_2 = most_significant_2 + least_significant_2
+
+    left, count_left = karatsuba(most_significant_1, most_significant_2, count)
+    summed, count_summed = karatsuba(most_plus_least_1, most_plus_least_2, count)
+    right, count_right  = karatsuba(least_significant_1, least_significant_2, count)
+
+    center = summed - left - right
+    return (left * 10**digits + center * 10**middle + right,
+            count_left + count_summed + count_right)
+#+end_src
+
+*** Test
+#+begin_src python :results none
+a, b = 2, 3
+x, y = to_arrays(a, b)
+output, count_1 = karatsuba(x, y, 0)
+expect(list(output)).to(contain_exactly(a * b))
+
+a, b = 22, 33
+x, y = to_arrays(a, b)
+output, count_2 = karatsuba(x, y, 0)
+expect(list(output)).to(contain_exactly(726))
+#+end_src
+
+** All Together Now
+#+begin_src python :results none
+def karatsuba_multiplication(integer_1: int, integer_2: int) -> int:
+    """Multiplies numbers using Karatsuba's algorithm
+
+    Args:
+     integer_1, integer_2: integers to multiply
+
+    Returns:
+     product of the integers
+    """
+    digits_1, digits_2 = to_arrays(integer_1, integer_2)
+    output, count =  karatsuba(digits_1, digits_2, 0)
+    return output[0], count
+#+end_src
+
+*** Test
+#+begin_src python :results none
+def test_karatsuba(first: int, second: int):
+    expected = first * second
+    actual, count = karatsuba_multiplication(first, second)
+    expect(actual).to(equal(expected))
+    return
+#+end_src
+#+begin_src python :results none
+upper = int(sys.maxsize**0.5)
+for digits in range(1, 11):
+    lower = int("".join([str(digit) for digit in [1] * digits]))
+    a = random.randrange(lower, upper + 1)
+    b = random.randrange(lower, upper + 1)
+    test_karatsuba(a, b)
+#+end_src
+
+#+begin_src python :results none
+limit = int(sys.maxsize**0.5)
+for digits in range(limit - 100, limit + 1):
+    a = random.randrange(digits - 1000, digits)
+    b = random.randrange(digits - 1000, digits)
+    try:
+        test_karatsuba(a, b)
+    except AssertionError as error:
+        print(f"maxsize: {sys.maxsize}")
+        print(f"a: {a}")
+        print(f"b: {b}")
+        print(f"a x b: {a * b}")
+        print(f"maxsize - a * b: {sys.maxsize - a * b}")
+        raise
+#+end_src
+
+Once the numbers get too big we end up with an overflow error. The wikipedia page has a suggestion for working around it, but that might have to wait for later.
+
+* Run Time
 * Sources
 - {{% doc %}}algorithms-illuminated-part-1-the-basics{{% /doc %}}
 - [[https://en.wikipedia.org/wiki/Karatsuba_algorithm][Wikipedia: Karatsuba Algorithm]]
