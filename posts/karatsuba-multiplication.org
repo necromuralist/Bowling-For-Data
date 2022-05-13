@@ -1,0 +1,360 @@
+#+BEGIN_COMMENT
+.. title: Karatsuba Multiplication
+.. slug: karatsuba-multiplication
+.. date: 2022-05-10 14:53:24 UTC-07:00
+.. tags: algorithms,divide-and-conquer
+.. category: Divide-and-Conquer
+.. link: 
+.. description: A look at the Karatsuba algorithm for multiplication.
+.. type: text
+.. has_pseudocode: yeah
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-74d58003-7faa-4866-a716-132f83b9db4a-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* Imports and Setup
+** Imports
+#+begin_src python :results none
+# from python
+from __future__ import annotations
+
+import math
+import random
+import sys
+
+
+# from pypi
+from expects import (
+    be_a,
+    contain_exactly,
+    equal,
+    expect,
+    raise_error
+)
+#+end_src
+* The Algorithm
+#+begin_export html
+<pre id="karatsuba" style="display:hidden;">
+\begin{algorithm}
+\caption{Karatsuba}
+\begin{algorithmic}
+\REQUIRE The input arrays are of the same length
+\INPUT Two arrays representing digits in integers
+\OUTPUT The product of the inputs
+
+\PROCEDURE{Karatsuba}{$number_1, number_2$}
+
+\STATE $\textit{digits} \gets $ \textsc{Length}($number_1$)
+
+\IF {$\textit{digits} = 1$}
+  \RETURN $number_1 \times number_2$
+\ENDIF
+
+\STATE $middle \gets \left\lfloor \frac{\textit{digits}}{2} \right\rfloor$
+
+\STATE \\
+\STATE $MostSignificant_1, LeastSignificant_1 \gets $ \textsc{Split}($number_1, middle$)
+\STATE $MostSignificant_2, LeastSignificant_2 \gets $ \textsc{Split}($number_2, middle$)
+\STATE \\
+\STATE $MostPlusLeast_1 \gets MostSignificant_1 + LeastSignificant_1$
+\STATE $MostPlusLeast_2 \gets MostSignificant_2 + LeastSignificant_2$
+\STATE \\
+
+\STATE \textit{left} $\gets $ \textsc{Karatsuba}($MostSignificant_1, MostSignificant_2$)
+\STATE \textit{summed} $\gets $ \textsc{Karatsuba}($MostPlusLeast_1, MostPlusLeast_2$)
+\STATE \textit{right} $\gets $ \textsc{Karatsuba}($LeastSignificant_1, LeastSignificant_2$)
+\STATE \\
+\STATE \textit{center} $\gets$ (\textit{summed} - \textit{left} - \textit{right})
+\STATE \\
+\RETURN \textit{left} $\times 10^{\textit{digits}} + \textit{center} \times 10^{\textit{middle}} + \textit{right}$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+This is a mashup of the Wikipedia version and the {{% lancelot "Algorithms Illuminated" %}}algorithms-illuminated-part-1-the-basics{{% /lancelot %}} version. It's a little tricky in that we're dealing with integers, in theory, but we have to know the number of digits and how to split it up so in code we're going to have to work with a collection instead, but hopefully this will be clearer in code.
+
+* An IntList
+#+begin_src python :results none
+class IntegerDigits:
+    """A hybrid integer and digits list
+    
+    Args:
+     integer: the number to store
+     padding: number of 0's to add to the left of the digits
+    """
+    def __init__(self, integer: int) -> None:
+        self.integer = integer
+        self._digits = None
+        return
+
+    @property
+    def digits(self) -> list:
+        """The digits for the given integer
+
+        Raises:
+         ValueError if the given integer isn't really an integer
+
+        Returns:
+         zero-padded list of digits
+        """
+        if self._digits is None:
+            digits = [int(digit) for digit in str(self.integer)]
+            length = len(digits)
+            power_of_two = 2**math.ceil(math.log2(length))
+            padding = power_of_two - length
+            self._digits = [0] * padding + digits
+        return self._digits
+
+    def add_padding(self, padding: int) -> None:
+        """Add more zeros to the left of the digits
+
+        Args:
+         padding: number of zeros to add to the left of the digits
+        """
+        self._digits = [0] * padding + self._digits
+        return
+
+    def set_length(self, target: int) -> None:
+        """Set the total length of the digit list
+
+        Args:
+         target: total number of digits to have
+
+        Raises:
+         RuntimeError: target is less than the current number of digits
+        """
+        if target < len(self):
+            raise RuntimeError(f"target {target} is less than current {len(self.digits)} digits")
+
+        padding = target - len(self)
+        self.add_padding(padding)
+        return
+
+    def set_equal_length(self, other: IntegerDigits) -> None:
+        """Set both self and other to have the same number of digits"""
+        target = max(len(self), len(other))
+        self.set_length(target)
+        other.set_length(target)
+        return
+
+    def reset(self) -> None:
+        """Clean out any generated attributes"""
+        self._digits = None
+
+    # collection methods
+    
+    def __len__(self) -> int:
+        """The number of digits"""
+        return len(self.digits)
+
+    def __getitem__(self, key) -> IntegerDigits:
+        """Slice the digits"""
+        sliced = self.digits[key]
+        if type(sliced) is int:
+            sliced = [sliced]
+        gotten = IntegerDigits(sum((value * 10**(len(sliced) - 1 - index)
+                                    for index, value in enumerate(sliced))))
+        # preserve any padding
+        gotten._digits = sliced
+        return gotten
+    # integer operations
+
+    def __add__(self, value) -> IntegerDigits:
+        """Add an integer or IntegerDigits to this integer"""
+        if type(value) is int:
+            return IntegerDigits(self.integer + value)
+        return IntegerDigits(self.integer + value.integer)
+
+    def __sub__(self, value) -> IntegerDigits:
+        """Subtract an integer or IntegerDigits from this integer"""
+        if type(value) is int:
+            return IntegerDigits(self.integer - value)
+        return IntegerDigits(self.integer - value.integer)
+
+    def __mul__(self, value) -> IntegerDigits:
+        """multiply integer by integer or IntegerDigits"""
+        if type(value) is int:
+            return IntegerDigits(self.integer * value)
+
+        return IntegerDigits(self.integer * value.integer)
+
+    # comparisons
+    def __eq__(self, other) -> bool:
+        """Compare to integer or IntegerDigits"""
+        return other == self.integer
+
+    def __lt__(self, other) -> bool:
+        return self.integer < other
+
+    def __gt__(self, other) -> bool:
+        return self.integer > other
+
+    def __ge__(self, other) -> bool:
+        return self.integer >= other
+
+    def __repr__(self) -> str:
+        return f"<IntegerDigits - {self.integer}>"
+#+end_src
+
+** Test it
+#+begin_src python :results none
+test = IntegerDigits(567)
+# build the digits padded to power of 2
+expect(len(test.digits)).to(equal(4))
+
+# implement the length dunder method
+expect(len(test)).to(equal(4))
+
+# add slicing
+expect(test[0]).to(equal(0))
+expect(test[-1]).to(equal(7))
+expect(test[:2].digits).to(contain_exactly(0, 5))
+
+# multiplication
+product = test * 2
+expect(product.integer).to(equal(567 * 2))
+test_2 = IntegerDigits(2)
+expect(len(test_2)).to(equal(1))
+product = test * test_2
+expect(product.integer).to(equal(2 * 567))
+
+# addition
+sum_ = test + 10
+expect(sum_.integer).to(equal(577))
+
+sum_ = test + test_2
+expect(sum_.integer).to(equal(569))
+
+# subtraction
+difference = test - 20
+expect(difference.integer).to(equal(547))
+
+difference = test_2 - test
+expect(difference.integer).to(equal(-565))
+#+end_src
+* An Implementation
+** Karatsuba Multiplication
+#+begin_src python :results none
+def karatsuba(integer_1: IntegerDigits,
+              integer_2: IntegerDigits, count: int) -> IntegerDigits:
+    """Multiply integer_1 and integer_2
+
+    Args:
+     integer_1, integer_2: arrays with equal number of digits
+     count: number of times the base-case is reached
+
+    Returns:
+     IntegerDigits with the product of the integers, count
+    """
+    digits = len(integer_1)
+    if digits == 1:
+        return integer_1 * integer_2, count + 1
+    middle = digits//2
+
+    most_significant_1, least_significant_1 = integer_1[:middle], integer_1[middle:]
+    most_significant_2, least_significant_2 = integer_2[:middle], integer_2[middle:]
+
+    most_plus_least_1 = most_significant_1 + least_significant_1
+    most_plus_least_2 = most_significant_2 + least_significant_2
+
+    # a hack to keep them the same number of digits after the addition
+    most_plus_least_1.set_equal_length(most_plus_least_2)
+
+    left, count_left = karatsuba(most_significant_1, most_significant_2, count)
+    summed, count_summed = karatsuba(most_plus_least_1, most_plus_least_2, count)
+    right, count_right  = karatsuba(least_significant_1, least_significant_2, count)
+
+    center = summed - left - right
+
+
+    output = left * 10**digits + center * 10**middle + right
+    if output < 0:
+        raise RuntimeError(f"left: {left} center: {center} right: {right}")
+
+    return output, count_left + count_summed + count_right
+#+end_src
+
+#+begin_src python :results none
+def karatsuba_multiplication(integer_1: int, integer_2: int) -> tuple:
+    """Sets up and runs the Karatsuba Multiplication
+
+    Args:
+     integer_1, integer_2: the two values to multiply
+    """
+    assert integer_1 >=0
+    assert integer_2 >= 0
+
+    integer_1 = IntegerDigits(integer_1)
+    integer_2 = IntegerDigits(integer_2)
+
+    # make them have the same number of digits
+    target = max(len(integer_1), len(integer_2))
+    integer_1.set_length(target)
+    integer_2.set_length(target)
+
+    return karatsuba(integer_1, integer_2, 0)
+#+end_src
+
+*** Test
+#+begin_src python :results none
+a, b = 2, 3
+output, count_1 = karatsuba_multiplication(a, b)
+expect(output).to(equal(a * b))
+
+a = 22
+output, count_2 = karatsuba_multiplication(a, b)
+expect(output).to(equal(66))
+#+end_src
+
+** Test
+#+begin_src python :results none
+def test_karatsuba(first: int, second: int):
+    expected = first * second
+    actual, count = karatsuba_multiplication(first, second)
+    expect(actual).to(equal(expected))
+    return
+#+end_src
+
+#+begin_src python :results none
+limit = int(sys.maxsize**0.5)
+for digits in range(limit - 100, limit):
+    a = random.randrange(digits - 1000, digits + 1000)
+    b = random.randrange(digits - 1000, digits + 1000)
+    try:
+        test_karatsuba(a, b)
+    except AssertionError as error:
+        print(f"maxsize: {sys.maxsize}")
+        print(f"a: {a}")
+        print(f"b: {b}")
+        print(f"a x b: {a * b}")
+        print(f"maxsize - a * b: {sys.maxsize - a * b}")
+        raise
+#+end_src
+
+Example values from the Algorithms Illuminated website.
+
+#+begin_src python :results none
+a = 3141592653589793238462643383279502884197169399375105820974944592
+b = 2718281828459045235360287471352662497757247093699959574966967627
+test_karatsuba(a, b)
+#+end_src
+
+* Run Time
+* Sources
+- {{% doc %}}algorithms-illuminated-part-1-the-basics{{% /doc %}}
+- [[https://en.wikipedia.org/wiki/Karatsuba_algorithm][Wikipedia: Karatsuba Algorithm]]
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("karatsuba"));
+});
+</script>
+#+end_export
