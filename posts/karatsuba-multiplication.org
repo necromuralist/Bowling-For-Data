@@ -58,7 +58,54 @@ PlotMultiplicationOutput = namedtuple(
     "PlotOutput",
     ["product", "count", "digits", "factor_1", "factor_2"])
 #+end_src
-* The Algorithm
+* The Algorithms
+** Grade School Multiplication
+
+Grade-School multiplication is how most of us are taught to multiply numbers with more than one digit each. Each digit in one number is multiplied by each digit in the other to create a partial product. Once we've gone through all the digits in the first number we sum up all the partial products we calculated to get our final answer.
+
+#+begin_export html
+<pre id="grade-school" style="display:hidden;">
+\begin{algorithm}
+\caption{Grade-School}
+\begin{algorithmic}
+\REQUIRE The input arrays are of the same length ($n$)
+\INPUT Two arrays representing digits in integers ($a, b$)
+\OUTPUT The product of the inputs
+
+\PROCEDURE{GradeSchool}{$number_1, number_2$}
+
+\FOR {$j \in \{0 \ldots n - 1\}$}
+  \STATE $carry \gets 0$
+  \FOR {$i \in \{0 \ldots n - 1\}$}
+    \STATE $product \gets a[i] \times b[j] + carry$
+    \STATE $partial[j][i + j] \gets product \bmod 10$
+    \STATE $carry \gets product/10$
+  \ENDFOR
+  \STATE $partial[j][n + j] \gets carry$
+\ENDFOR
+
+\STATE $carry \gets 0$
+
+\FOR {$i \in \{0 \ldots 2n - 1\}$}
+  \STATE $sum \gets carry$
+  \FOR {$j \in \{0 \ldots n - 1\}$}
+    \STATE $sum \gets sum + partial[j][i]$
+  \ENDFOR
+  \STATE $result[i] \gets sum \bmod 10$
+  \STATE $carry \gets sum/10$
+\ENDFOR
+
+\STATE $result[2n] \gets carry$
+\RETURN result
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+** Karatsuba Multiplication
+Karatsuba Multiplication improves on the Grade-School algorithm using a trick from Frederick Gauss, which is a little too much of a diversion. With all these improvements in multiplication it seems like you need a background in number theory that not all Computer Scientist's have (or at least I don't). Maybe take it on faith for now.
+
 #+begin_export html
 <pre id="karatsuba" style="display:hidden;">
 \begin{algorithm}
@@ -387,13 +434,40 @@ test_karatsuba(a, b)
 #+end_src
 
 * Run Time
+** Using the Master Method
+Let's use the Master Method to find the theoretical upper bound for Karatsuba Multiplication.
+
+The basic form of the Master Method is this:
+
+\[
+T(n) = a T(\frac{n}{b}) + O(n^d)
+\]
+
+| Variable | Description                                         | Value |
+|----------+-----------------------------------------------------+-------|
+| \(a\)    | Recursive calls within the function                 |     3 |
+| \(b\)    | Amount the input is split up                        |     2 |
+| \(d\)    | Exponent for the work done outside of the recursion |     1 |
+
+We make three recursive calls within the Karatsuba function and split the data in half within each call. The amount of work done outside the recursion is constant so \(O\left(n^d\right) = O\left(n^1\right)\). \(a > b^d\) so we have the case where the sub-problems grow faster than the input is reduced, giving us:
+
+\begin{align}
+T(n) &= O\left(n^{\log_b a}\right) \\
+&= O\left(n^{\log_2 3}\right)
+\end{align}
 ** With Padding
+Let's plot the base-case counts alongside the theoretical bounds we found using the Master Method.
+
+First we'll create the numbers to multiply.
+
 #+begin_src python :results none
 digit_supply = range(1, 101)
 things_to_multiply = [(random.randrange(10**(digits - 1), 10**digits),
                         random.randrange(10**(digits - 1), 10**digits))
                         for digits in digit_supply]
 #+end_src
+
+Now we'll do the math, running the cases in parallel using Joblib.
 
 #+begin_src python :results output :exports both
 with TIMER:
@@ -406,6 +480,8 @@ with TIMER:
 : Started: 2022-05-13 23:52:06.399789
 : Ended: 2022-05-13 23:52:09.347825
 : Elapsed: 0:00:02.948036
+
+Now a little plotting.
 
 #+begin_src python :results output :exports both
 frame = pandas.DataFrame.from_dict(
@@ -439,8 +515,10 @@ save_it(chart, "karatsuba-multiplications")
 </object>
 #+end_export
 
+Since when I added the padding I made sure that the number of digits was a power of two, the numbers are bunched up around those powers of two (so there's a lot of wasted computation, maybe) but the multiplication counts still fall within a constant multiple of our theoretical runtime.
+
 ** Without Padding
-Since I didn't make the karatsuba work without padding this is more to illustrate how much the padding effects the counts
+Since I didn't make the karatsuba work without padding this will just show the points spaced out, but the counts will still be based on there being padding.
 
 #+begin_src python :results output :exports both
 unpadded = lambda a, b: karatsuba_multiplication(a, b, count_padding=False)
@@ -461,12 +539,18 @@ frame = pandas.DataFrame.from_dict(
     {"Karatsuba Count": [output.count for output in unpadded_outputs],
      "Digits (pre-padding)": [output.digits for output in unpadded_outputs],
      "digits^log2(3)": [output.digits**(math.log2(3)) for output in karatsuba_outputs],
-     "6 x digits^log2(3)": [6 * output.digits**(math.log2(3)) for output in karatsuba_outputs]     
+     "6 x digits^log2(3)": [6 * output.digits**(math.log2(3)) for output in karatsuba_outputs],
+     "6 x digits^log2(3) (no padding)": [6 * output.digits**(math.log2(3))
+                                         for output in unpadded_outputs],
+     "n^2 (no padding)": [output.digits**2
+                          for output in unpadded_outputs],
 })
 
 melted = frame.melt(id_vars=["Digits (pre-padding)"],  value_vars=["Karatsuba Count",
                                                                    "digits^log2(3)",
-                                                                   "6 x digits^log2(3)"],
+                                                                   "6 x digits^log2(3)",
+                                                                   "6 x digits^log2(3) (no padding)",
+                                                                   "n^2 (no padding)"],
                     var_name="Source", value_name="Multiplications")
 
 chart = altair.Chart(melted).mark_line().encode(
@@ -504,13 +588,27 @@ expect(output.product).to(equal(output.factor_1 * output.factor_2))
 : 56,913,917,723,202,495,576,238,408,244,650,506,926,406,731,625,206,370,840,517,493,281,396,538,892,710,818,017,869,257,379,987,881,688,195,601,612,438,838,803,669,047,089,313,679,236,814,971,999,554,405,895,121,583,263,228,500,933,878,783,310,375,258,385,063,631,332
 
 * Sources
+** Karatsuba Multiplicatio
 - {{% doc %}}algorithms-illuminated-part-1-the-basics{{% /doc %}}
 - [[https://en.wikipedia.org/wiki/Karatsuba_algorithm][Wikipedia: Karatsuba Algorithm]]
+  
+** Grade-School Multiplication
+I took the grade-school algorithm from the Lecture 2 Notes on this course-site.
+
+- McGill University School of Computer Science: COMP 250 (sec 1) [Internet]. [cited 2022 May 14]. Available from: http://crypto.cs.mcgill.ca/~crepeau/COMP250/
 
 #+begin_export html
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("karatsuba"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("grade-school"));
 });
 </script>
 #+end_export
