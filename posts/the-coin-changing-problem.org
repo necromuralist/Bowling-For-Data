@@ -1,0 +1,210 @@
+#+BEGIN_COMMENT
+.. title: The Coin Changing Problem
+.. slug: the-coin-changing-problem
+.. date: 2022-06-16 15:11:33 UTC-07:00
+.. tags: dynamic programming,greedy,algorithms
+.. category: Dynamic Programming
+.. link: 
+.. description: 
+.. type: text
+.. has_pseudocode: yes
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f838af95-fde1-482e-8706-5a8f2c895386-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* The Change Problem
+The /Change Problem (Coin Changing Problem)/ asks us to convert some amount of money into denominations using the fewest coins.
+
+**Input:** An integer (/money/) and an array of /d/ denominations (\(c = c_1, c_2, \ldots, c_d\)) in decreasing order of value (\(c_1 > c_2> \cdots > c_d\)).
+
+**Output:** A list of /d/ integers \(i_1, i_2, \ldots, i_d\) such that \(c_1 \cdot i_1 + c_2 \cdot i_2 + \cdots + c_d \cdot i_d = money\)  and \(i_1 + i_2 + \cdots + i_d\) is as small as possible.
+* SetUp
+** Imports
+#+begin_src python :results none
+# pypi
+from expects import contain_exactly, expect, equal
+#+end_src
+* The Cashier's Algorithm
+The way many cashier's make change for customers is using a greedy approach.
+
+#+begin_export html
+<pre id="cashiers-algorithm" style="display:hidden;">
+\begin{algorithm}
+\caption{CashiersChange}
+\begin{algorithmic}
+\INPUT Amount owed ($money$) and a supply of coins ($c$).
+\PROCEDURE{CashiersChange}{$money, c$}
+\WHILE {\(money > 0\)}
+  \STATE \(coin \gets\) Coin with the largest denomination that doesn't exceed \(money\).
+  \STATE Give a coin with denomination "coin" to the customer.
+  \STATE \(money \gets money - coin\)
+\ENDWHILE
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+* A Greedy Version
+As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it into code with the understanding that the problem isn't exactly the same as the one given to the cashier in that we only calculate how many of each coin we need and thus can assume that we'll never run out of any coins (something that, if you've ever worked retail, you know isn't always a safe assumption).
+
+** In Pseudocode
+#+begin_export html
+<pre id="greedy-algorithm" style="display:hidden;">
+\begin{algorithm}
+\caption{GreedyChange}
+\begin{algorithmic}
+\INPUT An integer ($money$) and an array of $d$ denominations (\(c = c_1, c_2, \ldots, c_d\)) in decreasing order of value (\(c_1 > c_2> \cdots > c_d\)).
+\OUTPUT A list of $d$ integers \(i_1, i_2, \ldots, i_d\) such that \(c_1 \cdot i_1 + c_2 \cdot i_2 + \cdots + c_d \cdot i_d = money\)  and \(i_1 + i_2 + \cdots + i_d\) is as small as possible.
+\PROCEDURE{CashiersChange}{$money, c$}
+\STATE $remainder \gets money$
+\STATE $d \gets $ \textsc{Length}($c$)
+\FOR {$k \in \{1 \ldots d\}$}
+  \STATE $i_k \gets \lfloor \frac{remainder}{c_k} \rfloor$
+  \STATE $remainder \gets remainder - c_k \cdot i_k$
+\ENDFOR
+\RETURN $(i_1, i_2, \ldots, i_d)$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+** In Python
+#+begin_src python :results none
+def greedy_change(money: int, denominations: list) -> list:
+    """Make change using the fewest coins
+
+    Args:
+     money: the amount to change
+     denominations: list of coin denominations in decreasing order
+
+    Returns:
+     Number of each denomination needed to make the change
+    """
+    coins = [0] * len(denominations)
+    remainder = money
+    for location, denomination in enumerate(denominations):
+        coins[location] = remainder // denomination
+        remainder = remainder - denomination * coins[location]
+    return coins
+#+end_src
+
+*** A First Test
+Examples from {{% lancelot "LATPAPS" %}}LATPAPS{{% /lancelot %}}.
+
+#+begin_src python :results none
+def check_coins(answer: list, denominations: list,
+                expected_coins: int,
+                expected_total: int) -> None:
+    """Check that our answer matches the expected
+
+    Args:
+     answer: list of counts for each denomination
+     denominations: list of coin denominations available
+     expected_coins: the expected list of counts for each denomination
+     expected_total: what the value our coins should add up to
+
+    Raises:
+     AssertionError: something about our answer doesn't match the expected
+    """
+    expect(sum(answer)).to(equal(sum(expected_coins)))
+    expect(answer).to(contain_exactly(*expected_coins))
+    expect(sum(count * coin for count, coin in zip(answer, denominations))).to(
+        equal(expected_total)
+    )
+    return
+#+end_src
+#+begin_src python :results none
+# case 1
+money = 2
+coins = [10, 5, 1]
+actual = greedy_change(money, coins)
+check_coins(actual, coins, [0, 0, 2], money)
+
+# case 2
+money = 28
+actual = greedy_change(money, coins)
+check_coins(actual, coins, [2, 1, 3], money)
+#+end_src
+
+*** U.S. Denominations
+#+begin_src python :results none
+coins = [25, 10, 5, 1]
+
+money = 28
+actual = greedy_change(money, coins)
+check_coins(actual, coins, [1, 0, 0, 3], money)
+
+money = 14
+actual = greedy_change(money, coins)
+check_coins(actual, coins, [0, 1, 0, 4], money)
+#+end_src
+
+*** The Double-Dime
+Looking at the greedy-algorithm you can see that it only has one loop that traverses the denominations of coins - so it is a very quick algorithm, but while our greedy algorithm turns out to work for the specific set of coins that cashiers use, will that always be the case?
+
+According to Wikipedia, there was at one time a proposal in the United States for a [[https://en.wikipedia.org/wiki/Twenty-cent_piece_(United_States_coin)][twenty-cent piece]]. If we include the twenty cent piece amongst our denominations, we find that there are cases where the greedy algorithm will miss the optimal solution.
+
+#+begin_src python :results output :exports both
+coins = [25, 20, 10, 5, 1]
+
+money = 40
+actual = greedy_change(money, coins)
+check_coins(actual, coins, [0, 2, 0, 0, 0], money)
+#+end_src
+
+#+RESULTS:
+:RESULTS:
+# [goto error]
+#+begin_example
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mAssertionError[0m                            Traceback (most recent call last)
+[0;32m/tmp/ipykernel_59/4192049474.py[0m in [0;36m<module>[0;34m[0m
+[1;32m      3[0m [0mmoney[0m [0;34m=[0m [0;36m40[0m[0;34m[0m[0;34m[0m[0m
+[1;32m      4[0m [0mactual[0m [0;34m=[0m [0mgreedy_change[0m[0;34m([0m[0mmoney[0m[0;34m,[0m [0mcoins[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0;32m----> 5[0;31m [0mcheck_coins[0m[0;34m([0m[0mactual[0m[0;34m,[0m [0mcoins[0m[0;34m,[0m [0;34m[[0m[0;36m0[0m[0;34m,[0m [0;36m2[0m[0;34m,[0m [0;36m0[0m[0;34m,[0m [0;36m0[0m[0;34m,[0m [0;36m0[0m[0;34m][0m[0;34m,[0m [0mmoney[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m
+[0;32m/tmp/ipykernel_59/597143335.py[0m in [0;36mcheck_coins[0;34m(answer, denominations, expected_coins, expected_total)[0m
+[1;32m     13[0m      [0mAssertionError[0m[0;34m:[0m [0msomething[0m [0mabout[0m [0mour[0m [0manswer[0m [0mdoesn[0m[0;31m'[0m[0mt[0m [0mmatch[0m [0mthe[0m [0mexpected[0m[0;34m[0m[0;34m[0m[0m
+[1;32m     14[0m     """
+[0;32m---> 15[0;31m     [0mexpect[0m[0;34m([0m[0msum[0m[0;34m([0m[0manswer[0m[0;34m)[0m[0;34m)[0m[0;34m.[0m[0mto[0m[0;34m([0m[0mequal[0m[0;34m([0m[0msum[0m[0;34m([0m[0mexpected_coins[0m[0;34m)[0m[0;34m)[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m     16[0m     [0mexpect[0m[0;34m([0m[0manswer[0m[0;34m)[0m[0;34m.[0m[0mto[0m[0;34m([0m[0mcontain_exactly[0m[0;34m([0m[0;34m*[0m[0mexpected_coins[0m[0;34m)[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[1;32m     17[0m     expect(sum(count * coin for count, coin in zip(answer, denominations))).to(
+
+    [0;31m[... skipping hidden 1 frame][0m
+
+[0;32m~/.virtualenvs/Bowling-For-Data/site-packages/expects/expectations.py[0m in [0;36m_assert[0;34m(self, matcher)[0m
+[1;32m     31[0m [0;34m[0m[0m
+[1;32m     32[0m         [0;32mif[0m [0;32mnot[0m [0mok[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[0;32m---> 33[0;31m             [0;32mraise[0m [0mAssertionError[0m[0;34m([0m[0mself[0m[0;34m.[0m[0m_failure_message[0m[0;34m([0m[0mmatcher[0m[0;34m,[0m [0mreasons[0m[0;34m)[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m     34[0m [0;34m[0m[0m
+[1;32m     35[0m     [0;32mdef[0m [0m_match[0m[0;34m([0m[0mself[0m[0;34m,[0m [0mmatcher[0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+
+[0;31mAssertionError[0m: 
+expected: 3 to equal 2
+#+end_example
+:END:
+
+Because the greedy algorithm always takes the largest possible coins first, it ends up using 25¢ + 10¢ + 5¢ as the solution instead of the optimal 20¢ + 20¢. While it might seem that these cases are rare, the important thing to note is that generalizing the greedy algorithm beyond the curated denominations or even beyond coins specifically leaves it vulnerable to cases where it will fail.
+
+* Sources
+- {{% doc %}}LATPAPS{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("cashiers-algorithm"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("greedy-algorithm"));
+});
+</script>
+#+end_export
