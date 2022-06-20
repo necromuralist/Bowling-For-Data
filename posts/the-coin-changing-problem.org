@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f838af95-fde1-482e-8706-5a8f2c895386-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-1f57c53d-4401-4217-ba41-9eb3a439ec28-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -40,7 +40,7 @@ The way many cashier's make change for customers is using a greedy approach.
 \PROCEDURE{CashiersChange}{$money, c$}
 \WHILE {\(money > 0\)}
   \STATE \(coin \gets\) Coin with the largest denomination that doesn't exceed \(money\).
-  \STATE Give a coin with denomination "coin" to the customer.
+  \STATE Give $coin$ to the customer.
   \STATE \(money \gets money - coin\)
 \ENDWHILE
 \ENDPROCEDURE
@@ -74,7 +74,7 @@ As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it 
 #+end_export
 ** In Python
 #+begin_src python :results none
-def greedy_change(money: int, denominations: list) -> list:
+def greedy_changer(money: int, denominations: list) -> list:
     """Make change using the fewest coins
 
     Args:
@@ -121,12 +121,12 @@ def check_coins(answer: list, denominations: list,
 # case 1
 money = 2
 coins = [10, 5, 1]
-actual = greedy_change(money, coins)
+actual = greedy_changer(money, coins)
 check_coins(actual, coins, [0, 0, 2], money)
 
 # case 2
 money = 28
-actual = greedy_change(money, coins)
+actual = greedy_changer(money, coins)
 check_coins(actual, coins, [2, 1, 3], money)
 #+end_src
 
@@ -135,11 +135,11 @@ check_coins(actual, coins, [2, 1, 3], money)
 coins = [25, 10, 5, 1]
 
 money = 28
-actual = greedy_change(money, coins)
+actual = greedy_changer(money, coins)
 check_coins(actual, coins, [1, 0, 0, 3], money)
 
 money = 14
-actual = greedy_change(money, coins)
+actual = greedy_changer(money, coins)
 check_coins(actual, coins, [0, 1, 0, 4], money)
 #+end_src
 
@@ -152,46 +152,176 @@ According to Wikipedia, there was at one time a proposal in the United States fo
 coins = [25, 20, 10, 5, 1]
 
 money = 40
-actual = greedy_change(money, coins)
-check_coins(actual, coins, [0, 2, 0, 0, 0], money)
+actual = greedy_changer(money, coins)
+
+try:
+    check_coins(actual, coins, [0, 2, 0, 0, 0], money)
+except AssertionError as error:
+    print(f"AssertionError: {error}")
 #+end_src
 
 #+RESULTS:
-:RESULTS:
-# [goto error]
-#+begin_example
-[0;31m---------------------------------------------------------------------------[0m
-[0;31mAssertionError[0m                            Traceback (most recent call last)
-[0;32m/tmp/ipykernel_59/4192049474.py[0m in [0;36m<module>[0;34m[0m
-[1;32m      3[0m [0mmoney[0m [0;34m=[0m [0;36m40[0m[0;34m[0m[0;34m[0m[0m
-[1;32m      4[0m [0mactual[0m [0;34m=[0m [0mgreedy_change[0m[0;34m([0m[0mmoney[0m[0;34m,[0m [0mcoins[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
-[0;32m----> 5[0;31m [0mcheck_coins[0m[0;34m([0m[0mactual[0m[0;34m,[0m [0mcoins[0m[0;34m,[0m [0;34m[[0m[0;36m0[0m[0;34m,[0m [0;36m2[0m[0;34m,[0m [0;36m0[0m[0;34m,[0m [0;36m0[0m[0;34m,[0m [0;36m0[0m[0;34m][0m[0;34m,[0m [0mmoney[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
-[0m
-[0;32m/tmp/ipykernel_59/597143335.py[0m in [0;36mcheck_coins[0;34m(answer, denominations, expected_coins, expected_total)[0m
-[1;32m     13[0m      [0mAssertionError[0m[0;34m:[0m [0msomething[0m [0mabout[0m [0mour[0m [0manswer[0m [0mdoesn[0m[0;31m'[0m[0mt[0m [0mmatch[0m [0mthe[0m [0mexpected[0m[0;34m[0m[0;34m[0m[0m
-[1;32m     14[0m     """
-[0;32m---> 15[0;31m     [0mexpect[0m[0;34m([0m[0msum[0m[0;34m([0m[0manswer[0m[0;34m)[0m[0;34m)[0m[0;34m.[0m[0mto[0m[0;34m([0m[0mequal[0m[0;34m([0m[0msum[0m[0;34m([0m[0mexpected_coins[0m[0;34m)[0m[0;34m)[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
-[0m[1;32m     16[0m     [0mexpect[0m[0;34m([0m[0manswer[0m[0;34m)[0m[0;34m.[0m[0mto[0m[0;34m([0m[0mcontain_exactly[0m[0;34m([0m[0;34m*[0m[0mexpected_coins[0m[0;34m)[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
-[1;32m     17[0m     expect(sum(count * coin for count, coin in zip(answer, denominations))).to(
+: AssertionError: 
+: expected: 3 to equal 2
 
-    [0;31m[... skipping hidden 1 frame][0m
+Because the greedy algorithm always takes the largest possible coins first, it ends up using 25¢ + 10¢ + 5¢ as the solution instead of the optimal 20¢ + 20¢. While it might seem artificial, given the characterization of this as a solution to making change, it's important to note that generalizing the greedy algorithm beyond the curated denominations or even beyond coins specifically leaves it vulnerable to cases where it will fail.
+* A Brute Force Changer
+{{% lancelot "LATPAPS" %}}latpaps{{% /lancelot %}} has some pseudocode for a Brute-Force Change maker but they use some pseudocode notation that I'm not familiar with and, while it doesn't seem like it's too obtuse, working it out seemed harder than writing some python so this is a rough change-finder that tries all the possible change counts to find the best.
 
-[0;32m~/.virtualenvs/Bowling-For-Data/site-packages/expects/expectations.py[0m in [0;36m_assert[0;34m(self, matcher)[0m
-[1;32m     31[0m [0;34m[0m[0m
-[1;32m     32[0m         [0;32mif[0m [0;32mnot[0m [0mok[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
-[0;32m---> 33[0;31m             [0;32mraise[0m [0mAssertionError[0m[0;34m([0m[0mself[0m[0;34m.[0m[0m_failure_message[0m[0;34m([0m[0mmatcher[0m[0;34m,[0m [0mreasons[0m[0;34m)[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
-[0m[1;32m     34[0m [0;34m[0m[0m
-[1;32m     35[0m     [0;32mdef[0m [0m_match[0m[0;34m([0m[0mself[0m[0;34m,[0m [0mmatcher[0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+#+begin_src python :results none
+def brute_changer(money: int, denominations: list) -> list:
+    """Make change using the fewest coins
 
-[0;31mAssertionError[0m: 
-expected: 3 to equal 2
-#+end_example
-:END:
+    Args:
+     money: the amount to change
+     denominations: list of coin denominations in decreasing order
 
-Because the greedy algorithm always takes the largest possible coins first, it ends up using 25¢ + 10¢ + 5¢ as the solution instead of the optimal 20¢ + 20¢. While it might seem that these cases are rare, the important thing to note is that generalizing the greedy algorithm beyond the curated denominations or even beyond coins specifically leaves it vulnerable to cases where it will fail.
+    Returns:
+     Number of each denomination needed to make the change
+    """
+    best = float("inf")
+    number_of_denominations = len(denominations)
+
+    for first in range(number_of_denominations):
+        remainder = money
+        counts = [0] * number_of_denominations
+        total = 0
+        for next_location in range(first, number_of_denominations):
+            denomination = denominations[next_location]
+            count = remainder//denomination
+            remainder = remainder - count * denomination
+            counts[next_location] = count
+            total += count
+        if total < best:
+            best_counts = counts
+            best = total
+    return best_counts
+#+end_src
+
+#+begin_src python :results none
+# case 1
+money = 2
+coins = [10, 5, 1]
+actual = brute_changer(money, coins)
+check_coins(actual, coins, [0, 0, 2], money)
+
+# case 2
+money = 28
+actual = brute_changer(money, coins)
+check_coins(actual, coins, [2, 1, 3], money)
+
+coins = [25, 10, 5, 1]
+
+money = 28
+actual = brute_changer(money, coins)
+check_coins(actual, coins, [1, 0, 0, 3], money)
+
+money = 14
+actual = brute_changer(money, coins)
+check_coins(actual, coins, [0, 1, 0, 4], money)
+#+end_src
+
+#+begin_src python :results none
+coins = [25, 20, 10, 5, 1]
+
+money = 40
+actual = brute_changer(money, coins)
+
+check_coins(actual, coins, [0, 2, 0, 0, 0], money)
+#+end_src
+
+The Brute-Force Changer fixes our double-dimes case, but our runtime estimate is once again:
+
+\[
+T(n) = \sum_{i = 1}^{n} = \frac{n(n + 1)}{2} \implies \Theta(n^2)
+\]
+
+Given how few denominations a person is likely to encounter this doesn't seem so bad, but this is meant to illustrate greedy versus brute-force versus dynamic programming to make it easier to generalize the concepts with other, possibly harder, problems.
+* Memoized Changer
+#+begin_src python :results none
+def memoized_changer(money: int, denominations: list, table: dict) -> list:
+    """Make change using the fewest coins
+
+    Args:
+     money: the amount to change
+     denominations: list of coin denominations in decreasing order
+     table: memoization table (largest denomination, amount to change): best coin counts
+
+    Returns:
+     Number of each denomination needed to make the change
+    """
+    if money == 0:
+        return [0] * len(denominations)
+    if (denominations[0], money) in table:
+        return table[(denominations[0], money)]
+    
+    last_denomination = len(denominations) - 1
+    best = float("inf")
+    best_counts = None
+
+    for current, denomination in enumerate(denominations):
+        count = money//denomination
+        remaining = money - count * denomination
+
+        if current == last_denomination:
+            if remaining > 0:
+                count = float("inf")
+            counts = [count]
+        else:
+            counts = [count] + memoized_changer(
+                remaining, denominations[current + 1:], table)
+
+        total_counts = sum(counts)
+        if total_counts < best:
+            best = total_counts
+            best_counts = [0] * current + counts
+        table[(denomination, money)] = counts
+    return best_counts
+#+end_src
+
+#+begin_src python :results none
+table = {}
+money = 2
+coins = [10, 5, 1]
+actual = memoized_changer(money, coins, table)
+
+#+end_src
+
+#+begin_src python :results none
+# case 1
+money = 2
+coins = [10, 5, 1]
+actual = memoized_changer(money, coins, {})
+check_coins(actual, coins, [0, 0, 2], money)
+
+# case 2
+money = 28
+actual = memoized_changer(money, coins, {})
+check_coins(actual, coins, [2, 1, 3], money)
+
+coins = [25, 10, 5, 1]
+
+money = 28
+actual = memoized_changer(money, coins, {})
+check_coins(actual, coins, [1, 0, 0, 3], money)
+
+money = 14
+actual = memoized_changer(money, coins, {})
+check_coins(actual, coins, [0, 1, 0, 4], money)
+#+end_src
+
+#+begin_src python :results none
+coins = [25, 20, 10, 5, 1]
+
+money = 40
+table = {}
+actual = memoized_changer(money, coins, table)
+
+check_coins(actual, coins, [0, 2, 0, 0, 0], money)
+#+end_src
 
 * Sources
-- {{% doc %}}LATPAPS{{% /doc %}}
+- [LATPAPS] {{% doc %}}LATPAPS{{% /doc %}}
 
 #+begin_export html
 <script>
@@ -208,3 +338,4 @@ window.addEventListener('load', function () {
 });
 </script>
 #+end_export
+
