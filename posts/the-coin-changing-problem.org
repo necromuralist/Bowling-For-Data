@@ -25,12 +25,32 @@ The /Change Problem (Coin Changing Problem)/ asks us to convert some amount of m
 * SetUp
 ** Imports
 #+begin_src python :results none
+# python
+from collections import namedtuple
+from functools import partial
+
 # pypi
 from expects import contain_exactly, expect, equal
+
+import altair
+import pandas
+
+# my stuff
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+** Setup
+#+begin_src python :results none
+ChangeCounts = namedtuple("ChangeCounts", ["coin_counts", "run_count"])
+
+SLUG = "the-coin-changing-problem"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
 #+end_src
 * The Cashier's Algorithm
 The way many cashier's make change for customers is using a greedy approach.
 
+** Pseudocode
 #+begin_export html
 <pre id="cashiers-algorithm" style="display:hidden;">
 \begin{algorithm}
@@ -48,48 +68,32 @@ The way many cashier's make change for customers is using a greedy approach.
 \end{algorithm}
 </pre>
 #+end_export
-* A Greedy Version
-As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it into code with the understanding that the problem isn't exactly the same as the one given to the cashier in that we only calculate how many of each coin we need and thus can assume that we'll never run out of any coins (something that, if you've ever worked retail, you know isn't always a safe assumption).
 
-** In Pseudocode
-#+begin_export html
-<pre id="greedy-algorithm" style="display:hidden;">
-\begin{algorithm}
-\caption{GreedyChange}
-\begin{algorithmic}
-\INPUT An integer ($money$) and an array of $d$ denominations (\(c = c_1, c_2, \ldots, c_d\)) in decreasing order of value (\(c_1 > c_2> \cdots > c_d\)).
-\OUTPUT A list of $d$ integers \(i_1, i_2, \ldots, i_d\) such that \(c_1 \cdot i_1 + c_2 \cdot i_2 + \cdots + c_d \cdot i_d = money\)  and \(i_1 + i_2 + \cdots + i_d\) is as small as possible.
-\PROCEDURE{CashiersChange}{$money, c$}
-\STATE $remainder \gets money$
-\STATE $d \gets $ \textsc{Length}($c$)
-\FOR {$k \in \{1 \ldots d\}$}
-  \STATE $i_k \gets \lfloor \frac{remainder}{c_k} \rfloor$
-  \STATE $remainder \gets remainder - c_k \cdot i_k$
-\ENDFOR
-\RETURN $(i_1, i_2, \ldots, i_d)$
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-</pre>
-#+end_export
-** In Python
+** Python Implementation
 #+begin_src python :results none
-def greedy_changer(money: int, denominations: list) -> list:
-    """Make change using the fewest coins
+def cashier_changer(amount: int, denominations: list) -> ChangeCounts:
+    """Implements the cashier's method for making change
 
     Args:
-     money: the amount to change
-     denominations: list of coin denominations in decreasing order
+     amount: the value of the change needed
+     denominations: values for coins (in descending order)
 
     Returns:
-     Number of each denomination needed to make the change
+     list of coin-counts, number of loops ran
     """
     coins = [0] * len(denominations)
-    remainder = money
-    for location, denomination in enumerate(denominations):
-        coins[location] = remainder // denomination
-        remainder = remainder - denomination * coins[location]
-    return coins
+    remainder = amount
+    loop_count = 0
+
+    for index, denomination in enumerate(denominations):
+        coin_count = 0
+        while denomination <= remainder:
+            coin_count += 1
+            loop_count += 1
+            remainder = remainder - denomination
+
+        coins[index] = coin_count
+    return ChangeCounts(coin_counts=coins, run_count=loop_count)
 #+end_src
 
 *** A First Test
@@ -117,17 +121,159 @@ def check_coins(answer: list, denominations: list,
     )
     return
 #+end_src
+
+#+begin_src python :results output :exports both
+# case 1
+money = 2
+coins = [10, 5, 1]
+actual = cashier_changer(money, coins)
+check_coins(actual.coin_counts, coins, [0, 0, 2], money)
+print(f"case 1: {actual.run_count}")
+
+# case 2
+money = 28
+actual = cashier_changer(money, coins)
+check_coins(actual.coin_counts, coins, [2, 1, 3], money)
+print(f"case 2: {actual.run_count}")
+
+# case 3
+money = 99
+actual = cashier_changer(money, coins)
+check_coins(actual.coin_counts, coins, [9, 1, 4], money)
+print(f"case 2: {actual.run_count}")
+#+end_src
+
+#+RESULTS:
+: case 1: 2
+: case 2: 6
+: case 2: 14
+
+The number of loops is dependent on the change owed, with an upper limit based on the denominations. In this case if we assume you wouldn't give out more than 99 cents in change then we would cap out at \( 9 \times 10 + 1 \times 5 + 4 \times 1\) = 14 coins/loops.
+
+*** U.S. Denominations
+This is a quick check using the U.S. coins most commonly used by cashiers. By adding a 25 cent piece we reduce the upper limit on the amount of coins needed to \(3 \times 25 + 2 \times 10 + 4 \times 1\) = 9 coins.
+
+#+begin_src python :results none
+coins = [25, 10, 5, 1]
+
+money = 28
+actual = cashier_changer(money, coins)
+check_coins(actual.coin_counts, coins, [1, 0, 0, 3], money)
+
+money = 14
+actual = cashier_changer(money, coins)
+check_coins(actual.coin_counts, coins, [0, 1, 0, 4], money)
+#+end_src
+
+** Plotting the Coin Counts/Loops
+
+#+begin_src python :results output :exports both
+amounts = list(range(1, 100))
+counts = [cashier_changer(amount, coins).run_count for amount in amounts]
+
+frame = pandas.DataFrame({"Amount to Change": amounts, "Coins": counts})
+
+chart = altair.Chart(frame).mark_bar().encode(
+    x="Amount to Change",
+    y="Coins", tooltip=["Amount to Change", "Coins"]).properties(
+        title="Cashier's Change Coin Counts (Common U.S. Coins)",
+        width=800,
+        height=525,
+    )
+
+save_it(chart, "cashiers-change-us-coins")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="cashiers-change-us-coins.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+*** The Double-Dime
+Looking at the cashier-algorithm you can see that it only has one loop that traverses the denominations of coins - so it is a very quick algorithm, but while our cashier algorithm turns out to work for the specific set of coins that cashiers use, will that always be the case?
+
+According to Wikipedia, there was at one time a proposal in the United States for a [[https://en.wikipedia.org/wiki/Twenty-cent_piece_(United_States_coin)][twenty-cent piece]]. If we include the twenty cent piece amongst our denominations, we find that there are cases where the cashier algorithm will miss the optimal solution.
+
+#+begin_src python :results output :exports both
+coins = [25, 20, 10, 5, 1]
+
+money = 40
+actual = cashier_changer(money, coins)
+
+try:
+    check_coins(actual.coin_counts, coins, [0, 2, 0, 0, 0], money)
+except AssertionError as error:
+    print(f"AssertionError: {error}")
+#+end_src
+
+#+RESULTS:
+: AssertionError: 
+: expected: 3 to equal 2
+
+Because the cashier algorithm always takes the largest possible coins first, it ends up using 25¢ + 10¢ + 5¢ as the solution instead of the optimal 20¢ + 20¢. While it might seem artificial, given the characterization of this as a solution to making change, it's important to note that generalizing the cashier algorithm beyond the curated denominations or even beyond coins specifically leaves it vulnerable to cases where it will fail.
+
+* A Greedy Version
+As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it into a silghtly smarter version which uses a little arithmetic to get to the same point.
+
+** In Pseudocode
+#+begin_export html
+<pre id="greedy-algorithm" style="display:hidden;">
+\begin{algorithm}
+\caption{GreedyChange}
+\begin{algorithmic}
+\INPUT An integer ($money$) and an array of $d$ denominations (\(c = c_1, c_2, \ldots, c_d\)) in decreasing order of value (\(c_1 > c_2> \cdots > c_d\)).
+\OUTPUT A list of $d$ integers \(i_1, i_2, \ldots, i_d\) such that \(c_1 \cdot i_1 + c_2 \cdot i_2 + \cdots + c_d \cdot i_d = money\)  and \(i_1 + i_2 + \cdots + i_d\) is as small as possible.
+\PROCEDURE{CashiersChange}{$money, c$}
+\STATE $remainder \gets money$
+\STATE $d \gets $ \textsc{Length}($c$)
+\FOR {$k \in \{1 \ldots d\}$}
+  \STATE $i_k \gets \lfloor \frac{remainder}{c_k} \rfloor$
+  \STATE $remainder \gets remainder - c_k \cdot i_k$
+\ENDFOR
+\RETURN $(i_1, i_2, \ldots, i_d)$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+** In Python
+#+begin_src python :results none
+def greedy_changer(money: int, denominations: list) -> ChangeCounts:
+    """Make change using the fewest coins
+
+    Args:
+     money: the amount to change
+     denominations: list of coin denominations in decreasing order
+
+    Returns:
+     Number of each denomination needed to make the change, loop-count
+    """
+    coins = [0] * len(denominations)
+    remainder = money
+    count = 0
+    for location, denomination in enumerate(denominations):
+        coins[location] = remainder // denomination
+        remainder = remainder - denomination * coins[location]
+        count += 1
+    return ChangeCounts(coins, count)
+#+end_src
+
+** Testing It Out
+*** A First Test
+
 #+begin_src python :results none
 # case 1
 money = 2
 coins = [10, 5, 1]
 actual = greedy_changer(money, coins)
-check_coins(actual, coins, [0, 0, 2], money)
+check_coins(actual.coin_counts, coins, [0, 0, 2], money)
 
 # case 2
 money = 28
 actual = greedy_changer(money, coins)
-check_coins(actual, coins, [2, 1, 3], money)
+check_coins(actual.coin_counts, coins, [2, 1, 3], money)
 #+end_src
 
 *** U.S. Denominations
@@ -136,11 +282,11 @@ coins = [25, 10, 5, 1]
 
 money = 28
 actual = greedy_changer(money, coins)
-check_coins(actual, coins, [1, 0, 0, 3], money)
+check_coins(actual.coin_counts, coins, [1, 0, 0, 3], money)
 
 money = 14
 actual = greedy_changer(money, coins)
-check_coins(actual, coins, [0, 1, 0, 4], money)
+check_coins(actual.coin_counts, coins, [0, 1, 0, 4], money)
 #+end_src
 
 *** The Double-Dime
@@ -155,7 +301,7 @@ money = 40
 actual = greedy_changer(money, coins)
 
 try:
-    check_coins(actual, coins, [0, 2, 0, 0, 0], money)
+    check_coins(actual.coin_counts, coins, [0, 2, 0, 0, 0], money)
 except AssertionError as error:
     print(f"AssertionError: {error}")
 #+end_src
@@ -165,6 +311,40 @@ except AssertionError as error:
 : expected: 3 to equal 2
 
 Because the greedy algorithm always takes the largest possible coins first, it ends up using 25¢ + 10¢ + 5¢ as the solution instead of the optimal 20¢ + 20¢. While it might seem artificial, given the characterization of this as a solution to making change, it's important to note that generalizing the greedy algorithm beyond the curated denominations or even beyond coins specifically leaves it vulnerable to cases where it will fail.
+
+** Plotting
+#+begin_src python :results output :exports both
+amounts = list(range(1, 100))
+cashier_counts = [cashier_changer(amount, coins).run_count for amount in amounts]
+greedy_counts = [greedy_changer(amount, coins).run_count for amount in amounts]
+frame = pandas.DataFrame({"Amount to Change": amounts,
+                          "Greedy": greedy_counts,
+                          "Cashier": cashier_counts})
+melted= frame.melt(id_vars=["Amount to Change"],
+                   value_vars=["Greedy", "Cashier"],
+                   var_name="Change Method",
+                   value_name="Loop Count")
+
+chart = altair.Chart(melted).mark_line(point=True).encode(
+    x="Amount to Change",
+    y="Loop Count",
+    tooltip=["Amount to Change", "Loop Count", "Change Method"],
+    color="Change Method").properties(
+        title="Cashier's and Greedy Change Coin Counts (Common U.S. Coins)",
+        width=800,
+        height=525,
+    )
+
+save_it(chart, "cashiers-greedy-change-us-coins")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="cashiers-greedy-change-us-coins.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 * A Brute Force Changer
 {{% lancelot "LATPAPS" %}}latpaps{{% /lancelot %}} has some pseudocode for a Brute-Force Change maker but they use some pseudocode notation that I'm not familiar with and, while it doesn't seem like it's too obtuse, working it out seemed harder than writing some python so this is a rough change-finder that tries all the possible change counts to find the best.
 
