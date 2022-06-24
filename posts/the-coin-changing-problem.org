@@ -50,6 +50,11 @@ save_it = partial(save_chart, output_path=OUTPUT_PATH)
 
 PlotParameters = namedtuple("PlotParameters", ["height", "width"],
                             defaults=[525, 750])()
+
+Denominations = namedtuple("Denominations", "US double_dime obsolete",
+                           defaults=[[25, 10, 5, 1],
+                                    [25, 20, 10, 5, 1],
+                                    [25, 20, 10, 5, 3, 2, 1]])()
 #+end_src
 * The Cashier's Algorithm
 The way many cashier's make change for customers is using a greedy approach.
@@ -157,23 +162,28 @@ The number of loops is dependent on the change owed, with an upper limit based o
 *** U.S. Denominations
 This is a quick check using the U.S. coins most commonly used by cashiers. By adding a 25 cent piece we reduce the upper limit on the amount of coins needed to \(3 \times 25 + 2 \times 10 + 4 \times 1\) = 9 coins.
 
-#+begin_src python :results none
-US_COINS = [25, 10, 5, 1]
+#+begin_src python :results output :exports both
+print(Denominations.US)
+#+end_src
 
+#+RESULTS:
+: [25, 10, 5, 1]
+
+#+begin_src python :results none
 money = 28
-actual = cashier_changer(money, US_COINS)
-check_coins(actual.coin_counts, US_COINS, [1, 0, 0, 3], money)
+actual = cashier_changer(money, Denominations.US)
+check_coins(actual.coin_counts, Denominations.US, [1, 0, 0, 3], money)
 
 money = 14
-actual = cashier_changer(money, US_COINS)
-check_coins(actual.coin_counts, US_COINS, [0, 1, 0, 4], money)
+actual = cashier_changer(money, Denominations.US)
+check_coins(actual.coin_counts, Denominations.US, [0, 1, 0, 4], money)
 #+end_src
 
 ** Plotting the Coin Counts/Loops
 
 #+begin_src python :results output :exports both
 PLOT_AMOUNTS = list(range(1, 100))
-CASHIER_COUNTS = [cashier_changer(amount, US_COINS).run_count
+CASHIER_COUNTS = [cashier_changer(amount, Denominations.US).run_count
                   for amount in PLOT_AMOUNTS]
 
 PLOT_FRAME = pandas.DataFrame({"Amount to Change": PLOT_AMOUNTS,
@@ -204,13 +214,18 @@ Our cashier algorithm turns out to work for the specific set of coins that cashi
 According to Wikipedia, there was at one time a proposal in the United States for a [[https://en.wikipedia.org/wiki/Twenty-cent_piece_(United_States_coin)][twenty-cent piece]] (and at one time there were [[https://en.wikipedia.org/wiki/Obsolete_denominations_of_United_States_currency#Coinage][half-cent, two-cent, and three-cent coins]]).If we include the twenty cent piece amongst our denominations, we find that there are cases where the cashier algorithm will miss the optimal solution.
 
 #+begin_src python :results output :exports both
-DOUBLE_DIME = [25, 20, 10, 5, 1]
+print(Denominations.double_dime)
+#+end_src
 
+#+RESULTS:
+: [25, 20, 10, 5, 1]
+
+#+begin_src python :results output :exports both
 money = 40
-actual = cashier_changer(money, DOUBLE_DIME)
+actual = cashier_changer(money, Denominations.double_dime)
 
 try:
-    check_coins(actual.coin_counts, DOUBLE_DIME, [0, 2, 0, 0, 0], money)
+    check_coins(actual.coin_counts, Denominations.double_dime, [0, 2, 0, 0, 0], money)
 except AssertionError as error:
     print(f"AssertionError: {error}")
 #+end_src
@@ -286,12 +301,12 @@ check_coins(actual.coin_counts, coins, [2, 1, 3], money)
 *** U.S. Denominations
 #+begin_src python :results none
 money = 28
-actual = greedy_changer(money, US_COINS)
-check_coins(actual.coin_counts, US_COINS, [1, 0, 0, 3], money)
+actual = greedy_changer(money, Denominations.US)
+check_coins(actual.coin_counts, Denominations.US, [1, 0, 0, 3], money)
 
 money = 14
-actual = greedy_changer(money, US_COINS)
-check_coins(actual.coin_counts, US_COINS, [0, 1, 0, 4], money)
+actual = greedy_changer(money, Denominations.US)
+check_coins(actual.coin_counts, Denominations.US, [0, 1, 0, 4], money)
 #+end_src
 
 *** The Double-Dime
@@ -299,10 +314,10 @@ Looking at the greedy-algorithm you can see that it only has one loop that trave
 
 #+begin_src python :results output :exports both
 money = 40
-actual = greedy_changer(money, DOUBLE_DIME)
+actual = greedy_changer(money, Denominations.double_dime)
 
 try:
-    check_coins(actual.coin_counts, DOUBLE_DIME, [0, 2, 0, 0, 0], money)
+    check_coins(actual.coin_counts, Denominations.double_dime, [0, 2, 0, 0, 0], money)
 except AssertionError as error:
     print(f"AssertionError: {error}")
 #+end_src
@@ -313,7 +328,7 @@ except AssertionError as error:
 
 ** Plotting
 #+begin_src python :results output :exports both
-greedy_counts = [greedy_changer(amount, US_COINS).run_count
+greedy_counts = [greedy_changer(amount, Denominations.US).run_count
                  for amount in PLOT_AMOUNTS]
 GREEDY_FRAME = PLOT_FRAME.rename(columns={"Coins": "Cashier"})
 GREEDY_FRAME["Greedy"] = greedy_counts
@@ -342,8 +357,10 @@ save_it(chart, "cashiers-greedy-change-us-coins")
 </object>
 #+end_export
 
+Since the Cashier works by repeated subtraction instead of division it goes up with the amount of change owed, and so generally does worse than the Greedy changer, except in the cases where it takes fewer coins to make the change than the number of denominations there are. If I had included the fifty cent piece it would have done a little better in the second half of the plot.
+
 * A Brute Force Changer
-{{% lancelot "LATPAPS" %}}latpaps{{% /lancelot %}} has some pseudocode for a Brute-Force Change maker but they use some pseudocode notation that I'm not familiar with and, while it doesn't seem like it's too obtuse, working it out seemed harder than writing some python so this is a rough change-finder that tries all the possible change counts to find the best.
+To get around the limitations of the greedy-style of change making we'll figure out all the ways we can make change for a particular amount and pick the solution with the fewest coins.
 
 #+begin_src python :results none
 def brute_changer(money: int, denominations: list) -> ChangeCounts:
@@ -377,6 +394,7 @@ def brute_changer(money: int, denominations: list) -> ChangeCounts:
 #+end_src
 
 #+begin_src python :results none
+
 # case 1
 money = 2
 coins = [10, 5, 1]
@@ -399,11 +417,13 @@ actual = brute_changer(money, coins)
 check_coins(actual.coin_counts, coins, [0, 1, 0, 4], money)
 #+end_src
 
+And now our double-dime case.
+
 #+begin_src python :results output :exports both
 money = 40
-actual = brute_changer(money, DOUBLE_DIME)
+actual = brute_changer(money, Denominations.double_dime)
 
-check_coins(actual.coin_counts, DOUBLE_DIME, [0, 2, 0, 0, 0], money)
+check_coins(actual.coin_counts, Denominations.double_dime, [0, 2, 0, 0, 0], money)
 
 print(actual)
 #+end_src
@@ -411,19 +431,35 @@ print(actual)
 #+RESULTS:
 : ChangeCounts(coin_counts=[0, 2, 0, 0, 0], run_count=15)
 
-The Brute-Force Changer fixes our double-dimes case, but our runtime estimate is once again:
+The Brute-Force Changer fixes our double-dimes case, and has a constant runtime of:
 
 \[
-T(n) = \sum_{i = 1}^{n} = \frac{n(n + 1)}{2} \implies \Theta(n^2)
+T(n) = \sum_{i = 1}^{n} = \frac{n(n + 1)}{2}
 \]
 
-Where $n$ is the number of denominations.
+Where $n$ is the number of denominations, not the input amount. 
 
-Given how few denominations a person is likely to encounter this doesn't seem so bad, but this is meant to illustrate greedy versus brute-force versus dynamic programming to make it easier to generalize the concepts with other, possibly harder, problems.
+
+Let's make sure our functions all agree.
+
+#+begin_src python :results none
+for amount in range(100):
+    cashiers_change = cashier_changer(amount, Denominations.US).coin_counts
+    greedy_change = greedy_changer(amount, Denominations.US).coin_counts
+    brute_change = brute_changer(amount, Denominations.US).coin_counts
+
+    check_coins(answer=cashiers_change, denominations=Denominations.US,
+                expected_coins=greedy_change, expected_total=amount)
+    check_coins(answer=brute_change, denominations=Denominations.US,
+                expected_coins=greedy_change, expected_total=amount)
+
+#+end_src
 
 ** Plotting
+Let's compare the three methods we've created so far using the typical U.S. Coins.
+
 #+begin_src python :results output :exports both
-brute_counts = [brute_changer(amount, US_COINS).run_count
+brute_counts = [brute_changer(amount, Denominations.US).run_count
                 for amount in PLOT_AMOUNTS]
 GREEDY_FRAME["Brute-Force"] = brute_counts
 melted = GREEDY_FRAME.melt(id_vars=["Amount to Change"],
@@ -451,10 +487,11 @@ save_it(chart, "brute-force-change-us-coins")
 </object>
 #+end_export
 
-The Greedy and Brute-Force methods both have a loop-count based on the number of coin denominations we have. Since we have four denominations (25, 10, 5, and 1) the Greedy method has four loops and the Brute-Force method has ten loops \(\left(^{4(4 + 1)}/_{2} = 10\right)\).
+The Greedy and Brute-Force methods both have a loop-count based on the number of coin denominations we have. Since we have four denominations (25, 10, 5, and 1) the Greedy method has four loops and the Brute-Force method has ten loops \(\left(^{4(4 + 1)}/_{2} = 10\right)\), so it does a little more calculating but not much, although in this case the benefit it has is wasted since we shouldn't find sub-optimal solutions with the greedy approach and using the coins that we did.
+
 * Memoized Changer
 #+begin_src python :results none
-def memoized_changer(money: int, denominations: list, table: dict,
+def memoized_changer(money: int, denominations: list, table: dict=None,
                      counter: int=0) -> ChangeCounts:
     """Make change using the fewest coins
 
@@ -467,6 +504,7 @@ def memoized_changer(money: int, denominations: list, table: dict,
     Returns:
      Number of each denomination needed to make the change, call_count
     """
+    table = dict() if table is None else table
     counter += 1
     
     if money == 0:
@@ -487,6 +525,7 @@ def memoized_changer(money: int, denominations: list, table: dict,
             if remaining > 0:
                 count = float("inf")
             counts = [count]
+            counter += 1
         else:
             counts, counter = memoized_changer(
                 remaining, denominations[current + 1:], table, counter)
@@ -515,7 +554,7 @@ def check_changers(changer: object, amount: int, denominations: list):
      AssertionError: there's a discrepancy somewhere
     """
     brute_counts = brute_changer(amount, denominations)
-    check_counts = changer(amount, denominations, {})
+    check_counts = changer(amount, denominations)
     check_coins(check_counts.coin_counts, denominations, brute_counts.coin_counts, amount)
     return
 #+end_src
@@ -531,8 +570,9 @@ def check_cases(changer: object) -> None:
      AssertionError if something doesn't check out
     """
     for amount in range(100):
-        check_changers(changer, amount, US_COINS)
-        check_changers(changer, amount, DOUBLE_DIME)
+        check_changers(changer, amount, Denominations.US)
+        check_changers(changer, amount, Denominations.double_dime)
+        check_changers(changer, amount, Denominations.obsolete)
 
         money = 2
         coins = [10, 5, 1]
@@ -561,7 +601,7 @@ check_cases(memoized_changer)
 ** Plotting
 *** All the Methods So Far
 #+begin_src python :results output :exports both
-memoized_counts = [memoized_changer(amount, US_COINS, {}).run_count
+memoized_counts = [memoized_changer(amount, Denominations.US, {}).run_count
                    for amount in PLOT_AMOUNTS]
 GREEDY_FRAME["Memoized"] = memoized_counts
 melted = GREEDY_FRAME.melt(id_vars=["Amount to Change"],
@@ -595,20 +635,20 @@ With a Brute-Force ceiling of 10 loops it's hard to see a marked improvement, gi
 *** Obsolete Coins
 First, we'll check to make sure that the brute-force and memoized methods agree on the best coins for making change with our new denominations, which include some that were once used in the United States but aren't any more.
 
-#+begin_src python :results none
-OBSOLETE = [25, 20, 10, 5, 3, 2, 1]
-for amount in PLOT_AMOUNTS:
-    brute_counts = brute_changer(amount, OBSOLETE)
-    memo_counts = memoized_changer(amount, OBSOLETE, {})
-    expect(brute_counts.coin_counts).to(contain_exactly(*memo_counts.coin_counts))
+#+begin_src python :results output :exports both
+print(Denominations.obsolete)
 #+end_src
+
+#+RESULTS:
+: [25, 20, 10, 5, 3, 2, 1]
+
 
 Now let's see how the run-times compare.
 
 #+begin_src python :results output :exports both
-BRUTE_OBSOLETE = [brute_changer(amount, OBSOLETE).run_count
+BRUTE_OBSOLETE = [brute_changer(amount, Denominations.obsolete).run_count
                   for amount in PLOT_AMOUNTS]
-MEMOIZED_OBSOLETE = [memoized_changer(amount, OBSOLETE, {}).run_count
+MEMOIZED_OBSOLETE = [memoized_changer(amount, Denominations.obsolete, {}).run_count
                      for amount in PLOT_AMOUNTS]
 
 OBSOLETE_FRAME = pandas.DataFrame({"Amount to Change": PLOT_AMOUNTS,
@@ -646,7 +686,7 @@ This time we have seven coin denominations so the brute-force method takes \(^7(
 #+begin_src python :results output :exports both
 OBSOLETE_TABLE = {}
 MEMOIZED_OBSOLETE_2 = [memoized_changer(amount,
-                                        OBSOLETE,
+                                        Denominations.obsolete,
                                         OBSOLETE_TABLE).run_count
                        for amount in PLOT_AMOUNTS]
 
@@ -686,7 +726,7 @@ Even better, now that we have the table built with all our allowed values, we ca
 
 #+begin_src python :results output :exports both
 MEMOIZED_OBSOLETE_3 = [memoized_changer(amount,
-                                        OBSOLETE,
+                                        Denominations.obsolete,
                                         OBSOLETE_TABLE).run_count
                        for amount in PLOT_AMOUNTS]
 
@@ -721,6 +761,10 @@ save_it(chart, "memoized-change-obsolete-pre-filled-table")
 #+end_export
 
 * Iterative Dynamic Programming
+The idea behind this problem (making change) is to show how Dynamic Programming can eleminate redundant calculations, so this is the point where I'll switch to an iterative approach that uses Dynamic Programming. The iterative, top-down approach works in the opposite direction of the memoized approach, starting with the smallest values and then moving to ever increasing values, storing the outcomes as we go so that we can re-use the lower solutions as the values increase. This is where I was stumped for a while - since the memoized function I used is based on the remainders left over after subtracting a coin's value from it (e.g. 26 cents minus a quarter has a remainder of 1 cent so we use the stored 1-cent solution from the memo-table rather than re-calculating it) in order to create an iterative version we somehow have to store the values in the table before they are needed, but the scheme I used where we iterate over the coin-denominations doesn't work (or it makes it really convoluted to force it to work). From what I can tell this is because I didn't really make a dynamic programming solution with the memoized version. With Dynamic Programming our memo-table should be built around the change we need to give out, so you would have a table with all the possible amounts, not just the ones needed as remainders. This works with our depth-first version because we're starting at the leaf nodes and working back up the tree, but it doesn't work with the iterative version because we don't know ahead of time which remainders we need later on in the table. For example, if we can only use 1-cent and 10-cent coins and we need to make change for 11 cents, then we have to have an entry for 1-cent in the table before we get to figuring out the solution that includes the 10-cent piece. If we need to break 12 cents, though, we need to have an entry for 2 cents before we get to calculating the entry for 10 cents. But how do we know which values we need to enter into the table for the 1-cent piece before we get to the 10 cent piece? 
+
+The solution is to fill out the table completely from 1 to the amount to make change for each coin before moving on to the next larger denomination. So, for our 12-cent example we need entries for \(1 \ldots 12\) cents for the 1 cent piece filled out before we move on to calculating the entries for the 10 cent piece so that no matter what remainder we have when we reach the 10-cent piece we can look it up in the table (we actually only need up to 9 cents, but since the denominations aren't fixed doing the trimming once again adds to the complexity more than I'd like). So, I'll just fill out the table and we can see how it goes.
+
 #+begin_src python :results none
 def centaur(amount: int, denominations: list, table: dict=None) -> ChangeCountsTable:
     """Make change using the fewest coins
@@ -772,9 +816,10 @@ check_cases(centaur)
 #+end_src
 
 ** Plotting
-*** All the Methods So Far
+Since the iterative version works differently from the others the loop-counts aren't really easy to compare.
+
 #+begin_src python :results output :exports both
-centaur_counts = [centaur(amount, US_COINS).run_count
+centaur_counts = [centaur(amount, Denominations.US).run_count
                    for amount in PLOT_AMOUNTS]
 GREEDY_FRAME["Iterative"] = centaur_counts
 melted = GREEDY_FRAME.melt(id_vars=["Amount to Change"],
@@ -803,135 +848,7 @@ save_it(chart, "all-change-us-coins")
 </object>
 #+end_export
 
-With a Brute-Force ceiling of 10 loops it's hard to see a marked improvement, given how much easier it is to write the Brute-Force method rather than the memoized one, but let's get rid of the two greedy methods and compare the brute force and memoized with more obsolete coins added in.
-
-*** Obsolete Coins
-First, we'll check to make sure that the brute-force and memoized methods agree on the best coins for making change with our new denominations, which include some that were once used in the United States but aren't any more.
-
-#+begin_src python :results none
-OBSOLETE = [25, 20, 10, 5, 3, 2, 1]
-for amount in PLOT_AMOUNTS:
-    brute_counts = brute_changer(amount, OBSOLETE)
-    memo_counts = memoized_changer(amount, OBSOLETE, {})
-    expect(brute_counts.coin_counts).to(contain_exactly(*memo_counts.coin_counts))
-#+end_src
-
-Now let's see how the run-times compare.
-
-#+begin_src python :results output :exports both
-BRUTE_OBSOLETE = [brute_changer(amount, OBSOLETE).run_count
-                  for amount in PLOT_AMOUNTS]
-MEMOIZED_OBSOLETE = [memoized_changer(amount, OBSOLETE, {}).run_count
-                     for amount in PLOT_AMOUNTS]
-
-OBSOLETE_FRAME = pandas.DataFrame({"Amount to Change": PLOT_AMOUNTS,
-                                   "Brute-Force": BRUTE_OBSOLETE,
-                                   "Memoized": MEMOIZED_OBSOLETE})
-
-melted = OBSOLETE_FRAME.melt(id_vars=["Amount to Change"],
-                           value_vars=["Brute-Force",
-                                       "Memoized"],
-                           var_name="Change Method",
-                           value_name="Loop Count")
-
-chart = altair.Chart(melted).mark_line(point=True).encode(
-    x="Amount to Change",
-    y=altair.Y("Loop Count", axis=altair.Axis(tickMinStep=1)),
-    tooltip=["Amount to Change", "Loop Count", "Change Method"],
-    color="Change Method").properties(
-        title="Brute-Force & Memoized Change Counts (Including Obsolete Coins)",
-        width=PlotParameters.width,
-        height=PlotParameters.height,
-    )
-
-save_it(chart, "memoized-change-obsolete")
-#+end_src
-
-#+RESULTS:
-#+begin_export html
-<object type="text/html" data="memoized-change-obsolete.html" style="width:100%" height=600>
-  <p>Figure Missing</p>
-</object>
-#+end_export
-
-This time we have seven coin denominations so the brute-force method takes \(^7(8)/_2 = 28\) loops. Now that we have more coins the memoized does slightly (very slightly) worse than the brute-force for larger amounts, but in the examples so far I've been creating a new memo-table for every amount - what happens if we build one table and re-use it as we find the change for new amounts?
-
-#+begin_src python :results output :exports both
-OBSOLETE_TABLE = {}
-MEMOIZED_OBSOLETE_2 = [memoized_changer(amount,
-                                        OBSOLETE,
-                                        OBSOLETE_TABLE).run_count
-                       for amount in PLOT_AMOUNTS]
-
-OBSOLETE_FRAME_2 = pandas.DataFrame({"Amount to Change": PLOT_AMOUNTS,
-                          "Brute-Force": BRUTE_OBSOLETE,
-                          "Memoized": MEMOIZED_OBSOLETE_2})
-
-melted = OBSOLETE_FRAME_2.melt(id_vars=["Amount to Change"],
-                               value_vars=["Brute-Force",
-                                           "Memoized"],
-                               var_name="Change Method",
-                               value_name="Loop Count")
-
-chart = altair.Chart(melted).mark_line(point=True).encode(
-    x="Amount to Change",
-    y=altair.Y("Loop Count", axis=altair.Axis(tickMinStep=1)),
-    tooltip=["Amount to Change", "Loop Count", "Change Method"],
-    color="Change Method").properties(
-        title="Brute-Force & Memoized Change Counts (Obsolete Coins, Re-Used Table)",
-        width=PlotParameters.width,
-        height=PlotParameters.height,
-    )
-
-save_it(chart, "memoized-change-obsolete-keep-table")
-#+end_src
-
-#+RESULTS:
-#+begin_export html
-<object type="text/html" data="memoized-change-obsolete-keep-table.html" style="width:100%" height=600>
-  <p>Figure Missing</p>
-</object>
-#+end_export
-
-Re-using the table allows us to avoid some re-calculating and the number of calls eventually drops down to the number of coins we have, the same as the number of loops for the greedy method, although in this case we can handle cases where the greedy method fails.
-
-Even better, now that we have the table built with all our allowed values, we can just look things up and don't need to run the function (although I will here just to make sure nothing funky is going on), so it has a cost of one.
-
-#+begin_src python :results output :exports both
-MEMOIZED_OBSOLETE_3 = [memoized_changer(amount,
-                                        OBSOLETE,
-                                        OBSOLETE_TABLE).run_count
-                       for amount in PLOT_AMOUNTS]
-
-OBSOLETE_FRAME_3 = pandas.DataFrame({"Amount to Change": PLOT_AMOUNTS,
-                          "Brute-Force": BRUTE_OBSOLETE,
-                          "Memoized": MEMOIZED_OBSOLETE_3})
-
-melted = OBSOLETE_FRAME_3.melt(id_vars=["Amount to Change"],
-                               value_vars=["Brute-Force",
-                                           "Memoized"],
-                               var_name="Change Method",
-                               value_name="Loop Count")
-
-chart = altair.Chart(melted).mark_line(point=True).encode(
-    x="Amount to Change",
-    y=altair.Y("Loop Count", axis=altair.Axis(tickMinStep=1)),
-    tooltip=["Amount to Change", "Loop Count", "Change Method"],
-    color="Change Method").properties(
-        title="Brute-Force & Memoized Change Counts (Obsolete Coins, Pre-Filled Table)",
-        width=PlotParameters.width,
-        height=PlotParameters.height,
-    )
-
-save_it(chart, "memoized-change-obsolete-pre-filled-table")
-#+end_src
-
-#+RESULTS:
-#+begin_export html
-<object type="text/html" data="memoized-change-obsolete-pre-filled-table.html" style="width:100%" height=600>
-  <p>Figure Missing</p>
-</object>
-#+end_export
+Since I'm filling out the whole table for the iterative function the loop is dependent on the amount of change owed, not the number of coin-denominations as with the other functions so it increases linearly. There's something I'm missing here as to why either the memoized-version is incorrect or there is an advantage to using the iterative version, but I haven't figured it out yet. The solutions seem to be the same in either case, though, and the linear growth for the number of loops is still tractable so I'll move on for now.
 
 * Sources
 - [LATPAPS] {{% doc %}}LATPAPS{{% /doc %}}
