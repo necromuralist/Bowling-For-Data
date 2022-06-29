@@ -11,12 +11,12 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-1f57c53d-4401-4217-ba41-9eb3a439ec28-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-34b343bb-1316-49f4-8e25-569cdf192171-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
-* The Knapsack Problems
+* The Knapsack Problem(s)
 The basic premise of the /Knapsack Problem/ is that we have a knapsack with a maximum capacity (/C/) and a selection of /n/ items, each item having a weight (\(w_i\)) and a value (\(v_i\)), and we want to pick the items that give us the most total value without exceeding the capacity of our knapsack.
 
 There are two forms of the problem. The first form is what {{% lancelot "CLRS" %}}clrs{{% /lancelot %}} 
@@ -24,9 +24,227 @@ calls the \(\textit{0-1 Knapsack Problem}\) because we can either take the item 
 
 Although the problems look more or less the same, the fractional problem is one that can be solved using a greedy algorithm while the 0-1 problem can fail if you use a greedy approach so the all-or-nothing version is the more interesting case and the one we'll look at here.
 
+** Imports
+#+begin_src python :results none
+# python
+from collections import namedtuple
+
+# pypi
+from expects import (be_below_or_equal, contain_exactly, equal, expect,
+                     raise_error)
+#+end_src
+
+** Setup
+#+begin_src python :results none
+Solution = namedtuple("Solution", "value inventory count")
+NEGATIVE_INFINITY = float("-inf")
+#+end_src
 * The Brute Force Solution
 One way to find the optimal load for our knapsack is to find all the possible loads and taking the best load from those that will fit in the knapsack. This requires us to calculate the values for {{% lancelot "every subset" %}}number-of-subsets-in-a-set{{% /lancelot %}} of items which means we'll have to do \(2^n\) calculations.
 
+** An Iterative Brute-Force Version
+To have a reference solution I'll make a brute-force iterative version of the knapsack solver. This will have a greater runtime (\(n 2^n\)) but sometimes starting with something easy is useful, even if it's not a practical solution.
+
+#+begin_src python :results none
+def brute_knapsack(capacity: int, values: list, weights: list) -> Solution:
+    """Finds the best selection of items to maximize value
+    
+    Args:
+     capacity: maximum weight allowed
+     values: value for each item available
+     weights: how much each item weighs
+
+    Returns:
+     best-value, count of each item, count of loops
+    """
+    assert len(values) == len(weights)
+
+    number_of_items = len(values)
+    items = [0] * number_of_items
+    best_value = 0
+    count = 0
+
+    for combination in range(2**(number_of_items)):
+        value, weight, carry = 0, 0, 1
+        for item in range(number_of_items):
+            increment = items[item] + carry
+            keep = increment % 2
+            carry = increment//2
+            if keep:
+                value += values[item]
+                weight += weights[item]
+            items[item] = keep
+            count += 1
+        if weight <= capacity and value > best_value:
+            best_value = value
+            solution = items[:]
+
+    return Solution(value=best_value, inventory=solution, count=count)
+    
+#+end_src
+
+** Checking the Brute
+#+begin_src python :results none
+def check_solution(solution: Solution,
+                   expected_inventory: list,
+                   values: list, weights: list, capacity: int):
+    """Check that the solution matches the expected
+
+    Args:
+     solution: namedtuple with the knapsack solution
+     expected_inventory: list of 0's and 1's representing which items to keep
+     expected_value: total value expected for the solution
+     values: values for the items
+     weights: weights for the items
+     capacity: maximum weight for the knapsack
+
+    Raises:
+     AssertionError if something isn't the expected
+    """
+    expect(solution.inventory).to(contain_exactly(*expected_inventory))
+    value = sum([loot for index, loot in enumerate(values)
+                 if solution.inventory[index]])
+    weight = sum([poundage for index, poundage in enumerate(weights)
+                  if solution.inventory[index]])
+
+    expected_value = sum([loot for index, loot in enumerate(values)
+                          if expected_inventory[index]])
+    expect(value).to(equal(expected_value))
+    expect(weight).to(be_below_or_equal(capacity))
+    return
+#+end_src
+
+#+begin_src python :results none
+def check_examples(solver: object) -> None:
+    """Check the toy examples
+
+    Args:
+     solver: function to find the optimal knapsack load
+    """
+    # values and weights don't match
+    broken = lambda : solver(5, [0, 1], [2, 1, 3])
+    expect(broken).to(raise_error(AssertionError))
+
+    capacity = 10
+    values = [42, 12, 40, 25]
+    weights = [7, 3, 4, 5]
+    expected = [0, 0, 1, 1]
+
+    solution = solver(capacity, values, weights)
+    check_solution(solution, expected, values, weights, capacity)
+
+    capacity = 6
+    values = [3, 2, 4, 4]
+    weights = [4, 3, 2, 3]
+
+    expected = [0, 0, 1, 1]
+    solution = solver(capacity, values, weights)
+    check_solution(solution, expected, values, weights, capacity)
+    return
+
+check_examples(brute_knapsack)
+#+end_src
+
+Let's look at a particular solution.
+
+#+begin_src python :results output :exports both
+values = [3, 4, 2, 4]
+weights = [4, 2, 3, 3]
+capacity = 6
+solution = brute_knapsack(capacity=capacity, values=values, weights=weights)
+print(f"Call Count: {solution.count}")
+print(f"Chosen knapsack value {solution.value}")
+print(f"Item inventory: {solution.inventory}")
+
+expect(solution.count).to(equal(len(values) * 2**len(values)))
+expect(solution.value).to(equal(8))
+expect(solution.inventory).to(contain_exactly(0, 1, 0, 1))
+#+end_src
+
+#+RESULTS:
+: Call Count: 64
+: Chosen knapsack value 8
+: Item inventory: [0, 1, 0, 1]
+
+So we have a solution that works, but the runtime is \(n2^n\) so let's make a version that does a little better.
+
+** A Recursive Exhaustive Search
+#+begin_src python :results none
+def exhaustive_knapsack(capacity: int, values: list, weights: list,
+                        count: int=0) -> Solution:
+    """Finds the best selection of items to maximize value
+    
+    Args:
+     capacity: maximum weight allowed
+     values: value for each item available
+     weights: how much each item weighs
+     count: number of recursions
+
+    Returns:
+     best-value, count of each item, count of loops
+    """
+    assert len(values) == len(weights)
+    count += 1
+
+    if len(values) == 0:
+        value = NEGATIVE_INFINITY if capacity < 0 else 0
+        return Solution(value, [], count)
+
+    value = 0
+
+    values_and_weights = zip(values, weights)
+    best = NEGATIVE_INFINITY
+    best_solution = None
+    
+    for item, (value, weight) in enumerate(values_and_weights):
+        remaining = capacity - weight
+        next_item = item + 1
+        descendant_output = exhaustive_knapsack(capacity=remaining,
+                                                values=values[next_item:],
+                                                weights=weights[next_item:],
+                                                count=count)
+        value += descendant_output.value
+        count = descendant_output.count
+        if value > best:
+            best = value
+            best_solution = [0] * item + [1] + descendant_output.inventory
+    return Solution(value=best, inventory=best_solution, count=count)
+#+end_src
+
+** Checking The Exhaustive
+#+begin_src python :results none
+solution = exhaustive_knapsack(-5, [], [])
+expect(solution.value).to(equal(NEGATIVE_INFINITY))
+
+solution = exhaustive_knapsack(5, [], [])
+expect(solution.value).to(equal(0))
+
+check_examples(exhaustive_knapsack)
+#+end_src
+
+Let's look at that example that we looked at for the iterative brute-force version.
+
+#+begin_src python :results output :exports both
+values = [3, 4, 2, 4]
+weights = [4, 2, 3, 3]
+capacity = 6
+solution = exhaustive_knapsack(capacity=capacity, values=values, weights=weights)
+brute_solution = brute_knapsack(capacity=capacity, values=values, weights=weights)
+print(f"Call Count: {solution.count}")
+print(f"Chosen knapsack value {solution.value}")
+print(f"Item inventory: {solution.inventory}")
+
+expect(solution.count).to(equal(2**len(values)))
+expect(solution.value).to(equal(brute_solution.value))
+expect(solution.inventory).to(contain_exactly(*brute_solution.inventory))
+#+end_src
+
+#+RESULTS:
+: Call Count: 16
+: Chosen knapsack value 8
+: Item inventory: [0, 1, 0, 1]
+
+So now the number calls has gone down to \(2^n\), which is better, but not what we want just yet.
 * The Greedy Approach
 * Dynamic Programming
 * Levitin's Example
