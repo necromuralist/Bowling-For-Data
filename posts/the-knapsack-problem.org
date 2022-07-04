@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-34b343bb-1316-49f4-8e25-569cdf192171-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-09f23e8c-9aa7-46f7-a2a1-73490b755ae4-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -37,6 +37,7 @@ from expects import (be_below_or_equal, contain_exactly, equal, expect,
 ** Setup
 #+begin_src python :results none
 Solution = namedtuple("Solution", "value inventory count")
+TableSolution = namedtuple("TableSolution", "value inventory count table")
 NEGATIVE_INFINITY = float("-inf")
 #+end_src
 * The Brute Force Solution
@@ -245,6 +246,236 @@ expect(solution.inventory).to(contain_exactly(*brute_solution.inventory))
 : Item inventory: [0, 1, 0, 1]
 
 So now the number calls has gone down to \(2^n\), which is better, but not what we want just yet.
+* Levitin's Memory Function
+This is a memoized function that is in {{% lancelot "Levitin's book" %}}itdaa{{% /lancelot %}}. It looks slightly different from the other memoized functions in the other books (but they all look slightly different from each other anyway) but it's only cosmetic. I've been creating the final solution list of items to use in the functions themselves but I'm going to try doing it the way the books do and separate out the solution using a re-creation function afterwards.
+
+** Some Pseudocode
+**Note:** Levitin keeps the weights, values, and solution table in the global space so it doesn't appear in the pseudocode. I'm going to copy that here but change it when I get to implementing it.
+I'm also going to change the variables a little to get them a little closer to the names I use. I'll call the eternal collections $Table$, $Weights$, and $Values$.
+
+The $Table$ is an $items \times capacity$ table, with from 0 to number of items rows and 0 to the capacity columns. The 0 row and 0 column get initialized with 0 and the other cells with -1. If we have 4 items and a knapsack capacity of 5 we'd have an initial table like this.
+
+|   | 0 |  1 |  2 |  3 |  4 |  5 |
+|---+---+----+----+----+----+----|
+| / | < |    |    |    |    |    |
+| 0 | 0 |  0 |  0 |  0 |  0 |  0 |
+| 1 | 0 | -1 | -1 | -1 | -1 | -1 |
+| 2 | 0 | -1 | -1 | -1 | -1 | -1 |
+| 3 | 0 | -1 | -1 | -1 | -1 | -1 |
+| 4 | 0 | -1 | -1 | -1 | -1 | -1 |
+
+Where the rows are the items and the columns are the used-capacities for the knapsack.
+
+#+begin_export html
+<pre id="memory-function-algorithm" style="display:hidden;">
+\begin{algorithm}
+\caption{Memory Function Knapsack Solver}
+\begin{algorithmic}
+\INPUT $i$: the number of the first items to consider.
+\INPUT $c$: the knapsack's capacity.
+\OUTPUT Value of the optimal subset of the first $i$ items that fit in the knapsack.
+\PROCEDURE{MFKnapsack}{$i, c$}
+\IF {\textit{Table}$[i, c] < 0$}
+ \IF {$c < \textit{Weights}[i]$}
+  \STATE $v \gets $ \textsc{MFKnapsack}($i - 1, c$)
+ \ELSE
+  \STATE $v \gets $ \textsc{Max}(\textsc{MFKnapsack}($i - 1, c$), $\textit{Values}[i] + $ \textsc{MFKnapsack}($i - 1, c - \textit{Weights}[i]$))
+ \ENDIF
+ \STATE $\textit{Table}[i, c] \gets v$
+\ENDIF
+\RETURN $\textit{Table}[i, c]$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+To start the function you would pass in the total number of items as the argument for $i$. Since we initialized the cells (other than the zero row and column) with -1 the initial /if/ is a check to see if the item and capacity passed to the function is already in the table and if it isn't we run the body but if it is we can just return the value from the table.
+
+In the body if the weight of the current item is beyond the remaining capacity of the knapsack we pick the value for the previous item using the current capacity. If the current item will fit in the knapsack then we pick the larger of the previous item's entry with the current capacity and the value of the current item plus the previous item's entry for the current capacity minus the weight of the current item - meaning we pick the bigger of the values we get if we skip this item or keep it.
+
+1. If the item and capacity aren't in the table:
+   - If the item's weight is greater than the remaining capacity use the previous item's value for the current capacity.
+   - Otherwise use the greater of the previous item's value and this item's value plus the previous item's value for the current capacity minus the current item's weight (the capacity if you use the current item)
+   - Whichever value you use, set it to the table's entry for this item and the current capacity
+2. Return the table entry for this item and the current capacity
+
+** Some Python
+*** A Table Maker
+
+#+begin_src python :results none
+def make_table(capacity: int, items: int) -> list:
+    """Make the memo-table
+
+    Args:
+     capacity: the starting capacity for the knapsack
+     items: number of candidate items to put in the knapsack
+
+    Returns:
+     items + 1 x capacity + 1 list of lists: 0's in 0 column/row, -1 elsewhere
+    """
+    first_row = [0] * (capacity + 1)
+    row = [0] + [-1] * capacity
+    table = [row[:] for item in range(items)]
+    table = [first_row] + table
+    return table
+#+end_src
+
+*** Check the table maker
+#+begin_src python :results none
+capacity, items = 5, 4
+table = make_table(capacity=capacity, items=items)
+
+# one row per item plus a zero row
+expect(len(table)).to(equal(items + 1))
+
+# columns from 0...capacity
+expect(len(table[0])).to(equal(capacity + 1))
+
+# first row should be 0's
+expect(sum(table[0])).to(equal(0))
+
+# first column should be 0's
+expect(sum(row[0] for row in table)).to(equal(0))
+
+# everything else should be -1 (items x capacity sub-array)
+expect(sum(sum(row) for row in table)).to(equal(-1 * (items * capacity)))
+#+end_src
+
+** Memory-Function Knapsack
+#+begin_src python :results none
+def memory_function_knapsack(item: int, capacity: int, values: list, weights: list,
+                             table: list, count: int=0) -> int:
+    """Find the best total value for the knapsack
+    
+    Args:
+     item: the number of the item to use (0...item)
+     capacity: maximum weight allowed
+     values: value for each item available
+     weights: how much each item weighs
+     table: memo-table to store the sub-problem values
+     count: number of calls
+
+    Returns:
+     best-value
+    """
+    count += 1
+    # the table is 0-based but the values and weights 1-based 
+    # so we need to adjust
+    this_item = item - 1
+    if table[item][capacity] < 0:
+        previous_item = item - 1
+        previous_value, count = memory_function_knapsack(previous_item, capacity, 
+                                                    values, weights, table, count)
+        if capacity < weights[this_item]:
+            value = previous_value
+        else:
+            lookup_value, count = memory_function_knapsack(
+                previous_item,
+                capacity - weights[this_item],
+                values, weights, table, count)
+            this_value = lookup_value + values[this_item]
+            value = max(previous_value, this_value)
+        table[item][capacity] = value
+    return table[item][capacity], count
+#+end_src
+
+#+begin_src python :results none
+weights = [2, 1, 3, 2]
+values = [12, 10, 20, 15]
+items = len(weights)
+capacity = 5
+table = make_table(capacity, items)
+value, count = memory_function_knapsack(items, capacity, values, weights, table)
+expect(value).to(equal(37))
+
+expected_table = [[0, 0, 0, 0, 0, 0],
+                  [0, 0, 12, 12, 12, 12],
+                  [0, -1, 12, 22, -1, 22],
+                  [0, -1, -1, 22, -1, 32],
+                  [0, -1, -1, -1, -1, 37]]
+for row_index, row in enumerate(table):
+    expect(row).to(contain_exactly(*expected_table[row_index]))
+#+end_src
+
+** Recovering the Solution
+Although knowing what the optimal value is for the knapsack is somewhat informative in that it tells us what we can expect to achieve, it isn't really the solution since we don't know what items actually give us this value, so we're going to need to reconstruct it from the table.
+
+#+begin_src python :results none
+def knapsack_reconstruction(table: list, weights: list, values: list) -> list:
+    """Reconstructs the optimal knapsack load using the table
+    
+    Args:
+     table: items + 1 x capacity + 1 list of lists (array)
+     weights: weights for each item
+     values: values for each item
+
+    Returns:
+     inventory of items in the optimal knapsack
+    """
+    table = table[1:]
+    items = len(table)
+    assert items == len(weights)
+    assert len(weights) == len(values)
+    solution = [0] * items
+    remaining_capacity = len(table[0]) - 1
+    
+    for item in reversed(range(items)):
+        previous_item = item - 1
+        if (weights[item] <= remaining_capacity and
+            table[previous_item][remaining_capacity - weights[item]]
+            + values[item] >= table[previous_item][remaining_capacity]):
+            solution[item] = 1
+            remaining_capacity -= weights[item]
+    return solution
+#+end_src
+
+#+begin_src python :results none
+weights = [2, 1, 3, 2]
+values = [12, 10, 20, 15]
+items = len(weights)
+capacity = 5
+table = make_table(capacity, items)
+value, count = memory_function_knapsack(items, capacity,
+                                 values, weights, table)
+
+solution = knapsack_reconstruction(table, weights, values)
+expect(solution).to(contain_exactly(1, 1, 0, 1))
+#+end_src
+** A Top-Function to Setup the MF Knapsack function
+
+#+begin_src python :results none
+def memoized_knapsack(capacity: int, values: list, weights: list) -> TableSolution:
+    """Find the best total value for the knapsack
+    
+    Args:
+     capacity: maximum weight allowed
+     values: value for each item available
+     weights: how much each item weighs
+
+    Returns:
+     best-value, count of each item, count of loops, solution table
+    """
+    assert len(values) == len(weights)
+    items = len(values)
+    table = make_table(capacity, items)
+    value, count = memory_function_knapsack(items, capacity, values, weights, table)
+    inventory = knapsack_reconstruction(table, weights, values)
+    return TableSolution(value, inventory, count, table)
+#+end_src
+
+#+begin_src python :results output :exports both
+solution = memoized_knapsack(capacity, values, weights)
+print(f"Optimal Value: {solution.value}")
+print(f"Call Count: {solution.count}")
+check_examples(memoized_knapsack)
+#+end_src
+
+#+RESULTS:
+: Optimal Value: 37
+: Call Count: 22
+
+Our solution is correct, but if you count all the function calls, not just the calls where the solution isn't in the table yet, it takes more calls than our exhaustive function. In fact, because we require that the recursions go to the extra zero columns or rows that we added, there's exactly double the number of calls where we add values to the table (if you move the count increment inside the first conditional it goes down to 11). So, even ignoring the table creation and solution lookup it seems that our solution takes more calls than the exhaustive search, unless we consider the zero-th item with zero weight and zero value that we add to the table as a required part of the problem, in which case our exhaustive solution would take \(2^5=32\), making the memoized version better. But this doesn't feel right.
 * Dynamic Programming
 * Levitin's Example
 This is the (toy) example given by {{% lancelot "Levitin" %}}itdaa{{% /lancelot %}}. Our knapsack can hold a total weight of 10 and we have four items to choose from.
@@ -271,3 +502,11 @@ If we use a greedy approach we'll end up with item 1 and a value of 42, while th
 - {{% doc %}}clrs{{% /doc %}}
 - {{% doc %}}algorithms-illuminated-part-3{{% /doc %}}
 - {{% doc %}}itdaa{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("memory-function-algorithm"));
+});
+</script>
+#+end_export
