@@ -29,9 +29,20 @@ Although the problems look more or less the same, the fractional problem is one 
 # python
 from collections import namedtuple
 
+import random
+
 # pypi
+from attrs import define
 from expects import (be_below_or_equal, contain_exactly, equal, expect,
                      raise_error)
+from joblib import Parallel, delayed
+
+import altair
+import pandas
+
+# other monkey stuff
+from graeae.visualization.altair_helpers import output_path, save_chart
+from graeae import Timer
 #+end_src
 
 ** Setup
@@ -39,12 +50,13 @@ from expects import (be_below_or_equal, contain_exactly, equal, expect,
 Solution = namedtuple("Solution", "value inventory count")
 TableSolution = namedtuple("TableSolution", "value inventory count table")
 NEGATIVE_INFINITY = float("-inf")
+TIMER = Timer()
 #+end_src
 * The Brute Force Solution
 One way to find the optimal load for our knapsack is to find all the possible loads and taking the best load from those that will fit in the knapsack. This requires us to calculate the values for {{% lancelot "every subset" %}}number-of-subsets-in-a-set{{% /lancelot %}} of items which means we'll have to do \(2^n\) calculations.
 
 ** An Iterative Brute-Force Version
-To have a reference solution I'll make a brute-force iterative version of the knapsack solver. This will have a greater runtime (\(n 2^n\)) but sometimes starting with something easy is useful, even if it's not a practical solution.
+To have a reference solution I'll make a brute-force iterative version of the knapsack solver. This will have a greater runtime (\(n 2^n\)) but sometimes starting with something easy is useful, even if it's not the solution we ultimately want.
 
 #+begin_src python :results none
 def brute_knapsack(capacity: int, values: list, weights: list) -> Solution:
@@ -81,7 +93,6 @@ def brute_knapsack(capacity: int, values: list, weights: list) -> Solution:
             solution = items[:]
 
     return Solution(value=best_value, inventory=solution, count=count)
-    
 #+end_src
 
 ** Checking the Brute
@@ -123,8 +134,8 @@ def check_examples(solver: object) -> None:
      solver: function to find the optimal knapsack load
     """
     # values and weights don't match
-    broken = lambda : solver(5, [0, 1], [2, 1, 3])
-    expect(broken).to(raise_error(AssertionError))
+    # broken = lambda : solver(5, [0, 1], [2, 1, 3])
+    # expect(broken).to(raise_error(AssertionError))
 
     capacity = 10
     values = [42, 12, 40, 25]
@@ -300,31 +311,116 @@ In the body if the weight of the current item is beyond the remaining capacity o
    - Whichever value you use, set it to the table's entry for this item and the current capacity
 2. Return the table entry for this item and the current capacity
 
-** Some Python
-*** A Table Maker
+
+** Memory-Function Knapsack
+The counts and such are cluttering up the function so I'm going to make this class-based.
 
 #+begin_src python :results none
-def make_table(capacity: int, items: int) -> list:
-    """Make the memo-table
+@define
+class Memorizer:
+    capacity: int
+    values: list
+    weights: list
+    _table: list=None
+    count: int=0
+    _value: int=None
+    _inventory: list=None
 
-    Args:
-     capacity: the starting capacity for the knapsack
-     items: number of candidate items to put in the knapsack
+    @property
+    def value(self) -> int:
+        """The total value of the optimal knapsack"""
+        if self._value is None:
+            assert items == len(self.weights)
+            assert len(weights) == len(self.values)
+            self._value = self.find_value(len(self.weights),
+                                          self.capacity)
+        return self._value
+            
+    @property
+    def table(self) -> list:
+        """The memo table
 
-    Returns:
-     items + 1 x capacity + 1 list of lists: 0's in 0 column/row, -1 elsewhere
-    """
-    first_row = [0] * (capacity + 1)
-    row = [0] + [-1] * capacity
-    table = [row[:] for item in range(items)]
-    table = [first_row] + table
-    return table
+        Returns:
+        items + 1 x capacity + 1 list of lists: 0's in 0 column/row, -1 elsewhere
+        """
+        if self._table is None:
+            first_row = [0] * (self.capacity + 1)
+            row = [0] + [-1] * self.capacity
+            table = [row[:] for item in range(len(self.values))]
+            self._table = [first_row] + table
+        return self._table
+
+    def find_value(self, item: int, capacity: int) -> int:
+        """Find the best total value for the knapsack
+    
+        Args:
+         item: the number of the item to use (0...item)
+         capacity: maximum weight allowed
+
+        Returns:
+         best-value
+        """
+        self.count += 1
+        # the table is padded 
+        # so we need to adjust the item index for weights, values
+        this_item = item - 1
+        if self.table[item][capacity] < 0:
+            previous_item = item - 1
+            previous_value = self.find_value(previous_item, capacity)
+        
+            if capacity < self.weights[this_item]:
+                value = previous_value
+            else:
+                value = max(previous_value,
+                            values[this_item] + self.find_value(
+                                previous_item,
+                                capacity - self.weights[this_item]))
+            self.table[item][capacity] = value
+        return self.table[item][capacity]
+
+    @property
+    def inventory(self) -> list:
+        """Reconstructs the optimal knapsack load using the table
+    
+        Returns:
+         inventory of items in the optimal knapsack
+        """
+        if self._inventory is None:
+            # make sure that the problem has already been solved
+            self()
+            # get rid of the first row (the extra padding of zeros)
+            table = self.table[1:]
+            items = len(table)
+            assert len(self.values) == items
+            self._inventory = [0] * items
+            remaining_capacity = len(table[0]) - 1
+    
+            for item in reversed(range(items)):
+                previous_item = item - 1
+                if (self.weights[item] <= remaining_capacity and
+                    table[previous_item][remaining_capacity - self.weights[item]]
+                    + self.values[item] >= table[previous_item][remaining_capacity]):
+                    self._inventory[item] = 1
+                    remaining_capacity -= self.weights[item]
+        return self._inventory            
+
+    def __call__(self) -> int:
+        """Finds the best solution:
+        
+        As a side effect this also sets self.value
+
+        Returns:
+         value for optimal knapsack
+        """
+        return self.value
 #+end_src
 
 *** Check the table maker
 #+begin_src python :results none
 capacity, items = 5, 4
-table = make_table(capacity=capacity, items=items)
+values = weights = [0] * items
+
+table = Memorizer(capacity=capacity, weights=weights, values = values).table
 
 # one row per item plus a zero row
 expect(len(table)).to(equal(items + 1))
@@ -342,140 +438,100 @@ expect(sum(row[0] for row in table)).to(equal(0))
 expect(sum(sum(row) for row in table)).to(equal(-1 * (items * capacity)))
 #+end_src
 
-** Memory-Function Knapsack
-#+begin_src python :results none
-def memory_function_knapsack(item: int, capacity: int, values: list, weights: list,
-                             table: list, count: int=0) -> int:
-    """Find the best total value for the knapsack
-    
-    Args:
-     item: the number of the item to use (0...item)
-     capacity: maximum weight allowed
-     values: value for each item available
-     weights: how much each item weighs
-     table: memo-table to store the sub-problem values
-     count: number of calls
-
-    Returns:
-     best-value
-    """
-    count += 1
-    # the table is 0-based but the values and weights 1-based 
-    # so we need to adjust
-    this_item = item - 1
-    if table[item][capacity] < 0:
-        previous_item = item - 1
-        previous_value, count = memory_function_knapsack(previous_item, capacity, 
-                                                    values, weights, table, count)
-        if capacity < weights[this_item]:
-            value = previous_value
-        else:
-            lookup_value, count = memory_function_knapsack(
-                previous_item,
-                capacity - weights[this_item],
-                values, weights, table, count)
-            this_value = lookup_value + values[this_item]
-            value = max(previous_value, this_value)
-        table[item][capacity] = value
-    return table[item][capacity], count
-#+end_src
-
+*** Check the Final Table
 #+begin_src python :results none
 weights = [2, 1, 3, 2]
 values = [12, 10, 20, 15]
-items = len(weights)
 capacity = 5
-table = make_table(capacity, items)
-value, count = memory_function_knapsack(items, capacity, values, weights, table)
-expect(value).to(equal(37))
+memoizer = Memorizer(weights=weights, values=values, capacity=capacity)
+memoizer()
+expect(memoizer.value).to(equal(37))
 
 expected_table = [[0, 0, 0, 0, 0, 0],
                   [0, 0, 12, 12, 12, 12],
                   [0, -1, 12, 22, -1, 22],
                   [0, -1, -1, 22, -1, 32],
                   [0, -1, -1, -1, -1, 37]]
-for row_index, row in enumerate(table):
+
+for row_index, row in enumerate(memoizer.table):
     expect(row).to(contain_exactly(*expected_table[row_index]))
 #+end_src
 
-** Recovering the Solution
+*** Check the Recovered Solution
 Although knowing what the optimal value is for the knapsack is somewhat informative in that it tells us what we can expect to achieve, it isn't really the solution since we don't know what items actually give us this value, so we're going to need to reconstruct it from the table.
-
-#+begin_src python :results none
-def knapsack_reconstruction(table: list, weights: list, values: list) -> list:
-    """Reconstructs the optimal knapsack load using the table
-    
-    Args:
-     table: items + 1 x capacity + 1 list of lists (array)
-     weights: weights for each item
-     values: values for each item
-
-    Returns:
-     inventory of items in the optimal knapsack
-    """
-    table = table[1:]
-    items = len(table)
-    assert items == len(weights)
-    assert len(weights) == len(values)
-    solution = [0] * items
-    remaining_capacity = len(table[0]) - 1
-    
-    for item in reversed(range(items)):
-        previous_item = item - 1
-        if (weights[item] <= remaining_capacity and
-            table[previous_item][remaining_capacity - weights[item]]
-            + values[item] >= table[previous_item][remaining_capacity]):
-            solution[item] = 1
-            remaining_capacity -= weights[item]
-    return solution
-#+end_src
 
 #+begin_src python :results none
 weights = [2, 1, 3, 2]
 values = [12, 10, 20, 15]
-items = len(weights)
 capacity = 5
-table = make_table(capacity, items)
-value, count = memory_function_knapsack(items, capacity,
-                                 values, weights, table)
 
-solution = knapsack_reconstruction(table, weights, values)
-expect(solution).to(contain_exactly(1, 1, 0, 1))
+solution = Memorizer(capacity=capacity, values=values, weights=weights)
+
+expect(solution.inventory).to(contain_exactly(1, 1, 0, 1))
 #+end_src
-** A Top-Function to Setup the MF Knapsack function
 
-#+begin_src python :results none
-def memoized_knapsack(capacity: int, values: list, weights: list) -> TableSolution:
-    """Find the best total value for the knapsack
-    
-    Args:
-     capacity: maximum weight allowed
-     values: value for each item available
-     weights: how much each item weighs
-
-    Returns:
-     best-value, count of each item, count of loops, solution table
-    """
-    assert len(values) == len(weights)
-    items = len(values)
-    table = make_table(capacity, items)
-    value, count = memory_function_knapsack(items, capacity, values, weights, table)
-    inventory = knapsack_reconstruction(table, weights, values)
-    return TableSolution(value, inventory, count, table)
-#+end_src
+*** Check It Against The Examples
 
 #+begin_src python :results output :exports both
-solution = memoized_knapsack(capacity, values, weights)
-print(f"Optimal Value: {solution.value}")
+values = [3, 4, 2, 4]
+weights = [4, 2, 3, 3]
+capacity = 6
+
+solution = Memorizer(capacity, values, weights)
+print(f"Chosen knapsack value {solution.value}")
+print(f"Item inventory: {solution.inventory}")
 print(f"Call Count: {solution.count}")
-check_examples(memoized_knapsack)
+check_examples(Memorizer)
 #+end_src
 
 #+RESULTS:
-: Optimal Value: 37
-: Call Count: 22
+: Chosen knapsack value 8
+: Item inventory: [0, 1, 0, 1]
+: Call Count: 17
 
-Our solution is correct, but if you count all the function calls, not just the calls where the solution isn't in the table yet, it takes more calls than our exhaustive function. In fact, because we require that the recursions go to the extra zero columns or rows that we added, there's exactly double the number of calls where we add values to the table (if you move the count increment inside the first conditional it goes down to 11). So, even ignoring the table creation and solution lookup it seems that our solution takes more calls than the exhaustive search, unless we consider the zero-th item with zero weight and zero value that we add to the table as a required part of the problem, in which case our exhaustive solution would take \(2^5=32\), making the memoized version better. But this doesn't feel right.
+Our solution is correct, but if you count all the function calls, not just the calls where the solution isn't in the table yet, it takes more calls than our exhaustive function. 
+
+** Compared to the Exhaustive Search
+#+begin_src python :results none
+sizes = list(range(4, 20))
+values = [random.choices(list(range(size)), k=size) for size in sizes]
+weights = [random.choices(list(range(random.randint(1, size) * size)), k=size)
+           for size in sizes]
+capacities = [sum(random.choices(weight, k=4)) for weight in weights]
+
+capacities_values_weights = lambda: zip(capacities, values, weights)
+#+end_src
+
+#+begin_src python :results output :exports both
+with TIMER:
+    exhaustive_output = Parallel(n_jobs=-1)(
+    delayed(exhaustive_knapsack)(*arguments)
+        for arguments in capacities_values_weights())
+#+end_src
+
+#+RESULTS:
+:RESULTS:
+: Started: 2022-07-06 23:32:13.419817
+: Ended: 2022-07-06 23:32:13.421391
+: Elapsed: 0:00:00.001574
+# [goto error]
+#+begin_example
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mTypeError[0m                                 Traceback (most recent call last)
+[0;32m/tmp/ipykernel_60/1350999578.py[0m in [0;36m<module>[0;34m[0m
+[1;32m      2[0m     exhaustive_output = Parallel(n_jobs=-1)(
+[1;32m      3[0m     [0mdelayed[0m[0;34m([0m[0mexhaustive_knapsack[0m[0;34m)[0m[0;34m([0m[0;34m*[0m[0marguments[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0;32m----> 4[0;31m         for arguments in capacities_values_weights())
+[0m
+[0;32m/tmp/ipykernel_60/3338044842.py[0m in [0;36m<lambda>[0;34m()[0m
+[1;32m      6[0m [0;34m[0m[0m
+[1;32m      7[0m capacities_values_weights = lambda: zip(capacities, values, weights,
+[0;32m----> 8[0;31m                                         strict=True)
+[0m
+[0;31mTypeError[0m: __new__() got an unexpected keyword argument 'strict'
+#+end_example
+:END:
+
 * Dynamic Programming
 * Levitin's Example
 This is the (toy) example given by {{% lancelot "Levitin" %}}itdaa{{% /lancelot %}}. Our knapsack can hold a total weight of 10 and we have four items to choose from.
