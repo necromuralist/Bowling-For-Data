@@ -5,7 +5,7 @@
 # latest pypy, I guess)
 
 ARG IMAGE_NAME=ubuntu
-FROM ${IMAGE_NAME}:22.04
+FROM ${IMAGE_NAME}:21.10
 
 # Set timezone to avoid apt-get dialog asking what timezone you're in
 # https://askubuntu.com/questions/909277/avoiding-user-interaction-with-tzdata-when-installing-certbot-in-a-docker-contai/1098881#1098881

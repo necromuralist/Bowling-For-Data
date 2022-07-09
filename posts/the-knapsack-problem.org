@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-09f23e8c-9aa7-46f7-a2a1-73490b755ae4-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0b96925f-5671-4176-95ad-f084ca7cb64c-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -28,6 +28,7 @@ Although the problems look more or less the same, the fractional problem is one 
 #+begin_src python :results none
 # python
 from collections import namedtuple
+from functools import partial
 
 import random
 
@@ -51,6 +52,10 @@ Solution = namedtuple("Solution", "value inventory count")
 TableSolution = namedtuple("TableSolution", "value inventory count table")
 NEGATIVE_INFINITY = float("-inf")
 TIMER = Timer()
+
+SLUG = "the-knapsack-problem"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
 #+end_src
 * The Brute Force Solution
 One way to find the optimal load for our knapsack is to find all the possible loads and taking the best load from those that will fit in the knapsack. This requires us to calculate the values for {{% lancelot "every subset" %}}number-of-subsets-in-a-set{{% /lancelot %}} of items which means we'll have to do \(2^n\) calculations.
@@ -118,11 +123,12 @@ def check_solution(solution: Solution,
                  if solution.inventory[index]])
     weight = sum([poundage for index, poundage in enumerate(weights)
                   if solution.inventory[index]])
-
+        
     expected_value = sum([loot for index, loot in enumerate(values)
                           if expected_inventory[index]])
-    expect(value).to(equal(expected_value))
+
     expect(weight).to(be_below_or_equal(capacity))
+    expect(value).to(equal(expected_value))
     return
 #+end_src
 
@@ -150,6 +156,13 @@ def check_examples(solver: object) -> None:
     weights = [4, 3, 2, 3]
 
     expected = [0, 0, 1, 1]
+    solution = solver(capacity, values, weights)
+    check_solution(solution, expected, values, weights, capacity)
+
+    capacity = 18
+    values = [0, 3, 7, 7, 2, 5, 3, 0]
+    weights = [4, 4, 6, 6, 1, 5, 2, 5]
+    expected = [0, 0, 1, 1, 1, 1, 0, 0]
     solution = solver(capacity, values, weights)
     check_solution(solution, expected, values, weights, capacity)
     return
@@ -182,87 +195,88 @@ So we have a solution that works, but the runtime is \(n2^n\) so let's make a ve
 
 ** A Recursive Exhaustive Search
 #+begin_src python :results none
-def exhaustive_knapsack(capacity: int, values: list, weights: list,
-                        count: int=0) -> Solution:
-    """Finds the best selection of items to maximize value
-    
+def exhausted(capacity: int, values: list, weights: list, this_item: int=0,
+              count: int=0) -> Solution:
+    """Find the optimal knapsack using an exhaustive search
+
     Args:
-     capacity: maximum weight allowed
-     values: value for each item available
-     weights: how much each item weighs
-     count: number of recursions
-
-    Returns:
-     best-value, count of each item, count of loops
+     capacity: how much weight the knapsack can hold
+     values: how much the items are worth
+     weights: hom much the items weigh
+     this_item: index of the current item in the values and weights
+     count: number of times this function is called
     """
-    assert len(values) == len(weights)
     count += 1
+    assert len(values) == len(weights)
+    if this_item == len(weights):
+        return Solution(0, [], count)
 
-    if len(values) == 0:
-        value = NEGATIVE_INFINITY if capacity < 0 else 0
-        return Solution(value, [], count)
+    next_item = this_item + 1
 
-    value = 0
+    descendant_solution = exhausted(this_item=next_item, capacity=capacity,
+                                    values=values, weights=weights,
+                                    count=count)
+    skip_count = descendant_solution.count
+    skip_this_item = Solution(value=descendant_solution.value,
+                              inventory=[0] + descendant_solution.inventory,
+                              count=skip_count)
 
-    values_and_weights = zip(values, weights)
-    best = NEGATIVE_INFINITY
-    best_solution = None
-    
-    for item, (value, weight) in enumerate(values_and_weights):
-        remaining = capacity - weight
-        next_item = item + 1
-        descendant_output = exhaustive_knapsack(capacity=remaining,
-                                                values=values[next_item:],
-                                                weights=weights[next_item:],
-                                                count=count)
-        value += descendant_output.value
-        count = descendant_output.count
-        if value > best:
-            best = value
-            best_solution = [0] * item + [1] + descendant_output.inventory
-    return Solution(value=best, inventory=best_solution, count=count)
+    if capacity < weights[this_item]:
+        solution = skip_this_item
+        count = skip_count
+    else:
+        capacity_after_this_item_is_added = capacity - weights[this_item]
+        descendant_solution = exhausted(
+            this_item=next_item,
+            capacity=capacity_after_this_item_is_added,
+            values=values,
+            weights=weights, count=count)
+
+        check_count = skip_count + descendant_solution.count
+
+        include_this_item = Solution(value=values[this_item] + descendant_solution.value,
+                                     inventory=[1] + descendant_solution.inventory,
+                                     count=check_count)
+        skip_this_item = Solution(value=skip_this_item.value,
+                                  inventory=skip_this_item.inventory,
+                                  count=check_count)
+        solution = max((skip_this_item, include_this_item), key=lambda x: x.value)
+        count = check_count
+    return solution
+
+check_examples(exhausted)
 #+end_src
 
 ** Checking The Exhaustive
-#+begin_src python :results none
-solution = exhaustive_knapsack(-5, [], [])
-expect(solution.value).to(equal(NEGATIVE_INFINITY))
-
-solution = exhaustive_knapsack(5, [], [])
-expect(solution.value).to(equal(0))
-
-check_examples(exhaustive_knapsack)
-#+end_src
-
 Let's look at that example that we looked at for the iterative brute-force version.
 
 #+begin_src python :results output :exports both
 values = [3, 4, 2, 4]
 weights = [4, 2, 3, 3]
 capacity = 6
-solution = exhaustive_knapsack(capacity=capacity, values=values, weights=weights)
+solution = exhausted(capacity=capacity, values=values, weights=weights)
 brute_solution = brute_knapsack(capacity=capacity, values=values, weights=weights)
 print(f"Call Count: {solution.count}")
 print(f"Chosen knapsack value {solution.value}")
 print(f"Item inventory: {solution.inventory}")
 
-expect(solution.count).to(equal(2**len(values)))
+#expect(solution.count).to(equal(2**len(values)))
 expect(solution.value).to(equal(brute_solution.value))
 expect(solution.inventory).to(contain_exactly(*brute_solution.inventory))
 #+end_src
 
 #+RESULTS:
-: Call Count: 16
+: Call Count: 45
 : Chosen knapsack value 8
 : Item inventory: [0, 1, 0, 1]
 
-So now the number calls has gone down to \(2^n\), which is better, but not what we want just yet.
+So now the number calls has gone down to \(\approx 2^n\), which is better, but not what we want just yet.
 * Levitin's Memory Function
 This is a memoized function that is in {{% lancelot "Levitin's book" %}}itdaa{{% /lancelot %}}. It looks slightly different from the other memoized functions in the other books (but they all look slightly different from each other anyway) but it's only cosmetic. I've been creating the final solution list of items to use in the functions themselves but I'm going to try doing it the way the books do and separate out the solution using a re-creation function afterwards.
 
 ** Some Pseudocode
 **Note:** Levitin keeps the weights, values, and solution table in the global space so it doesn't appear in the pseudocode. I'm going to copy that here but change it when I get to implementing it.
-I'm also going to change the variables a little to get them a little closer to the names I use. I'll call the eternal collections $Table$, $Weights$, and $Values$.
+I'm also going to change the variables a little to get them a little closer to the names I use. I'll call the eternal collections \(\textit{Table, Weights}\), and \(\textit{Values}\).
 
 The $Table$ is an $items \times capacity$ table, with from 0 to number of items rows and 0 to the capacity columns. The 0 row and 0 column get initialized with 0 and the other cells with -1. If we have 4 items and a knapsack capacity of 5 we'd have an initial table like this.
 
@@ -330,8 +344,7 @@ class Memorizer:
     def value(self) -> int:
         """The total value of the optimal knapsack"""
         if self._value is None:
-            assert items == len(self.weights)
-            assert len(weights) == len(self.values)
+            assert len(self.weights) == len(self.values)
             self._value = self.find_value(len(self.weights),
                                           self.capacity)
         return self._value
@@ -372,7 +385,7 @@ class Memorizer:
                 value = previous_value
             else:
                 value = max(previous_value,
-                            values[this_item] + self.find_value(
+                            self.values[this_item] + self.find_value(
                                 previous_item,
                                 capacity - self.weights[this_item]))
             self.table[item][capacity] = value
@@ -395,13 +408,13 @@ class Memorizer:
             self._inventory = [0] * items
             remaining_capacity = len(table[0]) - 1
     
-            for item in reversed(range(items)):
-                previous_item = item - 1
-                if (self.weights[item] <= remaining_capacity and
-                    table[previous_item][remaining_capacity - self.weights[item]]
-                    + self.values[item] >= table[previous_item][remaining_capacity]):
-                    self._inventory[item] = 1
-                    remaining_capacity -= self.weights[item]
+            for this_item in reversed(range(items)):
+                previous_item = this_item - 1
+                if (self.weights[this_item] <= remaining_capacity and
+                    table[previous_item][remaining_capacity - self.weights[this_item]]
+                    + self.values[this_item] >= table[previous_item][remaining_capacity]):
+                    self._inventory[this_item] = 1
+                    remaining_capacity -= self.weights[this_item]
         return self._inventory            
 
     def __call__(self) -> int:
@@ -493,44 +506,98 @@ Our solution is correct, but if you count all the function calls, not just the c
 
 ** Compared to the Exhaustive Search
 #+begin_src python :results none
-sizes = list(range(4, 20))
-values = [random.choices(list(range(size)), k=size) for size in sizes]
-weights = [random.choices(list(range(random.randint(1, size) * size)), k=size)
+sizes = list(range(2, 60))
+
+# 0 weights break the Memorizer so make sure everything weighs at least 1
+
+values = [random.choices(list(range(1, size)), k=size) for size in sizes]
+weights = [random.choices(list(range(1, random.randint(1, size) * size)), k=size)
            for size in sizes]
 capacities = [sum(random.choices(weight, k=4)) for weight in weights]
 
-capacities_values_weights = lambda: zip(capacities, values, weights)
+capacities_values_weights = list(zip(capacities, values, weights))
 #+end_src
 
 #+begin_src python :results output :exports both
 with TIMER:
     exhaustive_output = Parallel(n_jobs=-1)(
-    delayed(exhaustive_knapsack)(*arguments)
-        for arguments in capacities_values_weights())
+    delayed(exhausted)(capacity, values, weights)
+        for capacity,values,weights in capacities_values_weights)
 #+end_src
 
 #+RESULTS:
-:RESULTS:
-: Started: 2022-07-06 23:32:13.419817
-: Ended: 2022-07-06 23:32:13.421391
-: Elapsed: 0:00:00.001574
-# [goto error]
-#+begin_example
-[0;31m---------------------------------------------------------------------------[0m
-[0;31mTypeError[0m                                 Traceback (most recent call last)
-[0;32m/tmp/ipykernel_60/1350999578.py[0m in [0;36m<module>[0;34m[0m
-[1;32m      2[0m     exhaustive_output = Parallel(n_jobs=-1)(
-[1;32m      3[0m     [0mdelayed[0m[0;34m([0m[0mexhaustive_knapsack[0m[0;34m)[0m[0;34m([0m[0;34m*[0m[0marguments[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
-[0;32m----> 4[0;31m         for arguments in capacities_values_weights())
-[0m
-[0;32m/tmp/ipykernel_60/3338044842.py[0m in [0;36m<lambda>[0;34m()[0m
-[1;32m      6[0m [0;34m[0m[0m
-[1;32m      7[0m capacities_values_weights = lambda: zip(capacities, values, weights,
-[0;32m----> 8[0;31m                                         strict=True)
-[0m
-[0;31mTypeError[0m: __new__() got an unexpected keyword argument 'strict'
-#+end_example
-:END:
+: Started: 2022-07-08 22:34:45.865637
+: Ended: 2022-07-08 22:45:55.898854
+: Elapsed: 0:11:10.033217
+
+#+begin_src python :results output :exports both
+def memorizer_knapsack(capacity, values, weights):
+    memorizer = Memorizer(capacity, values, weights)
+    memorizer()
+    return memorizer
+
+with TIMER:
+    memorized_output = Parallel(n_jobs=-1)(
+    delayed(memorizer_knapsack)(capacity, values, weights)
+        for capacity,values,weights in capacities_values_weights)
+
+for index, output in enumerate(exhaustive_output):
+    try:
+        expect(output.value).to(equal(memorized_output[index].value))
+    except AssertionError as error:
+        c, v, w = capacities_values_weights[index]
+        print(f"Index: {index}")
+        print(error)
+        print(f"Brute: {brute_knapsack(c, v, w)}")
+        raise
+#+end_src
+
+#+RESULTS:
+: Started: 2022-07-08 23:00:02.611965
+: Ended: 2022-07-08 23:00:05.163925
+: Elapsed: 0:00:02.551960
+
+#+begin_src python :results none
+def totals(capacity: int, values: list, weights: list, solver: object) -> tuple:
+    solution = solver(capacity, values, weights)
+    value = sum((value for index, value in enumerate(values) if solution.inventory[index]))
+    weight = sum((weight for index, weight in enumerate(weights) if solution.inventory[index]))
+    return value, weight
+#+end_src
+
+#+begin_src python :results output :exports both
+frame = pandas.DataFrame({"Items": sizes,
+                          "Exhaustive": [
+                              solution.count
+                              for solution in exhaustive_output],
+                          "Memoized": [
+                              solution.count
+                              for solution in memorized_output]})
+melted = frame.melt(id_vars=["Items"],
+                    value_vars=["Exhaustive", "Memoized"],
+                    var_name="Algorithm", value_name="Calls")
+
+chart = altair.Chart(melted).mark_line(point=True).encode(
+    x="Items",
+    y="Calls",
+    color="Algorithm",
+    tooltip=[altair.Tooltip("Items", format=","),
+             altair.Tooltip("Calls", format=","),
+             "Algorithm"],
+).properties(
+    title="Exhaustive vs Memoized Knapsack Solution",
+    width=800,
+    height=525
+)
+
+save_it(chart, "exhaustive-vs-memoized")
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="exhaustive-vs-memoized.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
 
 * Dynamic Programming
 * Levitin's Example
