@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0b96925f-5671-4176-95ad-f084ca7cb64c-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-306fc261-576d-4e9f-b13d-7ee1c89a122b-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -194,9 +194,9 @@ expect(solution.inventory).to(contain_exactly(0, 1, 0, 1))
 So we have a solution that works, but the runtime is \(n2^n\) so let's make a version that does a little better.
 
 ** A Recursive Exhaustive Search
+
 #+begin_src python :results none
-def exhausted(capacity: int, values: list, weights: list, this_item: int=0,
-              count: int=0) -> Solution:
+def exhausted(capacity: int, values: list, weights: list, this_item: int=0) -> Solution:
     """Find the optimal knapsack using an exhaustive search
 
     Args:
@@ -206,17 +206,27 @@ def exhausted(capacity: int, values: list, weights: list, this_item: int=0,
      this_item: index of the current item in the values and weights
      count: number of times this function is called
     """
-    count += 1
     assert len(values) == len(weights)
-    if this_item == len(weights):
-        return Solution(0, [], count)
 
     next_item = this_item + 1
 
+    # quit this branch if we're already out of space
+    if capacity == 0:
+         return Solution(0, [0] * (len(weights) - this_item), 1)
+
+    # to save on an extra base-case call handle the last item separately here
+    if next_item == len(weights):
+        skip_this_item = Solution(0, [0], 1)
+        if weights[this_item] > capacity:
+            return skip_this_item
+        use_this_item = Solution(value=values[this_item], inventory=[1], count=1)
+        return max((skip_this_item, use_this_item), key=lambda x: x.value)
+
+    # now on to the recursive cases
     descendant_solution = exhausted(this_item=next_item, capacity=capacity,
-                                    values=values, weights=weights,
-                                    count=count)
-    skip_count = descendant_solution.count
+                                    values=values, weights=weights)
+    
+    skip_count = descendant_solution.count + 1
     skip_this_item = Solution(value=descendant_solution.value,
                               inventory=[0] + descendant_solution.inventory,
                               count=skip_count)
@@ -230,13 +240,14 @@ def exhausted(capacity: int, values: list, weights: list, this_item: int=0,
             this_item=next_item,
             capacity=capacity_after_this_item_is_added,
             values=values,
-            weights=weights, count=count)
+            weights=weights)
 
         check_count = skip_count + descendant_solution.count
 
         include_this_item = Solution(value=values[this_item] + descendant_solution.value,
                                      inventory=[1] + descendant_solution.inventory,
                                      count=check_count)
+        
         skip_this_item = Solution(value=skip_this_item.value,
                                   inventory=skip_this_item.inventory,
                                   count=check_count)
@@ -260,13 +271,12 @@ print(f"Call Count: {solution.count}")
 print(f"Chosen knapsack value {solution.value}")
 print(f"Item inventory: {solution.inventory}")
 
-#expect(solution.count).to(equal(2**len(values)))
 expect(solution.value).to(equal(brute_solution.value))
 expect(solution.inventory).to(contain_exactly(*brute_solution.inventory))
 #+end_src
 
 #+RESULTS:
-: Call Count: 45
+: Call Count: 12
 : Chosen knapsack value 8
 : Item inventory: [0, 1, 0, 1]
 
@@ -506,29 +516,28 @@ Our solution is correct, but if you count all the function calls, not just the c
 
 ** Compared to the Exhaustive Search
 #+begin_src python :results none
-sizes = list(range(2, 60))
+sizes = list(range(2, 61))
 
 # 0 weights break the Memorizer so make sure everything weighs at least 1
-
 values = [random.choices(list(range(1, size)), k=size) for size in sizes]
 weights = [random.choices(list(range(1, random.randint(1, size) * size)), k=size)
            for size in sizes]
 capacities = [sum(random.choices(weight, k=4)) for weight in weights]
 
-capacities_values_weights = list(zip(capacities, values, weights))
+capacities_values_weights = lambda : zip(capacities, values, weights)
 #+end_src
 
 #+begin_src python :results output :exports both
 with TIMER:
     exhaustive_output = Parallel(n_jobs=-1)(
     delayed(exhausted)(capacity, values, weights)
-        for capacity,values,weights in capacities_values_weights)
+        for capacity,values,weights in capacities_values_weights())
 #+end_src
 
 #+RESULTS:
-: Started: 2022-07-08 22:34:45.865637
-: Ended: 2022-07-08 22:45:55.898854
-: Elapsed: 0:11:10.033217
+: Started: 2022-07-09 20:13:56.062977
+: Ended: 2022-07-09 20:27:26.418546
+: Elapsed: 0:13:30.355569
 
 #+begin_src python :results output :exports both
 def memorizer_knapsack(capacity, values, weights):
@@ -539,7 +548,7 @@ def memorizer_knapsack(capacity, values, weights):
 with TIMER:
     memorized_output = Parallel(n_jobs=-1)(
     delayed(memorizer_knapsack)(capacity, values, weights)
-        for capacity,values,weights in capacities_values_weights)
+        for capacity,values,weights in capacities_values_weights())
 
 for index, output in enumerate(exhaustive_output):
     try:
@@ -553,9 +562,9 @@ for index, output in enumerate(exhaustive_output):
 #+end_src
 
 #+RESULTS:
-: Started: 2022-07-08 23:00:02.611965
-: Ended: 2022-07-08 23:00:05.163925
-: Elapsed: 0:00:02.551960
+: Started: 2022-07-09 20:49:28.267769
+: Ended: 2022-07-09 20:49:30.850950
+: Elapsed: 0:00:02.583181
 
 #+begin_src python :results none
 def totals(capacity: int, values: list, weights: list, solver: object) -> tuple:
@@ -593,8 +602,37 @@ chart = altair.Chart(melted).mark_line(point=True).encode(
 save_it(chart, "exhaustive-vs-memoized")
 #+end_src
 
+#+RESULTS:
 #+begin_export html
 <object type="text/html" data="exhaustive-vs-memoized.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+The height of those last points squashes the previous points down to make it look like the two algorithms do about the same until you hit 44 items, but if you trim off those end points you'll see that the exhaustive algorithm generally requires much more calls than the memoized version. The points aren't on a smooth line as a function of the number of items because whenever an item won't fit in the remaining capacity of the knapsack we skip the second recursive call.
+
+#+begin_src python :results output :exports both
+trimmed = melted[melted.Items < 44]
+chart = altair.Chart(trimmed).mark_line(point=True).encode(
+    x="Items",
+    y="Calls",
+    color="Algorithm",
+    tooltip=[altair.Tooltip("Items", format=","),
+             altair.Tooltip("Calls", format=","),
+             "Algorithm"],
+).properties(
+    title="Exhaustive vs Memoized Knapsack Solution (< 44)",
+    width=800,
+    height=525
+)
+
+save_it(chart, "exhaustive-vs-memoized-trimmed")
+#+end_src
+
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="exhaustive-vs-memoized-trimmed.html" style="width:100%" height=600>
   <p>Figure Missing</p>
 </object>
 #+end_export
