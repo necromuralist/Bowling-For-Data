@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-306fc261-576d-4e9f-b13d-7ee1c89a122b-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-6fd08022-2b8d-4e7d-b87b-876f656ca476-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -39,6 +39,7 @@ from expects import (be_below_or_equal, contain_exactly, equal, expect,
 from joblib import Parallel, delayed
 
 import altair
+import numpy
 import pandas
 
 # other monkey stuff
@@ -101,6 +102,24 @@ def brute_knapsack(capacity: int, values: list, weights: list) -> Solution:
 #+end_src
 
 ** Checking the Brute
+
+#+begin_src python :results none
+def totals(inventory: list, values: list, weights: list) -> tuple:
+    """Reduce the inventory values and weights to a total value and a total weight
+
+    Args:
+     inventory: list of item counts
+     values: list of values for the items
+     list of weights for the items
+
+    Returns:
+     value, weight for the inventory
+    """
+    value = sum((value for index, value in enumerate(values) if inventory[index]))
+    weight = sum((weight for index, weight in enumerate(weights) if inventory[index]))
+    return value, weight
+#+end_src
+
 #+begin_src python :results none
 def check_solution(solution: Solution,
                    expected_inventory: list,
@@ -119,15 +138,10 @@ def check_solution(solution: Solution,
      AssertionError if something isn't the expected
     """
     expect(solution.inventory).to(contain_exactly(*expected_inventory))
-    value = sum([loot for index, loot in enumerate(values)
-                 if solution.inventory[index]])
-    weight = sum([poundage for index, poundage in enumerate(weights)
-                  if solution.inventory[index]])
-        
-    expected_value = sum([loot for index, loot in enumerate(values)
-                          if expected_inventory[index]])
-
+    value, weight = totals(solution.inventory, values, weights)
+    expected_value, expected_weight = totals(expected_inventory, values, weights)
     expect(weight).to(be_below_or_equal(capacity))
+    expect(weight).to(equal(expected_weight))
     expect(value).to(equal(expected_value))
     return
 #+end_src
@@ -165,6 +179,12 @@ def check_examples(solver: object) -> None:
     expected = [0, 0, 1, 1, 1, 1, 0, 0]
     solution = solver(capacity, values, weights)
     check_solution(solution, expected, values, weights, capacity)
+
+    # this won't work for greedy algorithms
+    capacity = 10
+    values = [42, 20, 25, 6]
+    weights = [7, 4, 5, 6]
+    expected = [0, 1, 1, 0]
     return
 
 check_examples(brute_knapsack)
@@ -191,7 +211,7 @@ expect(solution.inventory).to(contain_exactly(0, 1, 0, 1))
 : Chosen knapsack value 8
 : Item inventory: [0, 1, 0, 1]
 
-So we have a solution that works, but the runtime is \(n2^n\) so let's make a version that does a little better.
+We have a solution that works, but the runtime is \(n2^n\) so let's make a version that does a little better.
 
 ** A Recursive Exhaustive Search
 
@@ -210,16 +230,19 @@ def exhausted(capacity: int, values: list, weights: list, this_item: int=0) -> S
 
     next_item = this_item + 1
 
-    # quit this branch if we're already out of space
+    # quit this branch if the knapsack is already out of space
     if capacity == 0:
          return Solution(0, [0] * (len(weights) - this_item), 1)
 
     # to save on an extra base-case call handle the last item separately here
     if next_item == len(weights):
         skip_this_item = Solution(0, [0], 1)
+        
         if weights[this_item] > capacity:
             return skip_this_item
-        use_this_item = Solution(value=values[this_item], inventory=[1], count=1)
+        
+        use_this_item = Solution(value=values[this_item],
+                                 inventory=[1], count=1)
         return max((skip_this_item, use_this_item), key=lambda x: x.value)
 
     # now on to the recursive cases
@@ -342,20 +365,42 @@ The counts and such are cluttering up the function so I'm going to make this cla
 #+begin_src python :results none
 @define
 class Memorizer:
+    """Dynamic Programming solution to the knapsack problem
+    
+    Args:
+     capacity: total capacity (by weight) of knapsack
+     values: values for items to put in knapsack
+     weights: weights for items to put in knapsack
+    """
     capacity: int
     values: list
     weights: list
+    _items: int=None
     _table: list=None
     count: int=0
     _value: int=None
     _inventory: list=None
 
     @property
+    def items(self) -> int:
+        """The number of items available for the knapsack
+
+        Raises:
+         AssertionError: the number of values and weights don't match
+
+        Returns:
+         number of items
+        """
+        if self._items is None:
+            assert len(self.values) == len(self.weights)
+            self._items = len(self.values)
+        return self._items
+
+    @property
     def value(self) -> int:
         """The total value of the optimal knapsack"""
         if self._value is None:
-            assert len(self.weights) == len(self.values)
-            self._value = self.find_value(len(self.weights),
+            self._value = self.find_value(self.items,
                                           self.capacity)
         return self._value
             
@@ -369,7 +414,7 @@ class Memorizer:
         if self._table is None:
             first_row = [0] * (self.capacity + 1)
             row = [0] + [-1] * self.capacity
-            table = [row[:] for item in range(len(self.values))]
+            table = [row[:] for item in range(self.items)]
             self._table = [first_row] + table
         return self._table
 
@@ -413,12 +458,10 @@ class Memorizer:
             self()
             # get rid of the first row (the extra padding of zeros)
             table = self.table[1:]
-            items = len(table)
-            assert len(self.values) == items
-            self._inventory = [0] * items
-            remaining_capacity = len(table[0]) - 1
+            self._inventory = [0] * self.items
+            remaining_capacity = self.capacity
     
-            for this_item in reversed(range(items)):
+            for this_item in reversed(range(self.items)):
                 previous_item = this_item - 1
                 if (self.weights[this_item] <= remaining_capacity and
                     table[previous_item][remaining_capacity - self.weights[this_item]]
@@ -535,9 +578,9 @@ with TIMER:
 #+end_src
 
 #+RESULTS:
-: Started: 2022-07-09 20:13:56.062977
-: Ended: 2022-07-09 20:27:26.418546
-: Elapsed: 0:13:30.355569
+: Started: 2022-07-09 21:41:34.484623
+: Ended: 2022-07-09 21:54:21.228392
+: Elapsed: 0:12:46.743769
 
 #+begin_src python :results output :exports both
 def memorizer_knapsack(capacity, values, weights):
@@ -562,17 +605,9 @@ for index, output in enumerate(exhaustive_output):
 #+end_src
 
 #+RESULTS:
-: Started: 2022-07-09 20:49:28.267769
-: Ended: 2022-07-09 20:49:30.850950
-: Elapsed: 0:00:02.583181
-
-#+begin_src python :results none
-def totals(capacity: int, values: list, weights: list, solver: object) -> tuple:
-    solution = solver(capacity, values, weights)
-    value = sum((value for index, value in enumerate(values) if solution.inventory[index]))
-    weight = sum((weight for index, weight in enumerate(weights) if solution.inventory[index]))
-    return value, weight
-#+end_src
+: Started: 2022-07-09 21:55:39.050638
+: Ended: 2022-07-09 21:55:41.495185
+: Elapsed: 0:00:02.444547
 
 #+begin_src python :results output :exports both
 frame = pandas.DataFrame({"Items": sizes,
@@ -582,6 +617,7 @@ frame = pandas.DataFrame({"Items": sizes,
                           "Memoized": [
                               solution.count
                               for solution in memorized_output]})
+
 melted = frame.melt(id_vars=["Items"],
                     value_vars=["Exhaustive", "Memoized"],
                     var_name="Algorithm", value_name="Calls")
@@ -609,10 +645,11 @@ save_it(chart, "exhaustive-vs-memoized")
 </object>
 #+end_export
 
-The height of those last points squashes the previous points down to make it look like the two algorithms do about the same until you hit 44 items, but if you trim off those end points you'll see that the exhaustive algorithm generally requires much more calls than the memoized version. The points aren't on a smooth line as a function of the number of items because whenever an item won't fit in the remaining capacity of the knapsack we skip the second recursive call.
+The height of those last points squashes the previous points down to make it look like the two algorithms do about the same until you hit 51 items, but if you trim off those end points you'll see that the exhaustive algorithm generally requires much more calls than the memoized version. The points aren't on a smooth line as a function of the number of items because whenever an item won't fit in the remaining capacity of the knapsack we skip the second recursive call.
 
 #+begin_src python :results output :exports both
-trimmed = melted[melted.Items < 44]
+UPPER_BOUND = 51
+trimmed = melted[melted.Items < UPPER_BOUND]
 chart = altair.Chart(trimmed).mark_line(point=True).encode(
     x="Items",
     y="Calls",
@@ -621,7 +658,7 @@ chart = altair.Chart(trimmed).mark_line(point=True).encode(
              altair.Tooltip("Calls", format=","),
              "Algorithm"],
 ).properties(
-    title="Exhaustive vs Memoized Knapsack Solution (< 44)",
+    title=f"Exhaustive vs Memoized Knapsack Solution (< {UPPER_BOUND})",
     width=800,
     height=525
 )
@@ -638,27 +675,140 @@ save_it(chart, "exhaustive-vs-memoized-trimmed")
 #+end_export
 
 * Dynamic Programming
-* Levitin's Example
-This is the (toy) example given by {{% lancelot "Levitin" %}}itdaa{{% /lancelot %}}. Our knapsack can hold a total weight of 10 and we have four items to choose from.
+This is taken from {{% lancelot "Algorithms Illuminated Part 3" %}}algorithms-illuminated-part-3{{% /lancelot %}}.
 
-| Item | Weight | Value |
-|------+--------+-------|
-|    1 |      7 |    42 |
-|    2 |      3 |    12 |
-|    3 |      4 |    40 |
-|    4 |      5 |    25 |
+** Some Pseudocode
+#+begin_export html
+<pre id="dynamic-programming-algorithm" style="display:hidden;">
+\begin{algorithm}
+\caption{Dynamic Programming Knapsack Solver}
+\begin{algorithmic}
+\INPUT Item Values: \(v_1, v_2, \ldots, v_n\)
+\INPUT Item Weights: \(w_1, w_2, \ldots, w_n\)
+\INPUT Knapsack Capacity \(C\)
+\OUTPUT Subset \(S\) of items with maximum possible sum of values and size at most \(C\)
+\PROCEDURE{DynamicKnapsack}{\(v, w, C\)}
+\STATE \(A \gets (n + 1) \times (c + 1)\) two dimensional array.
+\FOR {\(c \in \{0 \ldots C\}\)}
+  \STATE \(A[0][c] \gets 0\)
+\ENDFOR
 
-* Non-Greedy Toy Example
-Say our knapsack still has a capacity of 10 and we again have four items.
+\FOR {\(i \in \{1 \ldots n\}\)}
+  \FOR {\(c \in \{0 \ldots C \}\)}
+    \IF {\(w_i > C \)}
+      \STATE \(A[i][c] \gets A[i - 1][c]\)
+    \ELSE
+      \STATE \(A[i][c] \gets \)\textsc{Max}(\(A[i - 1][c], A[i - 1][c - w_i] + v_i\))
+    \ENDIF
+  \ENDFOR
+\ENDFOR
 
-| Item | Weight | Value |
-|------+--------+-------|
-|    1 |      7 |    42 |
-|    2 |      4 |    20 |
-|    3 |      5 |    25 |
-|    4 |      6 |     6 |
+\RETURN \(A[n][C]\)
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
 
-If we use a greedy approach we'll end up with item 1 and a value of 42, while the optimal answer is to take items 2 and 3 for a value of 45.
+This looks pretty much like the memoized-recursive version so it shouldn't be too hard to understand.
+
+** In Python
+#+begin_src python :results none
+@define
+class CaptainDynamic(Memorizer):
+    """Dynamic Programming solution to the knapsack problem
+    
+    Args:
+     capacity: total capacity (by weight) of knapsack
+     values: values for items to put in knapsack
+     weights: weights for items to put in knapsack
+    """
+    @property
+    def value(self) -> int:
+        """The total value of the optimal knapsack"""
+        if self._value is None:
+            self._value = self.find_value()
+        return self._value
+
+    def find_value(self) -> int:
+        """Finds the optimal value"""
+        for item_row in range(1, self.items + 1):
+            previous_item = this_item = item_row - 1
+            for capacity in range(self.capacity + 1):
+                skip_this_item = self.table[previous_item][capacity]
+                if self.weights[this_item] > capacity:
+                    self.table[item_row][capacity] = skip_this_item
+                else:
+                    use_this_item = (
+                        self.table[previous_item][
+                            capacity - self.weights[this_item]] +
+                        self.values[this_item])
+                    
+                    self.table[item_row][capacity] = max(
+                        (skip_this_item, use_this_item)
+                    )
+                self.count += 1
+        return self.table[self.items][self.capacity]
+#+end_src
+
+*** Check the table maker
+#+begin_src python :results none
+capacity, items = 5, 4
+values = weights = [0] * items
+
+table = CaptainDynamic(capacity=capacity, weights=weights, values = values).table
+
+# one row per item plus a zero row
+expect(len(table)).to(equal(items + 1))
+
+# columns from 0...capacity
+expect(len(table[0])).to(equal(capacity + 1))
+
+# first row should be 0's
+expect(sum(table[0])).to(equal(0))
+
+# first column should be 0's
+expect(sum(row[0] for row in table)).to(equal(0))
+
+# everything else should be -1 (items x capacity sub-array)
+expect(sum(sum(row) for row in table)).to(equal(-1 * (items * capacity)))
+#+end_src
+
+*** Check the Recovered Solution
+Although knowing what the optimal value is for the knapsack is somewhat informative in that it tells us what we can expect to achieve, it isn't really the solution since we don't know what items actually give us this value, so we're going to need to reconstruct it from the table.
+
+#+begin_src python :results none
+weights = [2, 1, 3, 2]
+values = [12, 10, 20, 15]
+capacity = 5
+
+solution = CaptainDynamic(capacity=capacity, values=values, weights=weights)
+
+expect(solution.inventory).to(contain_exactly(1, 1, 0, 1))
+#+end_src
+
+*** Check It Against The Examples
+
+#+begin_src python :results output :exports both
+values = [3, 4, 2, 4]
+weights = [4, 2, 3, 3]
+capacity = 6
+
+solution = Memorizer(capacity, values, weights)
+print(f"Chosen knapsack value {solution.value}")
+print(f"Item inventory: {solution.inventory}")
+print(f"Call Count: {solution.count}")
+check_examples(Memorizer)
+#+end_src
+
+#+RESULTS:
+: Chosen knapsack value 8
+: Item inventory: [0, 1, 0, 1]
+: Call Count: 17
+
+Our solution is correct, but if you count all the function calls, not just the calls where the solution isn't in the table yet, it takes more calls than our exhaustive function. 
+
+
 * Sources
 - {{% doc %}}clrs{{% /doc %}}
 - {{% doc %}}algorithms-illuminated-part-3{{% /doc %}}
@@ -668,6 +818,14 @@ If we use a greedy approach we'll end up with item 1 and a value of 42, while th
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("memory-function-algorithm"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("dynamic-programming-algorithm"));
 });
 </script>
 #+end_export
