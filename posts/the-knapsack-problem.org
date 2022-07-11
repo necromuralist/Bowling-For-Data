@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-6fd08022-2b8d-4e7d-b87b-876f656ca476-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-e19db772-804a-44d2-9883-0c424750c80e-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -308,6 +308,7 @@ So now the number calls has gone down to \(\approx 2^n\), which is better, but n
 This is a memoized function that is in {{% lancelot "Levitin's book" %}}itdaa{{% /lancelot %}}. It looks slightly different from the other memoized functions in the other books (but they all look slightly different from each other anyway) but it's only cosmetic. I've been creating the final solution list of items to use in the functions themselves but I'm going to try doing it the way the books do and separate out the solution using a re-creation function afterwards.
 
 ** Some Pseudocode
+*** The Memoizer
 **Note:** Levitin keeps the weights, values, and solution table in the global space so it doesn't appear in the pseudocode. I'm going to copy that here but change it when I get to implementing it.
 I'm also going to change the variables a little to get them a little closer to the names I use. I'll call the eternal collections \(\textit{Table, Weights}\), and \(\textit{Values}\).
 
@@ -357,6 +358,34 @@ In the body if the weight of the current item is beyond the remaining capacity o
    - Otherwise use the greater of the previous item's value and this item's value plus the previous item's value for the current capacity minus the current item's weight (the capacity if you use the current item)
    - Whichever value you use, set it to the table's entry for this item and the current capacity
 2. Return the table entry for this item and the current capacity
+
+*** A Reconstructor
+The main algorithm builds a memo-table and returns the value of the optimal solution but doesn't tell you which  items are actually taken. For that we'll need a separate function. The pseudocode assumes that the weights (\(w_i\)) and values (\(v_i\)) are global variables.
+
+#+begin_export html
+<pre id="reconstruction-algorithm" style="display:hidden;">
+\begin{algorithm}
+\caption{Knapsack Inventory Reconstructor}
+\begin{algorithmic}
+\INPUT $A$: The table created to solve the knapsack problem
+\INPUT $c$: the knapsack's capacity.
+\OUTPUT An optimal knapsack solution
+\PROCEDURE{KnapsackReconstruction}{$A, C$}
+
+\STATE \( S \gets \emptyset \)
+\STATE \(c \gets C \)
+\FOR {\(i = n \ldots 1\)}
+    \IF {\(w_i \leq c\) and \(A[i - 1][c - w_i] + v_i \geq A[i - 1][c]\)}
+        \STATE \(S \gets S \cup \{i\}\)
+        \STATE \(c \gets c - w_i\)
+    \ENDIF
+\ENDFOR
+\RETURN \(S\)
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
 
 
 ** Memory-Function Knapsack
@@ -456,16 +485,18 @@ class Memorizer:
         if self._inventory is None:
             # make sure that the problem has already been solved
             self()
-            # get rid of the first row (the extra padding of zeros)
-            table = self.table[1:]
             self._inventory = [0] * self.items
             remaining_capacity = self.capacity
     
-            for this_item in reversed(range(self.items)):
-                previous_item = this_item - 1
+            for table_item in range(self.items, 0, -1):
+                # table_item is padded by one
+                this_item = previous_table_item = table_item - 1
+
                 if (self.weights[this_item] <= remaining_capacity and
-                    table[previous_item][remaining_capacity - self.weights[this_item]]
-                    + self.values[this_item] >= table[previous_item][remaining_capacity]):
+                    self.table[previous_table_item][
+                        remaining_capacity - self.weights[this_item]]
+                    + self.values[this_item]
+                    >= self.table[previous_table_item][remaining_capacity]):
                     self._inventory[this_item] = 1
                     remaining_capacity -= self.weights[this_item]
         return self._inventory            
@@ -567,20 +598,20 @@ weights = [random.choices(list(range(1, random.randint(1, size) * size)), k=size
            for size in sizes]
 capacities = [sum(random.choices(weight, k=4)) for weight in weights]
 
-capacities_values_weights = lambda : zip(capacities, values, weights)
+capacities_values_weights = list(zip(capacities, values, weights))
 #+end_src
 
 #+begin_src python :results output :exports both
 with TIMER:
     exhaustive_output = Parallel(n_jobs=-1)(
     delayed(exhausted)(capacity, values, weights)
-        for capacity,values,weights in capacities_values_weights())
+        for capacity,values,weights in capacities_values_weights)
 #+end_src
 
 #+RESULTS:
-: Started: 2022-07-09 21:41:34.484623
-: Ended: 2022-07-09 21:54:21.228392
-: Elapsed: 0:12:46.743769
+: Started: 2022-07-11 02:35:10.337731
+: Ended: 2022-07-11 02:50:47.862952
+: Elapsed: 0:15:37.525221
 
 #+begin_src python :results output :exports both
 def memorizer_knapsack(capacity, values, weights):
@@ -591,11 +622,20 @@ def memorizer_knapsack(capacity, values, weights):
 with TIMER:
     memorized_output = Parallel(n_jobs=-1)(
     delayed(memorizer_knapsack)(capacity, values, weights)
-        for capacity,values,weights in capacities_values_weights())
+        for capacity,values,weights in capacities_values_weights)
 
 for index, output in enumerate(exhaustive_output):
     try:
         expect(output.value).to(equal(memorized_output[index].value))
+        capacity, value, weight = capacities_values_weights[index]
+        b_value, b_weight = totals(output.inventory,
+                                   value,
+                                   weight)
+        m_value, m_weight = totals(memorized_output[index].inventory,
+                                   value,
+                                   weight)
+        expect(m_value).to(equal(b_value))
+        expect(m_weight).to(be_below_or_equal(capacity))
     except AssertionError as error:
         c, v, w = capacities_values_weights[index]
         print(f"Index: {index}")
@@ -605,9 +645,9 @@ for index, output in enumerate(exhaustive_output):
 #+end_src
 
 #+RESULTS:
-: Started: 2022-07-09 21:55:39.050638
-: Ended: 2022-07-09 21:55:41.495185
-: Elapsed: 0:00:02.444547
+: Started: 2022-07-11 05:00:50.158584
+: Ended: 2022-07-11 05:00:52.849549
+: Elapsed: 0:00:02.690965
 
 #+begin_src python :results output :exports both
 frame = pandas.DataFrame({"Items": sizes,
@@ -645,10 +685,10 @@ save_it(chart, "exhaustive-vs-memoized")
 </object>
 #+end_export
 
-The height of those last points squashes the previous points down to make it look like the two algorithms do about the same until you hit 51 items, but if you trim off those end points you'll see that the exhaustive algorithm generally requires much more calls than the memoized version. The points aren't on a smooth line as a function of the number of items because whenever an item won't fit in the remaining capacity of the knapsack we skip the second recursive call.
+The height of those last points squashes the previous points down to make it look like the two algorithms do about the same until you hit 47 items, but if you trim off those end points you'll see that the exhaustive algorithm generally requires much more calls than the memoized version. The points aren't on a smooth line as a function of the number of items because whenever an item won't fit in the remaining capacity of the knapsack we skip the second recursive call.
 
 #+begin_src python :results output :exports both
-UPPER_BOUND = 51
+UPPER_BOUND = 47
 trimmed = melted[melted.Items < UPPER_BOUND]
 chart = altair.Chart(trimmed).mark_line(point=True).encode(
     x="Items",
@@ -785,6 +825,9 @@ capacity = 5
 solution = CaptainDynamic(capacity=capacity, values=values, weights=weights)
 
 expect(solution.inventory).to(contain_exactly(1, 1, 0, 1))
+
+m_solution = Memorizer(capacity=capacity, values=values, weights=weights)
+expect(m_solution.inventory).to(contain_exactly(1, 1, 0, 1))
 #+end_src
 
 *** Check It Against The Examples
@@ -794,20 +837,111 @@ values = [3, 4, 2, 4]
 weights = [4, 2, 3, 3]
 capacity = 6
 
-solution = Memorizer(capacity, values, weights)
-print(f"Chosen knapsack value {solution.value}")
-print(f"Item inventory: {solution.inventory}")
-print(f"Call Count: {solution.count}")
+d_solution = CaptainDynamic(capacity, values, weights)
+print("Captain Dynamic")
+print(f"Chosen knapsack value {d_solution.value}")
+print(f"Item inventory: {d_solution.inventory}")
+print(f"Call Count: {d_solution.count}")
+check_examples(CaptainDynamic)
+
+print("\nMemorizer")
+m_solution = Memorizer(capacity, values, weights)
+print(f"Chosen knapsack value: {m_solution.value}")
+print(f"Item inventory: {m_solution.inventory}")
+print(f"Call Count: {m_solution.count}")
 check_examples(Memorizer)
 #+end_src
 
 #+RESULTS:
+: Captain Dynamic
 : Chosen knapsack value 8
+: Item inventory: [0, 1, 0, 1]
+: Call Count: 28
+: 
+: Memorizer
+: Chosen knapsack value: 8
 : Item inventory: [0, 1, 0, 1]
 : Call Count: 17
 
 Our solution is correct, but if you count all the function calls, not just the calls where the solution isn't in the table yet, it takes more calls than our exhaustive function. 
 
+
+** Compared
+
+#+begin_src python :results output :exports both
+def dynamic_knapsack(capacity, values, weights):
+    captain = CaptainDynamic(capacity, values, weights)
+    captain()
+    return captain
+
+with TIMER:
+    dynamic_output = Parallel(n_jobs=-1)(
+    delayed(dynamic_knapsack)(capacity, values, weights)
+        for capacity,values,weights in capacities_values_weights)
+
+for index, output in enumerate(exhaustive_output):
+    try:
+        expect(output.value).to(equal(dynamic_output[index].value))
+        capacity, value, weight = capacities_values_weights[index]
+        b_value, b_weight = totals(output.inventory,
+                                   value,
+                                   weight)
+        m_value, m_weight = totals(dynamic_output[index].inventory,
+                                   value,
+                                   weight)
+        expect(m_value).to(equal(b_value))
+        expect(m_weight).to(be_below_or_equal(capacity))
+    except AssertionError as error:
+        c, v, w = capacities_values_weights[index]
+        print(f"Index: {index}")
+        print(error)
+        print(f"Brute: {brute_knapsack(c, v, w)}")
+        raise
+#+end_src
+
+#+RESULTS:
+: Started: 2022-07-11 05:08:19.593276
+: Ended: 2022-07-11 05:08:21.585963
+: Elapsed: 0:00:01.992687
+
+#+begin_src python :results output :exports both
+frame = pandas.DataFrame({"Items": sizes,
+                          "Dynamic": [
+                              solution.count
+                              for solution in dynamic_output],
+                          "cN": [
+                              solution.capacity * solution.items
+                              for solution in dynamic_output],
+                          "Memoized": [
+                              solution.count
+                              for solution in memorized_output]})
+
+melted = frame.melt(id_vars=["Items"],
+                    value_vars=["Dynamic", "Memoized", "cN"],
+                    var_name="Algorithm", value_name="Calls")
+
+chart = altair.Chart(melted).mark_line(point=True).encode(
+    x="Items",
+    y="Calls",
+    color="Algorithm",
+    tooltip=[altair.Tooltip("Items", format=","),
+             altair.Tooltip("Calls", format=","),
+             "Algorithm"],
+).properties(
+    title="Dynamic vs Memoized Knapsack Solution",
+    width=800,
+    height=525
+)
+
+save_it(chart, "dynamic-vs-memoized")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="dynamic-vs-memoized.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
 
 * Sources
 - {{% doc %}}clrs{{% /doc %}}
@@ -818,6 +952,14 @@ Our solution is correct, but if you count all the function calls, not just the c
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("memory-function-algorithm"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("reconstruction-algorithm"));
 });
 </script>
 #+end_export
