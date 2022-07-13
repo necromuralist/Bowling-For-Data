@@ -1,0 +1,318 @@
+#+BEGIN_COMMENT
+.. title: Graphs: Strongly Connected Components
+.. slug: graphs-strongly-connected-components
+.. date: 2022-04-20 19:43:49 UTC-07:00
+.. tags: graphs,algorithms,data structures
+.. category: Data Structures
+.. link: 
+.. description: Using Depth-First Search to find Strongly Connected Components.
+.. type: text
+.. has_math: True
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-a1a2f205-43b2-412f-8f21-52a0eff802f5-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+#+begin_src python :tangle ../bowling/data_structures/graphs/transpose.py :exports none
+<<imports>>
+
+
+<<the-transposer>>
+
+    <<the-adjacent>>
+
+    <<the-vertices>>
+
+    <<the-call>>
+
+
+<<strongly-connected-components>>
+
+    <<the-transpose-property>>
+
+    <<find-child>>
+
+    <<the-forest>>
+#+end_src
+* Beginning
+** Imports For Testing
+#+begin_src python :results none
+# pypi
+from expects import (
+    be_a,
+    expect,
+    contain_exactly,
+    contain_only,
+)
+# this project
+from bowling.data_structures.graphs.depth_first_search import (
+    DepthFirstSearch,
+    DFSVertex,
+    DirectedGraph,
+)
+
+from bowling.data_structures.graphs.transpose import Transpose
+#+end_src
+* The Graph Transpose
+A transpose of a directed graph (\(G^T\)) contains the same nodes and the same edges but the direction of each edge is reversed.
+
+** Imports for the Transpose
+#+begin_src python :noweb-ref imports
+# python
+from collections import defaultdict
+
+# this project
+from bowling.data_structures.graphs.depth_first_search import (
+    DepthFirstSearch,
+    DFSVertex,
+    DirectedGraph)
+#+end_src
+
+** The Transpose
+#+begin_src python :noweb-ref the-transposer
+class Transpose:
+    """Creates the transpose of a graph
+
+    Args:
+     graph: the directed graph to transpose
+    """
+    def __init__(self, graph: DirectedGraph) -> None:
+        self.graph = graph
+        self._adjacent = None
+        self._vertices = None
+        return
+#+end_src
+
+*** The Adjacency Sets
+#+begin_src python :noweb-ref the-adjacent
+@property
+def adjacent(self) -> dict:
+    """Vertex: set of adjacente vertices dictionary"""
+    if self._adjacent is None:
+        self._adjacent = defaultdict(set)
+        
+        for vertex, neighbors in self.graph.adjacent.items():
+            for neighbor in neighbors:
+                print(f"Adding neighbor {vertex} to {self.vertices}")
+                self._adjacent[neighbor].add(vertex)
+    return self._adjacent
+#+end_src
+
+*** The Vertices
+#+begin_src python :noweb-ref the-vertices
+@property
+def vertices(self) -> set:
+    """The vertices in the directed graph"""
+    if self._vertices is None:
+        self._vertices = self.graph.vertices
+    return self._vertices
+#+end_src
+
+** Testing the Transpose
+#+begin_src python :results none
+graph = DirectedGraph()
+vertex_a = DFSVertex("a")
+vertex_b = DFSVertex("b")
+vertex_e = DFSVertex("e")
+vertex_f = DFSVertex("f")
+
+graph.add(vertex_a, vertex_b)
+graph.add(vertex_b, vertex_e)
+graph.add(vertex_b, vertex_f)
+graph.add(vertex_e, vertex_a)
+graph.add(vertex_e, vertex_f)
+
+transpose = Transpose(graph)
+
+expect(transpose.vertices).to(contain_only(vertex_a, vertex_b,
+                                           vertex_e, vertex_f))
+
+expect(transpose.adjacent[vertex_a]).to(contain_exactly(vertex_e))
+expect(transpose.adjacent[vertex_b]).to(contain_exactly(vertex_a))
+expect(transpose.adjacent[vertex_e]).to(contain_exactly(vertex_b))
+expect(transpose.adjacent[vertex_f]).to(contain_only(vertex_b, vertex_e))
+#+end_src
+
+* Strongly Connected Components
+A Strongly Connected Component of a Directed Graph is a sub-graph where each pair of vertices has an edge in both directions (if /a/ has an edge to /b/ then /b/ has an edge to /a/).
+
+** The Steps to Build Them
+
+1. Call ~DFS(G)~ to compute the finishing times.
+2. Compute \(G^T\)
+3. Call ~DFS(~\(G^T\) ~)~, going through the vertices in decreasing finish time in the main loop.
+4. Output the Depth-First forest created in step 3 as the Strongly Connected Components.
+
+** The Builder
+#+begin_src python :noweb-ref strongly-connected-components
+class StronglyConnectedComponents:
+    """Build the strongly connected components sub-trees
+
+    Args:
+     graph: directed graph to process
+    """
+    def __init__(self, graph: DirectedGraph) -> None:
+        self.graph = graph
+        self._transpose = None
+        self._forest = None
+        return
+#+end_src
+
+*** The Transpose
+#+begin_src python :noweb-ref the-transpose-property
+@property
+def transpose(self) -> Transpose:
+    """The transpose of the original graph"""
+    if self._transpose is None:
+        self._transpose = Transpose(self.graph)
+    return self._transpose
+#+end_src
+*** Find the Child
+Unlike with a Binary Search Tree, our vertices don't keep track of their child nodes, just the predecessor node so this is a helper to get all the children of a node.
+
+#+begin_src python :noweb-ref find-child
+def find_child(self, vertices: set, predecessor: DFSVertex,
+               path: list) -> list:
+    """Find the child nodes of the given predecessor
+
+    Note:
+     this is a helper to find the children in a Strongly Connected Component
+     For it to make sense the vertices should have the forest already built
+
+    Args:
+     vertices: source of nodes
+     predecessor: node in the graph to find the child of
+     path: list to append child nodes to
+    """
+    for vertex in vertices:
+        if vertex.predecessor is predecessor:
+            path.append(vertex)
+            self.find_child(vertices, vertex, path)
+    return path
+#+end_src
+*** The Call
+#+begin_src python :noweb-ref the-forest
+@property
+def forest(self) -> dict:
+    """creates the forest with the strongly connected components
+
+    Returns:
+     adjacency dict for the strongly connected components
+    """
+    if self._forest is None:
+        # do the search to get the finish times
+        searcher = DepthFirstSearch(self.graph)
+        searcher()
+
+        # change the transpose vertices to be in reversed finish order
+        vertices = sorted(self.graph.vertices,
+                          key=lambda vertex: vertex.finished,
+                          reverse=True)
+        self.transpose._vertices = dict(zip(vertices, (None,) * len(vertices)))
+
+        # do a depth first search on the graph transpose
+        searcher.graph = self.transpose
+        searcher()
+
+        # at this point the strongly connected components are set up in 
+        # self.transpose, but you have to do some figuring to get the trees
+
+        # get the roots of the trees in the forest
+        roots = (vertex for vertex in self.transpose.vertices
+                 if vertex.predecessor is None)
+
+        # build a forest for each root by finding its children
+        forest = (self.find_child(self.transpose.vertices, root, [root])
+                  for root in roots)
+
+        # build a new adjacency dict
+        self._forest = dict()
+
+        # the neighbors are all the original adjacent nodes without the 
+        # tree nodes
+        for tree in forest:
+            neighbors = set()
+            for node in tree:
+                neighbors = neighbors.union(self.graph.adjacent[node])
+            neighbors = neighbors - set(tree)
+            self._forest[tuple(tree)] = neighbors
+    return self._forest
+#+end_src
+** Testing it
+#+begin_src python :results none
+from bowling.data_structures.graphs.transpose import StronglyConnectedComponents
+
+graph = DirectedGraph()
+vertex_a = DFSVertex("a")
+vertex_b = DFSVertex("b")
+vertex_c = DFSVertex("c")
+vertex_d = DFSVertex("d")
+vertex_e = DFSVertex("e")
+vertex_f = DFSVertex("f")
+vertex_g = DFSVertex("g")
+vertex_h = DFSVertex("h")
+
+graph.add(vertex_a, vertex_b)
+graph.add(vertex_b, vertex_c)
+graph.add(vertex_b, vertex_e)
+graph.add(vertex_b, vertex_f)
+graph.add(vertex_c, vertex_d)
+graph.add(vertex_c, vertex_g)
+graph.add(vertex_d, vertex_c)
+graph.add(vertex_d, vertex_h)
+graph.add(vertex_e, vertex_a)
+graph.add(vertex_e, vertex_f)
+graph.add(vertex_f, vertex_g)
+graph.add(vertex_g, vertex_f)
+graph.add(vertex_g, vertex_h)
+graph.add(vertex_h, vertex_h)
+
+components = StronglyConnectedComponents(graph)
+forest = components.forest
+#+end_src
+
+Let's see what's in the forest.
+
+Since the Depth-First Search created a forest of strongly connected components, we can see how many trees are in the forest by finding the roots (the nodes with no predecessor).
+
+#+begin_src python :results output :exports both
+for root in forest:
+    print(root)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+abe
+cd
+fg
+h
+[autoreload of bowling.data_structures.graphs.transpose failed: Traceback (most recent call last):
+  File "/home/bravo/.virtualenvs/Bowling-For-Data/site-packages/IPython/extensions/autoreload.py", line 245, in check
+    superreload(m, reload, self.old_objects)
+  File "/home/bravo/.virtualenvs/Bowling-For-Data/site-packages/IPython/extensions/autoreload.py", line 394, in superreload
+    module = reload(module)
+  File "/usr/lib/pypy3/lib-python/3/imp.py", line 314, in reload
+    return importlib.reload(module)
+  File "/usr/lib/pypy3/lib-python/3/importlib/__init__.py", line 169, in reload
+    _bootstrap._exec(spec, module)
+  File "<frozen importlib._bootstrap>", line 639, in _exec
+  File "<builtin>/frozen importlib._bootstrap_external", line 737, in exec_module
+  File "<builtin>/frozen importlib._bootstrap_external", line 873, in get_code
+  File "<builtin>/frozen importlib._bootstrap_external", line 804, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/bravo/Bowling-For-Data/bowling/data_structures/graphs/transpose.py", line 126
+    self._forest[tuple(tree])] = neighbors
+                           ^
+SyntaxError: closing parenthesis ']' does not match opening parenthesis '('
+]
+#+end_example
+
+So We have four Strongly Connected Components.
+
+#+begin_src python :results output :exports both
+
+#+end_src
+* End

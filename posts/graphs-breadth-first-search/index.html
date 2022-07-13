@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="A Breadth-First Search algorithm for graphs.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphs: Breadth-First-Search | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/graphs-breadth-first-search/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../graphs/" title="Graphs" type="text/html">
+<link rel="next" href="../graphs-depth-first-search/" title="Graphs: Depth-First-Search" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="Graphs: Breadth-First-Search">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/graphs-breadth-first-search/">
+<meta property="og:description" content="A Breadth-First Search algorithm for graphs.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-04-09T16:16:51-07:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="data structures">
+<meta property="article:tag" content="graphs">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Graphs: Breadth-First-Search</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2022-04-09T16:16:51-07:00" itemprop="datePublished" title="2022-04-09 16:16">2022-04-09 16:16</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li>
+<a href="#org5a9ab50">Breadth First Search</a>
+<ul>
+<li><a href="#org4565809">Imports</a></li>
+<li><a href="#org7b1722c">Constants</a></li>
+<li>
+<a href="#orgc00c131">The Class</a>
+<ul>
+<li><a href="#orgb237822">The Call</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#org56ccf18">Testing</a>
+<ul>
+<li>
+<ul>
+<li><a href="#org90d9eaf">CLRS Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org5a9ab50" class="outline-2">
+<h2 id="org5a9ab50">Breadth First Search</h2>
+<div class="outline-text-2" id="text-org5a9ab50">
+</div>
+<div id="outline-container-org4565809" class="outline-3">
+<h3 id="org4565809">Imports</h3>
+<div class="outline-text-3" id="text-org4565809">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.graph</span> <span class="kn">import</span> <span class="n">Graph</span><span class="p">,</span> <span class="n">Vertex</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs</span> <span class="kn">import</span> <span class="n">graph</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org7b1722c" class="outline-3">
+<h3 id="org7b1722c">Constants</h3>
+<div class="outline-text-3" id="text-org7b1722c">
+<div class="highlight"><pre><span></span><span class="n">INFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgc00c131" class="outline-3">
+<h3 id="orgc00c131">The Class</h3>
+<div class="outline-text-3" id="text-orgc00c131">
+<div class="highlight"><pre><span></span><span class="nd">@define</span>
+<span class="k">class</span> <span class="nc">BreadthFirstSearch</span><span class="p">:</span>
+    <span class="sd">"""Creates a shortest-path tree from a source node to all reachable nodes</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">     The vertices should be BFSVertex instances</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     graph: the graph with the adjacency dict for all the vertices</span>
+<span class="sd">    """</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span>
+</pre></div>
+</div>
+
+<div id="outline-container-orgb237822" class="outline-4">
+<h4 id="orgb237822">The Call</h4>
+<div class="outline-text-4" id="text-orgb237822">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">BFSVertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Does the breadth first search to create the shortest paths tree"""</span>
+    <span class="c1"># reset all the search attributes</span>
+    <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">adjacent</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="n">source</span><span class="p">}:</span>
+	<span class="n">vertex</span><span class="o">.</span><span class="n">color</span><span class="p">,</span> <span class="n">vertex</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span> <span class="n">vertex</span><span class="o">.</span><span class="n">predecessor</span> <span class="o">=</span> <span class="p">(</span>
+	    <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">WHITE</span><span class="p">,</span> <span class="n">INFINITY</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">source</span><span class="o">.</span><span class="n">color</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">predecessor</span> <span class="o">=</span> <span class="p">(</span>
+	<span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">GRAY</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+    <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+	<span class="n">predecessor</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+	<span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">predecessor</span><span class="p">]:</span>
+	    <span class="k">if</span> <span class="n">vertex</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">WHITE</span><span class="p">:</span>
+		<span class="n">vertex</span><span class="o">.</span><span class="n">color</span><span class="p">,</span> <span class="n">vertex</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span> <span class="n">vertex</span><span class="o">.</span><span class="n">predecessor</span> <span class="o">=</span> <span class="p">(</span>
+		    <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">GRAY</span><span class="p">,</span> <span class="n">predecessor</span><span class="o">.</span><span class="n">distance</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">predecessor</span><span class="p">)</span>
+		<span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
+	<span class="n">predecessor</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org56ccf18" class="outline-2">
+<h2 id="org56ccf18">Testing</h2>
+<div class="outline-text-2" id="text-org56ccf18">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span> <span class="n">be_none</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span>
+
+<span class="c1"># software under test</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs</span> <span class="kn">import</span> <span class="n">graph</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.breadth_first_search</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BreadthFirstSearch</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">bowling.data_structures.graphs.breadth_first_search</span> <span class="k">as</span> <span class="nn">bfs</span>
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">BFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s2">"s"</span><span class="p">)</span>
+<span class="n">v1</span> <span class="o">=</span> <span class="n">BFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">v2</span> <span class="o">=</span> <span class="n">BFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">v3</span> <span class="o">=</span> <span class="n">BFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v3</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+
+<span class="n">search</span> <span class="o">=</span> <span class="n">BreadthFirstSearch</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+<span class="n">search</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">v3</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">v3</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">v3</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">v2</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">v2</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">v2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+
+<div id="outline-container-org90d9eaf" class="outline-4">
+<h4 id="org90d9eaf">CLRS Example</h4>
+<div class="outline-text-4" id="text-org90d9eaf">
+<p>
+We'll start with the same Graph from the previous example and add more nodes.
+</p>
+<div class="highlight"><pre><span></span><span class="n">v4</span> <span class="o">=</span> <span class="n">BFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">v5</span> <span class="o">=</span> <span class="n">BFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">v6</span> <span class="o">=</span> <span class="n">BFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">v7</span> <span class="o">=</span> <span class="n">BFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v3</span><span class="p">,</span> <span class="n">v4</span><span class="p">)</span>
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v3</span><span class="p">,</span> <span class="n">v5</span><span class="p">)</span>
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v4</span><span class="p">,</span> <span class="n">v5</span><span class="p">)</span>
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v4</span><span class="p">,</span> <span class="n">v6</span><span class="p">)</span>
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v5</span><span class="p">,</span> <span class="n">v6</span><span class="p">)</span>
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v5</span><span class="p">,</span> <span class="n">v7</span><span class="p">)</span>
+<span class="n">test</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v6</span><span class="p">,</span> <span class="n">v7</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">plot_adjacent</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="o">.</span><span class="n">identifier</span><span class="p">:</span> <span class="n">item</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">test</span><span class="o">.</span><span class="n">adjacent</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">adjacents</span> <span class="ow">in</span> <span class="n">plot_adjacent</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">plot_adjacent</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">adjacent</span><span class="o">.</span><span class="n">identifier</span> <span class="k">for</span> <span class="n">adjacent</span> <span class="ow">in</span> <span class="n">adjacents</span><span class="p">]</span>
+
+<span class="n">plot_graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">plot_adjacent</span><span class="p">)</span>
+<span class="n">pydot_graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">plot_graph</span><span class="p">)</span>
+
+<span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"graphs-breadth-first-search"</span>
+<span class="n">PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">PATH</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+    <span class="n">PATH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+
+<span class="n">pydot_graph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">PATH</span><span class="o">/</span><span class="s2">"clrs_example.png"</span><span class="p">)</span>
+</pre></div>
+
+<p>
+<img src="clrs_example.png" alt="nil"></p>
+
+<div class="highlight"><pre><span></span><span class="n">search</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">test</span><span class="o">.</span><span class="n">adjacent</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">predecessor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>        
+	<span class="n">nodes</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">predecessor</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+<span class="n">pydot_graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+<span class="n">pydot_graph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">PATH</span><span class="o">/</span><span class="s2">"clrs_example_searched.png"</span><span class="p">)</span>
+</pre></div>
+
+<p>
+<img src="clrs_example_searched.png" alt="nil"></p>
+</div>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/data-structures/" rel="tag">data structures</a></li>
+            <li><a class="tag p-category" href="../../categories/graphs/" rel="tag">graphs</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../graphs/" rel="prev" title="Graphs">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../graphs-depth-first-search/" rel="next" title="Graphs: Depth-First-Search">Next post</a>
+            </li>
+        </ul></nav></aside></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>

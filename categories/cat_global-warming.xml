@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="../assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Bowling For Data (Posts about Global Warming)</title><link>https://necromuralist.github.io/Bowling-For-Data/</link><description></description><atom:link href="https://necromuralist.github.io/Bowling-For-Data/categories/cat_global-warming.xml" rel="self" type="application/rss+xml"></atom:link><language>en</language><copyright>Contents © 2022 &lt;a href="mailto:cloisteredmonkey.jmark@slmail.me"&gt;The Cloistered Monkey&lt;/a&gt; 
+ &lt;a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"&gt;
+ &lt;img alt="Creative Commons License BY-NC-SA"
+ style="border-width:0; margin-bottom:12px;"
+ src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"&gt;&lt;/a&gt;</copyright><lastBuildDate>Wed, 13 Jul 2022 03:15:12 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Comparing Energy Prices</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="table-of-contents"&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;div id="text-table-of-contents"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/#org66777a6"&gt;How Many Megajoules For a Dollar of Gas?&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/#org1397168"&gt;Chain-Link Conversion&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/#org993d683"&gt;In Python&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/#org0d24d22"&gt;How Many MegaJoules For a Dollar of Electricity?&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/#org48aed4b"&gt;Kilowatt-Hour To Joules&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/#org51052dc"&gt;A Dollar's Worth Of Megajoules&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/#org94b8259"&gt;Check The Math&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/#org5b589b6"&gt;Source&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org66777a6" class="outline-2"&gt;
+&lt;h2 id="org66777a6"&gt;How Many Megajoules For a Dollar of Gas?&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org66777a6"&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;A gallon of gasoline carries with it \(\approx 1.3E8\) joules of energy.&lt;/li&gt;
+&lt;li&gt;You pay \(5 \frac{\text{dollars}}{\text{gallon}}\).&lt;/li&gt;
+&lt;li&gt;How many megajoules (\(10^6\) joules) can you get for a dollar?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org1397168" class="outline-3"&gt;
+&lt;h3 id="org1397168"&gt;Chain-Link Conversion&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org1397168"&gt;
+\begin{align}
+\require{cancel}
+\left(\frac{1 \cancel{gallon}}{5\textit{ dollars}}\right)\left(\frac{1.3 \times 10^8\textit{ joules}}{1 \cancel{gallon}}\right) &amp;amp;= \left(\frac{1.3 \times 10^8 \cancel{joules}}{5\textit{ dollars}}\right)\left(\frac{1 megajoule}{10^6 \cancel{joule}}\right) \\
+&amp;amp;=\frac{1.3\times 10^8 megajoules}{(5 \textit{ dollars})\left(10^6\right)}\\
+&amp;amp;= 26 \frac{megajoules}{dollar}
+\end{align}
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org993d683" class="outline-3"&gt;
+&lt;h3 id="org993d683"&gt;In Python&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org993d683"&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;fractions&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Fraction&lt;/span&gt;
+
+&lt;span class="n"&gt;gallons_per_dollar&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Fraction&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;joules_per_gallon&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;13&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;7&lt;/span&gt;
+&lt;span class="n"&gt;joules_per_dollar&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;joules_per_gallon&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;gallons_per_dollar&lt;/span&gt;
+&lt;span class="n"&gt;megajoules_per_joule&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Fraction&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;megajoules_per_dollar&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;joules_per_dollar&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;megajoules_per_joule&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;megajoules_per_dollar&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; megajoules/dollar"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;pre class="example"&gt;
+26 megajoules/dollar
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org0d24d22" class="outline-2"&gt;
+&lt;h2 id="org0d24d22"&gt;How Many MegaJoules For a Dollar of Electricity?&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org0d24d22"&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;Electricity is $0.05 per kilowatt-hour.&lt;/li&gt;
+&lt;li&gt;\(1\text{ watt} = 1 \frac{joule}{second}\)&lt;/li&gt;
+&lt;li&gt;\(1\text{ kilowatt-hour} = 1,000\text{ watts} \times 3,600\text{ seconds}\)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org48aed4b" class="outline-3"&gt;
+&lt;h3 id="org48aed4b"&gt;Kilowatt-Hour To Joules&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org48aed4b"&gt;
+\begin{align}
+1 kilowatt-hour &amp;amp;= (1,000\text{ watts})(3,600\text{ seconds})\\
+  &amp;amp;= \left(\frac{1,000\text{ joules}}{\cancel{second}}\right)\left(3,600 \cancel{seconds}\right)\\
+  &amp;amp;= 36 \times 10^5 \text{ joules}
+\end{align}
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org51052dc" class="outline-3"&gt;
+&lt;h3 id="org51052dc"&gt;A Dollar's Worth Of Megajoules&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org51052dc"&gt;
+\begin{align}
+\frac{1 \text{ kilowatt-hour}}{0.05\text{ dollars}} &amp;amp;= \left(\frac{3.6 \times \cancel{10^6 joules}}{0.05\text{ dollars}}\right)\left(\frac{1 \text{ megajoule}}{\cancel{10^6 joules}}\right)\\
+
+&amp;amp;= \left(\frac{3.6\ megajoules}{0.05\text{ dollars}}\right)\left(\frac{20}{20}\right) \\
+&amp;amp;= 72 \ \frac{megajoules}{dollar}
+
+\end{align}
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org94b8259" class="outline-3"&gt;
+&lt;h3 id="org94b8259"&gt;Check The Math&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org94b8259"&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;kilowatt_hours_per_dollar&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt; &lt;span class="c1"&gt;# 1/0.05 = 20&lt;/span&gt;
+&lt;span class="n"&gt;megajoules&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mf"&gt;3.6&lt;/span&gt;
+&lt;span class="n"&gt;megajoules_per_dollar&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;kilowatt_hours_per_dollar&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;megajoules&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;megajoules_per_dollar&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; megajoules/dollar of electricity"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;pre class="example"&gt;
+72.0 megajoules/dollar of electricity
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org5b589b6" class="outline-2"&gt;
+&lt;h2 id="org5b589b6"&gt;Source&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org5b589b6"&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/course-global-warming/"&gt;Global Warming I: The Science and Modeling of Climate Change&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description><category>global warming</category><category>unit conversion</category><guid>https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/</guid><pubDate>Tue, 12 Jul 2022 20:13:00 GMT</pubDate></item><item><title>How much coal does it take to power a light bulb?</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/how-much-coal-to-power-a-light-bulb/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="table-of-contents"&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;div id="text-table-of-contents"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/how-much-coal-to-power-a-light-bulb/#org08c862d"&gt;How many Joules of energy does it take to power a 100 Watt light bulb for one day?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/how-much-coal-to-power-a-light-bulb/#orgf5a7f57"&gt;Double-Check The Math&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/how-much-coal-to-power-a-light-bulb/#org71e2e0b"&gt;Source&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org08c862d" class="outline-2"&gt;
+&lt;h2 id="org08c862d"&gt;How many Joules of energy does it take to power a 100 Watt light bulb for one day?&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org08c862d"&gt;
+&lt;p&gt;
+&lt;b&gt;&lt;b&gt;Given:&lt;/b&gt;&lt;/b&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+\[
+1 Watt = 1 \frac{Joule}{Second}
+\]
+&lt;/p&gt;
+
+&lt;p&gt;
+For a 100 Watt Bulb:
+&lt;/p&gt;
+
+&lt;p&gt;
+\[
+\require{cancel}
+(100 \cancel{Watt})\left(1 \frac{\frac{Joule}{Second}}{\cancel{Watt}}\right) = 100 \frac{Joule}{Second}
+\]
+&lt;/p&gt;
+
+&lt;p&gt;
+For One Minute:
+&lt;/p&gt;
+
+&lt;p&gt;
+\[
+\left(100 \frac{Joule}{\cancel{Second}}\right) \left(60 \frac{\cancel{Second}}{Minute}\right) = 6{,}000 \frac{Joule}{Minute}
+\]
+&lt;/p&gt;
+
+&lt;p&gt;
+For One Hour:
+&lt;/p&gt;
+
+&lt;p&gt;
+\[
+\left(6 \times 10^3 \frac{Joule}{\cancel{Minute}}\right)\left(60 \frac{\cancel{Minute}}{Hour}\right) = 3.6 \times 10^5 \frac{Joule}{Hour}
+\]
+&lt;/p&gt;
+
+&lt;p&gt;
+For One Day:
+&lt;/p&gt;
+
+&lt;p&gt;
+\[
+\left(3.6 \times 10^5 \frac{Joule}{\cancel{Hour}}\right)\left(24 \frac{\cancel{Hour}}{Day}\right) = 8.64 \times 10^6 \frac{Joule}{Day}
+\]
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgf5a7f57" class="outline-2"&gt;
+&lt;h2 id="orgf5a7f57"&gt;Double-Check The Math&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgf5a7f57"&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;bulb&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;100&lt;/span&gt; &lt;span class="c1"&gt;# Watt (Joule/Second)&lt;/span&gt;
+&lt;span class="n"&gt;per_minute&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;bulb&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;60&lt;/span&gt; &lt;span class="c1"&gt;# Second/Minute&lt;/span&gt;
+&lt;span class="n"&gt;per_hour&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;per_minute&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;60&lt;/span&gt; &lt;span class="c1"&gt;# Minute/Hour&lt;/span&gt;
+&lt;span class="n"&gt;per_day&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;per_hour&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;24&lt;/span&gt; &lt;span class="c1"&gt;# Hour/Day&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"A 100 Watt Light bulb uses &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;per_day&lt;/span&gt;&lt;span class="si"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;0.2e&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; Joules per day."&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;pre class="example"&gt;
+A 100 Watt Light bulb uses 8.64e+06 Joules per day.
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org71e2e0b" class="outline-2"&gt;
+&lt;h2 id="org71e2e0b"&gt;Source&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org71e2e0b"&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/course-global-warming/"&gt;Global Warming I: The Science and Modeling of Climate Change&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description><category>global warming</category><category>unit conversion</category><guid>https://necromuralist.github.io/Bowling-For-Data/posts/how-much-coal-to-power-a-light-bulb/</guid><pubDate>Thu, 16 Jun 2022 00:28:30 GMT</pubDate></item></channel></rss>

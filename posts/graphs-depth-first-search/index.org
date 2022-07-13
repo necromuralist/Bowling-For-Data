@@ -1,0 +1,203 @@
+#+BEGIN_COMMENT
+.. title: Graphs: Depth-First-Search
+.. slug: graphs-depth-first-search
+.. date: 2022-04-16 18:50:06 UTC-07:00
+.. tags: graphs,algorithms,data structures
+.. category: Data Structures
+.. link: 
+.. description: A look at the Depth-First Search algorithm for graphs.
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-d5a929cb-b29d-4210-a4ae-486bfa2bb7e8-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+#+begin_src python :tangle ../bowling/data_structures/graphs/depth_first_search.py :exports none
+<<imports>>
+
+
+<<constants>>
+
+
+<<dfs-vertex>>
+
+
+<<directed-graph>>
+
+    <<directed-graph-add>>
+
+
+<<depth-first-search>>
+
+    <<the-call>>
+
+    <<visit-adjacent>>
+#+end_src
+
+* Imports and Setup
+#+begin_src python :noweb-ref imports
+# python
+from __future__ import annotations
+from enum import Enum
+
+# from pypi
+from attrs import define
+
+# this projects
+from bowling.data_structures.graphs import graph
+#+end_src
+* DFS Vertex
+The Vertices used in the Depth-First Search also keep track of the "times" so it has two more attributes than our original vertex - ~discovered~ and ~finished~. Although, as with color and all the other attributes, we could just let the program stick the attributes into the object, I thought it'd be better to create a new class to make it more obvious that there's a difference. I couldn't get the sets to add the vertices when I used inheritance so I'm going to start from scratch instead of inheriting from the original Vertex.
+
+#+begin_src python :noweb-ref dfs-vertex
+@define(eq=False)
+class DFSVertex(graph.Vertex):
+    """The Depth-First Search Vertex
+
+    Args:
+     identifier: something to identify the node
+     color: the 'discovery' state of the node
+     distance: The number of edges to the root
+     predecessor: The 'parent' of the node in a tree
+     discovered: when the node was discovered
+     finished: when the node's adjacent nodes where checked
+    """
+    discovered: int = None
+    finished: int = None
+
+    def __str__(self) -> str:
+        return (super().__str__() + 
+        f", discovered: {self.discovered}, finished: {self.finished}")
+#+end_src
+* Directed Graph
+#+begin_src python :noweb-ref directed-graph
+class DirectedGraph(graph.Graph):
+    """A Directed Graph"""    
+#+end_src
+** Add
+#+begin_src python :noweb-ref directed-graph-add
+def add(self, source: DFSVertex, target: DFSVertex) -> None:
+    """Add an edge from source to target
+
+    Args:
+     source: the vertex where the edge starts
+     target: the vertex where the edge ends
+    """
+    self.vertices.add(source)
+    self.vertices.add(target)
+    self.adjacent[source].add(target)
+    return
+#+end_src
+* Depth First Search
+** The Class
+#+begin_src python :noweb-ref depth-first-search
+@define
+class DepthFirstSearch:
+    """depth-first-searcher
+
+    Args:
+     graph: the graph to process
+    """
+    graph: graph.Graph
+    time: int=0
+#+end_src
+** The Call
+#+begin_src python :noweb-ref the-call
+def __call__(self) -> None:
+    """Performs the depth-first-search"""
+    for vertex in self.graph.vertices:
+        vertex.color = graph.Color.WHITE
+        vertex.predecessor = None
+    self.time = 0
+    for vertex in self.graph.vertices:
+        if vertex.color is graph.Color.WHITE:
+            self.visit_adjacent(vertex)
+    return
+#+end_src
+
+** Visiting Adjacent Nodes
+
+#+begin_src python :noweb-ref visit-adjacent
+def visit_adjacent(self, vertex: DFSVertex) -> None:
+    """Visit the nodes adjacent to the given node
+
+    Args:
+     vertex: vertex whose adjacency to visit
+    """
+    self.time += 1
+    vertex.discovered = self.time
+    vertex.color = graph.Color.GRAY
+    for neighbor in self.graph.adjacent[vertex]:
+        if neighbor.color is graph.Color.WHITE:
+            neighbor.predecessor = vertex
+            self.visit_adjacent(neighbor)
+    vertex.color = graph.Color.BLACK
+    self.time += 1
+    vertex.finished = self.time
+    return
+#+end_src
+* Testing It
+
+#+begin_src python :results none
+# pypi
+from expects import be, equal, expect
+# software under test
+from bowling.data_structures.graphs import graph
+from bowling.data_structures.graphs.depth_first_search import (
+    DepthFirstSearch,
+    DFSVertex,
+    DirectedGraph
+)
+
+graph_1 = DirectedGraph()
+node_u = DFSVertex(identifier="u")
+node_v = DFSVertex(identifier="v")
+node_w = DFSVertex(identifier="w")
+node_x = DFSVertex(identifier="x")
+node_y = DFSVertex(identifier="y")
+node_z = DFSVertex(identifier="z")
+
+graph_1.add(node_u, node_v)
+graph_1.add(node_u, node_x)
+graph_1.add(node_x, node_v)
+graph_1.add(node_v, node_y)
+graph_1.add(node_y, node_x)
+graph_1.add(node_w, node_y)
+graph_1.add(node_w, node_z)
+graph_1.add(node_z, node_z)
+
+searcher = DepthFirstSearch(graph=graph_1)
+searcher()
+for node in graph_1.vertices:
+    expect(node.color).to(be(graph.Color.BLACK))
+
+expect(node_u.discovered).to(equal(1))
+expect(node_u.finished).to(equal(8))
+
+expect(node_v.discovered).to(equal(2))
+expect(node_v.finished).to(equal(7))
+
+expect(node_w.discovered).to(equal(9))
+expect(node_w.finished).to(equal(12))
+
+expect(node_x.discovered).to(equal(4))
+expect(node_x.finished).to(equal(5))
+
+expect(node_y.discovered).to(equal(3))
+expect(node_y.finished).to(equal(6))
+
+expect(node_z.discovered).to(equal(10))
+expect(node_z.finished).to(equal(11))
+
+expect(node_u.predecessor).to(be(None))
+expect(node_v.predecessor).to(be(node_u))
+expect(node_y.predecessor).to(be(node_v))
+expect(node_x.predecessor).to(be(node_y))
+expect(node_z.predecessor).to(be(node_w))
+
+expect(node_w.predecessor).to(be(None))
+#+end_src

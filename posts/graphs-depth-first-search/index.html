@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="A look at the Depth-First Search algorithm for graphs.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphs: Depth-First-Search | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/graphs-depth-first-search/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../graphs-breadth-first-search/" title="Graphs: Breadth-First-Search" type="text/html">
+<link rel="next" href="../graphs-topological-ordering/" title="Graphs: Topological Ordering" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="Graphs: Depth-First-Search">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/graphs-depth-first-search/">
+<meta property="og:description" content="A look at the Depth-First Search algorithm for graphs.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-04-16T18:50:06-07:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="data structures">
+<meta property="article:tag" content="graphs">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Graphs: Depth-First-Search</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2022-04-16T18:50:06-07:00" itemprop="datePublished" title="2022-04-16 18:50">2022-04-16 18:50</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgadfa06b">Imports and Setup</a></li>
+<li><a href="#orga6782a9">DFS Vertex</a></li>
+<li>
+<a href="#orge5a9634">Directed Graph</a>
+<ul>
+<li><a href="#orgde7837d">Add</a></li>
+</ul>
+</li>
+<li>
+<a href="#orga2bb7f6">Depth First Search</a>
+<ul>
+<li><a href="#org812f450">The Class</a></li>
+<li><a href="#orgafb3d03">The Call</a></li>
+<li><a href="#org2784991">Visiting Adjacent Nodes</a></li>
+</ul>
+</li>
+<li><a href="#org70dd126">Testing It</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgadfa06b" class="outline-2">
+<h2 id="orgadfa06b">Imports and Setup</h2>
+<div class="outline-text-2" id="text-orgadfa06b">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<span class="c1"># from pypi</span>
+<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
+
+<span class="c1"># this projects</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs</span> <span class="kn">import</span> <span class="n">graph</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orga6782a9" class="outline-2">
+<h2 id="orga6782a9">DFS Vertex</h2>
+<div class="outline-text-2" id="text-orga6782a9">
+<p>
+The Vertices used in the Depth-First Search also keep track of the "times" so it has two more attributes than our original vertex - <code>discovered</code> and <code>finished</code>. Although, as with color and all the other attributes, we could just let the program stick the attributes into the object, I thought it'd be better to create a new class to make it more obvious that there's a difference. I couldn't get the sets to add the vertices when I used inheritance so I'm going to start from scratch instead of inheriting from the original Vertex.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nd">@define</span><span class="p">(</span><span class="n">eq</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">DFSVertex</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">Vertex</span><span class="p">):</span>
+    <span class="sd">"""The Depth-First Search Vertex</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     identifier: something to identify the node</span>
+<span class="sd">     color: the 'discovery' state of the node</span>
+<span class="sd">     distance: The number of edges to the root</span>
+<span class="sd">     predecessor: The 'parent' of the node in a tree</span>
+<span class="sd">     discovered: when the node was discovered</span>
+<span class="sd">     finished: when the node's adjacent nodes where checked</span>
+<span class="sd">    """</span>
+    <span class="n">discovered</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">finished</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+	<span class="k">return</span> <span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="o">+</span> 
+	<span class="sa">f</span><span class="s2">", discovered: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">discovered</span><span class="si">}</span><span class="s2">, finished: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orge5a9634" class="outline-2">
+<h2 id="orge5a9634">Directed Graph</h2>
+<div class="outline-text-2" id="text-orge5a9634">
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DirectedGraph</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="sd">"""A Directed Graph"""</span>    
+</pre></div>
+</div>
+<div id="outline-container-orgde7837d" class="outline-3">
+<h3 id="orgde7837d">Add</h3>
+<div class="outline-text-3" id="text-orgde7837d">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">DFSVertex</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">DFSVertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Add an edge from source to target</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     source: the vertex where the edge starts</span>
+<span class="sd">     target: the vertex where the edge ends</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">source</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orga2bb7f6" class="outline-2">
+<h2 id="orga2bb7f6">Depth First Search</h2>
+<div class="outline-text-2" id="text-orga2bb7f6">
+</div>
+<div id="outline-container-org812f450" class="outline-3">
+<h3 id="org812f450">The Class</h3>
+<div class="outline-text-3" id="text-org812f450">
+<div class="highlight"><pre><span></span><span class="nd">@define</span>
+<span class="k">class</span> <span class="nc">DepthFirstSearch</span><span class="p">:</span>
+    <span class="sd">"""depth-first-searcher</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     graph: the graph to process</span>
+<span class="sd">    """</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">graph</span><span class="o">.</span><span class="n">Graph</span>
+    <span class="n">time</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgafb3d03" class="outline-3">
+<h3 id="orgafb3d03">The Call</h3>
+<div class="outline-text-3" id="text-orgafb3d03">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Performs the depth-first-search"""</span>
+    <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">vertices</span><span class="p">:</span>
+	<span class="n">vertex</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">WHITE</span>
+	<span class="n">vertex</span><span class="o">.</span><span class="n">predecessor</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">vertices</span><span class="p">:</span>
+	<span class="k">if</span> <span class="n">vertex</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">WHITE</span><span class="p">:</span>
+	    <span class="bp">self</span><span class="o">.</span><span class="n">visit_adjacent</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org2784991" class="outline-3">
+<h3 id="org2784991">Visiting Adjacent Nodes</h3>
+<div class="outline-text-3" id="text-org2784991">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">visit_adjacent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">DFSVertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Visit the nodes adjacent to the given node</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     vertex: vertex whose adjacency to visit</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">vertex</span><span class="o">.</span><span class="n">discovered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
+    <span class="n">vertex</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">GRAY</span>
+    <span class="k">for</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">vertex</span><span class="p">]:</span>
+	<span class="k">if</span> <span class="n">neighbor</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">WHITE</span><span class="p">:</span>
+	    <span class="n">neighbor</span><span class="o">.</span><span class="n">predecessor</span> <span class="o">=</span> <span class="n">vertex</span>
+	    <span class="bp">self</span><span class="o">.</span><span class="n">visit_adjacent</span><span class="p">(</span><span class="n">neighbor</span><span class="p">)</span>
+    <span class="n">vertex</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">vertex</span><span class="o">.</span><span class="n">finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org70dd126" class="outline-2">
+<h2 id="org70dd126">Testing It</h2>
+<div class="outline-text-2" id="text-org70dd126">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<span class="c1"># software under test</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs</span> <span class="kn">import</span> <span class="n">graph</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.depth_first_search</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DepthFirstSearch</span><span class="p">,</span>
+    <span class="n">DFSVertex</span><span class="p">,</span>
+    <span class="n">DirectedGraph</span>
+<span class="p">)</span>
+
+<span class="n">graph_1</span> <span class="o">=</span> <span class="n">DirectedGraph</span><span class="p">()</span>
+<span class="n">node_u</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s2">"u"</span><span class="p">)</span>
+<span class="n">node_v</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s2">"v"</span><span class="p">)</span>
+<span class="n">node_w</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s2">"w"</span><span class="p">)</span>
+<span class="n">node_x</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span>
+<span class="n">node_y</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s2">"y"</span><span class="p">)</span>
+<span class="n">node_z</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="s2">"z"</span><span class="p">)</span>
+
+<span class="n">graph_1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_u</span><span class="p">,</span> <span class="n">node_v</span><span class="p">)</span>
+<span class="n">graph_1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_u</span><span class="p">,</span> <span class="n">node_x</span><span class="p">)</span>
+<span class="n">graph_1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_x</span><span class="p">,</span> <span class="n">node_v</span><span class="p">)</span>
+<span class="n">graph_1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_v</span><span class="p">,</span> <span class="n">node_y</span><span class="p">)</span>
+<span class="n">graph_1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_y</span><span class="p">,</span> <span class="n">node_x</span><span class="p">)</span>
+<span class="n">graph_1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_w</span><span class="p">,</span> <span class="n">node_y</span><span class="p">)</span>
+<span class="n">graph_1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_w</span><span class="p">,</span> <span class="n">node_z</span><span class="p">)</span>
+<span class="n">graph_1</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_z</span><span class="p">,</span> <span class="n">node_z</span><span class="p">)</span>
+
+<span class="n">searcher</span> <span class="o">=</span> <span class="n">DepthFirstSearch</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="n">graph_1</span><span class="p">)</span>
+<span class="n">searcher</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">graph_1</span><span class="o">.</span><span class="n">vertices</span><span class="p">:</span>
+    <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">node_u</span><span class="o">.</span><span class="n">discovered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_u</span><span class="o">.</span><span class="n">finished</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">node_v</span><span class="o">.</span><span class="n">discovered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_v</span><span class="o">.</span><span class="n">finished</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">node_w</span><span class="o">.</span><span class="n">discovered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_w</span><span class="o">.</span><span class="n">finished</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">node_x</span><span class="o">.</span><span class="n">discovered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_x</span><span class="o">.</span><span class="n">finished</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">node_y</span><span class="o">.</span><span class="n">discovered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_y</span><span class="o">.</span><span class="n">finished</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">node_z</span><span class="o">.</span><span class="n">discovered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_z</span><span class="o">.</span><span class="n">finished</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">11</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">node_u</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_v</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_u</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_y</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_v</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_x</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_y</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">node_z</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">node_w</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">node_w</span><span class="o">.</span><span class="n">predecessor</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/data-structures/" rel="tag">data structures</a></li>
+            <li><a class="tag p-category" href="../../categories/graphs/" rel="tag">graphs</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../graphs-breadth-first-search/" rel="prev" title="Graphs: Breadth-First-Search">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../graphs-topological-ordering/" rel="next" title="Graphs: Topological Ordering">Next post</a>
+            </li>
+        </ul></nav></aside></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>

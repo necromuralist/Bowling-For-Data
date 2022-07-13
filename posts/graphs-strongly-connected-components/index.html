@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Using Depth-First Search to find Strongly Connected Components.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphs: Strongly Connected Components | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/graphs-strongly-connected-components/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../graphs-topological-ordering/" title="Graphs: Topological Ordering" type="text/html">
+<link rel="next" href="../minimum-spanning-trees-kruskals-algorithm/" title="Minimum Spanning Trees: Kruskal's Algorithm" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="Graphs: Strongly Connected Components">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/graphs-strongly-connected-components/">
+<meta property="og:description" content="Using Depth-First Search to find Strongly Connected Components.">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-04-20T19:43:49-07:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="data structures">
+<meta property="article:tag" content="graphs">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Graphs: Strongly Connected Components</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2022-04-20T19:43:49-07:00" itemprop="datePublished" title="2022-04-20 19:43">2022-04-20 19:43</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li>
+<a href="#org460f7d0">Beginning</a>
+<ul>
+<li><a href="#org3285934">Imports For Testing</a></li>
+</ul>
+</li>
+<li>
+<a href="#org0202eef">The Graph Transpose</a>
+<ul>
+<li><a href="#org908d38e">Imports for the Transpose</a></li>
+<li>
+<a href="#org94e80a9">The Transpose</a>
+<ul>
+<li><a href="#orgd9ace6a">The Adjacency Sets</a></li>
+<li><a href="#org6f63f55">The Vertices</a></li>
+</ul>
+</li>
+<li><a href="#org8e4b192">Testing the Transpose</a></li>
+</ul>
+</li>
+<li>
+<a href="#org84431b0">Strongly Connected Components</a>
+<ul>
+<li><a href="#orgcd150f8">The Steps to Build Them</a></li>
+<li>
+<a href="#org108c1e0">The Builder</a>
+<ul>
+<li><a href="#orgb849162">The Transpose</a></li>
+<li><a href="#org06df458">Find the Child</a></li>
+<li><a href="#org09b82a6">The Call</a></li>
+</ul>
+</li>
+<li><a href="#org6e2ecb3">Testing it</a></li>
+</ul>
+</li>
+<li><a href="#orgdc2faa9">End</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org460f7d0" class="outline-2">
+<h2 id="org460f7d0">Beginning</h2>
+<div class="outline-text-2" id="text-org460f7d0">
+</div>
+<div id="outline-container-org3285934" class="outline-3">
+<h3 id="org3285934">Imports For Testing</h3>
+<div class="outline-text-3" id="text-org3285934">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">be_a</span><span class="p">,</span>
+    <span class="n">expect</span><span class="p">,</span>
+    <span class="n">contain_exactly</span><span class="p">,</span>
+    <span class="n">contain_only</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.depth_first_search</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DepthFirstSearch</span><span class="p">,</span>
+    <span class="n">DFSVertex</span><span class="p">,</span>
+    <span class="n">DirectedGraph</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.transpose</span> <span class="kn">import</span> <span class="n">Transpose</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org0202eef" class="outline-2">
+<h2 id="org0202eef">The Graph Transpose</h2>
+<div class="outline-text-2" id="text-org0202eef">
+<p>
+A transpose of a directed graph (\(G^T\)) contains the same nodes and the same edges but the direction of each edge is reversed.
+</p>
+</div>
+
+<div id="outline-container-org908d38e" class="outline-3">
+<h3 id="org908d38e">Imports for the Transpose</h3>
+<div class="outline-text-3" id="text-org908d38e">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.depth_first_search</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DepthFirstSearch</span><span class="p">,</span>
+    <span class="n">DFSVertex</span><span class="p">,</span>
+    <span class="n">DirectedGraph</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org94e80a9" class="outline-3">
+<h3 id="org94e80a9">The Transpose</h3>
+<div class="outline-text-3" id="text-org94e80a9">
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Transpose</span><span class="p">:</span>
+    <span class="sd">"""Creates the transpose of a graph</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     graph: the directed graph to transpose</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="n">DirectedGraph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">graph</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="k">return</span>
+</pre></div>
+</div>
+
+<div id="outline-container-orgd9ace6a" class="outline-4">
+<h4 id="orgd9ace6a">The Adjacency Sets</h4>
+<div class="outline-text-4" id="text-orgd9ace6a">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">adjacent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">"""Vertex: set of adjacente vertices dictionary"""</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+
+	<span class="k">for</span> <span class="n">vertex</span><span class="p">,</span> <span class="n">neighbors</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">adjacent</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+	    <span class="k">for</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span>
+		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Adding neighbor </span><span class="si">{</span><span class="n">vertex</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span><span class="p">[</span><span class="n">neighbor</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org6f63f55" class="outline-4">
+<h4 id="org6f63f55">The Vertices</h4>
+<div class="outline-text-4" id="text-org6f63f55">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
+    <span class="sd">"""The vertices in the directed graph"""</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">vertices</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8e4b192" class="outline-3">
+<h3 id="org8e4b192">Testing the Transpose</h3>
+<div class="outline-text-3" id="text-org8e4b192">
+<div class="highlight"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">DirectedGraph</span><span class="p">()</span>
+<span class="n">vertex_a</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"a"</span><span class="p">)</span>
+<span class="n">vertex_b</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"b"</span><span class="p">)</span>
+<span class="n">vertex_e</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"e"</span><span class="p">)</span>
+<span class="n">vertex_f</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"f"</span><span class="p">)</span>
+
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_a</span><span class="p">,</span> <span class="n">vertex_b</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_b</span><span class="p">,</span> <span class="n">vertex_e</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_b</span><span class="p">,</span> <span class="n">vertex_f</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_e</span><span class="p">,</span> <span class="n">vertex_a</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_e</span><span class="p">,</span> <span class="n">vertex_f</span><span class="p">)</span>
+
+<span class="n">transpose</span> <span class="o">=</span> <span class="n">Transpose</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">transpose</span><span class="o">.</span><span class="n">vertices</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_only</span><span class="p">(</span><span class="n">vertex_a</span><span class="p">,</span> <span class="n">vertex_b</span><span class="p">,</span>
+					   <span class="n">vertex_e</span><span class="p">,</span> <span class="n">vertex_f</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">transpose</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">vertex_a</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="n">vertex_e</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">transpose</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">vertex_b</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="n">vertex_a</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">transpose</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">vertex_e</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="n">vertex_b</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">transpose</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">vertex_f</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_only</span><span class="p">(</span><span class="n">vertex_b</span><span class="p">,</span> <span class="n">vertex_e</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org84431b0" class="outline-2">
+<h2 id="org84431b0">Strongly Connected Components</h2>
+<div class="outline-text-2" id="text-org84431b0">
+<p>
+A Strongly Connected Component of a Directed Graph is a sub-graph where each pair of vertices has an edge in both directions (if <i>a</i> has an edge to <i>b</i> then <i>b</i> has an edge to <i>a</i>).
+</p>
+</div>
+
+<div id="outline-container-orgcd150f8" class="outline-3">
+<h3 id="orgcd150f8">The Steps to Build Them</h3>
+<div class="outline-text-3" id="text-orgcd150f8">
+<ol class="org-ol">
+<li>Call <code>DFS(G)</code> to compute the finishing times.</li>
+<li>Compute \(G^T\)</li>
+<li>Call <code>DFS(</code>\(G^T\) <code>)</code>, going through the vertices in decreasing finish time in the main loop.</li>
+<li>Output the Depth-First forest created in step 3 as the Strongly Connected Components.</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org108c1e0" class="outline-3">
+<h3 id="org108c1e0">The Builder</h3>
+<div class="outline-text-3" id="text-org108c1e0">
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">StronglyConnectedComponents</span><span class="p">:</span>
+    <span class="sd">"""Build the strongly connected components sub-trees</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     graph: directed graph to process</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="n">DirectedGraph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="n">graph</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="k">return</span>
+</pre></div>
+</div>
+
+<div id="outline-container-orgb849162" class="outline-4">
+<h4 id="orgb849162">The Transpose</h4>
+<div class="outline-text-4" id="text-orgb849162">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Transpose</span><span class="p">:</span>
+    <span class="sd">"""The transpose of the original graph"""</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span> <span class="o">=</span> <span class="n">Transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transpose</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org06df458" class="outline-4">
+<h4 id="org06df458">Find the Child</h4>
+<div class="outline-text-4" id="text-org06df458">
+<p>
+Unlike with a Binary Search Tree, our vertices don't keep track of their child nodes, just the predecessor node so this is a helper to get all the children of a node.
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">find_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:</span> <span class="nb">set</span><span class="p">,</span> <span class="n">predecessor</span><span class="p">:</span> <span class="n">DFSVertex</span><span class="p">,</span>
+	       <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">"""Find the child nodes of the given predecessor</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">     this is a helper to find the children in a Strongly Connected Component</span>
+<span class="sd">     For it to make sense the vertices should have the forest already built</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     vertices: source of nodes</span>
+<span class="sd">     predecessor: node in the graph to find the child of</span>
+<span class="sd">     path: list to append child nodes to</span>
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
+	<span class="k">if</span> <span class="n">vertex</span><span class="o">.</span><span class="n">predecessor</span> <span class="ow">is</span> <span class="n">predecessor</span><span class="p">:</span>
+	    <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
+	    <span class="bp">self</span><span class="o">.</span><span class="n">find_child</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">vertex</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org09b82a6" class="outline-4">
+<h4 id="org09b82a6">The Call</h4>
+<div class="outline-text-4" id="text-org09b82a6">
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">forest</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">"""creates the forest with the strongly connected components</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     adjacency dict for the strongly connected components</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="c1"># do the search to get the finish times</span>
+	<span class="n">searcher</span> <span class="o">=</span> <span class="n">DepthFirstSearch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+	<span class="n">searcher</span><span class="p">()</span>
+
+	<span class="c1"># change the transpose vertices to be in reversed finish order</span>
+	<span class="n">vertices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span>
+			  <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">vertex</span><span class="o">.</span><span class="n">finished</span><span class="p">,</span>
+			  <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">transpose</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertices</span><span class="p">)))</span>
+
+	<span class="c1"># do a depth first search on the graph transpose</span>
+	<span class="n">searcher</span><span class="o">.</span><span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transpose</span>
+	<span class="n">searcher</span><span class="p">()</span>
+
+	<span class="c1"># at this point the strongly connected components are set up in </span>
+	<span class="c1"># self.transpose, but you have to do some figuring to get the trees</span>
+
+	<span class="c1"># get the roots of the trees in the forest</span>
+	<span class="n">roots</span> <span class="o">=</span> <span class="p">(</span><span class="n">vertex</span> <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transpose</span><span class="o">.</span><span class="n">vertices</span>
+		 <span class="k">if</span> <span class="n">vertex</span><span class="o">.</span><span class="n">predecessor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+
+	<span class="c1"># build a forest for each root by finding its children</span>
+	<span class="n">forest</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">find_child</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transpose</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="p">[</span><span class="n">root</span><span class="p">])</span>
+		  <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">roots</span><span class="p">)</span>
+
+	<span class="c1"># build a new adjacency dict</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+	<span class="c1"># the neighbors are all the original adjacent nodes without the </span>
+	<span class="c1"># tree nodes</span>
+	<span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">forest</span><span class="p">:</span>
+	    <span class="n">neighbors</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+	    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+		<span class="n">neighbors</span> <span class="o">=</span> <span class="n">neighbors</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
+	    <span class="n">neighbors</span> <span class="o">=</span> <span class="n">neighbors</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+	    <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">tree</span><span class="p">)]</span> <span class="o">=</span> <span class="n">neighbors</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-org6e2ecb3" class="outline-3">
+<h3 id="org6e2ecb3">Testing it</h3>
+<div class="outline-text-3" id="text-org6e2ecb3">
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.transpose</span> <span class="kn">import</span> <span class="n">StronglyConnectedComponents</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">DirectedGraph</span><span class="p">()</span>
+<span class="n">vertex_a</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"a"</span><span class="p">)</span>
+<span class="n">vertex_b</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"b"</span><span class="p">)</span>
+<span class="n">vertex_c</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"c"</span><span class="p">)</span>
+<span class="n">vertex_d</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"d"</span><span class="p">)</span>
+<span class="n">vertex_e</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"e"</span><span class="p">)</span>
+<span class="n">vertex_f</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"f"</span><span class="p">)</span>
+<span class="n">vertex_g</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"g"</span><span class="p">)</span>
+<span class="n">vertex_h</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"h"</span><span class="p">)</span>
+
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_a</span><span class="p">,</span> <span class="n">vertex_b</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_b</span><span class="p">,</span> <span class="n">vertex_c</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_b</span><span class="p">,</span> <span class="n">vertex_e</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_b</span><span class="p">,</span> <span class="n">vertex_f</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_c</span><span class="p">,</span> <span class="n">vertex_d</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_c</span><span class="p">,</span> <span class="n">vertex_g</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_d</span><span class="p">,</span> <span class="n">vertex_c</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_d</span><span class="p">,</span> <span class="n">vertex_h</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_e</span><span class="p">,</span> <span class="n">vertex_a</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_e</span><span class="p">,</span> <span class="n">vertex_f</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_f</span><span class="p">,</span> <span class="n">vertex_g</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_g</span><span class="p">,</span> <span class="n">vertex_f</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_g</span><span class="p">,</span> <span class="n">vertex_h</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vertex_h</span><span class="p">,</span> <span class="n">vertex_h</span><span class="p">)</span>
+
+<span class="n">components</span> <span class="o">=</span> <span class="n">StronglyConnectedComponents</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="n">forest</span> <span class="o">=</span> <span class="n">components</span><span class="o">.</span><span class="n">forest</span>
+</pre></div>
+
+<p>
+Let's see what's in the forest.
+</p>
+
+<p>
+Since the Depth-First Search created a forest of strongly connected components, we can see how many trees are in the forest by finding the roots (the nodes with no predecessor).
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">forest</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+abe
+cd
+fg
+h
+[autoreload of bowling.data_structures.graphs.transpose failed: Traceback (most recent call last):
+  File "/home/bravo/.virtualenvs/Bowling-For-Data/site-packages/IPython/extensions/autoreload.py", line 245, in check
+    superreload(m, reload, self.old_objects)
+  File "/home/bravo/.virtualenvs/Bowling-For-Data/site-packages/IPython/extensions/autoreload.py", line 394, in superreload
+    module = reload(module)
+  File "/usr/lib/pypy3/lib-python/3/imp.py", line 314, in reload
+    return importlib.reload(module)
+  File "/usr/lib/pypy3/lib-python/3/importlib/__init__.py", line 169, in reload
+    _bootstrap._exec(spec, module)
+  File "&lt;frozen importlib._bootstrap&gt;", line 639, in _exec
+  File "&lt;builtin&gt;/frozen importlib._bootstrap_external", line 737, in exec_module
+  File "&lt;builtin&gt;/frozen importlib._bootstrap_external", line 873, in get_code
+  File "&lt;builtin&gt;/frozen importlib._bootstrap_external", line 804, in source_to_code
+  File "&lt;frozen importlib._bootstrap&gt;", line 228, in _call_with_frames_removed
+  File "/home/bravo/Bowling-For-Data/bowling/data_structures/graphs/transpose.py", line 126
+    self._forest[tuple(tree])] = neighbors
+                           ^
+SyntaxError: closing parenthesis ']' does not match opening parenthesis '('
+]
+</pre>
+
+<p>
+So We have four Strongly Connected Components.
+</p>
+
+<div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgdc2faa9" class="outline-2">
+<h2 id="orgdc2faa9">End</h2>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/data-structures/" rel="tag">data structures</a></li>
+            <li><a class="tag p-category" href="../../categories/graphs/" rel="tag">graphs</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../graphs-topological-ordering/" rel="prev" title="Graphs: Topological Ordering">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../minimum-spanning-trees-kruskals-algorithm/" rel="next" title="Minimum Spanning Trees: Kruskal's Algorithm">Next post</a>
+            </li>
+        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
+             MathJax.Hub.Config({
+               tex2jax: {
+                 inlineMath: [['$','$'], ['\\(','\\)']],
+                 displayMath: [['$$','$$'], ['\\[','\\]']],
+                 processEscapes: true,
+                 processEnvironments: true,
+               },
+               displayAlign: 'center',
+               "HTML-CSS": {
+                 styles: {'.MathJax_Display': {"margin": 0}}
+               }
+             });
+            </script></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+#+BEGIN_COMMENT
+.. title: Graphs: Topological Ordering
+.. slug: graphs-topological-ordering
+.. date: 2022-04-19 19:17:55 UTC-07:00
+.. tags: graphs,algorithms,data structures
+.. category: Data Structures
+.. link: 
+.. description: A look at Topological Sort (an application of Depth First Search).
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-81c13787-dd83-4711-8200-6f3ec9c7d6a5-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+* Beginning
+#+begin_src python :results none
+# python
+from functools import partial
+
+# this project
+from bowling.data_structures.graphs.depth_first_search import (
+    DFSVertex,
+    DepthFirstSearch,
+    DirectedGraph)
+#+end_src
+
+* Middle
+#+begin_src python :results none
+underpants = DFSVertex("underpants")
+pants = DFSVertex("pants")
+belt = DFSVertex("belt")
+socks = DFSVertex("socks")
+watch = DFSVertex("watch")
+shoes = DFSVertex("shoes")
+shirt = DFSVertex("shirt")
+tie = DFSVertex("tie")
+jacket = DFSVertex("jacket")
+
+graph = DirectedGraph()
+
+graph.add(underpants, pants)
+graph.add(underpants, shoes)
+graph.add(socks, shoes)
+graph.add(pants, shoes)
+graph.add(pants, belt)
+graph.add(shirt, belt)
+graph.add(shirt, tie)
+graph.add(tie, jacket)
+graph.add(belt, jacket)
+graph.vertices.add(watch)
+#+end_src
+
+#+begin_src python :results output :exports both
+search = DepthFirstSearch(graph)
+search()
+
+topologically_sorted = reversed(sorted(graph.vertices, key=lambda v: v.finished))
+for node in topologically_sorted:
+    predecessor = node.predecessor.identifier if node.predecessor is not None else "None"
+    print(f"{node.identifier} \tfinished: {node.finished}\t predecessor: {predecessor}")
+    
+#+end_src
+
+#+RESULTS:
+: watch 	finished: 18	 predecessor: None
+: shirt 	finished: 16	 predecessor: None
+: tie 	finished: 15	 predecessor: shirt
+: socks 	finished: 12	 predecessor: None
+: underpants 	finished: 10	 predecessor: None
+: pants 	finished: 9	 predecessor: underpants
+: belt 	finished: 8	 predecessor: pants
+: jacket 	finished: 7	 predecessor: belt
+: shoes 	finished: 4	 predecessor: pants
+
+This differs from the CLRS solution. The ordering depends on the order in which the edges are encountered (in this case it means the order in which the edges are added to the graph) so the sort won't always be the same. The important feature is that no item later in the list needs to come before any that precede it.

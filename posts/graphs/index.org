@@ -1,0 +1,190 @@
+#+BEGIN_COMMENT
+.. title: Graphs
+.. slug: graphs
+.. date: 2022-04-04 18:40:48 UTC-07:00
+.. tags: graphs,algorithms,data structures
+.. category: Data Structures
+.. link: 
+.. description: A look at Graphs.
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-a4a533db-244e-4399-8bb4-53d539d6167d-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+#+begin_src python :tangle ../bowling/data_structures/graphs/graph.py :exports none
+<<imports>>
+
+
+<<constants>>
+
+
+<<the-vertex>>
+
+
+<<the-graph>>
+
+    <<adjacencies>>
+
+    <<vertices>>
+
+    <<add-element>>
+
+    <<getitem>>
+#+end_src
+* Introduction
+This is a starter post for an introduction to Graphs.
+
+* Imports and Setup
+** Imports
+#+begin_src python :noweb-ref imports
+# python
+from __future__ import annotations
+from collections import defaultdict
+from enum import Enum
+
+# pypi
+from attrs import define
+#+end_src
+
+** Constants
+#+begin_src python :noweb-ref constants
+class Color(Enum):
+    WHITE = 1
+    GRAY = 2
+    BLACK = 3
+
+INFINITY = float("inf")
+#+end_src
+
+* A Vertex Implementation
+
+Note to future self: the default setting for ~attrs.define~ makes the object to unhashable, to make it hashable by object identity pass in ~eq=False~ otherwise trying to add the object to a set will raise an error.
+
+#+begin_src python :noweb-ref the-vertex
+@define(eq=False)
+class Vertex:
+    """A single node in a graph
+
+    Args:
+     identifier: something to identify the node
+     color: the 'discovery' state of the node
+     distance: The number of edges to the root
+     predecessor: The 'parent' of the node in a tree
+    """
+    identifier: int
+    color: Enum=Color.WHITE
+    distance: float=INFINITY
+    predecessor: Vertex=None
+    
+    def __str__(self) -> str:
+        return (f"{self.identifier}: {self.color}, "
+                f"distance: {self.distance}, predecessor: {self.predecessor}")
+#+end_src
+* A Graph Implementation
+#+begin_src python :noweb-ref the-graph
+class Graph:
+    """A graph implementation
+
+    """
+    def __init__(self) -> None:
+        self._adjacent = None
+        self._vertices = None
+        return
+#+end_src
+** Adjacencies
+The book uses an adjacency linked list, but I'll assume that there will be only one edge between each pair of vertices and use a dictionary with sets of adjacent nodes instead.
+
+#+begin_src python :noweb-ref adjacencies
+@property
+def adjacent(self) -> defaultdict:
+    """The dictionary of adjacent vertices"""
+    if self._adjacent is None:
+        self._adjacent = defaultdict(set)
+    return self._adjacent
+
+@adjacent.setter
+def adjacent(self, new_adjacent: dict) -> None:
+    """Sets the dictionary of adjacent vertices (converting to default dict)
+
+    Note:
+     This expects the new_adjacent to be a dict of node: set of nodes
+    """
+    if type(new_adjacent) is not defaultdict:
+        new_new_adjacent = defaultdict(set)
+        for key, nodes in new_adjacent.items():
+            new_new_adjacent[key] = nodes
+        new_adjacent = new_new_adjacent
+    self._adjacent = new_adjacent
+    return
+#+end_src
+** Vertices
+The representation we're using is an adjacency list, but sometimes you need to traverse the vertices. So I'm going to make an alias to the adjacency list keys, in the assumption that every node in the graph is a key in the dict. This might not be true in a directed graph, so I'll have to revisit it later.
+
+#+begin_src python :noweb-ref vertices
+@property
+def vertices(self) -> set:
+    """The vertices in this graph"""
+    if self._vertices is None:
+        self._vertices = set()
+    return self._vertices
+#+end_src
+** Add Item
+#+begin_src python :noweb-ref add-element
+def add(self, node_1: Vertex, node_2: Vertex) -> None:
+    """Add edge 
+
+    Warning:
+     This assumes an undirected graph, change it for a directed graph
+
+    Args:
+     node_1: node on one end of the edge
+     node_2: Node on the other end of the edge
+    """
+    self.vertices.add(node_1)
+    self.vertices.add(node_2)
+    self.adjacent[node_1].add(node_2)
+    self.adjacent[node_2].add(node_1)
+    return
+#+end_src
+** Getitem
+
+#+begin_src python :noweb-ref getitem
+def __getitem__(self, key):
+    """Get the list from the adjacencies dict
+    
+    Args:
+     key: vertex whose list we want
+    """
+    return self.adjacent[key]
+#+end_src
+** Testing
+#+begin_src python :results none
+# pypi
+from expects import be, contain, equal, expect
+
+# software under test
+from bowling.data_structures.graphs import graph
+from bowling.data_structures.graphs.graph import Color, Graph, Vertex
+
+v = Vertex(1)
+expect(v.color).to(be(Color.WHITE))
+
+g = Graph()
+v2 = Vertex(2)
+v3 = Vertex(3)
+g.add(v, v2)
+g.add(v, v3)
+
+expect(g.adjacent.keys()).to(contain(v, v2))
+expect(g.adjacent[v]).to(contain(v2))
+expect(g[v2]).to(contain(v))
+expect(g[v3]).to(contain(v))
+expect(g[v3]).not_to(contain(v2))
+#+end_src
+* Sources
+- {{% doc %}}clrs{{% /doc %}}

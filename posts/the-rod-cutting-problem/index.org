@@ -1,0 +1,619 @@
+#+BEGIN_COMMENT
+.. title: The Rod Cutting Problem
+.. slug: the-rod-cutting-problem
+.. date: 2022-05-29 15:21:31 UTC-07:00
+.. tags: dynamic programming,algorithms
+.. category: Algorithms
+.. link: 
+.. description: A look at the Rod-Cutting Problem.
+.. type: text
+.. has_pseudocode: yassir
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-6a9dbf4e-3c2c-44d5-b4bd-771599850477-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* The Rod Cutting Problem
+The Rod Cutting Problem begins with the premise that we have a metal rod (or some other kind of rod that's sellable) of a given length (/n/) and the price of a rod depends on the length so cutting the rod into shorter pieces will yield different total values - sometimes cutting a rod up make it more valuable than keeping it whole.
+
+**Goal:** Cut the rod in such a way that you maximize the total value of the pieces.
+
+To make this simpler we'll assume that lengths are always whole numbers (non-negative integers).
+
+** An Example
+
+Say we have the following prices for different rod lengths.
+
+| Length | 1 | 2 | 3 | 4 |  5 |  6 |  7 |  8 |
+| Value  | 1 | 5 | 8 | 9 | 10 | 17 | 17 | 20 |
+
+
+Now suppose we have a rod that's 10 units in length. what combination of cuts will give us the best outcome?
+
+| cuts                  | values by piece | total value |
+|-----------------------+-----------------+-------------|
+| 10 pieces of length 1 | 10 x 1          |          10 |
+| 2 pieces of length 5  | 2 x 10          |          20 |
+| 1 piece 8, 1 piece 2  | 20 + 5          |          25 |
+| 1 piece 6, 1 piece 4  | 17 + 9          |          26 |
+
+
+Out of these four possible combinations, 26 is the most we could get.
+
+** Imports
+#+begin_src python :results none
+# from pypi
+from expects import contain_exactly, equal, expect
+#+end_src
+* Brute Force
+In the previous example we could choose to make one cut, splitting our rod into 6 units and 4 units, and it would give us the highest value of the four combinations that we looked at. but what if we want to know the highest value out of /all/ the combinations? Let's start by looking at a Brute-force approach to solving the problem.
+
+A Brute Force approach to finding the maximal cuts might do the following:
+
+- Try every possible combination of cuts
+- Evaluate the total values for each of the combinations
+- Pick the combination with the highest total value
+
+What will the runtime for this approach be? Let's start with two ideas:
+
+ - Each cut location can have two values (cut, don't cut) so it is a binary value
+ - Given a rod of length /n/, there are /n - 1/ possible cuts you can make (e.g. if your rod has length three, you can make two cuts (at length 1 and length 2) to give you three pieces)
+
+Although we are concerned with cuts, to get the total number of combinations you can think of each cut as a binary digit - (e.g. cut at length 1, don't cut at length 2 could be written as two digits: ~10~) and since the number of combinations of binary digits is \(2^{\textit{number of digits}}\), this means that if we do an exhaustive exploration of the combinations we need to check
+
+\begin{align}
+2^{n - 1} &= \left(2^{-1}\right)\left(2^n\right) \\
+&= \frac{1}{2}2^n\\
+
+T(n) &= \Theta\left(2^n\right)
+\end{align}
+
+So we have a problem with exponential growth.
+** The CLRS Brute-Force Solution
+
+First, let's define some variables.
+
+| Variable | Representing                                     |
+|----------+--------------------------------------------------|
+| $i$      | Number of units of length of the rod             |
+| $p_i$    | Price for rod of length $i$                      |
+| $r_n$    | Revenue for rod segments with total length $n$   |
+| $q$      | Maximum possible revenue for a particular length |
+
+And now a little pseudocode.
+
+#+begin_export html
+<pre id="cut-rod-brute-force" style="display:hidden;">
+\begin{algorithm}
+\caption{Brute-Force Rod-Cutting}
+\begin{algorithmic}
+\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
+\INPUT Integer $n$ the length of the rod
+\OUTPUT $q$ the highest value for the combinations of rods totaling $n$ in length
+
+\PROCEDURE{CutRodBruteForce}{$p, n$}
+\IF {$n = 0$}
+  \RETURN 0
+\ENDIF
+
+\STATE $q \gets -\inf$
+\FOR {$i \in \{1 \ldots n\}$}
+  \STATE $q \gets $ \textsc{Max}($q, p[i]$ + \textsc{CutRodBruteForce}($p, n - i$))
+\ENDFOR
+\RETURN $q$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** In Python
+#+begin_src python :results none
+def cut_rod_brute_force(prices: list, length: int, count: int=0) -> int:
+    """Finds the maximum value you can extract from the rod
+
+    Args:
+     prices: map of length to price
+     length: total length of the rod before cutting
+     count: number of calls made
+
+    Returns:
+     the best total price you would get from cutting and selling the rod
+    """
+    count += 1
+    if length == 0:
+        return 0, count
+
+    best_total = float("-inf")
+
+    for next_cut in range(1, length + 1):
+        next_total, count = cut_rod_brute_force(
+            prices, length - next_cut, count=count)
+        best_total = max(best_total,
+                         prices[next_cut] + next_total)
+    return best_total, count
+#+end_src
+
+This naively assumes that there's an entry in ~prices~ for every length from 1 to the total length so price-lists need to be padded if there's missing lengths, as in the next example.
+
+*** The First Example
+
+The first thing we're going to do is to check the example given earlier, padding the price-list to make it have 10 entries. I originally had it just short-circuit if the list was shorter but then the counts were off by a little bit so I decided to get rid of that. It might make it slightly more efficient in certain cases, but brute-force isn't really what we're going for anyway.
+
+#+begin_src python :results output :exports both
+PRICES = [0, 1, 5, 8, 9, 10, 17, 17, 20, 0, 0]
+best_total, count = cut_rod_brute_force(PRICES, 10)
+expect(best_total).to(equal(27))
+expect(count).to(equal(2**10))
+print(f"Best Total Value: {best_total}")
+print(f"Count: {count:,}")
+print(f"Combinations: {2**10:,}")
+#+end_src
+
+#+RESULTS:
+: Best Total Value: 27
+: Count: 1,024
+: Combinations: 1,024
+
+So our actual best value is 27, not the 26 from the sub-set of combinations I used in the earlier example.
+* Memoized Cut Rod
+The main reason why our brute-force version is so expensive is that it does all the calculations for every length over and over again when we test the different combinations. One way to get around this is by storing the values as they're calculated so that we can just look them up instead of repeating the calculations.
+
+This first version is very similar to the brute-force version except that the brute-force version makes a recursive call for every length we check, while for this memoized version we maintain an array to store previously calculated values and if the next one we want is in it we pull it from the array instead of making another recursive call.
+
+** Cut Rod Memoized
+This first function is sort of a mask to make it look like the brute-force version. It sets up an empty memo table (as an array) and then passes it to the ~CutRodMemoizedAuxiliary~ function to do the actual calculations.
+
+#+begin_export html
+<pre id="cut-rod-memoized" style="display:hidden;">
+\begin{algorithm}
+\caption{Memoized Rod-Cutting}
+\begin{algorithmic}
+\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
+\INPUT Integer $n$ the length of the rod to cut
+\OUTPUT $q$ the highest value for the combinations of rods totaling $n$ in length
+
+\PROCEDURE{CutRodMemoized}{$p, n$}
+\STATE Let $r[0 \ldots n]$ be a new array.
+\FOR {$i \in \{0\ldots n\}$}
+  \STATE $r[i]\gets -\infty$
+\ENDFOR
+\RETURN \textsc{CutRodMemoizedAuxiliary}($p, n, r$)
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+** Cut Rod Memoized Auxiliary
+
+#+begin_export html
+<pre id="cut-rod-memoized-auxiliary" style="display:hidden;">
+\begin{algorithm}
+\caption{Memoized Rod-Cutting Auxiliary}
+\begin{algorithmic}
+\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
+\INPUT Integer $n$ the length of the rod to cut
+\INPUT Array $r$ of previously calculated values
+\OUTPUT $q$ the highest value for the combinations of rods totaling $n$ in length
+
+\PROCEDURE{CutRodMemoizedAuxiliary}{$p, n, r$}
+\IF {$r[n] \geq 0$}
+  \RETURN $r[n]$
+\ENDIF
+
+\IF {$n=0$}
+  \STATE $q \gets 0$
+\ELSE
+  \STATE $q \gets -\infty$
+
+  \FOR {$i \in \{1 \ldots n\}$}
+    \STATE $q \gets$ \textsc{Max}($q, p[i] + $ \textsc{CutRodMemoizedAuxiliary}($p, n-i, r$))
+  \ENDFOR
+\ENDIF
+
+\STATE $r[n] \gets q$
+
+\RETURN q
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+If you squint at ~CutRodMemoizedAuxiliary~ you might notice that it looks similar to the brute-force version except that there's an initial check to see if the value we want is already in our lookup-table and only makes the recursive call if it isn't.
+** Python Version
+#+begin_src python :results none
+def cut_rod_memoized(prices: list, length: int) -> int:
+    """Finds the maximum value for a rod after it has been cut up
+
+    Args:
+     prices: map of length to price
+     length: the length of the rod to be cut up
+
+    Returns:
+     the maximum value that can be gained by cutting up and selling the rod
+    """
+    table = [float("-inf")] * (length + 1)
+    return cut_rod_memoized_auxiliary(prices, length, table)
+#+end_src
+
+#+begin_src python :results none
+def cut_rod_memoized_auxiliary(prices: list, length: int, best_values: list, count: int=0) -> int:
+    """Find the maximum value from cutting up and selling rod
+
+    Args:
+     prices: map of length to price
+     length: the length of the rod to be cut up
+     best_values: lookup-table for previously calculated values (index is starting length)
+
+    Returns:
+     the maximum value that can be gained by cutting up and selling the rod
+    """
+    count += 1
+    if best_values[length] >= 0:
+        return best_values[length], count
+
+    if length == 0:
+        best_total = 0
+    else:
+        best_total = float("-inf")
+        for next_cut in range(1, length + 1):
+            leftover = length - next_cut
+            next_total, count = cut_rod_memoized_auxiliary(prices,
+                                                           leftover,
+                                                           best_values,
+                                                           count)
+            best_total = max(best_total,
+                             prices[next_cut] + next_total)
+    best_values[length] = best_total
+    return best_total, count
+#+end_src
+
+#+begin_src python :results output :exports both
+best_total, count = cut_rod_memoized(PRICES, 4)
+print(f"Best Total Value: {best_total}")
+print(f"Count: {count}")
+#+end_src
+
+#+RESULTS:
+: Best Total Value: 10
+: Count: 11
+
+#+begin_src python :results output :exports both
+best_total, count = cut_rod_memoized(PRICES, 5)
+print(f"Best Total Value: {best_total}")
+print(f"Count: {count}")
+#+end_src
+
+#+RESULTS:
+: Best Total Value: 13
+: Count: 16
+
+
+** Example
+#+begin_src python :results output :exports both
+best_total, count = cut_rod_memoized(PRICES, 10)
+expect(best_total).to(equal(27))
+expect(count).to(equal(1 + (10 * 11)/2))
+print(f"Best Total Value: {best_total}")
+print(f"Count: {count}")
+#+end_src
+
+#+RESULTS:
+: Best Total Value: 27
+: Count: 56
+
+We've gone from 1,024 calls to 56 calls, a pretty good improvement. The number of calls comes from the for loop plus one for the initial call. The for loop goes from 1 through the length of the rod, but passes in the difference between the starting length and the loop value. So if we start with a length of 4, the for-loop makes recursive calls using lengths of 4-1=3, 4-2=2, 4-3=1, 4-4=0. But then each of the calls goes through the for-loop as well (except for the base-case of 0). Since the first call of the for-loop is always one less than the starting length, we end up memoizing the values for all the starting lengths as we go so the subsequent calls don't need to go into the for-loop. So the number of calls we make equals \(1 + 2 + \cdots + n\) plus one for the first call before the recursion starts. This means the runtime is
+
+\[
+1 + \sum_{i=1}^n i = 1 + \frac{n(n+1)}{2} \Rightarrow O(n^2)
+\]
+
+So for our case with length 10, we have
+
+\begin{align}
+T(10) &= \frac{10(10 + 1)}{2} + 1\\
+      &= 56
+\end{align}
+
+* Non-Recursive Solution
+The memoized cut-rod solution is a top-down, depth-first search solution that uses recursion. We can eliminate the recursion altogether using a for-loop along with our look-up array. The trick is to make it a bottoms-up approach - that is to say that we start with the solutions for the smaller lengths and work up to the longer ones so that the look-up array always has the sub-problem values that we need to look up.
+
+#+begin_export html
+<pre id="cut-rod-bottoms-up" style="display:hidden;">
+\begin{algorithm}
+\caption{Bottoms-Up Rod-Cutting}
+\begin{algorithmic}
+\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
+\INPUT Integer $n$ the length of the rod to cut
+\OUTPUT $q$ the highest value for the combinations of rods totaling $n$ in length
+
+\PROCEDURE{CutRodBottomsUp}{$p, n$}
+\STATE Let $r[0\ldots n]$ be a new array.
+\STATE $r[0] \gets 0$
+
+  \FOR {$j \in \{1 \ldots n\}$}
+    \STATE $q \gets -\infty$
+    \FOR {$i \in \{1 \ldots j\}$}
+      \STATE $q \gets$ \textsc{Max}($q, p[i] + r[j - i]$)
+    \ENDFOR
+    \STATE $r[j] \gets q$
+  \ENDFOR
+\RETURN $r[n]$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+** Python Version
+
+#+begin_src python :results none
+def cut_rod_bottom_up(prices: list, length: int) -> tuple:
+    """Find the maximum value for a rod after cutting
+
+    Args:
+     prices: map of length to price
+     length: total length of rod to cut up
+
+    Returns:
+     best-value, count
+    """
+    count = 1
+    best_values = [0] * (length + 1)
+    for rod_length in range(1, length + 1):
+        best_value_this_length = float("-inf")
+        for cut_length in range(1, rod_length + 1):
+            count += 1
+            leftover = rod_length - cut_length
+            best_value_this_length = max(
+                best_value_this_length,
+                prices[cut_length] + best_values[leftover])
+        best_values[rod_length] = best_value_this_length
+    return best_values[length], count
+#+end_src
+
+** The Example Again
+#+begin_src python :results output :exports both
+best_total, count = cut_rod_bottom_up(PRICES, 10)
+expect(best_total).to(equal(27))
+expect(count).to(equal(1 + 110/2))
+print(f"Best Total Value: {best_total}")
+print(f"Count: {count}")
+#+end_src
+
+#+RESULTS:
+: Best Total Value: 27
+: Count: 56
+
+The runtime for this version is the same as the memoized version. It's sort of the backwards case - the inner for-loop runs 1 then 1, 2, then 1, 2, 3 up to the length of the rod, so the number of times it runs is \(1 + 2 + 3 + \cdots + n\) while the memoized count goes \(n + \cdots + 3 + 2 + 1\). In any case, the count ends up the same.
+
+\[
+1 + \sum_{i=1}^n i = 1 + \frac{n(n+1)}{2} \Rightarrow O(n^2)
+\]
+
+* Recovering the Cuts
+The previous functions all return the best value for a length but don't tell you the actual cuts that you need in order to get it. We can alter the function slightly to get both the best-revenue table and the cuts you need to use to get the best value.
+
+** Pseudocode
+*** Extended Bottoms-Up
+#+begin_export html
+<pre id="cut-rod-extended" style="display:hidden;">
+\begin{algorithm}
+\caption{Extended Bottoms-Up Rod-Cutting}
+\begin{algorithmic}
+\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
+\INPUT Integer $n$ the length of the rod to cut
+\OUTPUT $r$ the best revenue for each length
+\OUTPUT $s$ list of next cut-lengths to use to get best revenue
+
+\PROCEDURE{CutRodBottomsUpExtended}{$p, n$}
+\STATE Let $r[0\ldots n]$ and $s[0 \ldots n]$ be new arrays.
+\STATE $r[0] \gets 0$
+
+  \FOR {$j \in \{1 \ldots n\}$}
+    \STATE $q \gets -\infty$
+    \FOR {$i \in \{1 \ldots j\}$}
+      \IF {$q < p[i] + r[j - i]$}
+                \STATE $q \gets p[i] + r[j - i]$)
+                \STATE $s[j] \gets i$
+      \ENDIF
+    \ENDFOR
+    \STATE $r[j] \gets q$
+  \ENDFOR
+\RETURN $(r, s)$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+*** Printing the Solution
+To actually see the cuts we just need to retrieve the next cuts from ~s~ and calculate the remaining length after each cut.
+
+#+begin_export html
+<pre id="cut-rod-printer" style="display:hidden;">
+\begin{algorithm}
+\caption{Print Rod-Cutting Solution}
+\begin{algorithmic}
+\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
+\INPUT Integer $n$ the length of the rod to cut
+
+\PROCEDURE{Print-Cut-Rod-Solution}{$p, n$}
+\STATE $(r, s) \gets $ \textsc{CutRodBottomsUpExtended}($p, n$)
+\WHILE {$n > 0$}
+  \STATE \textsc{Print}($s[n]$)
+  \STATE $n \gets n - s[n]$
+\ENDWHILE
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+** In Python
+#+begin_src python :results none
+def cut_rod_extended(prices: list, length: int) -> tuple:
+    """Find the maximum values for a cut rod
+
+    Args:
+     prices: map of length to price
+     length: total length of rod to cut up
+
+    Returns:
+     best-revenues, best-lengths
+    """
+    best_revenues = [0] * (length + 1)
+    best_cuts = [0] * (length + 1)
+
+    for next_length in range(1, length + 1):
+        best_revenue = float("-inf")
+        for next_cut in range(1, next_length + 1):
+            remaining_length = next_length - next_cut
+            next_revenue = prices[next_cut] + best_revenues[next_length - next_cut]
+            if best_revenue < next_revenue:
+                best_revenue = next_revenue
+                best_cuts[next_length] = next_cut
+        best_revenues[next_length] = best_revenue
+    return best_revenues, best_cuts
+#+end_src
+
+#+begin_src python :results none
+def print_solution(prices: list, length: int) -> tuple:
+    """Solve and print the best cuts to maximize revenue
+
+    Args:
+     prices: list mapping length to price
+     length: the pre-cut length of the rod
+
+    Returns:
+     best_revenues, best_cuts
+    """
+    revenues, cuts = cut_rod_extended(prices, length)
+    check, remaining_length = 0, length
+    output = []
+    while remaining_length > 0:
+        next_cut = cuts[remaining_length]
+        check += next_cut
+        output.append(str(next_cut))
+        remaining_length -= next_cut
+    print(f"Best Revenue for rod of length {length}: {revenues[length]}")
+    print(f"Cuts: ({', '.join(output)})")
+    expect(check).to(equal(length))
+    return revenues, cuts
+#+end_src
+
+#+begin_src python :results output :exports both
+print_solution(PRICES, 10)
+#+end_src
+
+#+RESULTS:
+: Best Revenue for rod of length 10: 27
+: Cuts: (2, 2, 6)
+
+** CLRS Example
+
+#+begin_src python :results output :exports both
+CLRS_PRICES = [0, 1, 5, 8, 9, 10, 17, 17, 20, 24, 30]
+revenues, cuts = print_solution(CLRS_PRICES, 10)
+expect(revenues).to(contain_exactly(0, 1, 5, 8, 10, 13, 17, 18, 22, 25, 30))
+expect(cuts).to(contain_exactly(0, 1, 2, 3, 2, 2, 6, 1, 2, 3, 10))
+#+end_src
+
+#+RESULTS:
+: Best Revenue for rod of length 10: 30
+: Cuts: (10)
+
+#+begin_src python :results output :exports both
+for length in range(1, 11):
+    print_solution(CLRS_PRICES, length)
+    print()
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Best Revenue for rod of length 1: 1
+Cuts: (1)
+
+Best Revenue for rod of length 2: 5
+Cuts: (2)
+
+Best Revenue for rod of length 3: 8
+Cuts: (3)
+
+Best Revenue for rod of length 4: 10
+Cuts: (2, 2)
+
+Best Revenue for rod of length 5: 13
+Cuts: (2, 3)
+
+Best Revenue for rod of length 6: 17
+Cuts: (6)
+
+Best Revenue for rod of length 7: 18
+Cuts: (1, 6)
+
+Best Revenue for rod of length 8: 22
+Cuts: (2, 6)
+
+Best Revenue for rod of length 9: 25
+Cuts: (3, 6)
+
+Best Revenue for rod of length 10: 30
+Cuts: (10)
+#+end_example
+
+* Sources
+- {{% doc %}}essential-algorithms{{% /doc %}}
+- {{% doc %}}clrs{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("cut-rod-brute-force"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("cut-rod-memoized"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("cut-rod-memoized-auxiliary"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("cut-rod-bottoms-up"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("cut-rod-extended"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("cut-rod-printer"));
+});
+</script>
+#+end_export

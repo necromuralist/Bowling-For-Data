@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="A look at Topological Sort (an application of Depth First Search).">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphs: Topological Ordering | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/graphs-topological-ordering/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../graphs-depth-first-search/" title="Graphs: Depth-First-Search" type="text/html">
+<link rel="next" href="../graphs-strongly-connected-components/" title="Graphs: Strongly Connected Components" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="Graphs: Topological Ordering">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/graphs-topological-ordering/">
+<meta property="og:description" content="A look at Topological Sort (an application of Depth First Search).">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-04-19T19:17:55-07:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="data structures">
+<meta property="article:tag" content="graphs">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Graphs: Topological Ordering</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="." rel="bookmark">
+            <time class="published dt-published" datetime="2022-04-19T19:17:55-07:00" itemprop="datePublished" title="2022-04-19 19:17">2022-04-19 19:17</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org35a19d3">Beginning</a></li>
+<li><a href="#org8592df1">Middle</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org35a19d3" class="outline-2">
+<h2 id="org35a19d3">Beginning</h2>
+<div class="outline-text-2" id="text-org35a19d3">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="c1"># this project</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.depth_first_search</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DFSVertex</span><span class="p">,</span>
+    <span class="n">DepthFirstSearch</span><span class="p">,</span>
+    <span class="n">DirectedGraph</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org8592df1" class="outline-2">
+<h2 id="org8592df1">Middle</h2>
+<div class="outline-text-2" id="text-org8592df1">
+<div class="highlight"><pre><span></span><span class="n">underpants</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"underpants"</span><span class="p">)</span>
+<span class="n">pants</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"pants"</span><span class="p">)</span>
+<span class="n">belt</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"belt"</span><span class="p">)</span>
+<span class="n">socks</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"socks"</span><span class="p">)</span>
+<span class="n">watch</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"watch"</span><span class="p">)</span>
+<span class="n">shoes</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"shoes"</span><span class="p">)</span>
+<span class="n">shirt</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"shirt"</span><span class="p">)</span>
+<span class="n">tie</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"tie"</span><span class="p">)</span>
+<span class="n">jacket</span> <span class="o">=</span> <span class="n">DFSVertex</span><span class="p">(</span><span class="s2">"jacket"</span><span class="p">)</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">DirectedGraph</span><span class="p">()</span>
+
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">underpants</span><span class="p">,</span> <span class="n">pants</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">underpants</span><span class="p">,</span> <span class="n">shoes</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">socks</span><span class="p">,</span> <span class="n">shoes</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pants</span><span class="p">,</span> <span class="n">shoes</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pants</span><span class="p">,</span> <span class="n">belt</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">shirt</span><span class="p">,</span> <span class="n">belt</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">shirt</span><span class="p">,</span> <span class="n">tie</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tie</span><span class="p">,</span> <span class="n">jacket</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">belt</span><span class="p">,</span> <span class="n">jacket</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">watch</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">search</span> <span class="o">=</span> <span class="n">DepthFirstSearch</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+<span class="n">search</span><span class="p">()</span>
+
+<span class="n">topologically_sorted</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">vertices</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">finished</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">topologically_sorted</span><span class="p">:</span>
+    <span class="n">predecessor</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">predecessor</span><span class="o">.</span><span class="n">identifier</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">predecessor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"None"</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">identifier</span><span class="si">}</span><span class="s2"> </span><span class="se">\t</span><span class="s2">finished: </span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">finished</span><span class="si">}</span><span class="se">\t</span><span class="s2"> predecessor: </span><span class="si">{</span><span class="n">predecessor</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+watch 	finished: 18	 predecessor: None
+shirt 	finished: 16	 predecessor: None
+tie 	finished: 15	 predecessor: shirt
+socks 	finished: 12	 predecessor: None
+underpants 	finished: 10	 predecessor: None
+pants 	finished: 9	 predecessor: underpants
+belt 	finished: 8	 predecessor: pants
+jacket 	finished: 7	 predecessor: belt
+shoes 	finished: 4	 predecessor: pants
+</pre>
+
+
+<p>
+This differs from the CLRS solution. The ordering depends on the order in which the edges are encountered (in this case it means the order in which the edges are added to the graph) so the sort won't always be the same. The important feature is that no item later in the list needs to come before any that precede it.
+</p>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/data-structures/" rel="tag">data structures</a></li>
+            <li><a class="tag p-category" href="../../categories/graphs/" rel="tag">graphs</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../graphs-depth-first-search/" rel="prev" title="Graphs: Depth-First-Search">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../graphs-strongly-connected-components/" rel="next" title="Graphs: Strongly Connected Components">Next post</a>
+            </li>
+        </ul></nav></aside></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+ <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+ <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+            
+        </footer>
+</div>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</body>
+</html>
