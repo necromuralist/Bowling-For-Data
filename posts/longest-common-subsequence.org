@@ -1,0 +1,252 @@
+#+BEGIN_COMMENT
+.. title: Longest Common Subsequence
+.. slug: longest-common-subsequence
+.. date: 2022-07-13 17:02:30 UTC-07:00
+.. tags: dynamic programming,algorithms
+.. category: Optimization
+.. link: 
+.. description: A look at finding the longest common subsequence of two sequences.
+.. type: text
+.. has_pseudocode: yes
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-c88b7295-2cb6-49dc-83da-f618b31048c9-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* The Longest Common Subsequence Problem
+A /subsequence/ of a sequence is the original sequence with zero or more elements removed from it. A /common subsequence/ of two sequences is a subsequence that belongs to both sequences. With the /Longest Common Subsequence (LCS)/ problem you are given two sequences - $X = \langle x_1, x_2,\ldots,x_m\rangle$ and $Y = \langle y_1, y_2,\ldots,y_n\rangle$ and you want to find a common subsequence of \(X\) and \(Y\) that has the maximum length (there might be more than one common subsequence that have the maximum length).
+
+**Note:** The elements of the subsequence have to be in both sequences in the same relative order, but don't need to be consecutive. "AK" is a common subsequence of "ARK" and "BACK" because "A" and "K" appears in both sequences and the "A" comes before the "K," even though there are letters between them in both of the original sequences.
+
+* Finding The LCS
+We basically have to look at three cases.
+
+\[
+c[i,j] = \begin{cases}
+  0 & \text{if } i = 0 \text{ or } j = 0\\
+  c[i - 1, j - 1] + 1 & \text{if } i,j > 0 \text{ and } x_i = y_j\\
+  \text{Max}(c[i, j-1], c[i - 1, j) & \text{if } i, j > 0 \text{ and } x_i \neq y_j
+\end{cases}
+\]
+
+- $c$ is the lookup table that we will build
+- $i$ is the index of an element in $X$ and a row in $c$
+- $j$ is the index of an element in $Y$ and a column in $c$
+- $X$ and $Y$ use 1-based indices, not 0-based
+
+** The Length-Finder
+As with the other Dynamic Programming algorithms, our function is going to find the length of the longest sequence, not the actual sequence (this is left to another function).
+
+#+begin_export html
+<pre id="longest-common-subsequence-algorithm" style="display:hidden;">
+\begin{algorithm}
+\caption{Longest Common Subsequence Length Finder}
+\begin{algorithmic}
+\INPUT $X$: Sequence of elements
+\INPUT $Y$: Sequence of elements
+\OUTPUT Table of common subsequence lengths, table to reconstruct the best subsequence.
+\PROCEDURE{LCS-Length}{$X, Y$}
+\STATE \(m \gets X.length\)
+\STATE \(n \gets Y.length\)
+\STATE \(b[1\ldots m, 1 \ldots n]\) and \(c[0 \ldots m, 0 \ldots n]\) are new tables.
+\FOR {\(i \in \{1 \ldots m\}\)}
+    \STATE \(c[i, 0] \gets 0\)
+\ENDFOR
+
+\FOR {\(j \in \{0 \ldots n\}\)}
+    \STATE \(c[0, j] \gets 0\)
+\ENDFOR
+
+\FOR {\(i \in \{1 \ldots m\}\)}
+  \FOR {\(j \in \{1 \ldots n\}\)}
+      \IF {\(X_i = Y_j\)}
+          \STATE \(c[i, j] \gets c[i - 1, j - 1] + 1\)
+          \STATE \(b[i, j] \gets "\nwarrow"\)
+      \ELSEIF {\(c[i - 1, j] \geq c[i, j-1]\)}
+          \STATE \(c[i, j] \gets c[i - 1, j]\)
+          \STATE \(b[i, j] \gets "\uparrow" \)
+      \ELSE
+          \STATE \(c[i, j] \gets c[i, j - 1]\)
+          \STATE \(b[i,j] \gets "\leftarrow"\)
+      \ENDIF
+  \ENDFOR
+\ENDFOR
+\RETURN $c, b$
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+** Implementation
+#+begin_src python :results none
+# python
+from collections import namedtuple
+
+# pypi
+from attrs import define
+from expects import contain_only, equal, expect
+#+end_src
+
+#+begin_src python :results none
+Direction = namedtuple("Direction", ["up_left", "up", "left"],
+                       defaults=["\\", "|", "-"])()
+#+end_src
+
+#+begin_src python :results none
+@define
+class LongestCommonSubsequence:
+    """Finds the longest common subsequence of two sequences
+
+    Args:
+     x: first sequence
+     y: second sequence
+    """
+    x: list
+    y: list
+    _table: list=None
+    _trace_table: list=None
+    _length: int=None
+
+    @property
+    def table(self) -> list:
+        """The memoization table"""
+        if self._table is None:
+            self._table = [[0] + [None] * len(self.y)
+                           for row in range(len(self.x) + 1)]
+            for column in range(len(self.y) + 1):
+                self._table[0][column] = 0
+        return self._table
+
+    @property
+    def trace_table(self) -> list:
+        """Table to reconstruct longest common subsequence"""
+        if self._trace_table is None:
+            self._trace_table = [[None] * len(self.y)
+                                 for row in range(len(self.x))]
+        return self._trace_table
+
+    @property
+    def length(self) -> int:
+        """Number of characters in longest common subsequence"""
+        if self._length is None:
+            for row in range(1, len(self.x) + 1):
+                for column in range(1, len(self.y) + 1):
+                    previous_row, previous_column = row - 1, column - 1
+                    unpadded_row, unpadded_column = row - 1, column - 1
+                    if self.x[previous_row] == self.y[previous_column]:
+                        self.table[row][column] = self.table[previous_row][previous_column] + 1
+                        self.trace_table[unpadded_row][unpadded_column] = Direction.up_left
+                    elif self.table[previous_row][column] >= self.table[row][previous_column]:
+                        self.table[row][column] = self.table[previous_row][column]
+                        self.trace_table[unpadded_row][unpadded_column] = Direction.up
+                    else:
+                        self.table[row][column] = self.table[row][previous_column]
+                        self.trace_table[unpadded_row][unpadded_column] = Direction.left
+            self._length = self.table[-1][-1]
+        return self._length
+
+    def print_lcs(self, row: int, column: int) -> None:
+        """Prints the elements of the longest common subsequence
+
+        Note:
+         to start row and column should match the last cell in the trace table.
+        
+        Args:
+         row: row in the trace_table to start with
+         column: column in the trace_table to start with
+        """
+        if row < 0 or column < 0:
+            return
+
+        if self.trace_table[row][column] == Direction.up_left:
+            self.print_lcs(row - 1, column - 1)
+            print(self.x[row])
+        elif self.trace_table[row][column] == Direction.up:
+            self.print_lcs(row - 1, column)
+        else:
+            self.print_lcs(row, column - 1)
+        return
+
+    def print_longest(self):
+        self.print_lcs(len(self.trace_table) - 1, len(self.trace_table[0]) - 1)
+        return
+#+end_src
+
+#+begin_src python :results none
+x = "A B C B D A B".split()
+y = "B D C A B A".split()
+lcs = LongestCommonSubsequence(x, y)
+
+expect(len(lcs.table)).to(equal(len(x) + 1))
+expect(len(lcs.table[0])).to(equal(len(y) + 1))
+for row in lcs.table:
+    expect(row[0]).to(equal(0))
+
+expect(lcs.table[0]).to(contain_only(*([0] * (len(y) + 1))))
+expect(len(lcs.trace_table)).to(equal(len(x)))
+expect(len(lcs.trace_table[0])).to(equal(len(y)))
+expect(lcs.length).to(equal(4))
+#+end_src
+
+* Printing The Sequence
+
+#+begin_export html
+<pre id="print-lcs-algorithm" style="display:hidden;">
+\begin{algorithm}
+\caption{Longest Common Subsequence Printer}
+\begin{algorithmic}
+\INPUT $b$: Table of directions from \textsc{LCS-Length}
+\INPUT $X$: Sequence of elements
+\INPUT $Y$: Sequence of elements
+\INPUT $i$: Row number in $b$
+\INPUT $j$: Column number in $b$
+\PROCEDURE{Print-LCS}{$b, X, i, j$}
+\IF {\(i = 0 \text{ or } j = 0\)}
+    \RETURN
+\ENDIF
+\IF {\(b[i, j] = "\nwarrow" \)}
+    \STATE \textsc{PrintLCS}(\(b, X, i - 1, j - 1\))
+    \STATE \textsc{Print}(\(X_i\))
+\ELSEIF {\(b[i, j] = "\uparrow" \)}
+    \STATE \textsc{PrintLCS}(\(b, X, i- 1, j \))
+\ELSE
+    \STATE \textsc{PrintLCS}(\(b, X, i, j - 1\))
+\ENDIF
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+#+begin_src python :results output :exports both
+lcs.print_longest()
+#+end_src
+
+#+RESULTS:
+: B
+: C
+: B
+: A
+
+* Sources
+- {{% doc %}}clrs{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("longest-common-subsequence-algorithm"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("print-lcs-algorithm"));
+});
+</script>
+#+end_export
