@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-b5c6944e-e279-456f-89fb-29fe6af4cf64-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-2f2a654b-7735-4442-957a-10e1f8739df7-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -73,6 +73,35 @@ print(f"{megajoules_per_dollar} megajoules/dollar of electricity")
 
 #+RESULTS:
 : 72.0 megajoules/dollar of electricity
+
+* How Many Megajoules For a Dollar Of Natural Gas?
+- A standard cubic foot of natural gas has about \(1.1 \times 10^6\) joules of energy.
+- You can get about \(5\times 10^5\) BTUs of gas for a dollar.
+- There are about 1,030 BTUs in a cubic foot.
+
+\begin{align}
+\left(1.1 \times 10^6 \frac{joules}{\cancel{cubic foot}}\right)\left(\frac{1\ \cancel{cubic foot}}{1.03 \times 10^3\ BTU}\right) &= \left(\frac{1.1 \times 10^3\ joules}{1.03\ \cancel{BTU}}\right)\left(\frac{5 \times 10^5\ \cancel{BTU}}{dollar}\right)\\
+&= \left(\frac{5.5 \times 10^8\ \cancel{joules}}{1.03\ dollars}\right)\left(\frac{1\ Megajoule}{10^6 \cancel{joules}}\right)\\
+&= \left(\frac{5.5 \times 10^2\ Megajoules}{1.03 dollars}\right)\\
+&\approx 533.98\ \frac{Megajoules}{dollar}\\
+\end{align}
+
+** Check The Math
+#+begin_src python :results output :exports both
+joules_per_cubic_foot = 1.1E6
+cubic_feet_per_btu = 1/1030
+btus_per_dollar = 5e5
+megajoules_per_joule = 1/(10**6)
+
+joules_per_btu = joules_per_cubic_foot * cubic_feet_per_btu
+
+joules_per_dollar = joules_per_btu * btus_per_dollar
+megajoules_per_dollar = joules_per_dollar * megajoules_per_joule
+print(f"{megajoules_per_dollar:0.2f} MJ/Dollar")
+#+end_src
+
+#+RESULTS:
+: 533.98 MJ/Dollar
 
 * Source
  - {{% doc %}}course-global-warming{{% /doc %}}
