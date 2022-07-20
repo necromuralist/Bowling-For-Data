@@ -102,61 +102,61 @@ bg-light
 <div id="text-table-of-contents">
 <ul>
 <li>
-<a href="#org5995aaa">The Rod Cutting Problem</a>
+<a href="#org662aca4">The Rod Cutting Problem</a>
 <ul>
-<li><a href="#org3622bfa">An Example</a></li>
-<li><a href="#org679d883">Imports</a></li>
+<li><a href="#org6288f47">An Example</a></li>
+<li><a href="#orgbbe9f12">Imports</a></li>
 </ul>
 </li>
 <li>
-<a href="#orgd5fd651">Brute Force</a>
+<a href="#org6a0fa12">Brute Force</a>
 <ul>
 <li>
-<a href="#org6d8ff24">The CLRS Brute-Force Solution</a>
+<a href="#org800859c">The CLRS Brute-Force Solution</a>
 <ul>
-<li><a href="#org633b648">In Python</a></li>
-<li><a href="#org7e9ae93">The First Example</a></li>
+<li><a href="#org61d2608">In Python</a></li>
+<li><a href="#org961d1ed">The First Example</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li>
-<a href="#orge76d186">Memoized Cut Rod</a>
-<ul>
-<li><a href="#orgdc40cd8">Cut Rod Memoized</a></li>
-<li><a href="#org2ce3883">Cut Rod Memoized Auxiliary</a></li>
-<li><a href="#org91bba80">Python Version</a></li>
-<li><a href="#org1bbe37c">Example</a></li>
 </ul>
 </li>
 <li>
-<a href="#orgeef2a0c">Non-Recursive Solution</a>
+<a href="#org3c331fc">Memoized Cut Rod</a>
 <ul>
-<li><a href="#orgc0cf01f">Python Version</a></li>
-<li><a href="#org216bf7b">The Example Again</a></li>
+<li><a href="#orgf90c9a5">Cut Rod Memoized</a></li>
+<li><a href="#orgc7d1f94">Cut Rod Memoized Auxiliary</a></li>
+<li><a href="#org01f784c">Python Version</a></li>
+<li><a href="#org0b87082">Example</a></li>
 </ul>
 </li>
 <li>
-<a href="#orge0f94c1">Recovering the Cuts</a>
+<a href="#org427e1ac">Non-Recursive Solution</a>
+<ul>
+<li><a href="#org48259a9">Python Version</a></li>
+<li><a href="#orgf5c9fde">The Example Again</a></li>
+</ul>
+</li>
+<li>
+<a href="#orga394b7f">Recovering the Cuts</a>
 <ul>
 <li>
-<a href="#org29ec004">Pseudocode</a>
+<a href="#org99c2ed7">Pseudocode</a>
 <ul>
-<li><a href="#org98a33c9">Extended Bottoms-Up</a></li>
-<li><a href="#orgf1ac414">Printing the Solution</a></li>
+<li><a href="#orgee17bea">Extended Bottoms-Up</a></li>
+<li><a href="#org53b2182">Printing the Solution</a></li>
 </ul>
 </li>
-<li><a href="#orgd668223">In Python</a></li>
-<li><a href="#org0ffa4a1">CLRS Example</a></li>
+<li><a href="#org9c61e39">In Python</a></li>
+<li><a href="#org05024b8">CLRS Example</a></li>
 </ul>
 </li>
-<li><a href="#orgc52cf6d">Sources</a></li>
+<li><a href="#org340b7f2">Sources</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5995aaa" class="outline-2">
-<h2 id="org5995aaa">The Rod Cutting Problem</h2>
-<div class="outline-text-2" id="text-org5995aaa">
+<div id="outline-container-org662aca4" class="outline-2">
+<h2 id="org662aca4">The Rod Cutting Problem</h2>
+<div class="outline-text-2" id="text-org662aca4">
 <p>
 The Rod Cutting Problem begins with the premise that we have a metal rod (or some other kind of rod that's sellable) of a given length (<i>n</i>) and the price of a rod depends on the length so cutting the rod into shorter pieces will yield different total values - sometimes cutting a rod up make it more valuable than keeping it whole.
 </p>
@@ -170,9 +170,9 @@ To make this simpler we'll assume that lengths are always whole numbers (non-neg
 </p>
 </div>
 
-<div id="outline-container-org3622bfa" class="outline-3">
-<h3 id="org3622bfa">An Example</h3>
-<div class="outline-text-3" id="text-org3622bfa">
+<div id="outline-container-org6288f47" class="outline-3">
+<h3 id="org6288f47">An Example</h3>
+<div class="outline-text-3" id="text-org6288f47">
 <p>
 Say we have the following prices for different rod lengths.
 </p>
@@ -258,18 +258,18 @@ Out of these four possible combinations, 26 is the most we could get.
 </div>
 </div>
 
-<div id="outline-container-org679d883" class="outline-3">
-<h3 id="org679d883">Imports</h3>
-<div class="outline-text-3" id="text-org679d883">
+<div id="outline-container-orgbbe9f12" class="outline-3">
+<h3 id="orgbbe9f12">Imports</h3>
+<div class="outline-text-3" id="text-orgbbe9f12">
 <div class="highlight"><pre><span></span><span class="c1"># from pypi</span>
 <span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div id="outline-container-orgd5fd651" class="outline-2">
-<h2 id="orgd5fd651">Brute Force</h2>
-<div class="outline-text-2" id="text-orgd5fd651">
+<div id="outline-container-org6a0fa12" class="outline-2">
+<h2 id="org6a0fa12">Brute Force</h2>
+<div class="outline-text-2" id="text-org6a0fa12">
 <p>
 In the previous example we could choose to make one cut, splitting our rod into 6 units and 4 units, and it would give us the highest value of the four combinations that we looked at. but what if we want to know the highest value out of <i>all</i> the combinations? Let's start by looking at a Brute-force approach to solving the problem.
 </p>
@@ -306,9 +306,9 @@ T(n) &amp;= \Theta\left(2^n\right)
 So we have a problem with exponential growth.
 </p>
 </div>
-<div id="outline-container-org6d8ff24" class="outline-3">
-<h3 id="org6d8ff24">The CLRS Brute-Force Solution</h3>
-<div class="outline-text-3" id="text-org6d8ff24">
+<div id="outline-container-org800859c" class="outline-3">
+<h3 id="org800859c">The CLRS Brute-Force Solution</h3>
+<div class="outline-text-3" id="text-org800859c">
 <p>
 First, let's define some variables.
 </p>
@@ -369,9 +369,9 @@ And now a little pseudocode.
 </pre>
 </div>
 
-<div id="outline-container-org633b648" class="outline-4">
-<h4 id="org633b648">In Python</h4>
-<div class="outline-text-4" id="text-org633b648">
+<div id="outline-container-org61d2608" class="outline-4">
+<h4 id="org61d2608">In Python</h4>
+<div class="outline-text-4" id="text-org61d2608">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_brute_force</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">"""Finds the maximum value you can extract from the rod</span>
 
@@ -403,9 +403,9 @@ This naively assumes that there's an entry in <code>prices</code> for every leng
 </div>
 </div>
 
-<div id="outline-container-org7e9ae93" class="outline-4">
-<h4 id="org7e9ae93">The First Example</h4>
-<div class="outline-text-4" id="text-org7e9ae93">
+<div id="outline-container-org961d1ed" class="outline-4">
+<h4 id="org961d1ed">The First Example</h4>
+<div class="outline-text-4" id="text-org961d1ed">
 <p>
 The first thing we're going to do is to check the example given earlier, padding the price-list to make it have 10 entries. I originally had it just short-circuit if the list was shorter but then the counts were off by a little bit so I decided to get rid of that. It might make it slightly more efficient in certain cases, but brute-force isn't really what we're going for anyway.
 </p>
@@ -433,9 +433,9 @@ So our actual best value is 27, not the 26 from the sub-set of combinations I us
 </div>
 </div>
 </div>
-<div id="outline-container-orge76d186" class="outline-2">
-<h2 id="orge76d186">Memoized Cut Rod</h2>
-<div class="outline-text-2" id="text-orge76d186">
+<div id="outline-container-org3c331fc" class="outline-2">
+<h2 id="org3c331fc">Memoized Cut Rod</h2>
+<div class="outline-text-2" id="text-org3c331fc">
 <p>
 The main reason why our brute-force version is so expensive is that it does all the calculations for every length over and over again when we test the different combinations. One way to get around this is by storing the values as they're calculated so that we can just look them up instead of repeating the calculations.
 </p>
@@ -445,9 +445,9 @@ This first version is very similar to the brute-force version except that the br
 </p>
 </div>
 
-<div id="outline-container-orgdc40cd8" class="outline-3">
-<h3 id="orgdc40cd8">Cut Rod Memoized</h3>
-<div class="outline-text-3" id="text-orgdc40cd8">
+<div id="outline-container-orgf90c9a5" class="outline-3">
+<h3 id="orgf90c9a5">Cut Rod Memoized</h3>
+<div class="outline-text-3" id="text-orgf90c9a5">
 <p>
 This first function is sort of a mask to make it look like the brute-force version. It sets up an empty memo table (as an array) and then passes it to the <code>CutRodMemoizedAuxiliary</code> function to do the actual calculations.
 </p>
@@ -472,9 +472,9 @@ This first function is sort of a mask to make it look like the brute-force versi
 </pre>
 </div>
 </div>
-<div id="outline-container-org2ce3883" class="outline-3">
-<h3 id="org2ce3883">Cut Rod Memoized Auxiliary</h3>
-<div class="outline-text-3" id="text-org2ce3883">
+<div id="outline-container-orgc7d1f94" class="outline-3">
+<h3 id="orgc7d1f94">Cut Rod Memoized Auxiliary</h3>
+<div class="outline-text-3" id="text-orgc7d1f94">
 <pre id="cut-rod-memoized-auxiliary" style="display:hidden;">
 \begin{algorithm}
 \caption{Memoized Rod-Cutting Auxiliary}
@@ -512,9 +512,9 @@ If you squint at <code>CutRodMemoizedAuxiliary</code> you might notice that it l
 </p>
 </div>
 </div>
-<div id="outline-container-org91bba80" class="outline-3">
-<h3 id="org91bba80">Python Version</h3>
-<div class="outline-text-3" id="text-org91bba80">
+<div id="outline-container-org01f784c" class="outline-3">
+<h3 id="org01f784c">Python Version</h3>
+<div class="outline-text-3" id="text-org01f784c">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_memoized</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">"""Finds the maximum value for a rod after it has been cut up</span>
 
@@ -584,9 +584,9 @@ Count: 16
 </div>
 
 
-<div id="outline-container-org1bbe37c" class="outline-3">
-<h3 id="org1bbe37c">Example</h3>
-<div class="outline-text-3" id="text-org1bbe37c">
+<div id="outline-container-org0b87082" class="outline-3">
+<h3 id="org0b87082">Example</h3>
+<div class="outline-text-3" id="text-org0b87082">
 <div class="highlight"><pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">best_total</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">27</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="mi">11</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
@@ -622,9 +622,9 @@ T(10) &amp;= \frac{10(10 + 1)}{2} + 1\\
 </div>
 </div>
 
-<div id="outline-container-orgeef2a0c" class="outline-2">
-<h2 id="orgeef2a0c">Non-Recursive Solution</h2>
-<div class="outline-text-2" id="text-orgeef2a0c">
+<div id="outline-container-org427e1ac" class="outline-2">
+<h2 id="org427e1ac">Non-Recursive Solution</h2>
+<div class="outline-text-2" id="text-org427e1ac">
 <p>
 The memoized cut-rod solution is a top-down, depth-first search solution that uses recursion. We can eliminate the recursion altogether using a for-loop along with our look-up array. The trick is to make it a bottoms-up approach - that is to say that we start with the solutions for the smaller lengths and work up to the longer ones so that the look-up array always has the sub-problem values that we need to look up.
 </p>
@@ -655,9 +655,9 @@ The memoized cut-rod solution is a top-down, depth-first search solution that us
 </pre>
 </div>
 
-<div id="outline-container-orgc0cf01f" class="outline-3">
-<h3 id="orgc0cf01f">Python Version</h3>
-<div class="outline-text-3" id="text-orgc0cf01f">
+<div id="outline-container-org48259a9" class="outline-3">
+<h3 id="org48259a9">Python Version</h3>
+<div class="outline-text-3" id="text-org48259a9">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_bottom_up</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
     <span class="sd">"""Find the maximum value for a rod after cutting</span>
 
@@ -684,9 +684,9 @@ The memoized cut-rod solution is a top-down, depth-first search solution that us
 </div>
 </div>
 
-<div id="outline-container-org216bf7b" class="outline-3">
-<h3 id="org216bf7b">The Example Again</h3>
-<div class="outline-text-3" id="text-org216bf7b">
+<div id="outline-container-orgf5c9fde" class="outline-3">
+<h3 id="orgf5c9fde">The Example Again</h3>
+<div class="outline-text-3" id="text-orgf5c9fde">
 <div class="highlight"><pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_bottom_up</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">best_total</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">27</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">110</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
@@ -713,21 +713,21 @@ The runtime for this version is the same as the memoized version. It's sort of t
 </div>
 </div>
 
-<div id="outline-container-orge0f94c1" class="outline-2">
-<h2 id="orge0f94c1">Recovering the Cuts</h2>
-<div class="outline-text-2" id="text-orge0f94c1">
+<div id="outline-container-orga394b7f" class="outline-2">
+<h2 id="orga394b7f">Recovering the Cuts</h2>
+<div class="outline-text-2" id="text-orga394b7f">
 <p>
 The previous functions all return the best value for a length but don't tell you the actual cuts that you need in order to get it. We can alter the function slightly to get both the best-revenue table and the cuts you need to use to get the best value.
 </p>
 </div>
 
-<div id="outline-container-org29ec004" class="outline-3">
-<h3 id="org29ec004">Pseudocode</h3>
-<div class="outline-text-3" id="text-org29ec004">
+<div id="outline-container-org99c2ed7" class="outline-3">
+<h3 id="org99c2ed7">Pseudocode</h3>
+<div class="outline-text-3" id="text-org99c2ed7">
 </div>
-<div id="outline-container-org98a33c9" class="outline-4">
-<h4 id="org98a33c9">Extended Bottoms-Up</h4>
-<div class="outline-text-4" id="text-org98a33c9">
+<div id="outline-container-orgee17bea" class="outline-4">
+<h4 id="orgee17bea">Extended Bottoms-Up</h4>
+<div class="outline-text-4" id="text-orgee17bea">
 <pre id="cut-rod-extended" style="display:hidden;">
 \begin{algorithm}
 \caption{Extended Bottoms-Up Rod-Cutting}
@@ -759,9 +759,9 @@ The previous functions all return the best value for a length but don't tell you
 </div>
 </div>
 
-<div id="outline-container-orgf1ac414" class="outline-4">
-<h4 id="orgf1ac414">Printing the Solution</h4>
-<div class="outline-text-4" id="text-orgf1ac414">
+<div id="outline-container-org53b2182" class="outline-4">
+<h4 id="org53b2182">Printing the Solution</h4>
+<div class="outline-text-4" id="text-org53b2182">
 <p>
 To actually see the cuts we just need to retrieve the next cuts from <code>s</code> and calculate the remaining length after each cut.
 </p>
@@ -787,9 +787,9 @@ To actually see the cuts we just need to retrieve the next cuts from <code>s</co
 </div>
 </div>
 
-<div id="outline-container-orgd668223" class="outline-3">
-<h3 id="orgd668223">In Python</h3>
-<div class="outline-text-3" id="text-orgd668223">
+<div id="outline-container-org9c61e39" class="outline-3">
+<h3 id="org9c61e39">In Python</h3>
+<div class="outline-text-3" id="text-org9c61e39">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_extended</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
     <span class="sd">"""Find the maximum values for a cut rod</span>
 
@@ -849,9 +849,9 @@ Cuts: (2, 2, 6)
 </div>
 </div>
 
-<div id="outline-container-org0ffa4a1" class="outline-3">
-<h3 id="org0ffa4a1">CLRS Example</h3>
-<div class="outline-text-3" id="text-org0ffa4a1">
+<div id="outline-container-org05024b8" class="outline-3">
+<h3 id="org05024b8">CLRS Example</h3>
+<div class="outline-text-3" id="text-org05024b8">
 <div class="highlight"><pre><span></span><span class="n">CLRS_PRICES</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
 <span class="n">revenues</span><span class="p">,</span> <span class="n">cuts</span> <span class="o">=</span> <span class="n">print_solution</span><span class="p">(</span><span class="n">CLRS_PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">revenues</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span>
@@ -904,9 +904,9 @@ Cuts: (10)
 </div>
 </div>
 
-<div id="outline-container-orgc52cf6d" class="outline-2">
-<h2 id="orgc52cf6d">Sources</h2>
-<div class="outline-text-2" id="text-orgc52cf6d">
+<div id="outline-container-org340b7f2" class="outline-2">
+<h2 id="org340b7f2">Sources</h2>
+<div class="outline-text-2" id="text-org340b7f2">
 <ul class="org-ul">
 <li><a href="../essential-algorithms/">Essential Algorithms</a></li>
 <li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>

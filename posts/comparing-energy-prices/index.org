@@ -11,11 +11,30 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-b5c6944e-e279-456f-89fb-29fe6af4cf64-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-07607863-5872-4ff9-8e44-c934c4f277f8-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
+
+#+begin_src python :results none
+# from python
+from fractions import Fraction
+
+def print_energy(megajoules_per_dollar: float, source: str) -> None:
+    """Print the energy provided by the source.
+
+    Args:
+     megajoules_per_dollar: how many megajoules provided by the source for each dollar
+     source: where the energy is coming from
+    """
+    print(f"{source} provides {megajoules_per_dollar:0.2f} megajoules per dollar.")
+    print(f"{source} costs ${1/megajoules_per_dollar:0.4f} per megajoule.")
+    return
+
+COSTS = []
+#+end_src
+
 * How Many Megajoules For a Dollar of Gas?
 - A gallon of gasoline carries with it \(\approx 1.3E8\) joules of energy.
 - You pay \(5 \frac{\text{dollars}}{\text{gallon}}\).
@@ -31,18 +50,20 @@
 
 ** In Python
 #+begin_src python :results output :exports both
-from fractions import Fraction
-
 gallons_per_dollar = Fraction(1, 5)
 joules_per_gallon = 13 * 10**7
 joules_per_dollar = joules_per_gallon * gallons_per_dollar
-megajoules_per_joule = Fraction(1, 10**6)
-megajoules_per_dollar = joules_per_dollar * megajoules_per_joule
-print(f"{megajoules_per_dollar} megajoules/dollar")
+MEGAJOULES_PER_JOULE = Fraction(1, 10**6)
+gas_megajoules_per_dollar = joules_per_dollar * megajoules_per_joule
+gasoline = 1/gas_megajoules_per_dollar
+
+print_energy(float(gas_megajoules_per_dollar), "Gasoline")
+COSTS.append((gasoline, "Gasoline"))
 #+end_src
 
 #+RESULTS:
-: 26 megajoules/dollar
+: Gasoline provides 26.00 megajoules per dollar.
+: Gasoline costs $0.0385 per megajoule.
 
 * How Many MegaJoules For a Dollar of Electricity?
 - Electricity is $0.05 per kilowatt-hour.
@@ -67,12 +88,130 @@ print(f"{megajoules_per_dollar} megajoules/dollar")
 #+begin_src python :results output :exports both
 kilowatt_hours_per_dollar = 20 # 1/0.05 = 20
 megajoules = 3.6
-megajoules_per_dollar = kilowatt_hours_per_dollar * megajoules
-print(f"{megajoules_per_dollar} megajoules/dollar of electricity")
+electricity_megajoules_per_dollar = kilowatt_hours_per_dollar * megajoules
+electricity = 1/electricity_megajoules_per_dollar
+
+print_energy(electricity_megajoules_per_dollar, "Electricity")
+COSTS.append((electricity, "Electricity"))
 #+end_src
 
 #+RESULTS:
-: 72.0 megajoules/dollar of electricity
+: Electricity provides 72.00 megajoules per dollar.
+: Electricity costs $0.0139 per megajoule.
+
+* How Many Megajoules For a Dollar Of Natural Gas?
+- A standard cubic foot of natural gas has about \(1.1 \times 10^6\) joules of energy.
+- You can get about \(5\times 10^5\) BTUs of gas for a dollar.
+- There are about 1,030 BTUs in a cubic foot.
+
+\begin{align}
+\left(1.1 \times 10^6 \frac{joules}{\cancel{cubic foot}}\right)\left(\frac{1\ \cancel{cubic foot}}{1.03 \times 10^3\ BTU}\right) &= \left(\frac{1.1 \times 10^3\ joules}{1.03\ \cancel{BTU}}\right)\left(\frac{5 \times 10^5\ \cancel{BTU}}{dollar}\right)\\
+&= \left(\frac{5.5 \times 10^8\ \cancel{joules}}{1.03\ dollars}\right)\left(\frac{1\ Megajoule}{10^6 \cancel{joules}}\right)\\
+&= \left(\frac{5.5 \times 10^2\ Megajoules}{1.03 dollars}\right)\\
+&\approx 533.98\ \frac{Megajoules}{dollar}\\
+\end{align}
+
+** Check The Math
+#+begin_src python :results output :exports both
+joules_per_cubic_foot = 1.1E6
+cubic_feet_per_btu = 1/1030
+btus_per_dollar = 5e5
+
+joules_per_btu = joules_per_cubic_foot * cubic_feet_per_btu
+
+joules_per_dollar = joules_per_btu * btus_per_dollar
+natural_gas_megajoules_per_dollar = joules_per_dollar * MEGAJOULES_PER_JOULE
+natural_gas = 1/natural_gas_megajoules_per_dollar
+print_energy(natural_gas_megajoules_per_dollar, "Natural Gas")
+COSTS.append((natural_gas, "Natural Gas"))
+#+end_src
+
+#+RESULTS:
+: Natural Gas provides 533.98 megajoules per dollar.
+: Natural Gas costs $0.0019 per megajoule.
+
+* How Many Megajoules For a Dollar of Coal?
+- A Ton of coal holds about \(3.2 × 10^{10}\) joules of energy.
+- A Ton of coal costs $40.
+
+How many Megajoules of energy in the form of coal can you get for a dollar?
+
+\begin{align}
+\left(\frac{3.2 \times 10^{10}\ joules}{40\ dollars}\right) &= \left(\frac{8 \times 10^{8} joules}{dollar}\right)\\
+&= \left(\frac{8 \times 10^{8}\ \cancel{joules}}{dollar}\right)\left(\frac{1\ Megajoule}{1 \times 10^6\ \cancel{joules}}\right)\\
+&=8 \times 10^2 \frac{Megajoules}{dollar}
+\end{align}
+
+** Checking the Math
+
+#+begin_src python :results output :exports both
+coal_megajoules_per_dollar = MEGAJOULES_PER_JOULE * 3.2e10/40
+coal = 1/coal_megajoules_per_dollar
+print_energy(coal_megajoules_per_dollar, "Coal")
+COSTS.append((coal, "Coal"))
+#+end_src
+
+#+RESULTS:
+: Coal provides 800.00 megajoules per dollar.
+: Coal costs $0.0013 per megajoule.
+
+* How Many Megajoules Per Dollar In Corn (Biodiesel)?
+- Corn oil costs about $0.10 per fluid ounce (wholesale).
+- A fluid ounce carries about 240 dietary calories (kilo-calories).
+- A calorie is about 4.2 joules.
+
+How many Megajoules of energy in the form of corn oil can you get for a dollar?
+
+\begin{align}
+\left(\frac{1\cancel{fluid-ounce}}{0.10\ dollar}\right)\left(\frac{240\ kilocalories}{\cancel{fluid- ounce}}\right) &= \left(\frac{240\ \cancel{kilocalories}}{0.10\ dollar}\right)\left(\frac{10^3\ calories}{1\ \cancel{kilocalorie}}\right)\\
+&=\left(\frac{24\times 10^4\ \cancel{calories}}{0.10\ dollar}\right)\left(\frac{4.2\ joules}{1 \cancel{calorie}}\right)\\
+&=\left(\frac{100.8\times 10^4\ joules}{1 \times 10^{-1} dollar}\right)\\
+&=\left(\frac{1.008 \times 10^7 joules}{dollar}\right)\left(\frac{1\ megajoule}{10^6\ joules}\right)\\
+&= 1.008 \times 10^{1}\ \frac{megajoules}{dollar}\\
+&= 10.008
+\end{align}
+
+** Checking the Math
+#+begin_src python :results output :exports both
+ounces_per_dollar = 1/0.10
+kilocalories_per_ounce = 240
+joules_per_calorie = 4.2
+calories_per_kilocalorie = 10**3
+
+corn_megajoules_per_dollar = (ounces_per_dollar
+                              ,* kilocalories_per_ounce
+                              ,* calories_per_kilocalorie
+                              ,* joules_per_calorie
+                              ,* MEGAJOULES_PER_JOULE)
+corn = 1/corn_megajoules_per_dollar
+print_energy(corn_megajoules_per_dollar, "Corn")
+COSTS.append((corn, "Corn"))
+#+end_src
+
+#+RESULTS:
+: Corn provides 10.08 megajoules per dollar.
+: Corn costs $0.0992 per megajoule.
+
+* What Is the Ratio of the Cost of the Most Expensive to the Cheapest?
+#+begin_src python :results output :exports both
+most_expensive, cheapest, cost, name = max(COSTS), min(COSTS), 0, 1
+print(f"The most expensive form of energy is {most_expensive[name]} "
+      f"at ${most_expensive[cost]:0.2f} per megajoule.")
+print(f"The cheapest form of energy is {cheapest[name]} at "
+      f"${cheapest[cost]:0.4f} per megajoule.")
+#+end_src
+
+#+RESULTS:
+: The most expensive form of energy is Corn at $0.10 per megajoule.
+: The cheapest form of energy is Coal at $0.0013 per megajoule.
+
+#+begin_src python :results output :exports both
+print(f"{most_expensive[name]} is {most_expensive[cost]/cheapest[cost]:0.2f} "
+      f"times more expensive than {cheapest[name]}.")
+#+end_src
+
+#+RESULTS:
+: Corn is 79.37 times more expensive than Coal.
 
 * Source
  - {{% doc %}}course-global-warming{{% /doc %}}
