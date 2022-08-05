@@ -1,0 +1,121 @@
+#+BEGIN_COMMENT
+.. title: The Activity Selection Problem
+.. slug: the-activity-selection-problem
+.. date: 2022-08-04 17:25:35 UTC-07:00
+.. tags: 
+.. category: 
+.. link: 
+.. description: 
+.. type: text
+.. has_pseudocode: yes
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-e19db772-804a-44d2-9883-0c424750c80e-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+* What is the Activity Selection Problem?
+- In this problem we have a set of /n/ activities \(S = \{a_1, a_2, \ldots, a_n\}\). 
+- Assume the activities are sorted by increasing finish time
+- Each activity has a start time \(s_i\) and a finish time \(f_i\)
+- Only one activity can happen at a time.
+- Two activities are /compatible/ if the earlier event finishes before the start time of the other event.
+
+The problem we want to solve is finding the most compatible activities we can from our set of activities. This differs from a more common scheduling problem in that the times are fixed - we can't re-arrange activities to make them fit so they either can happen or they can't.
+
+* The Greedy Choice
+{{% lancelot "CLRS" %}}clrs{{% /lancelot %}} goes into the more formal aspects of finding the optimal substructure and proving that a greedy strategy works, but in this case the reasoning is fairly intuitive (and I didn't find the proof so easy to follow) so I'll skip the formal stuff. The thing to recognize is just that the sooner the first activity you schedule finishes the more time there is for other activities. So if after each activity you pick you then pick the next compatible activity that finishes first you will be maximizing the number of activities that you can schedule.
+
+* The Recursive Activity Selector
+
+#+begin_export html
+<pre id="recursive-activity-selector" style="display:hidden;">
+\begin{algorithm}
+\caption{Recursive Activity Selector}
+\begin{algorithmic}
+\REQUIRE The activities are sorted in non-decreasing order of finish time
+\INPUT $s$: The array of start times for the activities.
+\INPUT $f$: The array of finish times for the activities.
+\INPUT $k$: The last activity selected so far.
+\INPUT $n$: The number of activities.
+\OUTPUT The activities that maximize the number of compatible activities.
+\PROCEDURE{RecursiveActivitySelector}{$s, f, k, n$}
+
+\STATE \(m \gets k + 1\)
+
+\WHILE {\(m \le n\) and \(s[m] < f[k]\)}
+  \STATE \(m \gets m + 1\)
+\ENDWHILE
+
+\IF {\(m \le n\)}
+  \RETURN \(\{a_m\} \cup \) \textsc{RecursiveActivitySelector}(\(s, f, m, n\))
+\ELSE
+  \RETURN \{\}
+\ENDIF
+
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+**Note:** The activity set (\(\{a_1, a_2, \ldots, a_n\}\)) is treated as a global collection so it is used in the function but not passed in as an argument.
+
+** Padding The Start
+Because the recursive algorithm is looking for the next earliest finish time after the first event we need to pad the activities with a dummy activity that has a finish time of 0 (\(f_0 = 0\)) and then when the function is first called the /k/ value is set to 0:
+
+\[
+RecursiveActivitySelector(s, f, 0, n)
+\]
+
+* The Iterative Activity Selector
+
+#+begin_export html
+<pre id="greedy-activity-selector" style="display:hidden;">
+\begin{algorithm}
+\caption{Greedy Activity Selector}
+\begin{algorithmic}
+\REQUIRE The activities are sorted in non-decreasing order of finish time
+\INPUT $s$: The array of start times for the activities.
+\INPUT $f$: The array of finish times for the activities.
+\OUTPUT The activities that maximize the number of compatible activities.
+\PROCEDURE{GreedyActivitySelector}{\(s, f\)}
+
+\STATE \(n \gets s.length \)
+\STATE \(A \gets \{a_1\} \)
+\STATE \(k \gets 1 \)
+
+\FOR {\(m  \in \{2, \ldots, n \}\)}
+  \IF {\( s[m] \ge f[k] \)}
+    \STATE \(A \gets A \cup \{a_m\}\)
+    \STATE \(k \gets m \)
+  \ENDIF
+\ENDFOR
+
+\RETURN \(A\)
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+</pre>
+#+end_export
+
+* Sources
+- {{% doc %}}clrs{{% /doc %}}
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("recursive-activity-selector"));
+});
+</script>
+#+end_export
+
+#+begin_export html
+<script>
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("greedy-activity-selector"));
+});
+</script>
+#+end_export
