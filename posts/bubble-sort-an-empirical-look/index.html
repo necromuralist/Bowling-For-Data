@@ -102,61 +102,61 @@ bg-light
 <div id="text-table-of-contents">
 <ul>
 <li>
-<a href="#org0d186b5">An Empirical Look</a>
+<a href="#org348427b">An Empirical Look</a>
 <ul>
 <li>
-<a href="#orgae02c70">Some Setup</a>
+<a href="#org7503fa2">Some Setup</a>
 <ul>
-<li><a href="#orgd74ecca">Stuff For Later</a></li>
-<li><a href="#org01ca07f">Numba  Random</a></li>
-</ul>
-</li>
-<li>
-<a href="#org10db945">A Counter</a>
-<ul>
-<li><a href="#orga912ee8">Some Types</a></li>
-<li><a href="#orgadc2c9f">The Sorting Function (With Counts)</a></li>
+<li><a href="#org0e28456">Stuff For Later</a></li>
+<li><a href="#orgb2afa11">Numba  Random</a></li>
 </ul>
 </li>
 <li>
-<a href="#org6db7908">Testing the Counter</a>
+<a href="#org725fcd3">A Counter</a>
 <ul>
-<li><a href="#org23a02d9">A Random Input</a></li>
-<li><a href="#org7bcb98c">The Worst Case</a></li>
-</ul>
-</li>
-<li><a href="#orgf769aef">The Tracker</a></li>
-<li>
-<a href="#orgb3451b6">Try Them Out</a>
-<ul>
-<li><a href="#org96af96e">Comparisons</a></li>
+<li><a href="#orgf0749d6">Some Types</a></li>
+<li><a href="#orge358833">The Sorting Function (With Counts)</a></li>
 </ul>
 </li>
 <li>
-<a href="#org5e72e03">Swaps</a>
+<a href="#org08850d2">Testing the Counter</a>
 <ul>
-<li><a href="#orge736be4">Worst Case</a></li>
+<li><a href="#orgb6b06a4">A Random Input</a></li>
+<li><a href="#org12cb152">The Worst Case</a></li>
+</ul>
+</li>
+<li><a href="#org249ec20">The Tracker</a></li>
+<li>
+<a href="#org00b8578">Try Them Out</a>
+<ul>
+<li><a href="#orgbdcfb00">Comparisons</a></li>
+</ul>
+</li>
+<li>
+<a href="#org2fc0cb9">Swaps</a>
+<ul>
+<li><a href="#org26110b9">Worst Case</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgaeb14d2">Onward</a></li>
+<li><a href="#orgc554cac">Onward</a></li>
 </ul>
 </div>
 </div>
 <p>
 This is a continuation of a <a href="../the-bubble-sort/">series on the Bubble Sort</a>. In the <a href="../bubble-sort-the-implementation/">previous post</a> I made an implementation of the Bubble Sort in python. In this post I'll run it with inputs of varying sizes to see how its runtime changes as well as do a plot to get a sense of how it rearranges the items its sorting as it works.
 </p>
-<div id="outline-container-org0d186b5" class="outline-2">
-<h2 id="org0d186b5">An Empirical Look</h2>
-<div class="outline-text-2" id="text-org0d186b5">
+<div id="outline-container-org348427b" class="outline-2">
+<h2 id="org348427b">An Empirical Look</h2>
+<div class="outline-text-2" id="text-org348427b">
 <p>
-The math is nice and all, but let's do some counting. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps. In this case we could calculate the comparisons pretty easily, but to make sure I don't mess up the math I'll just grab it.
+Using math to figure out the number of comparisons is nice and all, but let's do some counting using real code. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps.
 </p>
 </div>
-<div id="outline-container-orgae02c70" class="outline-3">
-<h3 id="orgae02c70">Some Setup</h3>
-<div class="outline-text-3" id="text-orgae02c70">
+<div id="outline-container-org7503fa2" class="outline-3">
+<h3 id="org7503fa2">Some Setup</h3>
+<div class="outline-text-3" id="text-org7503fa2">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
@@ -178,9 +178,9 @@ The math is nice and all, but let's do some counting. I'm going to re-implement 
 <span class="kn">from</span> <span class="nn">graeae</span> <span class="kn">import</span> <span class="n">EmbedHoloviews</span><span class="p">,</span> <span class="n">Timer</span>
 </pre></div>
 </div>
-<div id="outline-container-orgd74ecca" class="outline-4">
-<h4 id="orgd74ecca">Stuff For Later</h4>
-<div class="outline-text-4" id="text-orgd74ecca">
+<div id="outline-container-org0e28456" class="outline-4">
+<h4 id="org0e28456">Stuff For Later</h4>
+<div class="outline-text-4" id="text-org0e28456">
 <div class="highlight"><pre><span></span><span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
 <span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"bubble-sort-an-empirical-look"</span>
 <span class="n">PATH</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
@@ -188,26 +188,26 @@ The math is nice and all, but let's do some counting. I'm going to re-implement 
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org01ca07f" class="outline-4">
-<h4 id="org01ca07f">Numba  Random</h4>
-<div class="outline-text-4" id="text-org01ca07f">
+<div id="outline-container-orgb2afa11" class="outline-4">
+<h4 id="orgb2afa11">Numba  Random</h4>
+<div class="outline-text-4" id="text-orgb2afa11">
 <div class="highlight"><pre><span></span><span class="n">numba_random</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="mi">2021</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org10db945" class="outline-3">
-<h3 id="org10db945">A Counter</h3>
-<div class="outline-text-3" id="text-org10db945">
+<div id="outline-container-org725fcd3" class="outline-3">
+<h3 id="org725fcd3">A Counter</h3>
+<div class="outline-text-3" id="text-org725fcd3">
 <p>
-This is going to be a reimplementation of the Bubble Sort function but with variables added to keep track of the counts. I originally did this as class-based so I could re-use the code but once I switched from pypy to numba that started to get problematic, and the functions are short anyway so I guess it's all the same.
+This is going to be a reimplementation of the Bubble Sort function but with variables added to keep track of the counts. I originally did this class-based so I could re-use the code but once I switched from pypy to numba that started to get problematic, and the functions are short anyway so I guess it's all the same.
 </p>
 </div>
 
-<div id="outline-container-orga912ee8" class="outline-4">
-<h4 id="orga912ee8">Some Types</h4>
-<div class="outline-text-4" id="text-orga912ee8">
+<div id="outline-container-orgf0749d6" class="outline-4">
+<h4 id="orgf0749d6">Some Types</h4>
+<div class="outline-text-4" id="text-orgf0749d6">
 <div class="highlight"><pre><span></span><span class="n">ElementCount</span> <span class="o">=</span> <span class="nb">int</span>
 <span class="n">ComparisonCount</span> <span class="o">=</span> <span class="nb">int</span>
 <span class="n">SwapCount</span> <span class="o">=</span> <span class="nb">int</span>
@@ -223,9 +223,9 @@ This is going to be a reimplementation of the Bubble Sort function but with vari
 </div>
 </div>
 
-<div id="outline-container-orgadc2c9f" class="outline-4">
-<h4 id="orgadc2c9f">The Sorting Function (With Counts)</h4>
-<div class="outline-text-4" id="text-orgadc2c9f">
+<div id="outline-container-orge358833" class="outline-4">
+<h4 id="orge358833">The Sorting Function (With Counts)</h4>
+<div class="outline-text-4" id="text-orge358833">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">bubble</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counts</span><span class="p">:</span>
     <span class="sd">"""Sorts the list in place</span>
 
@@ -255,9 +255,9 @@ One thing to note is that in the algorithm the outer loop stops at \(n-2\), whic
 </div>
 </div>
 </div>
-<div id="outline-container-org6db7908" class="outline-3">
-<h3 id="org6db7908">Testing the Counter</h3>
-<div class="outline-text-3" id="text-org6db7908">
+<div id="outline-container-org08850d2" class="outline-3">
+<h3 id="org08850d2">Testing the Counter</h3>
+<div class="outline-text-3" id="text-org08850d2">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_non_decreasing</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">"""Checks that all the elements in the list are non-decreasing</span>
 
@@ -276,9 +276,9 @@ One thing to note is that in the algorithm the outer loop stops at \(n-2\), whic
 </pre></div>
 </div>
 
-<div id="outline-container-org23a02d9" class="outline-4">
-<h4 id="org23a02d9">A Random Input</h4>
-<div class="outline-text-4" id="text-org23a02d9">
+<div id="outline-container-orgb6b06a4" class="outline-4">
+<h4 id="orgb6b06a4">A Random Input</h4>
+<div class="outline-text-4" id="text-orgb6b06a4">
 <p>
 Because we aren't using any kind of short-circuiting to stop once the data is sorted, it will always loop \(\Omega(n^2)\), but the number of swaps will depend on the input.
 </p>
@@ -296,9 +296,9 @@ Because we aren't using any kind of short-circuiting to stop once the data is so
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org7bcb98c" class="outline-4">
-<h4 id="org7bcb98c">The Worst Case</h4>
-<div class="outline-text-4" id="text-org7bcb98c">
+<div id="outline-container-org12cb152" class="outline-4">
+<h4 id="org12cb152">The Worst Case</h4>
+<div class="outline-text-4" id="text-org12cb152">
 <p>
 In the worst case where it's in the exact opposite sorted order (non-increasing instead of non-decreasing) the number of comparisons should equaly the number of swaps.
 </p>
@@ -312,9 +312,9 @@ In the worst case where it's in the exact opposite sorted order (non-increasing 
 </div>
 </div>
 
-<div id="outline-container-orgf769aef" class="outline-3">
-<h3 id="orgf769aef">The Tracker</h3>
-<div class="outline-text-3" id="text-orgf769aef">
+<div id="outline-container-org249ec20" class="outline-3">
+<h3 id="org249ec20">The Tracker</h3>
+<div class="outline-text-3" id="text-org249ec20">
 <p>
 To visualize what the sort is doing I'm going to update the bubble sort to keep track of the order of the items as it's being sorted. I'm using a dictionary to map the list values to their locations so we can't use inputs where there are repeated elements or more than one list of locations will be mapped to a element value.
 </p>
@@ -371,13 +371,13 @@ First a little sanity check just to make sure it still works.
 </div>
 </div>
 
-<div id="outline-container-orgb3451b6" class="outline-3">
-<h3 id="orgb3451b6">Try Them Out</h3>
-<div class="outline-text-3" id="text-orgb3451b6">
+<div id="outline-container-org00b8578" class="outline-3">
+<h3 id="org00b8578">Try Them Out</h3>
+<div class="outline-text-3" id="text-org00b8578">
 </div>
-<div id="outline-container-org96af96e" class="outline-4">
-<h4 id="org96af96e">Comparisons</h4>
-<div class="outline-text-4" id="text-org96af96e">
+<div id="outline-container-orgbdcfb00" class="outline-4">
+<h4 id="orgbdcfb00">Comparisons</h4>
+<div class="outline-text-4" id="text-orgbdcfb00">
 <p>
 Let's look at how the comparisons and swaps change as the input gets bigger. To speed this up I'm going to run the sort in numba.
 </p>
@@ -450,14 +450,14 @@ Now we'll plot it.
 </object>
 
 <p>
-The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of swaps, and the bottom line (blue) is the number of comparisons. If you hover over the lines you can see that each line is roughly double the one below it - there are twice as many comparisons as swaps for a given input and \(n^2\) is twice as big as the comparison count for a given input.
+The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of comparisons, and the bottom line (blue) is the number of swaps. If you hover over the lines you can see that each line is roughly double the one below it - there are around twice as many comparisons as swaps for a given input and \(n^2\) is around twice as big as the comparison count for a given input.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org5e72e03" class="outline-3">
-<h3 id="org5e72e03">Swaps</h3>
-<div class="outline-text-3" id="text-org5e72e03">
+<div id="outline-container-org2fc0cb9" class="outline-3">
+<h3 id="org2fc0cb9">Swaps</h3>
+<div class="outline-text-3" id="text-org2fc0cb9">
 <p>
 The comparisons and swaps are pretty much what we expected to see, they just confirm the theoretical assessment, but now let's look at plotting the swaps as they occur to see if we can understand what the bubble sort is doing.
 </p>
@@ -503,12 +503,12 @@ HoloViews seems to not let you set the Tooltips if you use multiple columns, whi
 </p>
 
 <p>
-Looking at the plot, though, this does seem to be a useful way to figure out what's going on. If you look at the largest unsorted values you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (0 and 1) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down and being adjacent so they would be swapped to get into the correct order.
+The plot is hopefully a useful way to figure out what's going on. If you look at the unsorted values you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (1 and 2) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down.
 </p>
 </div>
-<div id="outline-container-orge736be4" class="outline-4">
-<h4 id="orge736be4">Worst Case</h4>
-<div class="outline-text-4" id="text-orge736be4">
+<div id="outline-container-org26110b9" class="outline-4">
+<h4 id="org26110b9">Worst Case</h4>
+<div class="outline-text-4" id="text-org26110b9">
 <p>
 The random-input gives an interesting view of how the algorithm might work in practice, but let's look at the worst-case input where the values are in the opposite of the sorted order.
 </p>
@@ -537,16 +537,16 @@ The random-input gives an interesting view of how the algorithm might work in pr
 </object>
 
 <p>
-This image gives an even better sense of the way that the bubble sort works. Since it emphasizes left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
+This image gives an even better sense of the way that the bubble sort works. Since the Bubble Sort uses a left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
 </p>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgaeb14d2" class="outline-2">
-<h2 id="orgaeb14d2">Onward</h2>
-<div class="outline-text-2" id="text-orgaeb14d2">
+<div id="outline-container-orgc554cac" class="outline-2">
+<h2 id="orgc554cac">Onward</h2>
+<div class="outline-text-2" id="text-orgc554cac">
 <p>
 The <a href="../double-bubble-sort/">final post in this series</a> (maybe) will look at a variation on the Bubble Sort that can improve the performance in special cases.
 </p>

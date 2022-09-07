@@ -18,7 +18,7 @@
 #+END_SRC
 This is a continuation of a {{% lancelot "series on the Bubble Sort" %}}the-bubble-sort{{% /lancelot %}}. In the {{% lancelot "previous post" %}}bubble-sort-the-implementation{{% /lancelot %}} I made an implementation of the Bubble Sort in python. In this post I'll run it with inputs of varying sizes to see how its runtime changes as well as do a plot to get a sense of how it rearranges the items its sorting as it works.
 * An Empirical Look
-    The math is nice and all, but let's do some counting. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps. In this case we could calculate the comparisons pretty easily, but to make sure I don't mess up the math I'll just grab it.
+    Using math to figure out the number of comparisons is nice and all, but let's do some counting using real code. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps.
 ** Some Setup
 #+begin_src python :results none
 # python
@@ -54,7 +54,7 @@ numba_random = default_rng(2021)
 #+end_src
 
 ** A Counter
-   This is going to be a reimplementation of the Bubble Sort function but with variables added to keep track of the counts. I originally did this as class-based so I could re-use the code but once I switched from pypy to numba that started to get problematic, and the functions are short anyway so I guess it's all the same.
+   This is going to be a reimplementation of the Bubble Sort function but with variables added to keep track of the counts. I originally did this class-based so I could re-use the code but once I switched from pypy to numba that started to get problematic, and the functions are short anyway so I guess it's all the same.
 
 *** Some Types
 
@@ -275,7 +275,7 @@ print(output)
 </object>
 #+end_export
 
-The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of swaps, and the bottom line (blue) is the number of comparisons. If you hover over the lines you can see that each line is roughly double the one below it - there are twice as many comparisons as swaps for a given input and \(n^2\) is twice as big as the comparison count for a given input.
+The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of comparisons, and the bottom line (blue) is the number of swaps. If you hover over the lines you can see that each line is roughly double the one below it - there are around twice as many comparisons as swaps for a given input and \(n^2\) is around twice as big as the comparison count for a given input.
 ** Swaps
 
    The comparisons and swaps are pretty much what we expected to see, they just confirm the theoretical assessment, but now let's look at plotting the swaps as they occur to see if we can understand what the bubble sort is doing.
@@ -323,7 +323,7 @@ print(output)
 
 HoloViews seems to not let you set the Tooltips if you use multiple columns, which is why I went through all the rigamarole of melting it. If you just plot it as the DataFrame with each column being one of the tracked locations for a sort value (e.g. the column name is '1' and the rows are the positions in the array at each swap) then the plot comes out okay, but the labels are kind of confusing.
 
-Looking at the plot, though, this does seem to be a useful way to figure out what's going on. If you look at the largest unsorted values you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (0 and 1) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down and being adjacent so they would be swapped to get into the correct order.
+The plot is hopefully a useful way to figure out what's going on. If you look at the unsorted values you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (1 and 2) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down.
 *** Worst Case
 
 The random-input gives an interesting view of how the algorithm might work in practice, but let's look at the worst-case input where the values are in the opposite of the sorted order.
@@ -358,7 +358,7 @@ print(output)
 </object>
 #+end_export
 
-This image gives an even better sense of the way that the bubble sort works. Since it emphasizes left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
+This image gives an even better sense of the way that the bubble sort works. Since the Bubble Sort uses a left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
 
 * Onward
   The {{% lancelot "final post in this series" %}}double-bubble-sort{{% /lancelot %}} (maybe) will look at a variation on the Bubble Sort that can improve the performance in special cases.

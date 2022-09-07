@@ -537,61 +537,61 @@ Well, I think I've beaten this dead horse enough for now. The overview for all t
 <div id="text-table-of-contents">
 <ul>
 <li>
-<a href="posts/bubble-sort-an-empirical-look/#org0d186b5">An Empirical Look</a>
+<a href="posts/bubble-sort-an-empirical-look/#org348427b">An Empirical Look</a>
 <ul>
 <li>
-<a href="posts/bubble-sort-an-empirical-look/#orgae02c70">Some Setup</a>
+<a href="posts/bubble-sort-an-empirical-look/#org7503fa2">Some Setup</a>
 <ul>
-<li><a href="posts/bubble-sort-an-empirical-look/#orgd74ecca">Stuff For Later</a></li>
-<li><a href="posts/bubble-sort-an-empirical-look/#org01ca07f">Numba  Random</a></li>
-</ul>
-</li>
-<li>
-<a href="posts/bubble-sort-an-empirical-look/#org10db945">A Counter</a>
-<ul>
-<li><a href="posts/bubble-sort-an-empirical-look/#orga912ee8">Some Types</a></li>
-<li><a href="posts/bubble-sort-an-empirical-look/#orgadc2c9f">The Sorting Function (With Counts)</a></li>
+<li><a href="posts/bubble-sort-an-empirical-look/#org0e28456">Stuff For Later</a></li>
+<li><a href="posts/bubble-sort-an-empirical-look/#orgb2afa11">Numba  Random</a></li>
 </ul>
 </li>
 <li>
-<a href="posts/bubble-sort-an-empirical-look/#org6db7908">Testing the Counter</a>
+<a href="posts/bubble-sort-an-empirical-look/#org725fcd3">A Counter</a>
 <ul>
-<li><a href="posts/bubble-sort-an-empirical-look/#org23a02d9">A Random Input</a></li>
-<li><a href="posts/bubble-sort-an-empirical-look/#org7bcb98c">The Worst Case</a></li>
-</ul>
-</li>
-<li><a href="posts/bubble-sort-an-empirical-look/#orgf769aef">The Tracker</a></li>
-<li>
-<a href="posts/bubble-sort-an-empirical-look/#orgb3451b6">Try Them Out</a>
-<ul>
-<li><a href="posts/bubble-sort-an-empirical-look/#org96af96e">Comparisons</a></li>
+<li><a href="posts/bubble-sort-an-empirical-look/#orgf0749d6">Some Types</a></li>
+<li><a href="posts/bubble-sort-an-empirical-look/#orge358833">The Sorting Function (With Counts)</a></li>
 </ul>
 </li>
 <li>
-<a href="posts/bubble-sort-an-empirical-look/#org5e72e03">Swaps</a>
+<a href="posts/bubble-sort-an-empirical-look/#org08850d2">Testing the Counter</a>
 <ul>
-<li><a href="posts/bubble-sort-an-empirical-look/#orge736be4">Worst Case</a></li>
+<li><a href="posts/bubble-sort-an-empirical-look/#orgb6b06a4">A Random Input</a></li>
+<li><a href="posts/bubble-sort-an-empirical-look/#org12cb152">The Worst Case</a></li>
+</ul>
+</li>
+<li><a href="posts/bubble-sort-an-empirical-look/#org249ec20">The Tracker</a></li>
+<li>
+<a href="posts/bubble-sort-an-empirical-look/#org00b8578">Try Them Out</a>
+<ul>
+<li><a href="posts/bubble-sort-an-empirical-look/#orgbdcfb00">Comparisons</a></li>
+</ul>
+</li>
+<li>
+<a href="posts/bubble-sort-an-empirical-look/#org2fc0cb9">Swaps</a>
+<ul>
+<li><a href="posts/bubble-sort-an-empirical-look/#org26110b9">Worst Case</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="posts/bubble-sort-an-empirical-look/#orgaeb14d2">Onward</a></li>
+<li><a href="posts/bubble-sort-an-empirical-look/#orgc554cac">Onward</a></li>
 </ul>
 </div>
 </div>
 <p>
 This is a continuation of a <a href="posts/the-bubble-sort/">series on the Bubble Sort</a>. In the <a href="posts/bubble-sort-the-implementation/">previous post</a> I made an implementation of the Bubble Sort in python. In this post I'll run it with inputs of varying sizes to see how its runtime changes as well as do a plot to get a sense of how it rearranges the items its sorting as it works.
 </p>
-<div id="outline-container-org0d186b5" class="outline-2">
-<h2 id="org0d186b5">An Empirical Look</h2>
-<div class="outline-text-2" id="text-org0d186b5">
+<div id="outline-container-org348427b" class="outline-2">
+<h2 id="org348427b">An Empirical Look</h2>
+<div class="outline-text-2" id="text-org348427b">
 <p>
-The math is nice and all, but let's do some counting. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps. In this case we could calculate the comparisons pretty easily, but to make sure I don't mess up the math I'll just grab it.
+Using math to figure out the number of comparisons is nice and all, but let's do some counting using real code. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps.
 </p>
 </div>
-<div id="outline-container-orgae02c70" class="outline-3">
-<h3 id="orgae02c70">Some Setup</h3>
-<div class="outline-text-3" id="text-orgae02c70">
+<div id="outline-container-org7503fa2" class="outline-3">
+<h3 id="org7503fa2">Some Setup</h3>
+<div class="outline-text-3" id="text-org7503fa2">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
@@ -613,9 +613,9 @@ The math is nice and all, but let's do some counting. I'm going to re-implement 
 <span class="kn">from</span> <span class="nn">graeae</span> <span class="kn">import</span> <span class="n">EmbedHoloviews</span><span class="p">,</span> <span class="n">Timer</span>
 </pre></div>
 </div>
-<div id="outline-container-orgd74ecca" class="outline-4">
-<h4 id="orgd74ecca">Stuff For Later</h4>
-<div class="outline-text-4" id="text-orgd74ecca">
+<div id="outline-container-org0e28456" class="outline-4">
+<h4 id="org0e28456">Stuff For Later</h4>
+<div class="outline-text-4" id="text-org0e28456">
 <div class="highlight"><pre><span></span><span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
 <span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"bubble-sort-an-empirical-look"</span>
 <span class="n">PATH</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
@@ -623,26 +623,26 @@ The math is nice and all, but let's do some counting. I'm going to re-implement 
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org01ca07f" class="outline-4">
-<h4 id="org01ca07f">Numba  Random</h4>
-<div class="outline-text-4" id="text-org01ca07f">
+<div id="outline-container-orgb2afa11" class="outline-4">
+<h4 id="orgb2afa11">Numba  Random</h4>
+<div class="outline-text-4" id="text-orgb2afa11">
 <div class="highlight"><pre><span></span><span class="n">numba_random</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="mi">2021</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org10db945" class="outline-3">
-<h3 id="org10db945">A Counter</h3>
-<div class="outline-text-3" id="text-org10db945">
+<div id="outline-container-org725fcd3" class="outline-3">
+<h3 id="org725fcd3">A Counter</h3>
+<div class="outline-text-3" id="text-org725fcd3">
 <p>
-This is going to be a reimplementation of the Bubble Sort function but with variables added to keep track of the counts. I originally did this as class-based so I could re-use the code but once I switched from pypy to numba that started to get problematic, and the functions are short anyway so I guess it's all the same.
+This is going to be a reimplementation of the Bubble Sort function but with variables added to keep track of the counts. I originally did this class-based so I could re-use the code but once I switched from pypy to numba that started to get problematic, and the functions are short anyway so I guess it's all the same.
 </p>
 </div>
 
-<div id="outline-container-orga912ee8" class="outline-4">
-<h4 id="orga912ee8">Some Types</h4>
-<div class="outline-text-4" id="text-orga912ee8">
+<div id="outline-container-orgf0749d6" class="outline-4">
+<h4 id="orgf0749d6">Some Types</h4>
+<div class="outline-text-4" id="text-orgf0749d6">
 <div class="highlight"><pre><span></span><span class="n">ElementCount</span> <span class="o">=</span> <span class="nb">int</span>
 <span class="n">ComparisonCount</span> <span class="o">=</span> <span class="nb">int</span>
 <span class="n">SwapCount</span> <span class="o">=</span> <span class="nb">int</span>
@@ -658,9 +658,9 @@ This is going to be a reimplementation of the Bubble Sort function but with vari
 </div>
 </div>
 
-<div id="outline-container-orgadc2c9f" class="outline-4">
-<h4 id="orgadc2c9f">The Sorting Function (With Counts)</h4>
-<div class="outline-text-4" id="text-orgadc2c9f">
+<div id="outline-container-orge358833" class="outline-4">
+<h4 id="orge358833">The Sorting Function (With Counts)</h4>
+<div class="outline-text-4" id="text-orge358833">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">bubble</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counts</span><span class="p">:</span>
     <span class="sd">"""Sorts the list in place</span>
 
@@ -690,9 +690,9 @@ One thing to note is that in the algorithm the outer loop stops at \(n-2\), whic
 </div>
 </div>
 </div>
-<div id="outline-container-org6db7908" class="outline-3">
-<h3 id="org6db7908">Testing the Counter</h3>
-<div class="outline-text-3" id="text-org6db7908">
+<div id="outline-container-org08850d2" class="outline-3">
+<h3 id="org08850d2">Testing the Counter</h3>
+<div class="outline-text-3" id="text-org08850d2">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_non_decreasing</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">"""Checks that all the elements in the list are non-decreasing</span>
 
@@ -711,9 +711,9 @@ One thing to note is that in the algorithm the outer loop stops at \(n-2\), whic
 </pre></div>
 </div>
 
-<div id="outline-container-org23a02d9" class="outline-4">
-<h4 id="org23a02d9">A Random Input</h4>
-<div class="outline-text-4" id="text-org23a02d9">
+<div id="outline-container-orgb6b06a4" class="outline-4">
+<h4 id="orgb6b06a4">A Random Input</h4>
+<div class="outline-text-4" id="text-orgb6b06a4">
 <p>
 Because we aren't using any kind of short-circuiting to stop once the data is sorted, it will always loop \(\Omega(n^2)\), but the number of swaps will depend on the input.
 </p>
@@ -731,9 +731,9 @@ Because we aren't using any kind of short-circuiting to stop once the data is so
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org7bcb98c" class="outline-4">
-<h4 id="org7bcb98c">The Worst Case</h4>
-<div class="outline-text-4" id="text-org7bcb98c">
+<div id="outline-container-org12cb152" class="outline-4">
+<h4 id="org12cb152">The Worst Case</h4>
+<div class="outline-text-4" id="text-org12cb152">
 <p>
 In the worst case where it's in the exact opposite sorted order (non-increasing instead of non-decreasing) the number of comparisons should equaly the number of swaps.
 </p>
@@ -747,9 +747,9 @@ In the worst case where it's in the exact opposite sorted order (non-increasing 
 </div>
 </div>
 
-<div id="outline-container-orgf769aef" class="outline-3">
-<h3 id="orgf769aef">The Tracker</h3>
-<div class="outline-text-3" id="text-orgf769aef">
+<div id="outline-container-org249ec20" class="outline-3">
+<h3 id="org249ec20">The Tracker</h3>
+<div class="outline-text-3" id="text-org249ec20">
 <p>
 To visualize what the sort is doing I'm going to update the bubble sort to keep track of the order of the items as it's being sorted. I'm using a dictionary to map the list values to their locations so we can't use inputs where there are repeated elements or more than one list of locations will be mapped to a element value.
 </p>
@@ -806,13 +806,13 @@ First a little sanity check just to make sure it still works.
 </div>
 </div>
 
-<div id="outline-container-orgb3451b6" class="outline-3">
-<h3 id="orgb3451b6">Try Them Out</h3>
-<div class="outline-text-3" id="text-orgb3451b6">
+<div id="outline-container-org00b8578" class="outline-3">
+<h3 id="org00b8578">Try Them Out</h3>
+<div class="outline-text-3" id="text-org00b8578">
 </div>
-<div id="outline-container-org96af96e" class="outline-4">
-<h4 id="org96af96e">Comparisons</h4>
-<div class="outline-text-4" id="text-org96af96e">
+<div id="outline-container-orgbdcfb00" class="outline-4">
+<h4 id="orgbdcfb00">Comparisons</h4>
+<div class="outline-text-4" id="text-orgbdcfb00">
 <p>
 Let's look at how the comparisons and swaps change as the input gets bigger. To speed this up I'm going to run the sort in numba.
 </p>
@@ -885,14 +885,14 @@ Now we'll plot it.
 </object>
 
 <p>
-The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of swaps, and the bottom line (blue) is the number of comparisons. If you hover over the lines you can see that each line is roughly double the one below it - there are twice as many comparisons as swaps for a given input and \(n^2\) is twice as big as the comparison count for a given input.
+The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of comparisons, and the bottom line (blue) is the number of swaps. If you hover over the lines you can see that each line is roughly double the one below it - there are around twice as many comparisons as swaps for a given input and \(n^2\) is around twice as big as the comparison count for a given input.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org5e72e03" class="outline-3">
-<h3 id="org5e72e03">Swaps</h3>
-<div class="outline-text-3" id="text-org5e72e03">
+<div id="outline-container-org2fc0cb9" class="outline-3">
+<h3 id="org2fc0cb9">Swaps</h3>
+<div class="outline-text-3" id="text-org2fc0cb9">
 <p>
 The comparisons and swaps are pretty much what we expected to see, they just confirm the theoretical assessment, but now let's look at plotting the swaps as they occur to see if we can understand what the bubble sort is doing.
 </p>
@@ -938,12 +938,12 @@ HoloViews seems to not let you set the Tooltips if you use multiple columns, whi
 </p>
 
 <p>
-Looking at the plot, though, this does seem to be a useful way to figure out what's going on. If you look at the largest unsorted values you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (0 and 1) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down and being adjacent so they would be swapped to get into the correct order.
+The plot is hopefully a useful way to figure out what's going on. If you look at the unsorted values you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (1 and 2) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down.
 </p>
 </div>
-<div id="outline-container-orge736be4" class="outline-4">
-<h4 id="orge736be4">Worst Case</h4>
-<div class="outline-text-4" id="text-orge736be4">
+<div id="outline-container-org26110b9" class="outline-4">
+<h4 id="org26110b9">Worst Case</h4>
+<div class="outline-text-4" id="text-org26110b9">
 <p>
 The random-input gives an interesting view of how the algorithm might work in practice, but let's look at the worst-case input where the values are in the opposite of the sorted order.
 </p>
@@ -972,16 +972,16 @@ The random-input gives an interesting view of how the algorithm might work in pr
 </object>
 
 <p>
-This image gives an even better sense of the way that the bubble sort works. Since it emphasizes left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
+This image gives an even better sense of the way that the bubble sort works. Since the Bubble Sort uses a left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
 </p>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgaeb14d2" class="outline-2">
-<h2 id="orgaeb14d2">Onward</h2>
-<div class="outline-text-2" id="text-orgaeb14d2">
+<div id="outline-container-orgc554cac" class="outline-2">
+<h2 id="orgc554cac">Onward</h2>
+<div class="outline-text-2" id="text-orgc554cac">
 <p>
 The <a href="posts/double-bubble-sort/">final post in this series</a> (maybe) will look at a variation on the Bubble Sort that can improve the performance in special cases.
 </p>
@@ -1004,32 +1004,32 @@ The <a href="posts/double-bubble-sort/">final post in this series</a> (maybe) wi
 <div id="text-table-of-contents">
 <ul>
 <li>
-<a href="posts/bubble-sort-the-implementation/#orgaa36b89">Some Setup</a>
+<a href="posts/bubble-sort-the-implementation/#org4ba14c9">Some Setup</a>
 <ul>
-<li><a href="posts/bubble-sort-the-implementation/#org427e725">Imports</a></li>
+<li><a href="posts/bubble-sort-the-implementation/#org1f857aa">Imports</a></li>
 </ul>
 </li>
 <li>
-<a href="posts/bubble-sort-the-implementation/#org8aa05e7">Bubble Sort</a>
+<a href="posts/bubble-sort-the-implementation/#orgdc4422b">Bubble Sort</a>
 <ul>
-<li><a href="posts/bubble-sort-the-implementation/#org80fd10c">The Implementation</a></li>
-<li><a href="posts/bubble-sort-the-implementation/#org8ea9d8e">Try It Out</a></li>
+<li><a href="posts/bubble-sort-the-implementation/#orgefce641">The Implementation</a></li>
+<li><a href="posts/bubble-sort-the-implementation/#org3f73587">Try It Out</a></li>
 </ul>
 </li>
-<li><a href="posts/bubble-sort-the-implementation/#orgb0a89a9">Up Next</a></li>
+<li><a href="posts/bubble-sort-the-implementation/#orgfb594c0">Up Next</a></li>
 </ul>
 </div>
 </div>
 <p>
 This is part of a <a href="posts/the-bubble-sort/">series on Bubble Sort</a> that began with a look at <a href="posts/bubble-sort-the-algorithm/">the Bubble Sort Algorithm</a> and continues now with a python translation of the algorithm.
 </p>
-<div id="outline-container-orgaa36b89" class="outline-2">
-<h2 id="orgaa36b89">Some Setup</h2>
-<div class="outline-text-2" id="text-orgaa36b89">
+<div id="outline-container-org4ba14c9" class="outline-2">
+<h2 id="org4ba14c9">Some Setup</h2>
+<div class="outline-text-2" id="text-org4ba14c9">
 </div>
-<div id="outline-container-org427e725" class="outline-3">
-<h3 id="org427e725">Imports</h3>
-<div class="outline-text-3" id="text-org427e725">
+<div id="outline-container-org1f857aa" class="outline-3">
+<h3 id="org1f857aa">Imports</h3>
+<div class="outline-text-3" id="text-org1f857aa">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">choices</span>
 
@@ -1039,13 +1039,13 @@ This is part of a <a href="posts/the-bubble-sort/">series on Bubble Sort</a> tha
 </div>
 </div>
 </div>
-<div id="outline-container-org8aa05e7" class="outline-2">
-<h2 id="org8aa05e7">Bubble Sort</h2>
-<div class="outline-text-2" id="text-org8aa05e7">
+<div id="outline-container-orgdc4422b" class="outline-2">
+<h2 id="orgdc4422b">Bubble Sort</h2>
+<div class="outline-text-2" id="text-orgdc4422b">
 </div>
-<div id="outline-container-org80fd10c" class="outline-3">
-<h3 id="org80fd10c">The Implementation</h3>
-<div class="outline-text-3" id="text-org80fd10c">
+<div id="outline-container-orgefce641" class="outline-3">
+<h3 id="orgefce641">The Implementation</h3>
+<div class="outline-text-3" id="text-orgefce641">
 <p>
 Here's a straight-forward translation of the pseudocode to python.
 </p>
@@ -1071,9 +1071,9 @@ Here's a straight-forward translation of the pseudocode to python.
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org8ea9d8e" class="outline-3">
-<h3 id="org8ea9d8e">Try It Out</h3>
-<div class="outline-text-3" id="text-org8ea9d8e">
+<div id="outline-container-org3f73587" class="outline-3">
+<h3 id="org3f73587">Try It Out</h3>
+<div class="outline-text-3" id="text-org3f73587">
 <div class="highlight"><pre><span></span><span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">bubble_sort</span><span class="p">(</span><span class="n">inputs</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 
@@ -1089,9 +1089,9 @@ Well, that wasn't so exciting, but that's because I'm going to look more at how 
 </div>
 </div>
 
-<div id="outline-container-orgb0a89a9" class="outline-2">
-<h2 id="orgb0a89a9">Up Next</h2>
-<div class="outline-text-2" id="text-orgb0a89a9">
+<div id="outline-container-orgfb594c0" class="outline-2">
+<h2 id="orgfb594c0">Up Next</h2>
+<div class="outline-text-2" id="text-orgfb594c0">
 <p>
 In the <a href="posts/bubble-sort-an-empirical-look/">next post</a> I'll run the function over some inputs to see how it performs.
 </p>
@@ -1262,21 +1262,33 @@ This is part of a <a href="posts/the-bubble-sort/">series on Bubble Sort</a>. Mo
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="posts/bubble-sort-the-algorithm/#orgc74e17a">The Parts</a></li>
-<li><a href="posts/bubble-sort-the-algorithm/#org5190941">The Algorithm</a></li>
+<li><a href="posts/bubble-sort-the-algorithm/#org5828f96">The Parts</a></li>
 <li>
-<a href="posts/bubble-sort-the-algorithm/#orgab13918">Assessing the Damage</a>
+<a href="posts/bubble-sort-the-algorithm/#org4aa46a5">The Algorithm</a>
+<ul>
+<li><a href="posts/bubble-sort-the-algorithm/#org9145ecf">Pseudocode</a></li>
+<li><a href="posts/bubble-sort-the-algorithm/#org787688b">Diagram</a></li>
+</ul>
+</li>
+<li>
+<a href="posts/bubble-sort-the-algorithm/#orgf4df854">A Simple Example</a>
+<ul>
+<li><a href="posts/bubble-sort-the-algorithm/#org1180558">As a Table</a></li>
+</ul>
+</li>
+<li>
+<a href="posts/bubble-sort-the-algorithm/#org39e310c">Assessing the Damage</a>
 <ul>
 <li>
 <ul>
-<li><a href="posts/bubble-sort-the-algorithm/#orgac71bde">Comparisons</a></li>
-<li><a href="posts/bubble-sort-the-algorithm/#org311da9a">Swaps</a></li>
+<li><a href="posts/bubble-sort-the-algorithm/#org427c63f">Comparisons</a></li>
+<li><a href="posts/bubble-sort-the-algorithm/#orgf7c2205">Swaps</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="posts/bubble-sort-the-algorithm/#orgaf25f54">Onward</a></li>
-<li><a href="posts/bubble-sort-the-algorithm/#org3bafb7c">Sources</a></li>
+<li><a href="posts/bubble-sort-the-algorithm/#org5651f9a">Onward</a></li>
+<li><a href="posts/bubble-sort-the-algorithm/#orgbba1386">Sources</a></li>
 </ul>
 </div>
 </div>
@@ -1284,13 +1296,9 @@ This is part of a <a href="posts/the-bubble-sort/">series on Bubble Sort</a>. Mo
 This is part of a <a href="posts/the-bubble-sort/">series on the Bubble Sort</a>. In this post we'll look at the algorithm without worrying about the implementation details.
 </p>
 
-<p>
-\(\def\sc#1{\dosc#1\csod} \def\dosc#1#2\csod{{\rm #1{\small #2}}}\)
-</p>
-
-<div id="outline-container-orgc74e17a" class="outline-2">
-<h2 id="orgc74e17a">The Parts</h2>
-<div class="outline-text-2" id="text-orgc74e17a">
+<div id="outline-container-org5828f96" class="outline-2">
+<h2 id="org5828f96">The Parts</h2>
+<div class="outline-text-2" id="text-org5828f96">
 <ul class="org-ul">
 <li>
 <b><b>Specification:</b></b> This is an instance of <a href="posts/the-sorting-problem/">The Sorting Problem</a>.</li>
@@ -1301,7 +1309,7 @@ This is part of a <a href="posts/the-bubble-sort/">series on the Bubble Sort</a>
 <li>
 <b><b>The Loop Invariant:</b></b> The number of times the loop has been performed (<i>k</i>) is the number of elements at the end of the items which are the largest elements in sorted order.</li>
 <li>
-<b><b>Main Steps:</b></b> Move from the start of the list swapping adjacent items that are out of order until the largest unsorted item is at the beginning of the sorted items.</li>
+<b><b>Main Steps:</b></b> Move from the start of the list swapping adjacent items that are out of order until the largest previously unsorted item is at the beginning of the sorted items.</li>
 <li>
 <b><b>Make Progress:</b></b> The main step reduces the unsorted by 1.</li>
 <li>
@@ -1327,9 +1335,13 @@ This is part of a <a href="posts/the-bubble-sort/">series on the Bubble Sort</a>
 </ul>
 </div>
 </div>
-<div id="outline-container-org5190941" class="outline-2">
-<h2 id="org5190941">The Algorithm</h2>
-<div class="outline-text-2" id="text-org5190941">
+<div id="outline-container-org4aa46a5" class="outline-2">
+<h2 id="org4aa46a5">The Algorithm</h2>
+<div class="outline-text-2" id="text-org4aa46a5">
+</div>
+<div id="outline-container-org9145ecf" class="outline-3">
+<h3 id="org9145ecf">Pseudocode</h3>
+<div class="outline-text-3" id="text-org9145ecf">
 <p>
 The Bubble Sort algorithm is a Brute-Force sort which works by repeatedly traversing the input array, checking adjacent values and swapping them if they are out of order. This has the effect of "bubbling-up" the largest unsorted value, thus the name, probably (see <a href="posts/bubble-sort-an-archeological-algorithmic-analysis/">Astrachan, 2003</a> for some history on it). Here's the algorithm in pseudocode.
 </p>
@@ -1362,9 +1374,308 @@ In translation, the \(i\) variable holds the amount of items at the end of the l
 </p>
 </div>
 </div>
-<div id="outline-container-orgab13918" class="outline-2">
-<h2 id="orgab13918">Assessing the Damage</h2>
-<div class="outline-text-2" id="text-orgab13918">
+
+<div id="outline-container-org787688b" class="outline-3">
+<h3 id="org787688b">Diagram</h3>
+<div class="outline-text-3" id="text-org787688b">
+<p>
+<img src="posts/bubble-sort-the-algorithm/bubble-sort.svg" alt="nil"></p>
+
+
+<p>
+The three colors in the diagram represent:
+</p>
+
+<ul class="org-ul">
+<li>Blue: The outer for-loop</li>
+<li>Red: The inner for-loop</li>
+<li>Green: The transitioning to and from the inner loop to the outer loop.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf4df854" class="outline-2">
+<h2 id="orgf4df854">A Simple Example</h2>
+<div class="outline-text-2" id="text-orgf4df854">
+<p>
+Let's step through how the Bubble Sort works with five items to sort.
+</p>
+
+<ul class="org-ul">
+<li>The Array To Sort: A = [4, 5, 2, 3, 1]</li>
+<li>n = 5</li>
+<li>n - 1 = 4</li>
+<li>n - 2 = 3</li>
+</ul>
+</div>
+
+<div id="outline-container-org1180558" class="outline-3">
+<h3 id="org1180558">As a Table</h3>
+<div class="outline-text-3" id="text-org1180558">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-right">
+<col class="org-left">
+<col class="org-right">
+<col class="org-left">
+<col class="org-right">
+<col class="org-left">
+<col class="org-right">
+<col class="org-left">
+<col class="org-right">
+<col class="org-left">
+<col class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right"># Sorted</th>
+<th scope="col" class="org-left">All Sorted?</th>
+<th scope="col" class="org-right">Last Unsorted</th>
+<th scope="col" class="org-left"> </th>
+<th scope="col" class="org-right"> </th>
+<th scope="col" class="org-left">Exit Inner Loop?</th>
+<th scope="col" class="org-right"> </th>
+<th scope="col" class="org-left"> </th>
+<th scope="col" class="org-right"> </th>
+<th scope="col" class="org-left">Swap?</th>
+<th scope="col" class="org-left"> </th>
+</tr>
+<tr>
+<th scope="col" class="org-right"><i>i</i></th>
+<th scope="col" class="org-left"><i>i == n - 1</i></th>
+<th scope="col" class="org-right"><i>n - 2 - i</i></th>
+<th scope="col" class="org-left"> </th>
+<th scope="col" class="org-right"><i>j</i></th>
+<th scope="col" class="org-left"><i>j &gt; n - 2 - i</i></th>
+<th scope="col" class="org-right"><i>A[j]</i></th>
+<th scope="col" class="org-left"> </th>
+<th scope="col" class="org-right"><i>A[j + 1]</i></th>
+<th scope="col" class="org-left"><i>A[j] &gt; A[j + 1]</i></th>
+<th scope="col" class="org-left"><i>A</i></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">\(\ne n - 1\)</td>
+<td class="org-right">3</td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">0</td>
+<td class="org-left"> </td>
+<td class="org-right">4</td>
+<td class="org-left">&lt;</td>
+<td class="org-right">5</td>
+<td class="org-left"> </td>
+<td class="org-left">4, 5, 2, 3, 1</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">1</td>
+<td class="org-left"> </td>
+<td class="org-right">5</td>
+<td class="org-left">&gt;</td>
+<td class="org-right">2</td>
+<td class="org-left">Swap</td>
+<td class="org-left">4, 2, 5, 3, 1</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">2</td>
+<td class="org-left"> </td>
+<td class="org-right">5</td>
+<td class="org-left">&gt;</td>
+<td class="org-right">3</td>
+<td class="org-left">Swap</td>
+<td class="org-left">4, 2, 3, 5, 1</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">3</td>
+<td class="org-left"> </td>
+<td class="org-right">5</td>
+<td class="org-left">&gt;</td>
+<td class="org-right">4</td>
+<td class="org-left">Swap</td>
+<td class="org-left">4, 2, 3, 1, 5</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">&lt;</td>
+<td class="org-right">4</td>
+<td class="org-left">Exit Loop</td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-left"> </td>
+</tr>
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">\(\ne n - 1\)</td>
+<td class="org-right">2</td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">0</td>
+<td class="org-left"> </td>
+<td class="org-right">4</td>
+<td class="org-left">&gt;</td>
+<td class="org-right">2</td>
+<td class="org-left">Swap</td>
+<td class="org-left">2, 4, 3, 1, 5</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">1</td>
+<td class="org-left"> </td>
+<td class="org-right">4</td>
+<td class="org-left">&gt;</td>
+<td class="org-right">3</td>
+<td class="org-left">Swap</td>
+<td class="org-left">2, 3, 4, 1, 5</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">2</td>
+<td class="org-left"> </td>
+<td class="org-right">4</td>
+<td class="org-left">&gt;</td>
+<td class="org-right">1</td>
+<td class="org-left">Swap</td>
+<td class="org-left">2, 3, 1, 4, 5</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">&lt;</td>
+<td class="org-right">3</td>
+<td class="org-left">Exit Loop</td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-left"> </td>
+</tr>
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">\(\ne n - 1\)</td>
+<td class="org-right">1</td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">0</td>
+<td class="org-left"> </td>
+<td class="org-right">2</td>
+<td class="org-left">&lt;</td>
+<td class="org-right">3</td>
+<td class="org-left"> </td>
+<td class="org-left">2, 3, 1, 4, 5</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">1</td>
+<td class="org-left"> </td>
+<td class="org-right">3</td>
+<td class="org-left">&gt;</td>
+<td class="org-right">1</td>
+<td class="org-left">Swap</td>
+<td class="org-left">2, 1, 3, 4, 5</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">&lt;</td>
+<td class="org-right">2</td>
+<td class="org-left">Exit Loop</td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-left"> </td>
+</tr>
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">\(\ne n - 1\)</td>
+<td class="org-right">0</td>
+<td class="org-left">\(\nless\)</td>
+<td class="org-right">0</td>
+<td class="org-left"> </td>
+<td class="org-right">2</td>
+<td class="org-left">&gt;</td>
+<td class="org-right">1</td>
+<td class="org-left">Swap</td>
+<td class="org-left">1, 2, 3, 4, 5</td>
+</tr>
+<tr>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left">&lt;</td>
+<td class="org-right">1</td>
+<td class="org-left">Exit Loop</td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-left"> </td>
+</tr>
+<tr>
+<td class="org-right">4</td>
+<td class="org-left">\(== n - 1\) (<b><b>Done</b></b>)</td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-right"> </td>
+<td class="org-left"> </td>
+<td class="org-left"> </td>
+</tr>
+</tbody>
+</table>
+<p>
+Some Column Notes:
+</p>
+
+<ul class="org-ul">
+<li>
+<i>i</i> is the count of items in the sorted section at the end of the array</li>
+<li>
+<i>i == n - 1</i>: When there's only one item left in the unsorted section there's nothing to swap so the array is sorted.</li>
+<li>
+<i>n - 2 - i</i> is the index of the item at the end of the unsorted section right before the sorted section of the array.</li>
+<li>
+<i>j &gt; n - 2 - i</i>: When <i>j</i> moves into the already sorted section restart the inner loop.</li>
+<li>
+<i>A[j] &gt; A[j + 1]</i>: If the item to the right of <i>j</i> is smaller than the item at <i>j</i> then swap them.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org39e310c" class="outline-2">
+<h2 id="org39e310c">Assessing the Damage</h2>
+<div class="outline-text-2" id="text-org39e310c">
 <p>
 Although it's nice to know that the sort works we're really not as concerned about how correct it is, as much as we are interested in how it performs. There's two things we can count:
 </p>
@@ -1378,18 +1689,18 @@ The fact that you have those two loops makes it pretty likely that it's going to
 </p>
 </div>
 
-<div id="outline-container-orgac71bde" class="outline-4">
-<h4 id="orgac71bde">Comparisons</h4>
-<div class="outline-text-4" id="text-orgac71bde">
+<div id="outline-container-org427c63f" class="outline-4">
+<h4 id="org427c63f">Comparisons</h4>
+<div class="outline-text-4" id="text-org427c63f">
 <p>
 The number of comparisons is equal to the number of times the loops run, so we get \(\Theta\left(n^2\right)\). I made some notes on how I got that in <a href="posts/bubble-sort-runtime-explained/">this post</a>.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org311da9a" class="outline-4">
-<h4 id="org311da9a">Swaps</h4>
-<div class="outline-text-4" id="text-org311da9a">
+<div id="outline-container-orgf7c2205" class="outline-4">
+<h4 id="orgf7c2205">Swaps</h4>
+<div class="outline-text-4" id="text-orgf7c2205">
 <p>
 The number of swaps will depend on how the inputs are arranged, but in the worst case where the array is sorted backwards, every comparison will produce a swap so you'll end up with the same bounds as the comparisons.
 </p>
@@ -1402,22 +1713,22 @@ S_{worst-case} &amp;= C(n)\\
 </div>
 </div>
 
-<div id="outline-container-orgaf25f54" class="outline-2">
-<h2 id="orgaf25f54">Onward</h2>
-<div class="outline-text-2" id="text-orgaf25f54">
+<div id="outline-container-org5651f9a" class="outline-2">
+<h2 id="org5651f9a">Onward</h2>
+<div class="outline-text-2" id="text-org5651f9a">
 <p>
 The <a href="posts/bubble-sort-the-implementation/">next post</a> will look at translating the algorithm to python.
 </p>
 </div>
 </div>
-<div id="outline-container-org3bafb7c" class="outline-2">
-<h2 id="org3bafb7c">Sources</h2>
-<div class="outline-text-2" id="text-org3bafb7c">
+<div id="outline-container-orgbba1386" class="outline-2">
+<h2 id="orgbba1386">Sources</h2>
+<div class="outline-text-2" id="text-orgbba1386">
 <ul class="org-ul">
 <li>(Levitin, 2007) <a href="posts/itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a>
 </li>
 <li>
-<a id="orgf8ed7b1"></a> (Astrachan, 2003) <a href="posts/bubble-sort-an-archeological-algorithmic-analysis/">Bubble Sort: An Archeological Algorithmic Analysis</a>
+<a id="orgd1169a5"></a> (Astrachan, 2003) <a href="posts/bubble-sort-an-archeological-algorithmic-analysis/">Bubble Sort: An Archeological Algorithmic Analysis</a>
 </li>
 </ul>
 <script>

@@ -3,7 +3,211 @@
  &lt;a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"&gt;
  &lt;img alt="Creative Commons License BY-NC-SA"
  style="border-width:0; margin-bottom:12px;"
- src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"&gt;&lt;/a&gt;</copyright><lastBuildDate>Wed, 20 Jul 2022 23:20:03 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Comparing Energy Prices</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="table-of-contents"&gt;
+ src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"&gt;&lt;/a&gt;</copyright><lastBuildDate>Wed, 07 Sep 2022 01:21:16 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>The Activity Selection Problem</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="table-of-contents"&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;div id="text-table-of-contents"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/#orgd48e4dc"&gt;What is the Activity Selection Problem?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/#orgca59225"&gt;The Greedy Choice&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/#org5838604"&gt;The Recursive Activity Selector&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/#org767a1a0"&gt;Padding The Start&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/#orgabb4fb6"&gt;The Iterative Activity Selector&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/#orgbd447f5"&gt;Sources&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-orgd48e4dc" class="outline-2"&gt;
+&lt;h2 id="orgd48e4dc"&gt;What is the Activity Selection Problem?&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgd48e4dc"&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;In this problem we have a set of &lt;i&gt;n&lt;/i&gt; activities \(S = \{a_1, a_2, \ldots, a_n\}\).&lt;/li&gt;
+&lt;li&gt;Assume the activities are sorted by increasing finish time&lt;/li&gt;
+&lt;li&gt;Each activity has a start time \(s_i\) and a finish time \(f_i\)&lt;/li&gt;
+&lt;li&gt;Only one activity can happen at a time.&lt;/li&gt;
+&lt;li&gt;Two activities are &lt;i&gt;compatible&lt;/i&gt; if the earlier event finishes before the start time of the other event.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;
+The problem we want to solve is finding the most compatible activities we can from our set of activities. This differs from a more common scheduling problem in that the times are fixed - we can't re-arrange activities to make them fit so they either can happen or they can't.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgca59225" class="outline-2"&gt;
+&lt;h2 id="orgca59225"&gt;The Greedy Choice&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgca59225"&gt;
+&lt;p&gt;
+&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/clrs/"&gt;CLRS&lt;/a&gt; goes into the more formal aspects of finding the optimal substructure and proving that a greedy strategy works, but in this case the reasoning is fairly intuitive (and I didn't find the proof so easy to follow) so I'll skip the formal stuff. The thing to recognize is just that the sooner the first activity you schedule finishes the more time there is for other activities. So if after each activity you pick you then pick the next compatible activity that finishes first you will be maximizing the number of activities that you can schedule.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org5838604" class="outline-2"&gt;
+&lt;h2 id="org5838604"&gt;The Recursive Activity Selector&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org5838604"&gt;
+&lt;pre id="recursive-activity-selector" style="display:hidden;"&gt;
+\begin{algorithm}
+\caption{Recursive Activity Selector}
+\begin{algorithmic}
+\REQUIRE The activities are sorted in non-decreasing order of finish time
+\INPUT $s$: The array of start times for the activities.
+\INPUT $f$: The array of finish times for the activities.
+\INPUT $k$: The last activity selected so far.
+\INPUT $n$: The number of activities.
+\OUTPUT The activities that maximize the number of compatible activities.
+\PROCEDURE{RecursiveActivitySelector}{$s, f, k, n$}
+
+\STATE \(m \gets k + 1\)
+
+\WHILE {\(m \le n\) and \(s[m] &amp;lt; f[k]\)}
+  \STATE \(m \gets m + 1\)
+\ENDWHILE
+
+\IF {\(m \le n\)}
+  \RETURN \(\{a_m\} \cup \) \textsc{RecursiveActivitySelector}(\(s, f, m, n\))
+\ELSE
+  \RETURN \{\}
+\ENDIF
+
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+&lt;/pre&gt;
+
+&lt;p&gt;
+&lt;b&gt;&lt;b&gt;Note:&lt;/b&gt;&lt;/b&gt; The activity set (\(\{a_1, a_2, \ldots, a_n\}\)) is treated as a global collection so it is used in the function but not passed in as an argument.
+&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org767a1a0" class="outline-3"&gt;
+&lt;h3 id="org767a1a0"&gt;Padding The Start&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org767a1a0"&gt;
+&lt;p&gt;
+Because the recursive algorithm is looking for the next earliest finish time after the first event we need to pad the activities with a dummy activity that has a finish time of 0 (\(f_0 = 0\)) and then when the function is first called the &lt;i&gt;k&lt;/i&gt; value is set to 0:
+&lt;/p&gt;
+
+&lt;p&gt;
+\[
+RecursiveActivitySelector(s, f, 0, n)
+\]
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgabb4fb6" class="outline-2"&gt;
+&lt;h2 id="orgabb4fb6"&gt;The Iterative Activity Selector&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgabb4fb6"&gt;
+&lt;pre id="greedy-activity-selector" style="display:hidden;"&gt;
+\begin{algorithm}
+\caption{Greedy Activity Selector}
+\begin{algorithmic}
+\REQUIRE The activities are sorted in non-decreasing order of finish time
+\INPUT $s$: The array of start times for the activities.
+\INPUT $f$: The array of finish times for the activities.
+\OUTPUT The activities that maximize the number of compatible activities.
+\PROCEDURE{GreedyActivitySelector}{\(s, f\)}
+
+\STATE \(n \gets s.length \)
+\STATE \(A \gets \{a_1\} \)
+\STATE \(k \gets 1 \)
+
+\FOR {\(m  \in \{2, \ldots, n \}\)}
+  \IF {\( s[m] \ge f[k] \)}
+    \STATE \(A \gets A \cup \{a_m\}\)
+    \STATE \(k \gets m \)
+  \ENDIF
+\ENDFOR
+
+\RETURN \(A\)
+\ENDPROCEDURE
+\end{algorithmic}
+\end{algorithm}
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgbd447f5" class="outline-2"&gt;
+&lt;h2 id="orgbd447f5"&gt;Sources&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgbd447f5"&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/clrs/"&gt;Introduction To Algorithms (CLRS)&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;script&gt;
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("recursive-activity-selector"));
+});
+&lt;/script&gt;
+
+&lt;script&gt;
+window.addEventListener('load', function () {
+    pseudocode.renderElement(document.getElementById("greedy-activity-selector"));
+});
+&lt;/script&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description><guid>https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/</guid><pubDate>Fri, 05 Aug 2022 00:25:35 GMT</pubDate></item><item><title>Weighted Completion Times</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/weighted-completion-times/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="table-of-contents"&gt;
+&lt;h2&gt;Table of Contents&lt;/h2&gt;
+&lt;div id="text-table-of-contents"&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/weighted-completion-times/#org8baa6f0"&gt;The Weighted Scheduling Problem&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/weighted-completion-times/#org6f7c8dd"&gt;Completion Time&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/weighted-completion-times/#org0b4548e"&gt;Greedy Metrics&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/weighted-completion-times/#orgad40e16"&gt;Source&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org8baa6f0" class="outline-2"&gt;
+&lt;h2 id="org8baa6f0"&gt;The Weighted Scheduling Problem&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org8baa6f0"&gt;
+&lt;p&gt;
+This is a look at the problem of arranging a schedule of jobs so that their completion times are lowest, while accounting for different priorities for each job.
+&lt;/p&gt;
+
+&lt;p&gt;
+&lt;b&gt;&lt;b&gt;Input:&lt;/b&gt;&lt;/b&gt; \(n\) jobs with positive lengths \(l_1, l_2, \ldots, l_n\) and positive weights \(w_1, w_2,\ldots,w_n\). The larger the weight, the higher the priority.
+&lt;/p&gt;
+
+&lt;p&gt;
+&lt;b&gt;&lt;b&gt;Output:&lt;/b&gt;&lt;/b&gt; A job sequence (the schedule) that minimizes the sum of the weight completion times \(w_1l_1 + w_2 l_2 + \cdots + w_n l_n\).
+&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org6f7c8dd" class="outline-3"&gt;
+&lt;h3 id="org6f7c8dd"&gt;Completion Time&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org6f7c8dd"&gt;
+&lt;p&gt;
+The output above is a little confusing (I'll have to re-write that later). What we're minimizing is the sum of &lt;i&gt;completion times&lt;/i&gt;. A job's completion time is the total of all the times for the jobs that precede it as well as the time to finish the job. This means the completion time for the first job is the time to run that job, the completion time for the second job is the time for the first job plus the time for the second job, and so on.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org0b4548e" class="outline-2"&gt;
+&lt;h2 id="org0b4548e"&gt;Greedy Metrics&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org0b4548e"&gt;
+&lt;p&gt;
+The greedy method for this problem involves finding a metric such that when the jobs are sorted by the metric they form the optimal schedule. One possible metric is the &lt;i&gt;Greedy Difference&lt;/i&gt; which is the weight for a job minus the time the job takes (\(w_i - l_i\)).
+&lt;/p&gt;
+
+&lt;p&gt;
+Another possible metric is the &lt;i&gt;Greedy Ratio&lt;/i&gt; which is the ratio of job-weight to job-length (\(\frac{w_i}{l_i}\)).
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-orgad40e16" class="outline-2"&gt;
+&lt;h2 id="orgad40e16"&gt;Source&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgad40e16"&gt;
+&lt;ul class="org-ul"&gt;
+&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/algorithms-illuminated-part-3/"&gt;Algorithms Illuminated - Part III: Greedy Algorithms and Dynamic Programming&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description><category>algorithms</category><category>greedy</category><category>optimization</category><guid>https://necromuralist.github.io/Bowling-For-Data/posts/weighted-completion-times/</guid><pubDate>Wed, 20 Jul 2022 23:33:47 GMT</pubDate></item><item><title>Comparing Energy Prices</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/comparing-energy-prices/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="table-of-contents"&gt;
 &lt;h2&gt;Table of Contents&lt;/h2&gt;
 &lt;div id="text-table-of-contents"&gt;
 &lt;ul&gt;
@@ -2924,908 +3128,4 @@ A 100 Watt Light bulb uses 8.64e+06 Joules per day.
 &lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/course-global-warming/"&gt;Global Warming I: The Science and Modeling of Climate Change&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
-&lt;/div&gt;</description><category>global warming</category><category>unit conversion</category><guid>https://necromuralist.github.io/Bowling-For-Data/posts/how-much-coal-to-power-a-light-bulb/</guid><pubDate>Thu, 16 Jun 2022 00:28:30 GMT</pubDate></item><item><title>The Rod Cutting Problem</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="table-of-contents"&gt;
-&lt;h2&gt;Table of Contents&lt;/h2&gt;
-&lt;div id="text-table-of-contents"&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org662aca4"&gt;The Rod Cutting Problem&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org6288f47"&gt;An Example&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#orgbbe9f12"&gt;Imports&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org6a0fa12"&gt;Brute Force&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org800859c"&gt;The CLRS Brute-Force Solution&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org61d2608"&gt;In Python&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org961d1ed"&gt;The First Example&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org3c331fc"&gt;Memoized Cut Rod&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#orgf90c9a5"&gt;Cut Rod Memoized&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#orgc7d1f94"&gt;Cut Rod Memoized Auxiliary&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org01f784c"&gt;Python Version&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org0b87082"&gt;Example&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org427e1ac"&gt;Non-Recursive Solution&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org48259a9"&gt;Python Version&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#orgf5c9fde"&gt;The Example Again&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#orga394b7f"&gt;Recovering the Cuts&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org99c2ed7"&gt;Pseudocode&lt;/a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#orgee17bea"&gt;Extended Bottoms-Up&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org53b2182"&gt;Printing the Solution&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org9c61e39"&gt;In Python&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org05024b8"&gt;CLRS Example&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/#org340b7f2"&gt;Sources&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id="outline-container-org662aca4" class="outline-2"&gt;
-&lt;h2 id="org662aca4"&gt;The Rod Cutting Problem&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-org662aca4"&gt;
-&lt;p&gt;
-The Rod Cutting Problem begins with the premise that we have a metal rod (or some other kind of rod that's sellable) of a given length (&lt;i&gt;n&lt;/i&gt;) and the price of a rod depends on the length so cutting the rod into shorter pieces will yield different total values - sometimes cutting a rod up make it more valuable than keeping it whole.
-&lt;/p&gt;
-
-&lt;p&gt;
-&lt;b&gt;&lt;b&gt;Goal:&lt;/b&gt;&lt;/b&gt; Cut the rod in such a way that you maximize the total value of the pieces.
-&lt;/p&gt;
-
-&lt;p&gt;
-To make this simpler we'll assume that lengths are always whole numbers (non-negative integers).
-&lt;/p&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org6288f47" class="outline-3"&gt;
-&lt;h3 id="org6288f47"&gt;An Example&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-org6288f47"&gt;
-&lt;p&gt;
-Say we have the following prices for different rod lengths.
-&lt;/p&gt;
-
-&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
-
-
-&lt;colgroup&gt;
-&lt;col class="org-left"&gt;
-
-&lt;col class="org-right"&gt;
-
-&lt;col class="org-right"&gt;
-
-&lt;col class="org-right"&gt;
-
-&lt;col class="org-right"&gt;
-
-&lt;col class="org-right"&gt;
-
-&lt;col class="org-right"&gt;
-
-&lt;col class="org-right"&gt;
-
-&lt;col class="org-right"&gt;
-&lt;/colgroup&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td class="org-left"&gt;Length&lt;/td&gt;
-&lt;td class="org-right"&gt;1&lt;/td&gt;
-&lt;td class="org-right"&gt;2&lt;/td&gt;
-&lt;td class="org-right"&gt;3&lt;/td&gt;
-&lt;td class="org-right"&gt;4&lt;/td&gt;
-&lt;td class="org-right"&gt;5&lt;/td&gt;
-&lt;td class="org-right"&gt;6&lt;/td&gt;
-&lt;td class="org-right"&gt;7&lt;/td&gt;
-&lt;td class="org-right"&gt;8&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td class="org-left"&gt;Value&lt;/td&gt;
-&lt;td class="org-right"&gt;1&lt;/td&gt;
-&lt;td class="org-right"&gt;5&lt;/td&gt;
-&lt;td class="org-right"&gt;8&lt;/td&gt;
-&lt;td class="org-right"&gt;9&lt;/td&gt;
-&lt;td class="org-right"&gt;10&lt;/td&gt;
-&lt;td class="org-right"&gt;17&lt;/td&gt;
-&lt;td class="org-right"&gt;17&lt;/td&gt;
-&lt;td class="org-right"&gt;20&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-
-&lt;p&gt;
-Now suppose we have a rod that's 10 units in length. what combination of cuts will give us the best outcome?
-&lt;/p&gt;
-
-&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
-
-
-&lt;colgroup&gt;
-&lt;col class="org-left"&gt;
-
-&lt;col class="org-left"&gt;
-
-&lt;col class="org-right"&gt;
-&lt;/colgroup&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th scope="col" class="org-left"&gt;cuts&lt;/th&gt;
-&lt;th scope="col" class="org-left"&gt;values by piece&lt;/th&gt;
-&lt;th scope="col" class="org-right"&gt;total value&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td class="org-left"&gt;10 pieces of length 1&lt;/td&gt;
-&lt;td class="org-left"&gt;10 x 1&lt;/td&gt;
-&lt;td class="org-right"&gt;10&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td class="org-left"&gt;2 pieces of length 5&lt;/td&gt;
-&lt;td class="org-left"&gt;2 x 10&lt;/td&gt;
-&lt;td class="org-right"&gt;20&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td class="org-left"&gt;1 piece 8, 1 piece 2&lt;/td&gt;
-&lt;td class="org-left"&gt;20 + 5&lt;/td&gt;
-&lt;td class="org-right"&gt;25&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td class="org-left"&gt;1 piece 6, 1 piece 4&lt;/td&gt;
-&lt;td class="org-left"&gt;17 + 9&lt;/td&gt;
-&lt;td class="org-right"&gt;26&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-
-&lt;p&gt;
-Out of these four possible combinations, 26 is the most we could get.
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-orgbbe9f12" class="outline-3"&gt;
-&lt;h3 id="orgbbe9f12"&gt;Imports&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-orgbbe9f12"&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# from pypi&lt;/span&gt;
-&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;expects&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;contain_exactly&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;equal&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;expect&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id="outline-container-org6a0fa12" class="outline-2"&gt;
-&lt;h2 id="org6a0fa12"&gt;Brute Force&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-org6a0fa12"&gt;
-&lt;p&gt;
-In the previous example we could choose to make one cut, splitting our rod into 6 units and 4 units, and it would give us the highest value of the four combinations that we looked at. but what if we want to know the highest value out of &lt;i&gt;all&lt;/i&gt; the combinations? Let's start by looking at a Brute-force approach to solving the problem.
-&lt;/p&gt;
-
-&lt;p&gt;
-A Brute Force approach to finding the maximal cuts might do the following:
-&lt;/p&gt;
-
-&lt;ul class="org-ul"&gt;
-&lt;li&gt;Try every possible combination of cuts&lt;/li&gt;
-&lt;li&gt;Evaluate the total values for each of the combinations&lt;/li&gt;
-&lt;li&gt;Pick the combination with the highest total value&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;
-What will the runtime for this approach be? Let's start with two ideas:
-&lt;/p&gt;
-
-&lt;ul class="org-ul"&gt;
-&lt;li&gt;Each cut location can have two values (cut, don't cut) so it is a binary value&lt;/li&gt;
-&lt;li&gt;Given a rod of length &lt;i&gt;n&lt;/i&gt;, there are &lt;i&gt;n - 1&lt;/i&gt; possible cuts you can make (e.g. if your rod has length three, you can make two cuts (at length 1 and length 2) to give you three pieces)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;
-Although we are concerned with cuts, to get the total number of combinations you can think of each cut as a binary digit - (e.g. cut at length 1, don't cut at length 2 could be written as two digits: &lt;code&gt;10&lt;/code&gt;) and since the number of combinations of binary digits is \(2^{\textit{number of digits}}\), this means that if we do an exhaustive exploration of the combinations we need to check
-&lt;/p&gt;
-
-\begin{align}
-2^{n - 1} &amp;amp;= \left(2^{-1}\right)\left(2^n\right) \\
-&amp;amp;= \frac{1}{2}2^n\\
-
-T(n) &amp;amp;= \Theta\left(2^n\right)
-\end{align}
-
-&lt;p&gt;
-So we have a problem with exponential growth.
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id="outline-container-org800859c" class="outline-3"&gt;
-&lt;h3 id="org800859c"&gt;The CLRS Brute-Force Solution&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-org800859c"&gt;
-&lt;p&gt;
-First, let's define some variables.
-&lt;/p&gt;
-
-&lt;table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides"&gt;
-
-
-&lt;colgroup&gt;
-&lt;col class="org-left"&gt;
-
-&lt;col class="org-left"&gt;
-&lt;/colgroup&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th scope="col" class="org-left"&gt;Variable&lt;/th&gt;
-&lt;th scope="col" class="org-left"&gt;Representing&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td class="org-left"&gt;\(i\)&lt;/td&gt;
-&lt;td class="org-left"&gt;Number of units of length of the rod&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td class="org-left"&gt;\(p_i\)&lt;/td&gt;
-&lt;td class="org-left"&gt;Price for rod of length \(i\)&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td class="org-left"&gt;\(r_n\)&lt;/td&gt;
-&lt;td class="org-left"&gt;Revenue for rod segments with total length \(n\)&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td class="org-left"&gt;\(q\)&lt;/td&gt;
-&lt;td class="org-left"&gt;Maximum possible revenue for a particular length&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;
-And now a little pseudocode.
-&lt;/p&gt;
-
-&lt;pre id="cut-rod-brute-force" style="display:hidden;"&gt;
-\begin{algorithm}
-\caption{Brute-Force Rod-Cutting}
-\begin{algorithmic}
-\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
-\INPUT Integer $n$ the length of the rod
-\OUTPUT $q$ the highest value for the combinations of rods totaling $n$ in length
-
-\PROCEDURE{CutRodBruteForce}{$p, n$}
-\IF {$n = 0$}
-  \RETURN 0
-\ENDIF
-
-\STATE $q \gets -\inf$
-\FOR {$i \in \{1 \ldots n\}$}
-  \STATE $q \gets $ \textsc{Max}($q, p[i]$ + \textsc{CutRodBruteForce}($p, n - i$))
-\ENDFOR
-\RETURN $q$
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org61d2608" class="outline-4"&gt;
-&lt;h4 id="org61d2608"&gt;In Python&lt;/h4&gt;
-&lt;div class="outline-text-4" id="text-org61d2608"&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;cut_rod_brute_force&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="sd"&gt;"""Finds the maximum value you can extract from the rod&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Args:&lt;/span&gt;
-&lt;span class="sd"&gt;     prices: map of length to price&lt;/span&gt;
-&lt;span class="sd"&gt;     length: total length of the rod before cutting&lt;/span&gt;
-&lt;span class="sd"&gt;     count: number of calls made&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
-&lt;span class="sd"&gt;     the best total price you would get from cutting and selling the rod&lt;/span&gt;
-&lt;span class="sd"&gt;    """&lt;/span&gt;
-    &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-	&lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;
-
-    &lt;span class="n"&gt;best_total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"-inf"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-	&lt;span class="n"&gt;next_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cut_rod_brute_force&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
-	    &lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-	&lt;span class="n"&gt;best_total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-			 &lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;next_cut&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;next_total&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;
-This naively assumes that there's an entry in &lt;code&gt;prices&lt;/code&gt; for every length from 1 to the total length so price-lists need to be padded if there's missing lengths, as in the next example.
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org961d1ed" class="outline-4"&gt;
-&lt;h4 id="org961d1ed"&gt;The First Example&lt;/h4&gt;
-&lt;div class="outline-text-4" id="text-org961d1ed"&gt;
-&lt;p&gt;
-The first thing we're going to do is to check the example given earlier, padding the price-list to make it have 10 entries. I originally had it just short-circuit if the list was shorter but then the counts were off by a little bit so I decided to get rid of that. It might make it slightly more efficient in certain cases, but brute-force isn't really what we're going for anyway.
-&lt;/p&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;PRICES&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;17&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;17&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cut_rod_brute_force&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PRICES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;27&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Best Total Value: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Count: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="si"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;,&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Combinations: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="si"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;,&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre class="example"&gt;
-Best Total Value: 27
-Count: 1,024
-Combinations: 1,024
-&lt;/pre&gt;
-
-
-&lt;p&gt;
-So our actual best value is 27, not the 26 from the sub-set of combinations I used in the earlier example.
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id="outline-container-org3c331fc" class="outline-2"&gt;
-&lt;h2 id="org3c331fc"&gt;Memoized Cut Rod&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-org3c331fc"&gt;
-&lt;p&gt;
-The main reason why our brute-force version is so expensive is that it does all the calculations for every length over and over again when we test the different combinations. One way to get around this is by storing the values as they're calculated so that we can just look them up instead of repeating the calculations.
-&lt;/p&gt;
-
-&lt;p&gt;
-This first version is very similar to the brute-force version except that the brute-force version makes a recursive call for every length we check, while for this memoized version we maintain an array to store previously calculated values and if the next one we want is in it we pull it from the array instead of making another recursive call.
-&lt;/p&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-orgf90c9a5" class="outline-3"&gt;
-&lt;h3 id="orgf90c9a5"&gt;Cut Rod Memoized&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-orgf90c9a5"&gt;
-&lt;p&gt;
-This first function is sort of a mask to make it look like the brute-force version. It sets up an empty memo table (as an array) and then passes it to the &lt;code&gt;CutRodMemoizedAuxiliary&lt;/code&gt; function to do the actual calculations.
-&lt;/p&gt;
-
-&lt;pre id="cut-rod-memoized" style="display:hidden;"&gt;
-\begin{algorithm}
-\caption{Memoized Rod-Cutting}
-\begin{algorithmic}
-\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
-\INPUT Integer $n$ the length of the rod to cut
-\OUTPUT $q$ the highest value for the combinations of rods totaling $n$ in length
-
-\PROCEDURE{CutRodMemoized}{$p, n$}
-\STATE Let $r[0 \ldots n]$ be a new array.
-\FOR {$i \in \{0\ldots n\}$}
-  \STATE $r[i]\gets -\infty$
-\ENDFOR
-\RETURN \textsc{CutRodMemoizedAuxiliary}($p, n, r$)
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id="outline-container-orgc7d1f94" class="outline-3"&gt;
-&lt;h3 id="orgc7d1f94"&gt;Cut Rod Memoized Auxiliary&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-orgc7d1f94"&gt;
-&lt;pre id="cut-rod-memoized-auxiliary" style="display:hidden;"&gt;
-\begin{algorithm}
-\caption{Memoized Rod-Cutting Auxiliary}
-\begin{algorithmic}
-\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
-\INPUT Integer $n$ the length of the rod to cut
-\INPUT Array $r$ of previously calculated values
-\OUTPUT $q$ the highest value for the combinations of rods totaling $n$ in length
-
-\PROCEDURE{CutRodMemoizedAuxiliary}{$p, n, r$}
-\IF {$r[n] \geq 0$}
-  \RETURN $r[n]$
-\ENDIF
-
-\IF {$n=0$}
-  \STATE $q \gets 0$
-\ELSE
-  \STATE $q \gets -\infty$
-
-  \FOR {$i \in \{1 \ldots n\}$}
-    \STATE $q \gets$ \textsc{Max}($q, p[i] + $ \textsc{CutRodMemoizedAuxiliary}($p, n-i, r$))
-  \ENDFOR
-\ENDIF
-
-\STATE $r[n] \gets q$
-
-\RETURN q
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-&lt;/pre&gt;
-
-&lt;p&gt;
-If you squint at &lt;code&gt;CutRodMemoizedAuxiliary&lt;/code&gt; you might notice that it looks similar to the brute-force version except that there's an initial check to see if the value we want is already in our lookup-table and only makes the recursive call if it isn't.
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id="outline-container-org01f784c" class="outline-3"&gt;
-&lt;h3 id="org01f784c"&gt;Python Version&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-org01f784c"&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;cut_rod_memoized&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="sd"&gt;"""Finds the maximum value for a rod after it has been cut up&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Args:&lt;/span&gt;
-&lt;span class="sd"&gt;     prices: map of length to price&lt;/span&gt;
-&lt;span class="sd"&gt;     length: the length of the rod to be cut up&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
-&lt;span class="sd"&gt;     the maximum value that can be gained by cutting up and selling the rod&lt;/span&gt;
-&lt;span class="sd"&gt;    """&lt;/span&gt;
-    &lt;span class="n"&gt;table&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"-inf"&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;cut_rod_memoized_auxiliary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;table&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;cut_rod_memoized_auxiliary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;best_values&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="sd"&gt;"""Find the maximum value from cutting up and selling rod&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Args:&lt;/span&gt;
-&lt;span class="sd"&gt;     prices: map of length to price&lt;/span&gt;
-&lt;span class="sd"&gt;     length: the length of the rod to be cut up&lt;/span&gt;
-&lt;span class="sd"&gt;     best_values: lookup-table for previously calculated values (index is starting length)&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
-&lt;span class="sd"&gt;     the maximum value that can be gained by cutting up and selling the rod&lt;/span&gt;
-&lt;span class="sd"&gt;    """&lt;/span&gt;
-    &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;best_values&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-	&lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;best_values&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;
-
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-	&lt;span class="n"&gt;best_total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
-    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-	&lt;span class="n"&gt;best_total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"-inf"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-	&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-	    &lt;span class="n"&gt;leftover&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt;
-	    &lt;span class="n"&gt;next_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cut_rod_memoized_auxiliary&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-							   &lt;span class="n"&gt;leftover&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-							   &lt;span class="n"&gt;best_values&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-							   &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-	    &lt;span class="n"&gt;best_total&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-			     &lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;next_cut&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;next_total&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;best_values&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;best_total&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cut_rod_memoized&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PRICES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Best Total Value: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Count: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre class="example"&gt;
-Best Total Value: 10
-Count: 11
-&lt;/pre&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cut_rod_memoized&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PRICES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Best Total Value: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Count: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre class="example"&gt;
-Best Total Value: 13
-Count: 16
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-
-&lt;div id="outline-container-org0b87082" class="outline-3"&gt;
-&lt;h3 id="org0b87082"&gt;Example&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-org0b87082"&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cut_rod_memoized&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PRICES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;27&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;11&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Best Total Value: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Count: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre class="example"&gt;
-Best Total Value: 27
-Count: 56
-&lt;/pre&gt;
-
-
-&lt;p&gt;
-We've gone from 1,024 calls to 56 calls, a pretty good improvement. The number of calls comes from the for loop plus one for the initial call. The for loop goes from 1 through the length of the rod, but passes in the difference between the starting length and the loop value. So if we start with a length of 4, the for-loop makes recursive calls using lengths of 4-1=3, 4-2=2, 4-3=1, 4-4=0. But then each of the calls goes through the for-loop as well (except for the base-case of 0). Since the first call of the for-loop is always one less than the starting length, we end up memoizing the values for all the starting lengths as we go so the subsequent calls don't need to go into the for-loop. So the number of calls we make equals \(1 + 2 + \cdots + n\) plus one for the first call before the recursion starts. This means the runtime is
-&lt;/p&gt;
-
-&lt;p&gt;
-\[
-1 + \sum_{i=1}^n i = 1 + \frac{n(n+1)}{2} \Rightarrow O(n^2)
-\]
-&lt;/p&gt;
-
-&lt;p&gt;
-So for our case with length 10, we have
-&lt;/p&gt;
-
-\begin{align}
-T(10) &amp;amp;= \frac{10(10 + 1)}{2} + 1\\
-      &amp;amp;= 56
-\end{align}
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org427e1ac" class="outline-2"&gt;
-&lt;h2 id="org427e1ac"&gt;Non-Recursive Solution&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-org427e1ac"&gt;
-&lt;p&gt;
-The memoized cut-rod solution is a top-down, depth-first search solution that uses recursion. We can eliminate the recursion altogether using a for-loop along with our look-up array. The trick is to make it a bottoms-up approach - that is to say that we start with the solutions for the smaller lengths and work up to the longer ones so that the look-up array always has the sub-problem values that we need to look up.
-&lt;/p&gt;
-
-&lt;pre id="cut-rod-bottoms-up" style="display:hidden;"&gt;
-\begin{algorithm}
-\caption{Bottoms-Up Rod-Cutting}
-\begin{algorithmic}
-\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
-\INPUT Integer $n$ the length of the rod to cut
-\OUTPUT $q$ the highest value for the combinations of rods totaling $n$ in length
-
-\PROCEDURE{CutRodBottomsUp}{$p, n$}
-\STATE Let $r[0\ldots n]$ be a new array.
-\STATE $r[0] \gets 0$
-
-  \FOR {$j \in \{1 \ldots n\}$}
-    \STATE $q \gets -\infty$
-    \FOR {$i \in \{1 \ldots j\}$}
-      \STATE $q \gets$ \textsc{Max}($q, p[i] + r[j - i]$)
-    \ENDFOR
-    \STATE $r[j] \gets q$
-  \ENDFOR
-\RETURN $r[n]$
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org48259a9" class="outline-3"&gt;
-&lt;h3 id="org48259a9"&gt;Python Version&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-org48259a9"&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;cut_rod_bottom_up&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;tuple&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="sd"&gt;"""Find the maximum value for a rod after cutting&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Args:&lt;/span&gt;
-&lt;span class="sd"&gt;     prices: map of length to price&lt;/span&gt;
-&lt;span class="sd"&gt;     length: total length of rod to cut up&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
-&lt;span class="sd"&gt;     best-value, count&lt;/span&gt;
-&lt;span class="sd"&gt;    """&lt;/span&gt;
-    &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
-    &lt;span class="n"&gt;best_values&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;rod_length&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-	&lt;span class="n"&gt;best_value_this_length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"-inf"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-	&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;cut_length&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;rod_length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-	    &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
-	    &lt;span class="n"&gt;leftover&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;rod_length&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;cut_length&lt;/span&gt;
-	    &lt;span class="n"&gt;best_value_this_length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
-		&lt;span class="n"&gt;best_value_this_length&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-		&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;cut_length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;best_values&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;leftover&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
-	&lt;span class="n"&gt;best_values&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;rod_length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;best_value_this_length&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;best_values&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-orgf5c9fde" class="outline-3"&gt;
-&lt;h3 id="orgf5c9fde"&gt;The Example Again&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-orgf5c9fde"&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cut_rod_bottom_up&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PRICES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;27&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;110&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Best Total Value: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;best_total&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Count: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre class="example"&gt;
-Best Total Value: 27
-Count: 56
-&lt;/pre&gt;
-
-
-&lt;p&gt;
-The runtime for this version is the same as the memoized version. It's sort of the backwards case - the inner for-loop runs 1 then 1, 2, then 1, 2, 3 up to the length of the rod, so the number of times it runs is \(1 + 2 + 3 + \cdots + n\) while the memoized count goes \(n + \cdots + 3 + 2 + 1\). In any case, the count ends up the same.
-&lt;/p&gt;
-
-&lt;p&gt;
-\[
-1 + \sum_{i=1}^n i = 1 + \frac{n(n+1)}{2} \Rightarrow O(n^2)
-\]
-&lt;/p&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-orga394b7f" class="outline-2"&gt;
-&lt;h2 id="orga394b7f"&gt;Recovering the Cuts&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-orga394b7f"&gt;
-&lt;p&gt;
-The previous functions all return the best value for a length but don't tell you the actual cuts that you need in order to get it. We can alter the function slightly to get both the best-revenue table and the cuts you need to use to get the best value.
-&lt;/p&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org99c2ed7" class="outline-3"&gt;
-&lt;h3 id="org99c2ed7"&gt;Pseudocode&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-org99c2ed7"&gt;
-&lt;/div&gt;
-&lt;div id="outline-container-orgee17bea" class="outline-4"&gt;
-&lt;h4 id="orgee17bea"&gt;Extended Bottoms-Up&lt;/h4&gt;
-&lt;div class="outline-text-4" id="text-orgee17bea"&gt;
-&lt;pre id="cut-rod-extended" style="display:hidden;"&gt;
-\begin{algorithm}
-\caption{Extended Bottoms-Up Rod-Cutting}
-\begin{algorithmic}
-\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
-\INPUT Integer $n$ the length of the rod to cut
-\OUTPUT $r$ the best revenue for each length
-\OUTPUT $s$ list of next cut-lengths to use to get best revenue
-
-\PROCEDURE{CutRodBottomsUpExtended}{$p, n$}
-\STATE Let $r[0\ldots n]$ and $s[0 \ldots n]$ be new arrays.
-\STATE $r[0] \gets 0$
-
-  \FOR {$j \in \{1 \ldots n\}$}
-    \STATE $q \gets -\infty$
-    \FOR {$i \in \{1 \ldots j\}$}
-      \IF {$q &amp;lt; p[i] + r[j - i]$}
-                \STATE $q \gets p[i] + r[j - i]$)
-                \STATE $s[j] \gets i$
-      \ENDIF
-    \ENDFOR
-    \STATE $r[j] \gets q$
-  \ENDFOR
-\RETURN $(r, s)$
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org53b2182" class="outline-4"&gt;
-&lt;h4 id="org53b2182"&gt;Printing the Solution&lt;/h4&gt;
-&lt;div class="outline-text-4" id="text-org53b2182"&gt;
-&lt;p&gt;
-To actually see the cuts we just need to retrieve the next cuts from &lt;code&gt;s&lt;/code&gt; and calculate the remaining length after each cut.
-&lt;/p&gt;
-
-&lt;pre id="cut-rod-printer" style="display:hidden;"&gt;
-\begin{algorithm}
-\caption{Print Rod-Cutting Solution}
-\begin{algorithmic}
-\INPUT Array $p[0 \ldots n]$ of prices mapped to length by index
-\INPUT Integer $n$ the length of the rod to cut
-
-\PROCEDURE{Print-Cut-Rod-Solution}{$p, n$}
-\STATE $(r, s) \gets $ \textsc{CutRodBottomsUpExtended}($p, n$)
-\WHILE {$n &amp;gt; 0$}
-  \STATE \textsc{Print}($s[n]$)
-  \STATE $n \gets n - s[n]$
-\ENDWHILE
-\ENDPROCEDURE
-\end{algorithmic}
-\end{algorithm}
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org9c61e39" class="outline-3"&gt;
-&lt;h3 id="org9c61e39"&gt;In Python&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-org9c61e39"&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;cut_rod_extended&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;tuple&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="sd"&gt;"""Find the maximum values for a cut rod&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Args:&lt;/span&gt;
-&lt;span class="sd"&gt;     prices: map of length to price&lt;/span&gt;
-&lt;span class="sd"&gt;     length: total length of rod to cut up&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
-&lt;span class="sd"&gt;     best-revenues, best-lengths&lt;/span&gt;
-&lt;span class="sd"&gt;    """&lt;/span&gt;
-    &lt;span class="n"&gt;best_revenues&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;best_cuts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;next_length&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-	&lt;span class="n"&gt;best_revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;float&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"-inf"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-	&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;next_length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-	    &lt;span class="n"&gt;remaining_length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;next_length&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt;
-	    &lt;span class="n"&gt;next_revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;next_cut&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;best_revenues&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;next_length&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-	    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;best_revenue&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;next_revenue&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-		&lt;span class="n"&gt;best_revenue&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;next_revenue&lt;/span&gt;
-		&lt;span class="n"&gt;best_cuts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;next_length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt;
-	&lt;span class="n"&gt;best_revenues&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;next_length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;best_revenue&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;best_revenues&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;best_cuts&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;print_solution&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&amp;gt;&lt;/span&gt; &lt;span class="nb"&gt;tuple&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-    &lt;span class="sd"&gt;"""Solve and print the best cuts to maximize revenue&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Args:&lt;/span&gt;
-&lt;span class="sd"&gt;     prices: list mapping length to price&lt;/span&gt;
-&lt;span class="sd"&gt;     length: the pre-cut length of the rod&lt;/span&gt;
-
-&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
-&lt;span class="sd"&gt;     best_revenues, best_cuts&lt;/span&gt;
-&lt;span class="sd"&gt;    """&lt;/span&gt;
-    &lt;span class="n"&gt;revenues&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cuts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cut_rod_extended&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prices&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;check&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;remaining_length&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;
-    &lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
-    &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="n"&gt;remaining_length&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-	&lt;span class="n"&gt;next_cut&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;cuts&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;remaining_length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-	&lt;span class="n"&gt;check&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt;
-	&lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;next_cut&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-	&lt;span class="n"&gt;remaining_length&lt;/span&gt; &lt;span class="o"&gt;-=&lt;/span&gt; &lt;span class="n"&gt;next_cut&lt;/span&gt;
-    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Best Revenue for rod of length &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;: &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;revenues&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;"Cuts: (&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;', '&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;)"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;check&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;equal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;revenues&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cuts&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;print_solution&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PRICES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre class="example"&gt;
-Best Revenue for rod of length 10: 27
-Cuts: (2, 2, 6)
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org05024b8" class="outline-3"&gt;
-&lt;h3 id="org05024b8"&gt;CLRS Example&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-org05024b8"&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;CLRS_PRICES&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;9&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;17&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;17&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;24&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
-&lt;span class="n"&gt;revenues&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cuts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;print_solution&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;CLRS_PRICES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;revenues&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;contain_exactly&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;13&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;17&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;18&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;22&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;25&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;span class="n"&gt;expect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cuts&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;contain_exactly&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre class="example"&gt;
-Best Revenue for rod of length 10: 30
-Cuts: (10)
-&lt;/pre&gt;
-
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;11&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
-    &lt;span class="n"&gt;print_solution&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;CLRS_PRICES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;length&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre class="example"&gt;
-Best Revenue for rod of length 1: 1
-Cuts: (1)
-
-Best Revenue for rod of length 2: 5
-Cuts: (2)
-
-Best Revenue for rod of length 3: 8
-Cuts: (3)
-
-Best Revenue for rod of length 4: 10
-Cuts: (2, 2)
-
-Best Revenue for rod of length 5: 13
-Cuts: (2, 3)
-
-Best Revenue for rod of length 6: 17
-Cuts: (6)
-
-Best Revenue for rod of length 7: 18
-Cuts: (1, 6)
-
-Best Revenue for rod of length 8: 22
-Cuts: (2, 6)
-
-Best Revenue for rod of length 9: 25
-Cuts: (3, 6)
-
-Best Revenue for rod of length 10: 30
-Cuts: (10)
-&lt;/pre&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-org340b7f2" class="outline-2"&gt;
-&lt;h2 id="org340b7f2"&gt;Sources&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-org340b7f2"&gt;
-&lt;ul class="org-ul"&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/essential-algorithms/"&gt;Essential Algorithms&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/clrs/"&gt;Introduction To Algorithms (CLRS)&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;script&gt;
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("cut-rod-brute-force"));
-});
-&lt;/script&gt;
-
-&lt;script&gt;
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("cut-rod-memoized"));
-});
-&lt;/script&gt;
-
-&lt;script&gt;
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("cut-rod-memoized-auxiliary"));
-});
-&lt;/script&gt;
-
-&lt;script&gt;
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("cut-rod-bottoms-up"));
-});
-&lt;/script&gt;
-
-&lt;script&gt;
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("cut-rod-extended"));
-});
-&lt;/script&gt;
-
-&lt;script&gt;
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("cut-rod-printer"));
-});
-&lt;/script&gt;
-&lt;/div&gt;
-&lt;/div&gt;</description><category>algorithms</category><category>dynamic programming</category><guid>https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/</guid><pubDate>Sun, 29 May 2022 22:21:31 GMT</pubDate></item><item><title>Algorithms Illuminated - Part 1: The Basics</title><link>https://necromuralist.github.io/Bowling-For-Data/posts/algorithms-illuminated-part-1/</link><dc:creator>The Cloistered Monkey</dc:creator><description>&lt;div id="outline-container-orgafdbcf8" class="outline-2"&gt;
-&lt;h2 id="orgafdbcf8"&gt;Citation&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-orgafdbcf8"&gt;
-&lt;ul class="org-ul"&gt;
-&lt;li&gt;Roughgarden T. Algorithms illuminated. Part 1: The Basics. First edition. San Francisco, CA: Soundlikeyourself Publishing; 2021. 213 p.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div id="outline-container-orgab590d8" class="outline-2"&gt;
-&lt;h2 id="orgab590d8"&gt;On The Web&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-orgab590d8"&gt;
-&lt;ul class="org-ul"&gt;
-&lt;li&gt;&lt;a href="https://algorithmsilluminated.org/"&gt;Algorithms Illuminated website&lt;/a&gt;: Has links to all four books, videos, test cases, etc.&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://timroughgarden.org/"&gt;Tim Roughgarden's (the author) Website&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;div id="outline-container-orgb66cb6e" class="outline-2"&gt;
-&lt;h2 id="orgb66cb6e"&gt;Other Books in the Series&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-orgb66cb6e"&gt;
-&lt;ul class="org-ul"&gt;
-&lt;li&gt;&lt;a href="https://necromuralist.github.io/Bowling-For-Data/posts/algorithms-illuminated-part-3/"&gt;Algorithms Illuminated - Part III: Greedy Algorithms and Dynamic Programming&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-&lt;/div&gt;</description><category>algorithms</category><category>bibliography</category><category>book</category><guid>https://necromuralist.github.io/Bowling-For-Data/posts/algorithms-illuminated-part-1/</guid><pubDate>Tue, 10 May 2022 22:03:11 GMT</pubDate></item></channel></rss>
+&lt;/div&gt;</description><category>global warming</category><category>unit conversion</category><guid>https://necromuralist.github.io/Bowling-For-Data/posts/how-much-coal-to-power-a-light-bulb/</guid><pubDate>Thu, 16 Jun 2022 00:28:30 GMT</pubDate></item></channel></rss>
