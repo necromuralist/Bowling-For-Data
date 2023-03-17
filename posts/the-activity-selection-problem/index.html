@@ -3,6 +3,7 @@
 " lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="description" content="A look at the Recursive Activity Selection Problem.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Activity Selection Problem | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
@@ -12,28 +13,16 @@
 <link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/">
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
 <link rel="prev" href="../weighted-completion-times/" title="Weighted Completion Times" type="text/html">
+<link rel="next" href="../activity-selector-implementation/" title="Activity Selector Implementations" type="text/html">
 <meta property="og:site_name" content="Bowling For Data">
 <meta property="og:title" content="The Activity Selection Problem">
 <meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/the-activity-selection-problem/">
-<meta property="og:description" content="Table of Contents
-
-
-What is the Activity Selection Problem?
-The Greedy Choice
-The Recursive Activity Selector
-
-Padding The Start
-
-
-The Iterative Activity Selector
-Sources
-
-
-
-
-What is the Activity Sele">
+<meta property="og:description" content="A look at the Recursive Activity Selection Problem.">
 <meta property="og:type" content="article">
 <meta property="article:published_time" content="2022-08-04T17:25:35-07:00">
+<meta property="article:tag" content="algorithms">
+<meta property="article:tag" content="greedy">
+<meta property="article:tag" content="scheduling">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
 </head>
 <body>
@@ -56,6 +45,9 @@ bg-light
 
         <div class="collapse navbar-collapse" id="bs-navbar">
             <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../pages/" class="nav-link">Pages</a>
+                </li>
 <li class="nav-item">
 <a href="../../archive.html" class="nav-link">Archive</a>
                 </li>
@@ -113,22 +105,22 @@ bg-light
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd48e4dc">What is the Activity Selection Problem?</a></li>
-<li><a href="#orgca59225">The Greedy Choice</a></li>
+<li><a href="#org279b463">What is the Activity Selection Problem?</a></li>
+<li><a href="#orgaf84e47">The Greedy Choice</a></li>
 <li>
-<a href="#org5838604">The Recursive Activity Selector</a>
+<a href="#org319d055">The Recursive Activity Selector</a>
 <ul>
-<li><a href="#org767a1a0">Padding The Start</a></li>
+<li><a href="#orga266210">Padding The Start</a></li>
 </ul>
 </li>
-<li><a href="#orgabb4fb6">The Iterative Activity Selector</a></li>
-<li><a href="#orgbd447f5">Sources</a></li>
+<li><a href="#orgf851d95">The Iterative Activity Selector</a></li>
+<li><a href="#orgf3a773b">Sources</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd48e4dc" class="outline-2">
-<h2 id="orgd48e4dc">What is the Activity Selection Problem?</h2>
-<div class="outline-text-2" id="text-orgd48e4dc">
+<div id="outline-container-org279b463" class="outline-2">
+<h2 id="org279b463">What is the Activity Selection Problem?</h2>
+<div class="outline-text-2" id="text-org279b463">
 <ul class="org-ul">
 <li>In this problem we have a set of <i>n</i> activities \(S = \{a_1, a_2, \ldots, a_n\}\).</li>
 <li>Assume the activities are sorted by increasing finish time</li>
@@ -142,18 +134,18 @@ The problem we want to solve is finding the most compatible activities we can fr
 </div>
 </div>
 
-<div id="outline-container-orgca59225" class="outline-2">
-<h2 id="orgca59225">The Greedy Choice</h2>
-<div class="outline-text-2" id="text-orgca59225">
+<div id="outline-container-orgaf84e47" class="outline-2">
+<h2 id="orgaf84e47">The Greedy Choice</h2>
+<div class="outline-text-2" id="text-orgaf84e47">
 <p>
 <a href="../clrs/">CLRS</a> goes into the more formal aspects of finding the optimal substructure and proving that a greedy strategy works, but in this case the reasoning is fairly intuitive (and I didn't find the proof so easy to follow) so I'll skip the formal stuff. The thing to recognize is just that the sooner the first activity you schedule finishes the more time there is for other activities. So if after each activity you pick you then pick the next compatible activity that finishes first you will be maximizing the number of activities that you can schedule.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org5838604" class="outline-2">
-<h2 id="org5838604">The Recursive Activity Selector</h2>
-<div class="outline-text-2" id="text-org5838604">
+<div id="outline-container-org319d055" class="outline-2">
+<h2 id="org319d055">The Recursive Activity Selector</h2>
+<div class="outline-text-2" id="text-org319d055">
 <pre id="recursive-activity-selector" style="display:hidden;">
 \begin{algorithm}
 \caption{Recursive Activity Selector}
@@ -188,9 +180,9 @@ The problem we want to solve is finding the most compatible activities we can fr
 </p>
 </div>
 
-<div id="outline-container-org767a1a0" class="outline-3">
-<h3 id="org767a1a0">Padding The Start</h3>
-<div class="outline-text-3" id="text-org767a1a0">
+<div id="outline-container-orga266210" class="outline-3">
+<h3 id="orga266210">Padding The Start</h3>
+<div class="outline-text-3" id="text-orga266210">
 <p>
 Because the recursive algorithm is looking for the next earliest finish time after the first event we need to pad the activities with a dummy activity that has a finish time of 0 (\(f_0 = 0\)) and then when the function is first called the <i>k</i> value is set to 0:
 </p>
@@ -204,9 +196,9 @@ RecursiveActivitySelector(s, f, 0, n)
 </div>
 </div>
 
-<div id="outline-container-orgabb4fb6" class="outline-2">
-<h2 id="orgabb4fb6">The Iterative Activity Selector</h2>
-<div class="outline-text-2" id="text-orgabb4fb6">
+<div id="outline-container-orgf851d95" class="outline-2">
+<h2 id="orgf851d95">The Iterative Activity Selector</h2>
+<div class="outline-text-2" id="text-orgf851d95">
 <pre id="greedy-activity-selector" style="display:hidden;">
 \begin{algorithm}
 \caption{Greedy Activity Selector}
@@ -236,9 +228,9 @@ RecursiveActivitySelector(s, f, 0, n)
 </div>
 </div>
 
-<div id="outline-container-orgbd447f5" class="outline-2">
-<h2 id="orgbd447f5">Sources</h2>
-<div class="outline-text-2" id="text-orgbd447f5">
+<div id="outline-container-orgf3a773b" class="outline-2">
+<h2 id="orgf3a773b">Sources</h2>
+<div class="outline-text-2" id="text-orgf3a773b">
 <ul class="org-ul">
 <li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
 </ul>
@@ -254,9 +246,17 @@ window.addEventListener('load', function () {
 </div>
 </div>
     </div>
-    <aside class="postpromonav"><nav><ul class="pager hidden-print">
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/greedy/" rel="tag">greedy</a></li>
+            <li><a class="tag p-category" href="../../categories/scheduling/" rel="tag">scheduling</a></li>
+        </ul>
+<ul class="pager hidden-print">
 <li class="previous">
                 <a href="../weighted-completion-times/" rel="prev" title="Weighted Completion Times">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../activity-selector-implementation/" rel="next" title="Activity Selector Implementations">Next post</a>
             </li>
         </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
              MathJax.Hub.Config({

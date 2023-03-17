@@ -36,6 +36,9 @@ bg-light
         <div class="collapse navbar-collapse" id="bs-navbar">
             <ul class="navbar-nav mr-auto">
 <li class="nav-item">
+<a href="pages/" class="nav-link">Pages</a>
+                </li>
+<li class="nav-item">
 <a href="archive.html" class="nav-link">Archive</a>
                 </li>
 <li class="nav-item">
@@ -70,7 +73,245 @@ bg-light
 
     
 <div class="postindex">
-    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/red-black-trees-delete/" class="u-url">Red-Black Trees: Delete</a></h1>
+    <article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/graphs/" class="u-url">Graphs</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="posts/graphs/" rel="bookmark">
+            <time class="published dt-published" datetime="2022-04-04T18:40:48-07:00" itemprop="datePublished" title="2022-04-04 18:40">2022-04-04 18:40</time></a>
+            </p>
+        </div>
+    </header><div class="e-content entry-content">
+    <div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="posts/graphs/#orgff0cafc">Introduction</a></li>
+<li>
+<a href="posts/graphs/#orge116e89">Imports and Setup</a>
+<ul>
+<li><a href="posts/graphs/#orgbfb4a39">Imports</a></li>
+<li><a href="posts/graphs/#orgd7f32bb">Constants</a></li>
+</ul>
+</li>
+<li><a href="posts/graphs/#org6e17636">A Vertex Implementation</a></li>
+<li>
+<a href="posts/graphs/#orgbd906d5">A Graph Implementation</a>
+<ul>
+<li><a href="posts/graphs/#org6720c27">Adjacencies</a></li>
+<li><a href="posts/graphs/#orgab81cd5">Vertices</a></li>
+<li><a href="posts/graphs/#org4e67eb0">Add Item</a></li>
+<li><a href="posts/graphs/#org81eafe8">Getitem</a></li>
+<li><a href="posts/graphs/#orgc7e6903">Testing</a></li>
+</ul>
+</li>
+<li><a href="posts/graphs/#orgf43a18d">Sources</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgff0cafc" class="outline-2">
+<h2 id="orgff0cafc">Introduction</h2>
+<div class="outline-text-2" id="text-orgff0cafc">
+<p>
+This is a starter post for an introduction to Graphs.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge116e89" class="outline-2">
+<h2 id="orge116e89">Imports and Setup</h2>
+<div class="outline-text-2" id="text-orge116e89">
+</div>
+<div id="outline-container-orgbfb4a39" class="outline-3">
+<h3 id="orgbfb4a39">Imports</h3>
+<div class="outline-text-3" id="text-orgbfb4a39">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-orgd7f32bb" class="outline-3">
+<h3 id="orgd7f32bb">Constants</h3>
+<div class="outline-text-3" id="text-orgd7f32bb">
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">WHITE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">GRAY</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">BLACK</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="n">INFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6e17636" class="outline-2">
+<h2 id="org6e17636">A Vertex Implementation</h2>
+<div class="outline-text-2" id="text-org6e17636">
+<p>
+Note to future self: the default setting for <code>attrs.define</code> makes the object to unhashable, to make it hashable by object identity pass in <code>eq=False</code> otherwise trying to add the object to a set will raise an error.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nd">@define</span><span class="p">(</span><span class="n">eq</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Vertex</span><span class="p">:</span>
+    <span class="sd">"""A single node in a graph</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     identifier: something to identify the node</span>
+<span class="sd">     color: the 'discovery' state of the node</span>
+<span class="sd">     distance: The number of edges to the root</span>
+<span class="sd">     predecessor: The 'parent' of the node in a tree</span>
+<span class="sd">    """</span>
+    <span class="n">identifier</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">color</span><span class="p">:</span> <span class="n">Enum</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">WHITE</span>
+    <span class="n">distance</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="n">INFINITY</span>
+    <span class="n">predecessor</span><span class="p">:</span> <span class="n">Vertex</span><span class="o">=</span><span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+	<span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2">, "</span>
+		<span class="sa">f</span><span class="s2">"distance: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="si">}</span><span class="s2">, predecessor: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">predecessor</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgbd906d5" class="outline-2">
+<h2 id="orgbd906d5">A Graph Implementation</h2>
+<div class="outline-text-2" id="text-orgbd906d5">
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Graph</span><span class="p">:</span>
+    <span class="sd">"""A graph implementation</span>
+
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="kc">None</span>
+	<span class="k">return</span>
+</pre></div>
+</div>
+<div id="outline-container-org6720c27" class="outline-3">
+<h3 id="org6720c27">Adjacencies</h3>
+<div class="outline-text-3" id="text-org6720c27">
+<p>
+The book uses an adjacency linked list, but I'll assume that there will be only one edge between each pair of vertices and use a dictionary with sets of adjacent nodes instead.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">adjacent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">defaultdict</span><span class="p">:</span>
+    <span class="sd">"""The dictionary of adjacent vertices"""</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span>
+
+<span class="nd">@adjacent</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">adjacent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_adjacent</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Sets the dictionary of adjacent vertices (converting to default dict)</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">     This expects the new_adjacent to be a dict of node: set of nodes</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">new_adjacent</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">defaultdict</span><span class="p">:</span>
+	<span class="n">new_new_adjacent</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">nodes</span> <span class="ow">in</span> <span class="n">new_adjacent</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+	    <span class="n">new_new_adjacent</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span>
+	<span class="n">new_adjacent</span> <span class="o">=</span> <span class="n">new_new_adjacent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_adjacent</span> <span class="o">=</span> <span class="n">new_adjacent</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgab81cd5" class="outline-3">
+<h3 id="orgab81cd5">Vertices</h3>
+<div class="outline-text-3" id="text-orgab81cd5">
+<p>
+The representation we're using is an adjacency list, but sometimes you need to traverse the vertices. So I'm going to make an alias to the adjacency list keys, in the assumption that every node in the graph is a key in the dict. This might not be true in a directed graph, so I'll have to revisit it later.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
+    <span class="sd">"""The vertices in this graph"""</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+	<span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org4e67eb0" class="outline-3">
+<h3 id="org4e67eb0">Add Item</h3>
+<div class="outline-text-3" id="text-org4e67eb0">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_1</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">node_2</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">"""Add edge </span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">     This assumes an undirected graph, change it for a directed graph</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     node_1: node on one end of the edge</span>
+<span class="sd">     node_2: Node on the other end of the edge</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">node_1</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">node_2</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_1</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org81eafe8" class="outline-3">
+<h3 id="org81eafe8">Getitem</h3>
+<div class="outline-text-3" id="text-org81eafe8">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="sd">"""Get the list from the adjacencies dict</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">     key: vertex whose list we want</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div id="outline-container-orgc7e6903" class="outline-3">
+<h3 id="orgc7e6903">Testing</h3>
+<div class="outline-text-3" id="text-orgc7e6903">
+<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span> <span class="n">contain</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+
+<span class="c1"># software under test</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs</span> <span class="kn">import</span> <span class="n">graph</span>
+<span class="kn">from</span> <span class="nn">bowling.data_structures.graphs.graph</span> <span class="kn">import</span> <span class="n">Color</span><span class="p">,</span> <span class="n">Graph</span><span class="p">,</span> <span class="n">Vertex</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">Color</span><span class="o">.</span><span class="n">WHITE</span><span class="p">))</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
+<span class="n">v2</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">v3</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v3</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">adjacent</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">adjacent</span><span class="p">[</span><span class="n">v</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain</span><span class="p">(</span><span class="n">v2</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="n">v2</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="n">v3</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="n">v3</span><span class="p">])</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">contain</span><span class="p">(</span><span class="n">v2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf43a18d" class="outline-2">
+<h2 id="orgf43a18d">Sources</h2>
+<div class="outline-text-2" id="text-orgf43a18d">
+<ul class="org-ul">
+<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
+</ul>
+</div>
+</div>
+    </div>
+    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/red-black-trees-delete/" class="u-url">Red-Black Trees: Delete</a></h1>
         <div class="metadata">
             <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
                 The Cloistered Monkey
@@ -3988,449 +4229,6 @@ window.addEventListener('load', function () {
 </script><script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("tree-predecessor"));
-});
-</script>
-</div>
-</div>
-    </div>
-    </article><article class="h-entry post-text" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title"><a href="posts/binary-search-tree-node-insertion/" class="u-url">Binary Search Tree Node Insertion</a></h1>
-        <div class="metadata">
-            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
-                The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="posts/binary-search-tree-node-insertion/" rel="bookmark">
-            <time class="published dt-published" datetime="2022-03-12T15:23:47-08:00" itemprop="datePublished" title="2022-03-12 15:23">2022-03-12 15:23</time></a>
-            </p>
-        </div>
-    </header><div class="e-content entry-content">
-    <div id="table-of-contents">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents">
-<ul>
-<li>
-<a href="posts/binary-search-tree-node-insertion/#org08bff04">The Tree</a>
-<ul>
-<li><a href="posts/binary-search-tree-node-insertion/#org0a2272a">The Query</a></li>
-<li><a href="posts/binary-search-tree-node-insertion/#org6ad0052">The Insertion Algorithm</a></li>
-<li><a href="posts/binary-search-tree-node-insertion/#orgaab279c">The Insert Method</a></li>
-<li><a href="posts/binary-search-tree-node-insertion/#orgf427ff3">Transplant</a></li>
-<li><a href="posts/binary-search-tree-node-insertion/#org618dd52">Deletion</a></li>
-</ul>
-</li>
-<li><a href="posts/binary-search-tree-node-insertion/#org6dd0aa4">Plotting</a></li>
-<li><a href="posts/binary-search-tree-node-insertion/#org15b523c">Sources</a></li>
-</ul>
-</div>
-</div>
-<p>
-This is the next post in a series on Binary Search Trees that start with <a href="posts/binary-search-trees/">this post</a>. In this post we'll be looking at creating a Tree class and the method of inserting a node into the tree.
-</p>
-
-<div id="outline-container-org08bff04" class="outline-2">
-<h2 id="org08bff04">The Tree</h2>
-<div class="outline-text-2" id="text-org08bff04">
-<p>
-Although <a href="posts/clrs/">CLRS</a> use a <b>T</b> (as in tree) class in their algorithms, they only use it to store a <b>root</b> attribute. To make it a little more object-oriented I'll create a Tree class and add the <code>insert</code> method to it, rather than passing the tree to a function. Not a big change, but one that might be useful.
-</p>
-
-<p>
-<img src="posts/binary-search-tree-node-insertion/tree.png" alt="nil"></p>
-
-<div class="highlight"><pre><span></span><span class="c1"># this project</span>
-<span class="kn">from</span> <span class="nn">.node</span> <span class="kn">import</span> <span class="n">Node</span>
-<span class="kn">from</span> <span class="nn">.query</span> <span class="kn">import</span> <span class="n">Query</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
-    <span class="sd">"""Binary Search Tree</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     root: the root node for the tree</span>
-<span class="sd">    """</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_query</span> <span class="o">=</span> <span class="kc">None</span>        
-	<span class="k">return</span>
-</pre></div>
-</div>
-
-<div id="outline-container-org0a2272a" class="outline-3">
-<h3 id="org0a2272a">The Query</h3>
-<div class="outline-text-3" id="text-org0a2272a">
-<p>
-We have kind of a chicken and the egg problem here in that I defined the Query to contain the Tree, but we need to use its <code>min</code> function to delete nodes. We'll see how it goes.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
-    <span class="sd">"""A Tree Query"""</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org6ad0052" class="outline-3">
-<h3 id="org6ad0052">The Insertion Algorithm</h3>
-<div class="outline-text-3" id="text-org6ad0052">
-<p>
-This is the <a href="posts/clrs/">CLRS</a> insert algorithm. As I noted above they consider it a function, rather than a method of the tree.
-</p>
-
-<p>
-One thing that tripped me up initially was the term "insert". I thought that it would put the new node in between existing nodes, but it instead adds it as a leaf. The job of the algorithm is to find the correct leaf to add the new node to and which side to put it on (left or right).
-</p>
-
-<pre id="insert-node" style="display:hidden;">
-\begin{algorithm}
-\caption{Insert Node}
-\begin{algorithmic}
-
-\INPUT Tree and Node to insert.
-\PROCEDURE{TreeInsert}{\textit{T, z}}
-
-\STATE \textit{y} $\gets$ \textsc{NIL}
-\STATE \textit{x} $\gets$ T.root
-
-\WHILE {\textit{x} $\neq$ \textsc{NIL}}
- \STATE \textit{y} = \textit{x}
- \IF {\textit{z}.key &lt; \textit{x}.key}
-   \STATE \textit{x} $\gets$ \textit{x}.left
- \ELSE
-   \STATE \textit{x} $\gets$ \textit{x}.right
- \ENDIF
-\ENDWHILE
-\STATE
-\STATE \textit{z}.parent $\gets$ \textit{y}
-\STATE
-\IF {\textit{y} = \textsc{NIL}} 
- \STATE T.root $\gets$ \textit{z}
-\ELIF {\textit{z}.key &lt; \textit{y}.key}
-  \STATE \textit{y}.left $\gets$ \textit{z}
-\ELSE
-  \STATE \textit{y}.right $\gets$ \textit{z}
-\ENDIF
-
-\ENDPROCEDURE
-
-\end{algorithmic}
-\end{algorithm}
-</pre>
-
-<p>
-What we have here is sort of a hunter and hound scenario. The hunter <code>y</code> is pulled along by the hound <code>x</code> as the hound chases down the path to find the spot for the new node. Once the hound falls into the spot where there's no node, the hunter is in the location of the leaf that should be the new node's parent and the hound is where the new node should be inserted.
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgaab279c" class="outline-3">
-<h3 id="orgaab279c">The Insert Method</h3>
-<div class="outline-text-3" id="text-orgaab279c">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">"""Insert the node as a new leaf in the tree</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     node: a node to insert into the tree</span>
-<span class="sd">    """</span>
-    <span class="n">hunter</span><span class="p">,</span> <span class="n">hound</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span>
-
-    <span class="k">while</span> <span class="n">hound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">hunter</span><span class="p">,</span> <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="p">,</span> <span class="n">hound</span><span class="o">.</span><span class="n">left</span> <span class="k">if</span> <span class="n">node</span> <span class="o">&lt;</span> <span class="n">hound</span> <span class="k">else</span> <span class="n">hound</span><span class="o">.</span><span class="n">right</span>
-
-    <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">hunter</span>
-
-    <span class="k">if</span> <span class="n">hunter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">node</span>
-    <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">hunter</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
-	<span class="n">hunter</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span>
-    <span class="k">else</span><span class="p">:</span>
-	<span class="n">hunter</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span>
-    <span class="k">return</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.tree</span> <span class="kn">import</span> <span class="n">Tree</span>
-<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">()</span>
-
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">12</span><span class="p">)))</span>
-
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">7</span><span class="p">)))</span>
-
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">20</span><span class="p">)))</span>
-
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)))</span>
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-orgf427ff3" class="outline-3">
-<h3 id="orgf427ff3">Transplant</h3>
-<div class="outline-text-3" id="text-orgf427ff3">
-<p>
-This is an implementation of what CLRS calls <code>Transplant</code> (although I kind of think <code>replace</code> might be more to the point) where we are given two nodes - one to remove from the tree and the other to take its place. It might not seem obvious by itself why you would need it but it's used when you delete nodes.
-</p>
-
-<pre id="transplant-node" style="display:hidden;">
-\begin{algorithm}
-\caption{Transplant Node}
-\begin{algorithmic}
-
-\INPUT Tree, Node to replace, Node to insert.
-\PROCEDURE{Transplant}{\textit{T, u, v}}
-
-\IF {\textit{u}.parent = \textsc{NIL}}
-  \STATE \textit{T}.root $\gets$ \textsc{v}
-\ELIF {\textit{u} = \textit{u}.parent.left}
-  \STATE \textit{u}.parent.left = \textit{v}
- \ELSE
-   \STATE \textit{u}.parent.right $\gets$ \textit{v}
- \ENDIF
-
-\IF {\textit{v} $\neq$ \textsc{NIL}} 
- \STATE \textit{v}.parent $\gets$ \textit{u}.parent
-\ENDIF
-
-\ENDPROCEDURE
-
-\end{algorithmic}
-\end{algorithm}
-</pre>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">transplant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_be_replaced</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">"""Replace node with another</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     to_be_replaced: current holder of the position to be replaced</span>
-<span class="sd">     replacement: node to replace the incumbent</span>
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">replacement</span>
-    <span class="k">elif</span> <span class="n">to_be_replaced</span> <span class="o">==</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">:</span>
-	<span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">replacement</span>
-    <span class="k">else</span><span class="p">:</span>
-	<span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">replacement</span>
-
-    <span class="k">if</span> <span class="n">replacement</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">replacement</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span>
-    <span class="k">return</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
-<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<span class="n">transplant</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">666</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">transplant</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">transplant</span><span class="p">))</span>
-
-<span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
-<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<span class="n">lefty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">lefty</span><span class="p">)</span>
-
-<span class="c1"># the transplant doesn't check the Binary Search Tree Property</span>
-<span class="c1"># before doing its thing so we have to make sure our transplant</span>
-<span class="c1"># is less than the parent when setting the left node</span>
-<span class="n">smaller_transplant</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">lefty</span><span class="p">,</span> <span class="n">smaller_transplant</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">lefty</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">smaller_transplant</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">smaller_transplant</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">lefty</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
-
-<span class="c1"># similarly we need to make sure the right transplant is bigger</span>
-<span class="n">righty</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">righty</span><span class="p">)</span>
-<span class="n">bigger_transplant</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">48</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">righty</span><span class="p">,</span> <span class="n">bigger_transplant</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">righty</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">bigger_transplant</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">righty</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">bigger_transplant</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org618dd52" class="outline-3">
-<h3 id="org618dd52">Deletion</h3>
-<div class="outline-text-3" id="text-org618dd52">
-<p>
-The uses for the <code>transplant</code> method might seem a little obscure, but it's a necessary function for our <code>delete</code> method to delete a node from the tree. There are three cases (four-ish really) to take care of:
-</p>
-
-<ol class="org-ol">
-<li>The node to delete has no left child: transplant the right child with the node</li>
-<li>The node to delete has no right child: transplant the left child with the node</li>
-<li>The node to delete has both children: transplant the children with the node</li>
-</ol>
-<pre id="delete-node" style="display:hidden;">
-\begin{algorithm}
-\caption{Delete Node}
-\begin{algorithmic}
-
-\INPUT Tree, Node to delete.
-\PROCEDURE{Delete}{\textit{T, z}}
-\IF {\textit{z}.left = \textsc{NIL}}
-  \STATE \textsc{Transplant}(\textit{T, z, z.right})
-\ELIF {\textit{z}.right = \textsc{NIL}}
-  \STATE \textsc{Transplant}(\textit{T, z, z.left})
-\ELSE
-   \STATE \textit{y} $\gets$ \textsc{TreeMinimum}(\textit{z}.right)
-   \IF {\textit{y}.parent $\neq$ \textit{z}}
-     \STATE \textsc{Transplant}(\textit{T, y, y.right})
-     \STATE \textit{y}.right $\gets$ \textit{z}.right
-     \STATE \textit{y}.right.parent $\gets$ \textit{y}
-   \ENDIF
-
-  \STATE \textsc{Transplant}(\textit{T, z, y})
-  \STATE \textit{y}.left $\gets$ \textit{z}.left
-  \STATE \textit{y}.left.parent $\gets$ \textit{y}
-\ENDIF
-\ENDPROCEDURE
-
-\end{algorithmic}
-\end{algorithm}
-</pre>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">"""Remove the node from the tree</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">     node: node to remove from the tree</span>
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-	<span class="n">replacement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
-	<span class="k">if</span> <span class="n">replacement</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">node</span><span class="p">:</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">replacement</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
-	    <span class="n">replacement</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span>
-	    <span class="n">replacement</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">replacement</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">replacement</span><span class="p">)</span>
-	<span class="n">replacement</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
-	<span class="n">replacement</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">replacement</span>
-    <span class="k">return</span>
-</pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
-<span class="n">child</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-<span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
-
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
-
-<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
-<span class="n">child</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-<span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
-
-<span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
-<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<span class="n">child</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-<span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
-
-<span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
-<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-<span class="n">child</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-<span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">right</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
-<span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-<span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
-</pre></div>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org6dd0aa4" class="outline-2">
-<h2 id="org6dd0aa4">Plotting</h2>
-<div class="outline-text-2" id="text-org6dd0aa4">
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
-<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
-    <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-<span class="n">adjacencies</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-
-<span class="k">def</span> <span class="nf">inorder</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="sd">"""Traverse the nodes and build an adjancency dictionary</span>
-<span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">)</span>
-	<span class="n">left</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="k">else</span> <span class="kc">None</span>
-	<span class="n">right</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="k">else</span> <span class="kc">None</span>
-	<span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)):</span>
-	    <span class="k">if</span> <span class="n">left</span> <span class="ow">and</span> <span class="n">right</span><span class="p">:</span>
-		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-	    <span class="k">elif</span> <span class="n">left</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
-		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="p">)</span>
-	    <span class="k">else</span><span class="p">:</span>
-		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span><span class="p">,)</span>
-	    <span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">)</span>
-    <span class="k">return</span>
-
-<span class="n">inorder</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">adjacencies</span><span class="o">=</span><span class="n">adjacencies</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">adjacencies</span><span class="p">)</span>
-</pre></div>
-
-<pre class="example">
-{2: (1, 3), 5: (2, 7), 7: (6, 8), 10: (5, 15), 12: (11, 14), 15: (12, 17), 17: (16, 20)}
-</pre>
-
-
-<p>
-Now that we have an adjacency list, let's try and plot it.
-</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span>
-
-<span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"binary-search-tree-node-insertion"</span>
-<span class="n">OUTPUT</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
-
-<span class="n">graph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">(</span><span class="n">adjacencies</span><span class="p">)</span>
-
-<span class="n">pygraph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
-<span class="n">pygraph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">OUTPUT</span> <span class="o">+</span> <span class="s2">"first_tree.png"</span><span class="p">)</span>
-</pre></div>
-
-<p>
-<img src="posts/binary-search-tree-node-insertion/first_tree.png" alt="nil"></p>
-
-<p>
-This is sort of an artificial example in that in order to get the plot right I had to insert nodes until they all had two (except the leaves), but it hopefully shows that it works.
-</p>
-</div>
-</div>
-<div id="outline-container-org15b523c" class="outline-2">
-<h2 id="org15b523c">Sources</h2>
-<div class="outline-text-2" id="text-org15b523c">
-<ul class="org-ul">
-<li><a href="posts/clrs/">Introduction To Algorithms (CLRS)</a></li>
-</ul>
-<script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("insert-node"));
-});
-</script><script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("transplant-node"));
-});
-</script><script>
-window.addEventListener('load', function () {
-    pseudocode.renderElement(document.getElementById("delete-node"));
 });
 </script>
 </div>
