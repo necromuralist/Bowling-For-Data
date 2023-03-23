@@ -1,0 +1,111 @@
+#+BEGIN_COMMENT
+.. title: NYC Shootings Python Version
+.. slug: nyc-shootings-python-version
+.. date: 2023-03-22 13:18:14 UTC-07:00
+.. tags: pandas,data science,data exploration
+.. category: Data Exploration
+.. link: 
+.. description: The NYPD Shooting Incident Data (Python Version)
+.. type: text
+
+#+END_COMMENT
+
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-fe3ac767-1a3f-4817-8bd5-eb420fef485f-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+* NYPD Shooting Incident Data Version 2 (python)
+
+This is a replication (more or less) of the {{% doc %}}nypd-shooting-incident-data{{%  /doc %}} post which we did using R but this time we'll use python and pandas instead. Once again we'll be looking at the [[https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic][NYPD Shooting Incident Data (Historic)]] from the [[https://catalog.data.gov/dataset][DATA.gov]] catalog of datasets, which lists every shooting from 2006 through the last updated incident (as of March 22, 2023 it shows that it was last updated June 9, 2022 but we'll have to look at it to see what the date of the last incident was).
+
+** Imports and Setup
+
+#+begin_src python :results none
+# python
+from functools import partial
+import sys
+
+# pypi
+from tabulate import tabulate
+import pandas
+#+end_src
+
+First, let's double-check which version of python we're using.
+
+#+begin_src python :results output :exports both
+print(sys.version)
+#+end_src
+
+#+RESULTS:
+: 3.9.16 (feeb267ead3e6771d3f2f49b83e1894839f64fb7, Dec 29 2022, 14:23:21)
+: [PyPy 7.3.11 with GCC 10.2.1 20210130 (Red Hat 10.2.1-11)]
+
+We're running pypy's version of python 3.9.16.
+
+#+begin_src python :results none
+TABLE = partial(tabulate, headers="keys", showindex=False, tablefmt="orgtbl")
+#+end_src
+
+* The Data
+** Loading It
+#+begin_src python :results none
+URL = "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD"
+data = pandas.read_csv(URL)
+#+end_src
+
+** The Columns
+
+#+begin_src python :results output :exports both
+print(len(data.columns))
+#+end_src
+
+#+RESULTS:
+: 19
+
+So we have 19 columns, how many of them does pandas think are numeric?
+
+#+begin_src python :results output :exports both
+print(TABLE(data.describe(), showindex=True))
+#+end_src
+
+#+RESULTS:
+|       |    INCIDENT_KEY |   PRECINCT |   JURISDICTION_CODE |       X_COORD_CD |   Y_COORD_CD |     Latitude |     Longitude |
+|-------+-----------------+------------+---------------------+------------------+--------------+--------------+---------------|
+| count | 25596           | 25596      |        25594        |  25596           |      25596   | 25596        | 25596         |
+| mean  |     1.12383e+08 |    65.8694 |            0.331601 |      1.00945e+06 |     207894   |    40.7372   |   -73.909     |
+| std   |     6.78612e+07 |    27.2019 |            0.742266 |  18421.4         |      31857.4 |     0.087447 |     0.0664265 |
+| min   |     9.95324e+06 |     1      |            0        | 914928           |     125757   |    40.5116   |   -74.2493    |
+| 25%   |     6.15936e+07 |    44      |            0        |      1.00001e+06 |     182782   |    40.6683   |   -73.9431    |
+| 50%   |     8.64373e+07 |    69      |            0        |      1.00772e+06 |     194038   |    40.6991   |   -73.9153    |
+| 75%   |     1.66661e+08 |    81      |            0        |      1.01684e+06 |     239429   |    40.8238   |   -73.8824    |
+| max   |     2.3849e+08  |   123      |            2        |      1.06682e+06 |     271128   |    40.9108   |   -73.702     |
+
+Just seven of them, and four are coordinates and the other three are categorical. This isn't really surprising, since the data isn't measuring anything but is rather a listing of shooting incidents reported (each row represents a single incident).
+
+There's a table on the [[https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8][NYPD-Shooting-Incident-Data]] page that describes the columns.
+
+| Column Name             | Description                                                      | Type        |
+|-------------------------+------------------------------------------------------------------+-------------|
+| INCIDENT_KEY            | Randomly generated persistent ID for each arrest                 | Plain Text  |
+| OCCUR_DATE              | Exact date of the shooting incident                              | Date & Time |
+| OCCUR_TIME              | Exact time of the shooting incident                              | Plain Text  |
+| BORO                    | Borough where the shooting incident occurred                     | Plain Text  |
+| PRECINCT                | Precinct where the shooting incident occurred                    | Plain Text  |
+| JURISDICTIONAL_CODE     | Jurisdiction where it occurred                                   | Number      |
+| LOCATION_DESC           | Location of the incident                                         | Plain Text  |
+| STATISTICAL_MURDER_FLAG | Victim died                                                      | Checkbox    |
+| PERP_AGE_GROUP          | Perpetrator's age within a category                              | Plain Text  |
+| PERP_SEX                | Pepetrator's sex.                                                | Plain Text  |
+| PERP_RACE               | Perpetrator's race.                                              | Plain Text  |
+| VIC_AGE_GROUP           | Victim's age with a category.                                    | Plain Text  |
+| VIC_SEX                 | Victim's sex.                                                    | Plain Text  |
+| VIC_RACE                | Victim's Race                                                    | Plain Text  |
+| X_COORD_CD              | Midblock X-coordinate for New York State Plane Coordinate System | Plain Text  |
+| Y_COORD_CD              | Midblock Y-coordinate                                            | Plain Text  |
+| Latitude                | Latitude coordinate                                              | Number      |
+| Longitude               | Longitude                                                        | Number      |
+| Lon_Lat                 | Longitude and Latitude Coordinate for mapping                    | Point       |
