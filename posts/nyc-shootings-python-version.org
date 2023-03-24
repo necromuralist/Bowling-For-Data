@@ -12,13 +12,13 @@
 
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-fe3ac767-1a3f-4817-8bd5-eb420fef485f-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-8bdc68b6-038f-4f9a-af62-acae3fde41b1-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
 
-* NYPD Shooting Incident Data Version 2 (python)
+* NYPD Shooting Incident Data Version 2 (with python)
 
 This is a replication (more or less) of the {{% doc %}}nypd-shooting-incident-data{{%  /doc %}} post which we did using R but this time we'll use python and pandas instead. Once again we'll be looking at the [[https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic][NYPD Shooting Incident Data (Historic)]] from the [[https://catalog.data.gov/dataset][DATA.gov]] catalog of datasets, which lists every shooting from 2006 through the last updated incident (as of March 22, 2023 it shows that it was last updated June 9, 2022 but we'll have to look at it to see what the date of the last incident was).
 
@@ -30,6 +30,7 @@ from functools import partial
 import sys
 
 # pypi
+from expects import equal, expect
 from tabulate import tabulate
 import pandas
 #+end_src
@@ -46,18 +47,25 @@ print(sys.version)
 
 We're running pypy's version of python 3.9.16.
 
+This next bit is a little setup to make nicer tables.
+
 #+begin_src python :results none
 TABLE = partial(tabulate, headers="keys", showindex=False, tablefmt="orgtbl")
 #+end_src
 
 * The Data
 ** Loading It
+
+The data is available to download as a CSV so we'll pass the URL for the CSV to pandas and make a dataframe.
+
 #+begin_src python :results none
 URL = "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD"
 data = pandas.read_csv(URL)
 #+end_src
 
 ** The Columns
+
+We'll start looking at the data by examining what's in the columns.
 
 #+begin_src python :results output :exports both
 print(len(data.columns))
@@ -109,3 +117,67 @@ There's a table on the [[https://data.cityofnewyork.us/Public-Safety/NYPD-Shooti
 | Latitude                | Latitude coordinate                                              | Number      |
 | Longitude               | Longitude                                                        | Number      |
 | Lon_Lat                 | Longitude and Latitude Coordinate for mapping                    | Point       |
+
+*** Incident Key
+
+The incident key is an identifier for a specific incident so it's only really useful if you need to look up or refer to one or more of them, but we'll be looking at things in aggregate so they probably won't be useful to us, except maybe for looking at anomalies. Let's just make sure that the identifiers are unique as I'm asserting that they are.
+
+#+begin_src python :results output :exports both
+id_count = len(data.INCIDENT_KEY.unique())
+incidents = len(data)
+print(f"Identifiers: {id_count:,}\tIncidents: {incidents:,}")
+# expect(id_count).to(equal(len(data)))
+#+end_src
+
+#+RESULTS:
+: Identifiers: 20,126	Incidents: 25,596
+
+It appears that I wasn't correct in my assumption... let's take a look at one of the incidents.
+
+#+begin_src python :results output :exports both
+top = data.INCIDENT_KEY.value_counts().head(1)
+top_id = top.index[0]
+print(f"Incident: {top_id}\tCount: {top.iloc[0]}")
+#+end_src
+
+#+RESULTS:
+: Incident: 173354054	Count: 18
+
+Maybe I'll go into this more later, but inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess.
+
+So the Incident Key might be useful to see the cases where multiple people shoot or are shot.
+
+*** OCCUR_DATE and OCCUR_TIME
+
+#+begin_src python :results output :exports both
+example = data[data.INCIDENT_KEY==top_id].iloc[0]
+print(f"OCCUR_DATE: {example.OCCUR_DATE} ({data.OCCUR_DATE.dtype})")
+print(f"OCCUR_TIME: {example.OCCUR_TIME} ({data.OCCUR_TIME.dtype})")
+#+end_src
+
+#+RESULTS:
+: OCCUR_DATE: 01/06/2018 (object)
+: OCCUR_TIME: 21:05:00 (object)
+
+Pandas interpreted both of these as strings, but it'd probably be more useful for us if they were datetime objects.
+
+#+begin_src python :results none
+DATE_FORMAT = "%m/%d/%Y"
+TIME_FORMAT = "%H:%M:%S"
+FORMAT = f"{DATE_FORMAT} {TIME_FORMAT}"
+data["date_time"] = pandas.to_datetime(data.OCCUR_DATE + " " + data.OCCUR_TIME, format=FORMAT)
+#+end_src
+
+#+begin_src python :results output :exports both
+check_date = data[data.INCIDENT_KEY==top_id].iloc[0]
+print(f"OCCUR_DATE: {check_date.OCCUR_DATE}")
+print(f"New Date: {check_date.date_time.date()}")
+print(f"OCCUR_TIME: {check_date.OCCUR_TIME}")
+print(f"New Time: {check_date.date_time.time()}")
+#+end_src
+
+#+RESULTS:
+: OCCUR_DATE: 01/06/2018
+: New Date: 2018-01-06
+: OCCUR_TIME: 21:05:00
+: New Time: 21:05:00
