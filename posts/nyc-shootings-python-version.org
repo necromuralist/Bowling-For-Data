@@ -12,7 +12,7 @@
 
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-8bdc68b6-038f-4f9a-af62-acae3fde41b1-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-e813d5ac-8b2e-4753-9761-f8a1773149ff-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -32,7 +32,11 @@ import sys
 # pypi
 from expects import equal, expect
 from tabulate import tabulate
+
+import altair
 import pandas
+
+from graeae.visualization.altair_helpers import output_path, save_chart
 #+end_src
 
 First, let's double-check which version of python we're using.
@@ -42,8 +46,8 @@ print(sys.version)
 #+end_src
 
 #+RESULTS:
-: 3.9.16 (feeb267ead3e6771d3f2f49b83e1894839f64fb7, Dec 29 2022, 14:23:21)
-: [PyPy 7.3.11 with GCC 10.2.1 20210130 (Red Hat 10.2.1-11)]
+: 3.9.9 (main, Dec  3 2021, 01:15:49) 
+: [GCC 10.2.1 20210110]
 
 We're running pypy's version of python 3.9.16.
 
@@ -51,6 +55,14 @@ This next bit is a little setup to make nicer tables.
 
 #+begin_src python :results none
 TABLE = partial(tabulate, headers="keys", showindex=False, tablefmt="orgtbl")
+#+end_src
+
+This is to help with the plotting.
+
+#+begin_src python :results none
+SLUG = "nyc-shootings-python-version"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH)
 #+end_src
 
 * The Data
@@ -63,18 +75,17 @@ URL = "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOW
 data = pandas.read_csv(URL)
 #+end_src
 
-** The Columns
-
-We'll start looking at the data by examining what's in the columns.
-
 #+begin_src python :results output :exports both
-print(len(data.columns))
+rows, columns = data.shape
+print(f"Rows: {rows:,}\tColumns: {columns}")
 #+end_src
 
 #+RESULTS:
-: 19
+: Rows: 25,596	Columns: 19
 
-So we have 19 columns, how many of them does pandas think are numeric?
+** The Columns
+
+We'll start looking at the data by examining what's in the columns. We saw from the data frame's shape that we have 19 columns, how many of them does pandas think are numeric?
 
 #+begin_src python :results output :exports both
 print(TABLE(data.describe(), showindex=True))
@@ -120,22 +131,25 @@ There's a table on the [[https://data.cityofnewyork.us/Public-Safety/NYPD-Shooti
 
 *** Incident Key
 
-The incident key is an identifier for a specific incident so it's only really useful if you need to look up or refer to one or more of them, but we'll be looking at things in aggregate so they probably won't be useful to us, except maybe for looking at anomalies. Let's just make sure that the identifiers are unique as I'm asserting that they are.
+The incident key is an identifier for a specific incident so it's only really useful if you need to look up or refer to one or more of them, but we'll be looking at things in aggregate making them less useful for us, except maybe for looking at anomalies. Let's just make sure that the identifiers are unique as I'm asserting that they are.
 
 #+begin_src python :results output :exports both
 id_count = len(data.INCIDENT_KEY.unique())
 incidents = len(data)
 print(f"Identifiers: {id_count:,}\tIncidents: {incidents:,}")
-# expect(id_count).to(equal(len(data)))
+print(f"There are {incidents - id_count:,} more rows than incident IDs.")
 #+end_src
 
 #+RESULTS:
 : Identifiers: 20,126	Incidents: 25,596
+: There are 5,470 more rows than incident IDs.
 
 It appears that I wasn't correct in my assumption... let's take a look at one of the incidents.
 
 #+begin_src python :results output :exports both
-top = data.INCIDENT_KEY.value_counts().head(1)
+counts = data.INCIDENT_KEY.value_counts()
+up_counts = counts[counts > 1]
+top = counts.head(1)
 top_id = top.index[0]
 print(f"Incident: {top_id}\tCount: {top.iloc[0]}")
 #+end_src
@@ -143,11 +157,69 @@ print(f"Incident: {top_id}\tCount: {top.iloc[0]}")
 #+RESULTS:
 : Incident: 173354054	Count: 18
 
-Maybe I'll go into this more later, but inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess.
+Inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess.
 
 So the Incident Key might be useful to see the cases where multiple people shoot or are shot.
 
+#+begin_src python :results output :exports both
+# altair sorts the bar-chart using the x-axis values. There's supposed to be a way
+# to turn it off but I couldn't get it to work, thus the second reset_index
+# call is to get a column to keep it in order
+use_counts = up_counts.reset_index().rename(
+    columns={"index": "Incident Key",
+             "INCIDENT_KEY": "Shots"}).reset_index()
+chart = altair.Chart(use_counts).mark_bar().encode(
+    x = "index",
+    y="Shots",
+    tooltip=[altair.Tooltip("Incident Key"), altair.Tooltip("Shots")]
+    
+).properties(
+   title="Incidents with Multiple Shots",
+   width=800,
+   height=525
+)
+
+save_it(chart, "multiple_shot_incidents")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="multiple_shot_incidents.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+It looks like a lot of entries have more than one row. Does this mean many incidents have more than one victim? More than one shooter?
+
+#+begin_src python :results output :exports both
+fractions = 100 * counts.value_counts()/len(data)
+fractions = fractions.reset_index().rename(columns={
+    "index": "Entries", "INCIDENT_KEY": "Percent of Rows"})
+
+chart = altair.Chart(fractions).mark_bar().encode(
+    x=altair.X("Entries", sort=fractions["Percent of Rows"].values),
+    y=altair.Y("Percent of Rows", scale=altair.Scale(domain=(-1, 70))),
+    tooltip=[altair.Tooltip("Entries"),
+             altair.Tooltip("Percent of Rows")]).properties(
+                 title="Percent Of Incidents with Multiple Rows",
+                 width=800,
+                 height=525)
+
+save_it(chart, "fraction_row_incidents")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="fraction_row_incidents.html" style="width:100%" height=600>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+The majority of the incidents do have only one row in the dataset. Perhaps it's not as unusual as I think it is to have multiple people involved in a shooting.
+
 *** OCCUR_DATE and OCCUR_TIME
+
+There are two columns that tell us when the shooting is supposed to have happened.
 
 #+begin_src python :results output :exports both
 example = data[data.INCIDENT_KEY==top_id].iloc[0]
@@ -162,10 +234,13 @@ print(f"OCCUR_TIME: {example.OCCUR_TIME} ({data.OCCUR_TIME.dtype})")
 Pandas interpreted both of these as strings, but it'd probably be more useful for us if they were datetime objects.
 
 #+begin_src python :results none
-DATE_FORMAT = "%m/%d/%Y"
-TIME_FORMAT = "%H:%M:%S"
+MONTH, DAY, YEAR = "%m", "%d", "%Y"
+HOUR, MINUTE, SECOND = "%H", "%M", "%S"
+DATE_FORMAT = "/".join((MONTH, DAY, YEAR))
+TIME_FORMAT = ":".join((HOUR, MINUTE, SECOND))
 FORMAT = f"{DATE_FORMAT} {TIME_FORMAT}"
-data["date_time"] = pandas.to_datetime(data.OCCUR_DATE + " " + data.OCCUR_TIME, format=FORMAT)
+DATE_COLUMN = "date_time"
+data[DATE_COLUMN] = pandas.to_datetime(data.OCCUR_DATE + " " + data.OCCUR_TIME, format=FORMAT)
 #+end_src
 
 #+begin_src python :results output :exports both
@@ -181,3 +256,49 @@ print(f"New Time: {check_date.date_time.time()}")
 : New Date: 2018-01-06
 : OCCUR_TIME: 21:05:00
 : New Time: 21:05:00
+
+#+begin_src python :results output :exports both
+print(data.OCCUR_DATE.min())
+print(data.OCCUR_DATE.max())
+#+end_src
+
+#+RESULTS:
+: 01/01/2006
+: 12/31/2021
+
+Our dataset covers the years from 2006 throught 20021. Let's see how many there are from month to month.
+
+#+begin_src python :results none
+indexed = data.set_index(DATE_COLUMN)
+#+end_src
+
+#+begin_src python :results output :exports both
+monthly = indexed.groupby(pandas.Grouper(freq="M"))
+counts = monthly.count()["INCIDENT_KEY"].reset_index().rename(
+    columns={"INCIDENT_KEY": "Shootings",
+             "date_time": "Month"}
+)
+expect(counts["Shootings"].sum()).to(equal(len(data)))
+
+chart = altair.Chart(counts).mark_line(point=True).encode(
+    x=altair.X("Month"),
+    y=altair.Y("Shootings"),
+    tooltip=[altair.Tooltip("Month"),
+             altair.Tooltip("Shootings")]
+).properties(
+    width=800,
+    height=525,
+    title="NYC Shootings By Month"
+)
+
+save_it(chart, "monthly_incidents", height=625)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="monthly_incidents.html" style="width:100%" height=625>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+It looks like shootings went down in 2013 then shot back up again in the Summer of 2020.
