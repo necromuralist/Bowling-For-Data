@@ -12,7 +12,7 @@
 
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-e813d5ac-8b2e-4753-9761-f8a1773149ff-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-69cc9b1b-e7cc-47f8-8dd6-76e4b63c5086-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -49,7 +49,7 @@ print(sys.version)
 : 3.9.9 (main, Dec  3 2021, 01:15:49) 
 : [GCC 10.2.1 20210110]
 
-We're running pypy's version of python 3.9.16.
+We're running pythor 3.9.9. I was running it in pypy but for some reason the pandas' ~groupby~ method would hang so this is done in cPython.
 
 This next bit is a little setup to make nicer tables.
 
@@ -274,13 +274,13 @@ indexed = data.set_index(DATE_COLUMN)
 
 #+begin_src python :results output :exports both
 monthly = indexed.groupby(pandas.Grouper(freq="M"))
-counts = monthly.count()["INCIDENT_KEY"].reset_index().rename(
+monthly_counts = monthly.count()["INCIDENT_KEY"].reset_index().rename(
     columns={"INCIDENT_KEY": "Shootings",
              "date_time": "Month"}
 )
-expect(counts["Shootings"].sum()).to(equal(len(data)))
+expect(monthly_counts["Shootings"].sum()).to(equal(len(data)))
 
-chart = altair.Chart(counts).mark_line(
+chart = altair.Chart(monthly_counts).mark_line(
     point={"filled": False,
            "fill": "white"}).encode(
     x=altair.X("Month"),
@@ -304,3 +304,70 @@ save_it(chart, "monthly_incidents", height=625)
 #+end_export
 
 It looks like shootings went down in 2013 then shot back up again in the Summer of 2020.
+
+
+#+begin_src python :results output :exports both
+monthly_counts["Rolling Mean"] = monthly_counts["Shootings"].ewm(
+    halflife="90 days", times=monthly_counts.Month).mean()
+pre_melt = monthly_counts.rename(columns={"Shootings": "Sum"})
+melted = pre_melt.melt("Month", var_name="Aggregation", value_name="Aggregated Value")
+chart = altair.Chart(melted).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+               x=altair.X("Month"),
+               y=altair.Y("Aggregated Value"),
+               color="Aggregation",
+               tooltip=[altair.Tooltip("Month"),
+                        altair.Tooltip("Aggregated Value"),
+                        altair.Tooltip("Aggregation")]
+).properties(
+    width=800,
+    height=525,
+    title="NYC Shootings By 90 Day Exponential Weighted Mean"
+)
+
+save_it(chart, "monthly_rolling_incidents", height=625)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="monthly_rolling_incidents.html" style="width:100%" height=625>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Using a ninety-day window gives a little better sense of the overall trend downwards until 2020 reversed it.
+
+
+#+begin_src python :results output :exports both
+yearly = indexed.groupby(pandas.Grouper(freq="Y"))
+yearly_counts = yearly.count()["INCIDENT_KEY"].reset_index().rename(
+    columns={"INCIDENT_KEY": "Shootings",
+             "date_time": "Year"}
+)
+expect(yearly_counts["Shootings"].sum()).to(equal(len(data)))
+
+chart = altair.Chart(yearly_counts).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+    x=altair.X("Year"),
+    y=altair.Y("Shootings"),
+    tooltip=[altair.Tooltip("Year"),
+             altair.Tooltip("Shootings")]
+).properties(
+    width=800,
+    height=525,
+    title="NYC Shootings By year"
+)
+
+save_it(chart, "yearly_incidents", height=625)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="yearly_incidents.html" style="width:100%" height=625>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Although 2020 had that crazy summer, 2021 still exceeded it overall.
