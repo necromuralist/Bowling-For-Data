@@ -12,7 +12,7 @@
 
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-69cc9b1b-e7cc-47f8-8dd6-76e4b63c5086-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-2b33afec-4db8-4912-933c-8fb207910a94-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -49,7 +49,7 @@ print(sys.version)
 : 3.9.9 (main, Dec  3 2021, 01:15:49) 
 : [GCC 10.2.1 20210110]
 
-We're running pythor 3.9.9. I was running it in pypy but for some reason the pandas' ~groupby~ method would hang so this is done in cPython.
+We're running python 3.9.9. I was running it in pypy but for some reason the pandas' ~groupby~ method would hang so this is done in cPython.
 
 This next bit is a little setup to make nicer tables.
 
@@ -62,7 +62,7 @@ This is to help with the plotting.
 #+begin_src python :results none
 SLUG = "nyc-shootings-python-version"
 OUTPUT_PATH = output_path(SLUG)
-save_it = partial(save_chart, output_path=OUTPUT_PATH)
+save_it = partial(save_chart, output_path=OUTPUT_PATH, height=650)
 #+end_src
 
 * The Data
@@ -210,7 +210,7 @@ save_it(chart, "fraction_row_incidents")
 
 #+RESULTS:
 #+begin_export html
-<object type="text/html" data="fraction_row_incidents.html" style="width:100%" height=600>
+<object type="text/html" data="fraction_row_incidents.html" style="width:100%" height=650>
   <p>Figure Missing</p>
 </object>
 #+end_export
@@ -268,6 +268,8 @@ print(data.OCCUR_DATE.max())
 
 Our dataset covers the years from 2006 throught 20021. Let's see how many there are from month to month.
 
+**** Shootings By Month
+
 #+begin_src python :results none
 indexed = data.set_index(DATE_COLUMN)
 #+end_src
@@ -293,18 +295,19 @@ chart = altair.Chart(monthly_counts).mark_line(
     title="NYC Shootings By Month"
 )
 
-save_it(chart, "monthly_incidents", height=625)
+save_it(chart, "monthly_incidents")
 #+end_src
 
 #+RESULTS:
 #+begin_export html
-<object type="text/html" data="monthly_incidents.html" style="width:100%" height=625>
+<object type="text/html" data="monthly_incidents.html" style="width:100%" height=650>
   <p>Figure Missing</p>
 </object>
 #+end_export
 
 It looks like shootings went down in 2013 then shot back up again in the Summer of 2020.
 
+**** 90 Da Rolling Window
 
 #+begin_src python :results output :exports both
 monthly_counts["Rolling Mean"] = monthly_counts["Shootings"].ewm(
@@ -326,18 +329,19 @@ chart = altair.Chart(melted).mark_line(
     title="NYC Shootings By 90 Day Exponential Weighted Mean"
 )
 
-save_it(chart, "monthly_rolling_incidents", height=625)
+save_it(chart, "monthly_rolling_incidents")
 #+end_src
 
 #+RESULTS:
 #+begin_export html
-<object type="text/html" data="monthly_rolling_incidents.html" style="width:100%" height=625>
+<object type="text/html" data="monthly_rolling_incidents.html" style="width:100%" height=650>
   <p>Figure Missing</p>
 </object>
 #+end_export
 
 Using a ninety-day window gives a little better sense of the overall trend downwards until 2020 reversed it.
 
+**** By Year
 
 #+begin_src python :results output :exports both
 yearly = indexed.groupby(pandas.Grouper(freq="Y"))
@@ -360,14 +364,53 @@ chart = altair.Chart(yearly_counts).mark_line(
     title="NYC Shootings By year"
 )
 
-save_it(chart, "yearly_incidents", height=625)
+save_it(chart, "yearly_incidents")
 #+end_src
 
 #+RESULTS:
 #+begin_export html
-<object type="text/html" data="yearly_incidents.html" style="width:100%" height=625>
+<object type="text/html" data="yearly_incidents.html" style="width:100%" height=650>
   <p>Figure Missing</p>
 </object>
 #+end_export
 
 Although 2020 had that crazy summer, 2021 still exceeded it overall.
+
+**** Monthly By Year
+
+#+begin_src python :results none
+monthly_counts = monthly_counts.rename(columns={"Month": "date-time"})
+#+end_src
+
+#+begin_src python :results none
+month_map = dict(zip(range(1, 13), "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()))
+monthly_counts["Year"] = monthly_counts["date-time"].apply(lambda date: date.year)
+monthly_counts["Month"] = monthly_counts["date-time"].apply(lambda date: month_map[date.month])
+#+end_src
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(monthly_counts).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+    x=altair.X("Month",
+               sort=monthly_counts["date-time"].values),
+    y=altair.Y("Shootings"),
+    color=altair.Color("Year", type="nominal"),
+    tooltip=[altair.Tooltip("Year"),
+             altair.Tooltip("Month"),
+             altair.Tooltip("Shootings")]
+).properties(
+    width=800,
+    height=525,
+    title="NYC Monthly Shootings By year"
+)
+
+save_it(chart, "month_year_shootings")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="month_year_shootings.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
