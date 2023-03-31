@@ -129,7 +129,7 @@ There's a table on the [[https://data.cityofnewyork.us/Public-Safety/NYPD-Shooti
 | Longitude               | Longitude                                                        | Number      |
 | Lon_Lat                 | Longitude and Latitude Coordinate for mapping                    | Point       |
 
-*** Incident Key
+** Incident Key
 
 The incident key is an identifier for a specific incident so it's only really useful if you need to look up or refer to one or more of them, but we'll be looking at things in aggregate making them less useful for us, except maybe for looking at anomalies. Let's just make sure that the identifiers are unique as I'm asserting that they are.
 
@@ -217,7 +217,7 @@ save_it(chart, "fraction_row_incidents")
 
 The majority of the incidents do have only one row in the dataset. Perhaps it's not as unusual as I think it is to have multiple people involved in a shooting.
 
-*** OCCUR_DATE and OCCUR_TIME
+** OCCUR_DATE and OCCUR_TIME
 
 There are two columns that tell us when the shooting is supposed to have happened.
 
@@ -268,7 +268,7 @@ print(data.OCCUR_DATE.max())
 
 Our dataset covers the years from 2006 throught 20021. Let's see how many there are from month to month.
 
-**** Shootings By Month
+*** Shootings By Month
 
 #+begin_src python :results none
 indexed = data.set_index(DATE_COLUMN)
@@ -307,7 +307,7 @@ save_it(chart, "monthly_incidents")
 
 It looks like shootings went down in 2013 then shot back up again in the Summer of 2020.
 
-**** 90 Da Rolling Window
+*** 90 Da Rolling Window
 
 #+begin_src python :results output :exports both
 monthly_counts["Rolling Mean"] = monthly_counts["Shootings"].ewm(
@@ -341,7 +341,7 @@ save_it(chart, "monthly_rolling_incidents")
 
 Using a ninety-day window gives a little better sense of the overall trend downwards until 2020 reversed it.
 
-**** By Year
+*** By Year
 
 #+begin_src python :results output :exports both
 yearly = indexed.groupby(pandas.Grouper(freq="Y"))
@@ -376,7 +376,7 @@ save_it(chart, "yearly_incidents")
 
 Although 2020 had that crazy summer, 2021 still exceeded it overall.
 
-**** Monthly By Year
+*** Monthly By Year
 
 #+begin_src python :results none
 monthly_counts = monthly_counts.rename(columns={"Month": "date-time"})
@@ -414,3 +414,22 @@ save_it(chart, "month_year_shootings")
   <p>Figure Missing</p>
 </object>
 #+end_export
+* Location
+** Descriptions
+*** BORO
+*** PRECINCT
+*** JURISDICTIONAL_CODE
+*** LOCATION_DESC
+** Coordinates
+*** X_COORD_CD & Y_COORD_CD
+*** Latitude & Longitude
+* Murder or Not
+* Victims and Perpetrators
+** Perpetrators
+*** PERP_AGE_GROUP
+*** PEPR_SEX
+*** PERP_RACE
+** Victims
+*** VIC_AGE_GROUP
+*** VIC_SEX
+*** VIC_RACE
