@@ -12,7 +12,7 @@
 
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-495a1695-6a31-4996-83a7-bb0f50de0df4-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-6de94f21-da49-4185-af66-e2ee8da925a1-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -50,6 +50,15 @@ print(sys.version)
 : [GCC 10.2.1 20210110]
 
 We're running python 3.9.9. I was running it in pypy but for some reason the pandas' ~groupby~ method would hang so this is done in cPython.
+
+#+begin_src python :results output :exports both
+print(altair.__version__)
+#+end_src
+
+#+RESULTS:
+: 5.0.0rc1
+
+I found out after I'd been struggling with altair for a little while that they're about to make a major release that breaks some of the ways you use it (in the prior versions). Since it's been a while since I've used altair I decided to go with the newer, upcoming version rather than re-learn the current one and then learn the new version of altair once it's released.
 
 This next bit is a little setup to make nicer tables.
 
@@ -157,9 +166,7 @@ print(f"Incident: {top_id}\tCount: {top.iloc[0]}")
 #+RESULTS:
 : Incident: 173354054	Count: 18
 
-Inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess.
-
-Reading the [[file:///home/hades/Downloads/NYPD_Shootings_Incident_Level_Data_Footnotes.pdf][Footnotes]] (link is to a PDF) it says:
+Inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess. Reading the [[file:///home/hades/Downloads/NYPD_Shootings_Incident_Level_Data_Footnotes.pdf][Footnotes]] (link is to a PDF) it says:
 
 #+begin_quote
 A shooting incident can have multiple victims involved and as a result duplicate INCIDENT_KEYs are produced.
@@ -170,18 +177,16 @@ So it appears each row represents the victim of a shooting and each ~INCIDENT_KE
 **Note:** There's actually a slight discrepancy between the descriptions of the ~INCIDENT_KEY~ between the web-page and the PDF footnotes. According to the Web-Page the ID is for each arrest while the footnotes make it sound like they represent cases where there was at least one victim, whether or not someone was arrested. For our purposes this won't matter, since we're only using the data as a source for data visualization, but if one were really trying to understand what was happening in NYC knowing exactly what the data represents might be important (assuming not all cases with a shooting victim leads to an arrest).
 
 #+begin_src python :results output :exports both
-# altair sorts the bar-chart using the x-axis values. There's supposed to be a way
-# to turn it off but I couldn't get it to work, thus the second reset_index
-# call is to get a column to keep it in order
-use_counts = up_counts.reset_index().rename(
-    columns={"index": "Incident Key",
-             "INCIDENT_KEY": "Shots"}).reset_index()
+use_counts = up_counts.reset_index()
 chart = altair.Chart(use_counts).mark_bar().encode(
-    x = "index",
-    y="Shots",
-    tooltip=[altair.Tooltip("Incident Key"), altair.Tooltip("Shots")]
-    
-).properties(
+    x = altair.X("INCIDENT_KEY",
+                 type="nominal",
+                 sort="-y",
+                 axis=altair.Axis(labels=False)),
+    y="count",
+    tooltip=[altair.Tooltip("INCIDENT_KEY", type="nominal"),
+             altair.Tooltip("count")]
+).interactive().properties(
    title="Incidents with Multiple Shots",
    width=800,
    height=525
@@ -192,7 +197,7 @@ save_it(chart, "multiple_shot_incidents")
 
 #+RESULTS:
 #+begin_export html
-<object type="text/html" data="multiple_shot_incidents.html" style="width:100%" height=600>
+<object type="text/html" data="multiple_shot_incidents.html" style="width:100%" height=650>
   <p>Figure Missing</p>
 </object>
 #+end_export
@@ -201,13 +206,13 @@ It looks like a lot of entries have more than one row. Does this mean many incid
 
 #+begin_src python :results output :exports both
 fractions = 100 * counts.value_counts()/len(data)
-fractions = fractions.reset_index().rename(columns={
-    "index": "Entries", "INCIDENT_KEY": "Percent of Rows"})
+fractions = fractions.reset_index(name="Percent of Rows").rename(columns={
+    "count": "Rows"})
 
 chart = altair.Chart(fractions).mark_bar().encode(
-    x=altair.X("Entries", sort=fractions["Percent of Rows"].values),
+    x=altair.X("Rows", sort=fractions["Percent of Rows"].values),
     y=altair.Y("Percent of Rows", scale=altair.Scale(domain=(-1, 70))),
-    tooltip=[altair.Tooltip("Entries"),
+    tooltip=[altair.Tooltip("Rows"),
              altair.Tooltip("Percent of Rows")]).properties(
                  title="Percent Of Incidents with Multiple Rows",
                  width=800,
@@ -290,12 +295,13 @@ expect(monthly_counts["Shootings"].sum()).to(equal(len(data)))
 #+end_src
 
 #+begin_src python :results output :exports both
+MONTH_YEAR = "%B %Y"
 chart = altair.Chart(monthly_counts).mark_line(
     point={"filled": False,
            "fill": "white"}).encode(
-    x=altair.X("Month"),
+    x=altair.X("Month", type="temporal"),
     y=altair.Y("Shootings"),
-    tooltip=[altair.Tooltip("Month"),
+    tooltip=[altair.Tooltip("Month", format=MONTH_YEAR),
              altair.Tooltip("Shootings")]
 ).properties(
     width=800,
@@ -328,9 +334,8 @@ chart = altair.Chart(melted).mark_line(
                x=altair.X("Month"),
                y=altair.Y("Aggregated Value"),
                color="Aggregation",
-               tooltip=[altair.Tooltip("Month"),
-                        altair.Tooltip("Aggregated Value"),
-                        altair.Tooltip("Aggregation")]
+               tooltip=[altair.Tooltip("Month", format=MONTH_YEAR),
+                        altair.Tooltip("Aggregated Value")]
 ).properties(
     width=800,
     height=525,
@@ -354,18 +359,19 @@ Using a ninety-day window gives a little better sense of the overall trend downw
 #+begin_src python :results output :exports both
 yearly = indexed.groupby(pandas.Grouper(freq="Y"))
 yearly_counts = yearly.count()["INCIDENT_KEY"].reset_index().rename(
-    columns={"INCIDENT_KEY": "Shootings",
-             "date_time": "Year"}
+    columns={"INCIDENT_KEY": "Shootings"}
 )
+
+yearly_counts["Year"] = yearly_counts.date_time.apply(lambda date: date.year)
 expect(yearly_counts["Shootings"].sum()).to(equal(len(data)))
-comma": True}
+
 chart = altair.Chart(yearly_counts).mark_line(
     point={"filled": False,
            "fill": "white"}).encode(
-    x=altair.X("Year"),
+    x=altair.X("Year", type="ordinal"),
     y=altair.Y("Shootings"),
     tooltip=[altair.Tooltip("Year"),
-             altair.Tooltip("Shootings")]
+             altair.Tooltip("Shootings", format=",")]
 ).properties(
     width=800,
     height=525,
@@ -395,6 +401,9 @@ monthly_counts["Month"] = monthly_counts["date-time"].apply(lambda date: month_m
 #+end_src
 
 #+begin_src python :results output :exports both
+selection = altair.selection_point(fields=["Year"],
+                                   bind="legend")
+
 chart = altair.Chart(monthly_counts).mark_line(
     point={"filled": False,
            "fill": "white"}).encode(
@@ -402,14 +411,16 @@ chart = altair.Chart(monthly_counts).mark_line(
                sort=monthly_counts["date-time"].values),
     y=altair.Y("Shootings"),
     color=altair.Color("Year", type="nominal"),
-    tooltip=[altair.Tooltip("Year"),
-             altair.Tooltip("Month"),
-             altair.Tooltip("Shootings")]
+    tooltip=[altair.Tooltip("date-time", title="Month", format=MONTH_YEAR),
+             altair.Tooltip("Shootings")],
+    opacity=altair.condition(selection,
+                             altair.value(0.8),
+                             altair.value(0.2))
 ).properties(
     width=800,
     height=525,
     title="NYC Monthly Shootings By year"
-)
+).add_params(selection)
 
 save_it(chart, "month_year_shootings")
 #+end_src
@@ -464,7 +475,7 @@ The ~BORO~ column identifies which of the [[https://en.wikipedia.org/wiki/Boroug
 
 #+begin_src python :results output :exports both
 boroughs = data.BORO.value_counts().reset_index().rename(
-    columns=dict(index="Borough", BORO="Shootings"))
+    columns=dict(BORO="Borough", count="Shootings"))
 
 
 chart = altair.Chart(boroughs).mark_bar().encode(
@@ -491,27 +502,28 @@ save_it(chart, "shootings-by-borough")
 #+begin_src python :results output :exports both
 borough_monthly = monthly.agg({"BORO": "first",
                                "INCIDENT_KEY": "count"}).reset_index().rename(
-                                   columns=dict(BORO="Borough", INCIDENT_KEY="Shootings"))
+                                   columns=dict(BORO="Borough", INCIDENT_KEY="Shootings", date_time="Month"))
 
-borough_monthly["Month"] = borough_monthly["date_time"].apply(
-    lambda date: month_map[date.month])
-
+selection = altair.selection_point(fields=["Borough"], bind="legend")
 chart = altair.Chart(borough_monthly).mark_line(
     point={"filled": False,
            "fill": "white"}).encode(
-               x=altair.X("date_time"),
+               x=altair.X("Month"),
                y=altair.Y("Shootings"),
                color="Borough",
                tooltip=[
                    altair.Tooltip("Borough"),
-                   altair.Tooltip("date_time", type="temporal"),
+                   altair.Tooltip("Month", format=MONTH_YEAR),
                    altair.Tooltip("Shootings")
-               ]
+               ],
+               opacity=altair.condition(selection,
+                                        altair.value(0.8),
+                                        altair.value(0.2))
 ).properties(
-    width=800,
+    width=900,
     height=525,
     title="Monthly Borough Shootings"
-)
+).add_params(selection)
 
 save_it(chart, "borough-monthly-shootings")
 #+end_src
@@ -528,14 +540,15 @@ There are seventy-seven police precincts in New York City, subdividing the borou
 *** LOCATION_DESC
 
 #+begin_src python :results output :exports both
-locations = data.LOCATION_DESC.value_counts().reset_index().rename(columns=dict(index="Location", LOCATION_DESC="Count"))
+locations = data.LOCATION_DESC.value_counts().reset_index().rename(columns=dict(count="Count", LOCATION_DESC="Location"))
 
 chart = altair.Chart(locations).mark_bar().encode(
     x=altair.X("Location", sort=locations.Location.values,
                axis=altair.Axis(labelAngle=30)),
-    y="Count"
+    y=altair.Y("Count"),
+    tooltip=[altair.Tooltip("Location"), altair.Tooltip("Count", format=",")]
 ).properties(
-    width=800,
+    width=900,
     height=525,
     title="Shooting Location Counts"
 )
@@ -554,6 +567,28 @@ It looks like most shootings happened at homes, and to avoid being shot you shou
 
 ** Coordinates
 *** X_COORD_CD & Y_COORD_CD
+#+begin_src python :results output :exports both
+chart = altair.Chart(
+    data[["X_COORD_CD", "Y_COORD_CD", "BORO"]]).mark_point().encode(
+        x=altair.X("X_COORD_CD").scale(domain=(data.X_COORD_CD.min(), data.X_COORD_CD.max())),
+        y=altair.Y("Y_COORD_CD").scale(domain=(data.Y_COORD_CD.min(), data.Y_COORD_CD.max())),
+        color="BORO"
+).properties(
+    width=800,
+    height=525,
+    title="Shootings By Coordinates",
+)
+
+save_it(chart, "shootings-by-coordinates")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="shootings-by-coordinates.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 *** Latitude & Longitude
 * Murder or Not
 * Victims and Perpetrators
