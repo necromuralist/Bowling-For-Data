@@ -166,7 +166,7 @@ print(f"Incident: {top_id}\tCount: {top.iloc[0]}")
 #+RESULTS:
 : Incident: 173354054	Count: 18
 
-Inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess. Reading the [[file:///home/hades/Downloads/NYPD_Shootings_Incident_Level_Data_Footnotes.pdf][Footnotes]] (link is to a PDF) it says:
+Inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess. Reading the [[https://data.cityofnewyork.us/api/views/833y-fsy8/files/e4e3d86c-348f-4a16-a17f-19480c089429?download=true&filename=NYPD_Shootings_Incident_Level_Data_Footnotes.pdf][Footnotes]] (link is to a PDF) it says:
 
 #+begin_quote
 A shooting incident can have multiple victims involved and as a result duplicate INCIDENT_KEYs are produced.
@@ -469,7 +469,7 @@ The ~BORO~ column identifies which of the [[https://en.wikipedia.org/wiki/Boroug
 1. Manhattan
 2. Brooklyn
 3. Queens
-4. Bronk
+4. Bronx
 5. Staten Island
 
 
@@ -567,9 +567,12 @@ It looks like most shootings happened at homes, and to avoid being shot you shou
 
 ** Coordinates
 *** X_COORD_CD & Y_COORD_CD
+
+These coordinates use the State Plane Coordinate System (see [[https://www.usgs.gov/faqs/what-state-plane-coordinate-system-can-gps-provide-coordinates-these-values][What is the State Plane Coordinate System?]]) Long Island Zone. The coordinates are mid-block locations with the units in feet.
+
 #+begin_src python :results output :exports both
 chart = altair.Chart(
-    data[["X_COORD_CD", "Y_COORD_CD", "BORO"]]).mark_point().encode(
+    data[["X_COORD_CD", "Y_COORD_CD", "BORO"]]).mark_point(opacity=0.2).encode(
         x=altair.X("X_COORD_CD").scale(domain=(data.X_COORD_CD.min(), data.X_COORD_CD.max())),
         y=altair.Y("Y_COORD_CD").scale(domain=(data.Y_COORD_CD.min(), data.Y_COORD_CD.max())),
         color="BORO"
@@ -589,7 +592,55 @@ save_it(chart, "shootings-by-coordinates")
 </object>
 #+end_export
 
+#+begin_src python :results output :exports both
+coordinates = data[["X_COORD_CD", "Y_COORD_CD",
+                    "BORO", "date_time",
+                    "Longitude", "Latitude"]].rename(columns=dict(
+    BORO="Borough",
+    X_COORD_CD="X-Coordinate",
+    Y_COORD_CD="Y-Coordinate"
+))
+
+coordinates["Year"] = coordinates.date_time.apply(lambda date: date.year)
+
+select_year = altair.selection_point(
+    name="Year",
+    fields=["Year"],
+    bind=altair.binding_range(min=2006, max=2021, step=1, name="Year"),
+    value=[{"Year": 2006}],
+)
+
+chart = altair.Chart(coordinates).mark_point(opacity=0.2).encode(
+    x=altair.X("X-Coordinate").scale(
+        domain=(coordinates["X-Coordinate"].min(),
+                coordinates["X-Coordinate"].max())),
+    y=altair.Y("Y-Coordinate").scale(
+        domain=(coordinates["Y-Coordinate"].min(),
+                coordinates["Y-Coordinate"].max())),
+    color="Borough",
+    tooltip=[altair.Tooltip("Borough"),
+             altair.Tooltip("date_time")],
+).properties(
+    width=800,
+    height=525,
+    title="Shootings By Coordinates and Year",
+).add_params(select_year).transform_filter(select_year)
+
+save_it(chart, "shootings-by-coordinates-and-year")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="shootings-by-coordinates-and-year.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 *** Latitude & Longitude
+
+#+begin_src python :results output :exports both
+
+#+end_src
 * Murder or Not
 * Victims and Perpetrators
 ** Perpetrators
