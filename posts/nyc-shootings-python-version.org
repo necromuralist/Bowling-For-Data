@@ -26,6 +26,7 @@ This is a replication (more or less) of the {{% doc %}}nypd-shooting-incident-da
 
 #+begin_src python :results none
 # python
+from datetime import datetime
 from functools import partial
 import sys
 
@@ -138,6 +139,28 @@ There's a table on the [[https://data.cityofnewyork.us/Public-Safety/NYPD-Shooti
 | Longitude               | Longitude                                                        | Number      |
 | Lon_Lat                 | Longitude and Latitude Coordinate for mapping                    | Point       |
 
+** Missing Data
+
+#+begin_src python :results output :exports both
+missing = len(data) - data.count()
+missing = missing.reset_index().rename(
+    columns={"index": "Column",
+             0: "Missing"})
+
+some_missing = missing[missing.Missing > 0].copy()
+some_missing.loc[:, "Fraction"] = some_missing.Missing/len(data)
+print(TABLE(some_missing))
+#+end_src
+
+| Column            |   Missing |    Fraction |
+|-------------------+-----------+-------------|
+| JURISDICTION_CODE |         2 | 7.81372e-05 |
+| LOCATION_DESC     |     14977 | 0.58513     |
+| PERP_AGE_GROUP    |      9344 | 0.365057    |
+| PERP_SEX          |      9310 | 0.363729    |
+| PERP_RACE         |      9310 | 0.363729    |
+
+Most entries are missing location descriptions for some reason, and quite a lot of perpertator data is missing, possibly because they didn't catch whoever did the shooting in those cases.
 * Incident Key
 
 The incident key is an identifier for a specific incident so it's only really useful if you need to look up or refer to one or more of them, but we'll be looking at things in aggregate making them less useful for us, except maybe for looking at anomalies. Let's just make sure that the identifiers are unique as I'm asserting that they are.
@@ -362,7 +385,7 @@ yearly_counts = yearly.count()["INCIDENT_KEY"].reset_index().rename(
     columns={"INCIDENT_KEY": "Shootings"}
 )
 
-yearly_counts["Year"] = yearly_counts.date_time.apply(lambda date: date.year)
+yearly_counts["Year"] = yearly_counts.date_time.dt.year
 expect(yearly_counts["Shootings"].sum()).to(equal(len(data)))
 
 chart = altair.Chart(yearly_counts).mark_line(
@@ -393,11 +416,14 @@ Although 2020 had that crazy summer, 2021 still exceeded it overall.
 ** Monthly By Year
 
 #+begin_src python :results none
-monthly_counts = monthly_counts.rename(columns={"Month": "date-time"})
+monthly_counts = monthly.count()["INCIDENT_KEY"].reset_index().rename(
+    columns={"INCIDENT_KEY": "Shootings"}
+)
+# monthly_counts = monthly_counts.rename(columns={"Month": "date-time"})
 
 month_map = dict(zip(range(1, 13), "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()))
-monthly_counts["Year"] = monthly_counts["date-time"].apply(lambda date: date.year)
-monthly_counts["Month"] = monthly_counts["date-time"].apply(lambda date: month_map[date.month])
+monthly_counts["Year"] = monthly_counts["date_time"].dt.year
+monthly_counts["Month"] = monthly_counts["date_time"].dt.month.apply(lambda month: month_map[month])
 #+end_src
 
 #+begin_src python :results output :exports both
@@ -408,10 +434,10 @@ chart = altair.Chart(monthly_counts).mark_line(
     point={"filled": False,
            "fill": "white"}).encode(
     x=altair.X("Month",
-               sort=monthly_counts["date-time"].values),
+               sort=monthly_counts["date_time"].values),
     y=altair.Y("Shootings"),
     color=altair.Color("Year", type="nominal"),
-    tooltip=[altair.Tooltip("date-time", title="Month", format=MONTH_YEAR),
+    tooltip=[altair.Tooltip("date_time", title="Month", format=MONTH_YEAR),
              altair.Tooltip("Shootings")],
     opacity=altair.condition(selection,
                              altair.value(0.8),
@@ -535,9 +561,64 @@ save_it(chart, "borough-monthly-shootings")
 </object>
 #+end_export
 
+#+begin_src python :results output :exports both
+borough_bar = data[["BORO", "date_time"]].rename(
+    columns=dict(BORO="Borough"))
+borough_bar["Month"] = pandas.to_datetime({
+    "year": borough_bar.date_time.dt.year,
+    "month": borough_bar.date_time.dt.month,
+    "day": 1
+})
+
+chart = altair.Chart(borough_bar).mark_bar().encode(
+    x="Month",
+    y="count()",
+    color="Borough").properties(
+        width=800,
+        height=525,
+        title="Monthly Shootings With Borough Breakdowns")
+
+save_it(chart, "borough-monthly-bar-chart")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="borough-monthly-bar-chart.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 *** PRECINCT & JURISDICTION_CODE
-There are seventy-seven police precincts in New York City, subdividing the boroughs. This might be useful for isolating where the shootings are occuring even further, but for now I'll skip it. Same with the JURISDICTION_CODE.
+There are seventy-seven police precincts in New York City, subdividing the boroughs. This might be useful for isolating where the shootings are occuring even further, but I'll skip it. Same with the JURISDICTION_CODE.
 *** LOCATION_DESC
+
+#+begin_src python :results output :exports both
+missing_locations = data[data.LOCATION_DESC.isna()].rename(columns=dict(LOCATION_DESC="Location Description"))
+missing_locations = missing_locations[["Location Description", "date_time", "BORO"]]
+missing_locations["Year"] = missing_locations.date_time.dt.year
+
+chart = altair.Chart(missing_locations).mark_bar().encode(
+    x=altair.X("Year", type="ordinal"),
+    y="count()",
+    tooltip=[altair.Tooltip("count()"), altair.Tooltip("BORO"), altair.Tooltip("Year")],
+    color="BORO"
+).properties(
+    width=800,
+    height=525,
+    title="Missing Location Descriptions by Year"
+)
+
+save_it(chart, "missing-locations-descriptions")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="missing-locations-descriptions.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+I was hoping the missing locations might be because they only started recording it after some point, but it looks like it's an ongoing problem not local to any one borough, so the location descriptions are interesting, but the number of missing entries makes it hard to say that they're meaningful.
 
 #+begin_src python :results output :exports both
 locations = data.LOCATION_DESC.value_counts().reset_index().rename(columns=dict(count="Count", LOCATION_DESC="Location"))
@@ -601,7 +682,7 @@ coordinates = data[["X_COORD_CD", "Y_COORD_CD",
     Y_COORD_CD="Y-Coordinate"
 ))
 
-coordinates["Year"] = coordinates.date_time.apply(lambda date: date.year)
+coordinates["Year"] = coordinates.date_time.dt.year
 
 select_year = altair.selection_point(
     name="Year",
