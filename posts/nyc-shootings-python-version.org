@@ -12,7 +12,7 @@
 
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-6de94f21-da49-4185-af66-e2ee8da925a1-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-20e7dd04-d855-4515-b2c6-4b1e4d2f2b4f-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -35,6 +35,7 @@ from expects import equal, expect
 from tabulate import tabulate
 
 import altair
+import geopandas
 import pandas
 
 from graeae.visualization.altair_helpers import output_path, save_chart
@@ -722,6 +723,51 @@ save_it(chart, "shootings-by-coordinates-and-year")
 #+begin_src python :results output :exports both
 
 #+end_src
+** With GeoPandas
+
+It turns out than the boroughs of New York City are one of the three datasets that come with GeoPandas so we can bring it in to make a map.
+
+#+begin_src python :results output :exports both
+path_to_data = geopandas.datasets.get_path("nybb")
+nyc_geopandas = geopandas.read_file(path_to_data)
+
+print(nyc_geopandas.head(1))
+#+end_src
+
+#+RESULTS:
+:    BoroCode       BoroName     Shape_Leng    Shape_Area   
+: 0         5  Staten Island  330470.010332  1.623820e+09  \
+: 
+:                                             geometry  
+: 0  MULTIPOLYGON (((970217.022 145643.332, 970227....  
+
+Let's look at a map colored with the 2021 shooting counts.
+
+#+begin_src python :results none
+BOROUGH_COLUMN = "BoroName"
+SHOOTINGS_COLUMN = "Shootings"
+latest = data[data.date_time.dt.year==2021]
+latest_count = latest.groupby("BORO").count().reset_index()
+expect(latest_count.INCIDENT_KEY.sum()).to(equal(len(latest)))
+latest_count = latest_count.rename(columns=dict(BORO=BOROUGH_COLUMN))
+latest_count[BOROUGH_COLUMN] = latest_count[BOROUGH_COLUMN].str.title()
+latest_count[SHOOTINGS_COLUMN] = latest_count["INCIDENT_KEY"].copy()
+latest_count = latest_count[[BOROUGH_COLUMN, SHOOTINGS_COLUMN]]
+merged = nyc_geopandas.merge(latest_count, on=BOROUGH_COLUMN)
+
+merged = merged[[BOROUGH_COLUMN, SHOOTINGS_COLUMN, "geometry"]]
+explorer = merged.explore(column=SHOOTINGS_COLUMN,
+                          tooltip=BOROUGH_COLUMN,
+                          popup=True)
+explorer.save(f"{OUTPUT_PATH}/nyc-shootings-explore.html")
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="nyc-shootings-explore.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 * Murder or Not
 * Victims and Perpetrators
 ** Perpetrators
