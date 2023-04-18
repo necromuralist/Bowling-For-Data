@@ -12,7 +12,7 @@
 
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-20e7dd04-d855-4515-b2c6-4b1e4d2f2b4f-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0f8cc424-cf17-4f40-987c-a94f32266de9-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -315,7 +315,6 @@ monthly_counts = monthly.count()["INCIDENT_KEY"].reset_index().rename(
              "date_time": "Month"}
 )
 expect(monthly_counts["Shootings"].sum()).to(equal(len(data)))
-
 #+end_src
 
 #+begin_src python :results output :exports both
@@ -769,6 +768,91 @@ explorer.save(f"{OUTPUT_PATH}/nyc-shootings-explore.html")
 #+end_export
 
 * Murder or Not
+** By Year
+#+begin_src python :results output :exports both
+MURDER_FLAG = "STATISTICAL_MURDER_FLAG"
+MURDERED = "Murdered"
+BOROUGH = "Borough"
+YEAR = "Year"
+data[YEAR] = data.date_time.dt.to_period("Y").dt.to_timestamp()
+yearly_murders = data.groupby([YEAR, "BORO"]).sum(
+    MURDER_FLAG).reset_index().rename(
+        columns={
+            "BORO": BOROUGH,
+            MURDER_FLAG: MURDERED})
+yearly_murders = yearly_murders[[YEAR, BOROUGH, MURDERED]]
+
+SELECTION = altair.selection_point(fields=[BOROUGH], bind="legend")
+
+chart = altair.Chart(yearly_murders).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+               x=altair.X(YEAR),
+               y=altair.Y(MURDERED),
+               color=BOROUGH,
+               tooltip=[altair.Tooltip(YEAR),
+                        altair.Tooltip(MURDERED),
+                        altair.Tooltip(BOROUGH)],
+               opacity=altair.condition(SELECTION,
+                                        altair.value(0.8),
+                                        altair.value(0.2))
+           ).add_params(SELECTION).properties(
+               width=800,
+               height=525,
+               title="NYC Murders By Year"
+           )
+
+save_it(chart, "yearly_borough_murders")
+,#+end_src
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="yearly_borough_murders.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+** By Month
+#+begin_src python :results output :exports both
+MONTH = "Month"
+data[MONTH] = data.date_time.dt.to_period("M").dt.to_timestamp()
+murdered = data.groupby([MONTH, "BORO"]).sum(MURDER_FLAG).reset_index()
+murdered = murdered[[MONTH, "BORO", MURDER_FLAG]].rename(columns={
+    "BORO": BOROUGH,
+    MURDER_FLAG: MURDERED,    
+})
+
+SELECTION = altair.selection_point(fields=[BOROUGH], bind="legend")
+
+chart = altair.Chart(murdered).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+               x=altair.X(MONTH),
+               y=altair.Y(MURDERED),
+               color=BOROUGH,
+               tooltip=[altair.Tooltip(MONTH, format=MONTH_YEAR),
+                        altair.Tooltip(MURDERED),
+                        altair.Tooltip(BOROUGH)],
+               opacity=altair.condition(SELECTION,
+                                        altair.value(0.8),
+                                        altair.value(0.2))
+           ).add_params(SELECTION).properties(
+               width=800,
+               height=525,
+               title="NYC Murders By Month"
+           )
+
+save_it(chart, "monthly_borough_murders")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="monthly_borough_murders.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 * Victims and Perpetrators
 ** Perpetrators
 *** PERP_AGE_GROUP
