@@ -1,5 +1,5 @@
 #+BEGIN_COMMENT
-.. title: NYC Shootings Python Version
+.. title: NYC Shootings (Python Version)
 .. slug: nyc-shootings-python-version
 .. date: 2023-03-22 13:18:14 UTC-07:00
 .. tags: pandas,data science,data exploration
@@ -12,7 +12,7 @@
 
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-0f8cc424-cf17-4f40-987c-a94f32266de9-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-4f550039-1d70-49d3-aa85-6d7afcd087cf-ssh.json
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
@@ -853,14 +853,209 @@ save_it(chart, "monthly_borough_murders")
 </object>
 #+end_export
 
+** By Coordinate
+
+#+begin_src python :results output :exports both
+murdered = data[data[MURDER_FLAG]]
+
+murder_coordinates = murdered[["BORO", "date_time",
+                               "Longitude", "Latitude"
+                               ]].rename(columns=dict(
+                                   BORO="Borough",
+                               ))
+murder_coordinates["Year"] = murder_coordinates.date_time.dt.year
+
+chart = (altair.Chart(murder_coordinates)
+         .mark_point(opacity=0.2)
+         .encode(
+             x=altair.X("Longitude").scale(
+                 domain=(murder_coordinates["Longitude"].min(),
+                         murder_coordinates["Longitude"].max())),
+             y=altair.Y("Latitude").scale(
+                 domain=(murder_coordinates["Latitude"].min(),
+                         murder_coordinates["Latitude"].max())),
+             color="Borough",
+             tooltip=[altair.Tooltip("Borough"),
+                      altair.Tooltip("date_time")],
+         ).properties(
+             width=800,
+             height=525,
+             title="Murders By Longitude, Latitude and Year",
+    ).add_params(select_year)
+         .transform_filter(select_year))
+
+save_it(chart, "murders-by-coordinates-and-year")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="murders-by-coordinates-and-year.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
 * Victims and Perpetrators
 ** Perpetrators
 *** PERP_AGE_GROUP
+
+#+begin_src python :results output :exports both
+print(TABLE(data.PERP_AGE_GROUP.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_AGE_GROUP   |   count |
+|------------------+---------|
+| nan              |    9344 |
+| 18-24            |    5844 |
+| 25-44            |    5202 |
+| UNKNOWN          |    3148 |
+| <18              |    1463 |
+| 45-64            |     535 |
+| 65+              |      57 |
+| 1020             |       1 |
+| 940              |       1 |
+| 224              |       1 |
+
 *** PEPR_SEX
+
+#+begin_src python :results output :exports both
+print(TABLE(data.PERP_SEX.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_SEX   |   count |
+|------------+---------|
+| M          |   14416 |
+| nan        |    9310 |
+| U          |    1499 |
+| F          |     371 |
+
 *** PERP_RACE
+
+#+begin_src python :results output :exports both
+print(TABLE(data.PERP_RACE.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_RACE                      |   count |
+|--------------------------------+---------|
+| BLACK                          |   10668 |
+| nan                            |    9310 |
+| WHITE HISPANIC                 |    2164 |
+| UNKNOWN                        |    1836 |
+| BLACK HISPANIC                 |    1203 |
+| WHITE                          |     272 |
+| ASIAN / PACIFIC ISLANDER       |     141 |
+| AMERICAN INDIAN/ALASKAN NATIVE |       2 |
+
+
+It looks like besides the ~NaN~ values, missing data is also classified as ~U~ or ~UNKNOWN~. 
+*** Handling the Unknowns
+
+Let's try and unify the missing values.
+
+#+begin_src python :results output :exports both
+data[data.PERP_AGE_GROUP.isna()] = "UNKNOWN"
+data[data.PERP_AGE_GROUP == "U"] = "UNKNOWN"
+
+print(TABLE(data.PERP_AGE_GROUP.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_AGE_GROUP   |   count |
+|------------------+---------|
+| UNKNOWN          |   12492 |
+| 18-24            |    5844 |
+| 25-44            |    5202 |
+| <18              |    1463 |
+| 45-64            |     535 |
+| 65+              |      57 |
+| 1020             |       1 |
+| 940              |       1 |
+| 224              |       1 |
+
+#+begin_src python :results output :exports both
+data[data.PERP_SEX.isna()] = "UNKNOWN"
+data[data.PERP_SEX == "U"] = "UNKNOWN"
+
+print(TABLE(data.PERP_SEX.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_SEX   |   count |
+|------------+---------|
+| M          |   14416 |
+| UNKNOWN    |   10809 |
+| F          |     371 |
+
+#+begin_src python :results output :exports both
+data[data.PERP_RACE.isna()] = "UNKNOWN"
+data[data.PERP_RACE == "U"] = "UNKNOWN"
+
+print(TABLE(data.PERP_RACE.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_RACE                      |   count |
+|--------------------------------+---------|
+| UNKNOWN                        |   11166 |
+| BLACK                          |   10650 |
+| WHITE HISPANIC                 |    2164 |
+| BLACK HISPANIC                 |    1201 |
+| WHITE                          |     272 |
+| ASIAN / PACIFIC ISLANDER       |     141 |
+| AMERICAN INDIAN/ALASKAN NATIVE |       2 |
+
+So, the first thing we can notice is that the ~UNKNOWN~ counts don't match so sometims some attributes were known but not others, so they don't just represent cases where the perpetrator wasn't caught like I thought it might be. The secindo thin is that for age and race the unknowns have the highest counts. For all three categories the numbers of unknows are so high that it's hard to say how they migh affect the cases where the values are known.
+
 ** Victims
 *** VIC_AGE_GROUP
+#+begin_src python :results output :exports both
+print(TABLE(data.VIC_AGE_GROUP.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| VIC_AGE_GROUP   |   count |
+|-----------------+---------|
+| UNKNOWN         |   10863 |
+| 25-44           |    6500 |
+| 18-24           |    5389 |
+| <18             |    1657 |
+| 45-64           |    1070 |
+| 65+             |     117 |
+
 *** VIC_SEX
+
+#+begin_src python :results output :exports both
+print(TABLE(data.VIC_SEX.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| VIC_SEX   |   count |
+|-----------+---------|
+| M         |   13182 |
+| UNKNOWN   |   10809 |
+| F         |    1598 |
+| U         |       7 |
+
 *** VIC_RACE
+
+#+begin_src python :results output :exports both
+print(TABLE(data.VIC_RACE.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| VIC_RACE                       |   count |
+|--------------------------------+---------|
+| UNKNOWN                        |   10851 |
+| BLACK                          |    9962 |
+| WHITE HISPANIC                 |    2515 |
+| BLACK HISPANIC                 |    1528 |
+| WHITE                          |     485 |
+| ASIAN / PACIFIC ISLANDER       |     249 |
+| AMERICAN INDIAN/ALASKAN NATIVE |       6 |
+
+Somewhat unexpectedly, the unknowns are also alarmingly high for the victims, suggesting that they represent poor case records and perhaps the demographic information isn't reliable enough to be useful.
+
 * Sources
 - [[https://commons.wikimedia.org/wiki/File:5_Boroughs_Labels_New_York_City_Map.svg][New York City Map]] via WikiMedia Commons
