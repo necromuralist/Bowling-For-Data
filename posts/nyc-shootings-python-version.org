@@ -458,7 +458,11 @@ save_it(chart, "month_year_shootings")
 </object>
 #+end_export
 
-** By Month
+Click on a year in the legend to isolate it from the other lines in the plot and on a space somewhere on the legend to highlight all the years again.
+
+It looks like there was an unusually large surge in the Summer of 2020 after years of declining shootings, but regardless of the year there's at least a slight increase in shootings during the Summer months.
+
+** Medain By Month
 #+begin_src python :results output :exports both
 by_month_median = monthly_counts.groupby("Month").median().reset_index()
 
@@ -482,6 +486,8 @@ save_it(chart, "monthly_shootings")
   <p>Figure Missing</p>
 </object>
 #+end_export
+
+It looks like there's a definite seasonal effect on shootings. Must be all those farmer's kids off from school to work the fields and shoot each other.
 
 * Location
 ** Descriptions
@@ -561,6 +567,8 @@ save_it(chart, "borough-monthly-shootings")
 </object>
 #+end_export
 
+The Bronx and Brooklyn look like they have the most shootings, although I didn't weight it by population so I don't know how they compare as a fraction of the population.
+
 #+begin_src python :results output :exports both
 borough_bar = data[["BORO", "date_time"]].rename(
     columns=dict(BORO="Borough"))
@@ -587,6 +595,9 @@ save_it(chart, "borough-monthly-bar-chart")
   <p>Figure Missing</p>
 </object>
 #+end_export
+
+By clicking on the legend you can isolate plot-lines by borough and it makes it clearer that the surge in 2020 happened primarily in the Bronx and Manhattan, although the plot is a little deceptive since Manhattan had some months where there were no shootings, but I didn't infill them with zeros so it doesn't show those months dropping back down.
+
 
 *** PRECINCT & JURISDICTION_CODE
 There are seventy-seven police precincts in New York City, subdividing the boroughs. This might be useful for isolating where the shootings are occuring even further, but I'll skip it. Same with the JURISDICTION_CODE.
@@ -719,9 +730,6 @@ save_it(chart, "shootings-by-coordinates-and-year")
 
 *** Latitude & Longitude
 
-#+begin_src python :results output :exports both
-
-#+end_src
 ** With GeoPandas
 
 It turns out than the boroughs of New York City are one of the three datasets that come with GeoPandas so we can bring it in to make a map.
@@ -766,6 +774,8 @@ explorer.save(f"{OUTPUT_PATH}/nyc-shootings-explore.html")
   <p>Figure Missing</p>
 </object>
 #+end_export
+
+This is probably most interesting to someone like me who doesn't know much about New York City. I wonder why Queens has so much fewer shootings than Brooklyn or the Bronx when it sits between them? Demographics?
 
 * Murder or Not
 ** By Year
@@ -852,6 +862,8 @@ save_it(chart, "monthly_borough_murders")
   <p>Figure Missing</p>
 </object>
 #+end_export
+
+It looks like Brooklyn lead in murders in the Summer of 2020, 
 
 ** By Coordinate
 
@@ -1006,7 +1018,7 @@ print(TABLE(data.PERP_RACE.value_counts(dropna=False).reset_index()))
 | ASIAN / PACIFIC ISLANDER       |     141 |
 | AMERICAN INDIAN/ALASKAN NATIVE |       2 |
 
-So, the first thing we can notice is that the ~UNKNOWN~ counts don't match so sometims some attributes were known but not others, so they don't just represent cases where the perpetrator wasn't caught like I thought it might be. The secindo thin is that for age and race the unknowns have the highest counts. For all three categories the numbers of unknows are so high that it's hard to say how they migh affect the cases where the values are known.
+So, the first thing we can notice is that the ~UNKNOWN~ counts don't match so sometims some attributes were known but not others, so they don't just represent cases where the perpetrator wasn't caught like I thought it might be. The second thing is that for age and race the unknowns have the highest counts. For all three categories the numbers of unknowns are so high that it's hard to say how they might affect the cases where the values are known.
 
 ** Victims
 *** VIC_AGE_GROUP
