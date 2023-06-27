@@ -9,13 +9,13 @@
 <meta name="theme-color" content="#5670d4">
 <meta name="generator" content="Nikola (getnikola.com)">
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-the-partition-swaps/">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-the-partition-swaps/index.html">
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../clrs-partition/" title="CLRS Partition" type="text/html">
-<link rel="next" href="../randomized-partition/" title="Randomized Partition" type="text/html">
+<link rel="prev" href="../clrs-partition/index.html" title="CLRS Partition" type="text/html">
+<link rel="next" href="../randomized-partition/index.html" title="Randomized Partition" type="text/html">
 <meta property="og:site_name" content="Bowling For Data">
 <meta property="og:title" content="Comparing the Partition Swaps">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-the-partition-swaps/">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/comparing-the-partition-swaps/index.html">
 <meta property="og:description" content="Introduction
 
 
@@ -65,6 +65,16 @@ bg-light
                 </li>
 <li class="nav-item">
 <a href="../../rss.xml" class="nav-link">RSS feed</a>
+            </li>
+<li class="nav-item dropdown">
+<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
+            <div class="dropdown-menu">
+                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
+                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
+                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
+                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
+                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
+            </div>
 
                 
             </li>
@@ -93,14 +103,14 @@ bg-light
         
         
         
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Comparing the Partition Swaps</a></h1>
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Comparing the Partition Swaps</a></h1>
 
         <div class="metadata">
             <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
                     The Cloistered Monkey
             </span></p>
             <p class="dateline">
-            <a href="." rel="bookmark">
+            <a href="#" rel="bookmark">
             <time class="published dt-published" datetime="2022-02-23T21:29:25-08:00" itemprop="datePublished" title="2022-02-23 21:29">2022-02-23 21:29</time></a>
             </p>
             
@@ -110,17 +120,17 @@ bg-light
         
 
     </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="outline-container-org2622324" class="outline-2">
-<h2 id="org2622324">Introduction</h2>
-<div class="outline-text-2" id="text-org2622324">
+    <div id="outline-container-orgc620451" class="outline-2">
+<h2 id="orgc620451">Introduction</h2>
+<div class="outline-text-2" id="text-orgc620451">
 <p>
 This is part of a series of posts about the Partition algorithm that starts with <a href="../the-partition/">this post</a>.
 </p>
 </div>
 
-<div id="outline-container-orga541997" class="outline-3">
-<h3 id="orga541997">Imports and Setup</h3>
-<div class="outline-text-3" id="text-orga541997">
+<div id="outline-container-org39f4684" class="outline-3">
+<h3 id="org39f4684">Imports and Setup</h3>
+<div class="outline-text-3" id="text-org39f4684">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
@@ -150,27 +160,27 @@ This is part of a series of posts about the Partition algorithm that starts with
 </div>
 </div>
 
-<div id="outline-container-orgda8bbf6" class="outline-2">
-<h2 id="orgda8bbf6">Comparing  the Swaps</h2>
-<div class="outline-text-2" id="text-orgda8bbf6">
+<div id="outline-container-org4e25ec3" class="outline-2">
+<h2 id="org4e25ec3">Comparing  the Swaps</h2>
+<div class="outline-text-2" id="text-org4e25ec3">
 <p>
 Both of the versions of partition shown here traverse the collection once, so looking at the number of comparisons doesn't seem so interesting. According to the <a href="https://en.wikipedia.org/wiki/Quicksort">Wikipedia page on Quicksort</a>, the swaps for Hoare's method (which is slightly different from Levitin's) is better for the worst cases, so let's see if this matters for Levitin's and CLRS's swaps.
 </p>
 </div>
 
-<div id="outline-container-orgb5d7a6d" class="outline-3">
-<h3 id="orgb5d7a6d">Some Swap Counters</h3>
-<div class="outline-text-3" id="text-orgb5d7a6d">
+<div id="outline-container-org4bbc6e4" class="outline-3">
+<h3 id="org4bbc6e4">Some Swap Counters</h3>
+<div class="outline-text-3" id="text-org4bbc6e4">
 <p>
 Since we're only calling the partitioners once rather than repeatedly using them to partition sub-lists in the collection we can get rid of the <code>left</code> and <code>right</code> arguments to the functions.
 </p>
 </div>
 
-<div id="outline-container-org426aa5c" class="outline-4">
-<h4 id="org426aa5c">A Levitin Swap Counter</h4>
-<div class="outline-text-4" id="text-org426aa5c">
+<div id="outline-container-orgcf494fa" class="outline-4">
+<h4 id="orgcf494fa">A Levitin Swap Counter</h4>
+<div class="outline-text-4" id="text-orgcf494fa">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">levitin_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Partitions the collection using a variation of Hoare's method</span>
+<span class="w">    </span><span class="sd">"""Partitions the collection using a variation of Hoare's method</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     collection: the list to partition</span>
@@ -223,11 +233,11 @@ Since we're only calling the partitioners once rather than repeatedly using them
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org0352868" class="outline-4">
-<h4 id="org0352868">A CLRS Swap Counter</h4>
-<div class="outline-text-4" id="text-org0352868">
+<div id="outline-container-orga39da9f" class="outline-4">
+<h4 id="orga39da9f">A CLRS Swap Counter</h4>
+<div class="outline-text-4" id="text-orga39da9f">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">clrs_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Partitions the collection around the last element</span>
+<span class="w">    </span><span class="sd">"""Partitions the collection around the last element</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     collection: the list to partition</span>
@@ -267,9 +277,9 @@ Since we're only calling the partitioners once rather than repeatedly using them
 </div>
 </div>
 </div>
-<div id="outline-container-org3c1a1d0" class="outline-3">
-<h3 id="org3c1a1d0">A Parallelizer Function</h3>
-<div class="outline-text-3" id="text-org3c1a1d0">
+<div id="outline-container-org3afeaab" class="outline-3">
+<h3 id="org3afeaab">A Parallelizer Function</h3>
+<div class="outline-text-3" id="text-org3afeaab">
 <p>
 This is what I'll pass to joblib to run the two swap-counter functions.
 </p>
@@ -280,7 +290,7 @@ This is what I'll pass to joblib to run the two swap-counter functions.
     <span class="n">swaps</span><span class="p">:</span> <span class="nb">int</span>
 
 <span class="k">def</span> <span class="nf">swap_counter</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">,</span> <span class="n">swap_counter</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SwapCounts</span><span class="p">:</span>
-    <span class="sd">"""Runs the swap_counter over the collection of inputs</span>
+<span class="w">    </span><span class="sd">"""Runs the swap_counter over the collection of inputs</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     collection: elements to partition</span>
@@ -296,7 +306,7 @@ This is what I'll pass to joblib to run the two swap-counter functions.
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">swap_plots</span><span class="p">(</span><span class="n">first_output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SwapCounts</span><span class="p">],</span> <span class="n">second_output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SwapCounts</span><span class="p">],</span>
 	       <span class="n">first_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 	       <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">"""Plot the swap counts</span>
+<span class="w">    </span><span class="sd">"""Plot the swap counts</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     first_output, second_output: lists of SwapCounts</span>
@@ -340,7 +350,7 @@ This is what I'll pass to joblib to run the two swap-counter functions.
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">swap_ratio_plots</span><span class="p">(</span><span class="n">first_output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SwapCounts</span><span class="p">],</span> <span class="n">second_output</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SwapCounts</span><span class="p">],</span>
 		     <span class="n">first_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 		     <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">"""Plot the swap count ratios</span>
+<span class="w">    </span><span class="sd">"""Plot the swap count ratios</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     first_output, second_output: lists of SwapCounts</span>
@@ -377,7 +387,7 @@ This is what I'll pass to joblib to run the two swap-counter functions.
 		<span class="n">label_one</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label_two</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 		<span class="n">things_to_partition</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">],</span>
 		<span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plotter</span><span class="p">:</span> <span class="n">Callable</span><span class="o">=</span><span class="n">swap_plots</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">"""Run the partitioners and plot</span>
+<span class="w">    </span><span class="sd">"""Run the partitioners and plot</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     swapper_one, swapper_two: swap-counter functions</span>
@@ -401,9 +411,9 @@ This is what I'll pass to joblib to run the two swap-counter functions.
 </div>
 </div>
 
-<div id="outline-container-org7316967" class="outline-3">
-<h3 id="org7316967">Random Inputs</h3>
-<div class="outline-text-3" id="text-org7316967">
+<div id="outline-container-org35132a4" class="outline-3">
+<h3 id="org35132a4">Random Inputs</h3>
+<div class="outline-text-3" id="text-org35132a4">
 <div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">random_things_to_partition</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
 			      <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
@@ -427,9 +437,9 @@ This is what I'll pass to joblib to run the two swap-counter functions.
 </div>
 </div>
 
-<div id="outline-container-orge6d5cce" class="outline-3">
-<h3 id="orge6d5cce">Biggest Item Last</h3>
-<div class="outline-text-3" id="text-orge6d5cce">
+<div id="outline-container-orgaff502f" class="outline-3">
+<h3 id="orgaff502f">Biggest Item Last</h3>
+<div class="outline-text-3" id="text-orgaff502f">
 <p>
 What happens if the input has the biggest item at the end of the list?
 </p>
@@ -450,9 +460,9 @@ What happens if the input has the biggest item at the end of the list?
 </div>
 </div>
 
-<div id="outline-container-org0ca971b" class="outline-3">
-<h3 id="org0ca971b">Sorted</h3>
-<div class="outline-text-3" id="text-org0ca971b">
+<div id="outline-container-orge0a7de0" class="outline-3">
+<h3 id="orge0a7de0">Sorted</h3>
+<div class="outline-text-3" id="text-orge0a7de0">
 <p>
 What happens if the input is already sorted?
 </p>
@@ -472,9 +482,9 @@ What happens if the input is already sorted?
 </div>
 </div>
 
-<div id="outline-container-org911dd8c" class="outline-3">
-<h3 id="org911dd8c">All The Same</h3>
-<div class="outline-text-3" id="text-org911dd8c">
+<div id="outline-container-org2aa823f" class="outline-3">
+<h3 id="org2aa823f">All The Same</h3>
+<div class="outline-text-3" id="text-org2aa823f">
 <div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">same_things_to_partition</span> <span class="o">=</span> <span class="p">[[</span><span class="n">count</span><span class="p">]</span> <span class="o">*</span> <span class="n">count</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
 
@@ -499,16 +509,16 @@ What happens if the input is already sorted?
 </div>
 </div>
 
-<div id="outline-container-org3099242" class="outline-2">
-<h2 id="org3099242">Randomized Swaps</h2>
-<div class="outline-text-2" id="text-org3099242">
+<div id="outline-container-orgb5acfa7" class="outline-2">
+<h2 id="orgb5acfa7">Randomized Swaps</h2>
+<div class="outline-text-2" id="text-orgb5acfa7">
 </div>
-<div id="outline-container-orgee5ba78" class="outline-3">
-<h3 id="orgee5ba78">A Randomized Swap Counter</h3>
-<div class="outline-text-3" id="text-orgee5ba78">
+<div id="outline-container-org481ff37" class="outline-3">
+<h3 id="org481ff37">A Randomized Swap Counter</h3>
+<div class="outline-text-3" id="text-org481ff37">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">randomized_swaps</span><span class="p">(</span><span class="n">collection</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">[</span><span class="n">Orderable</span><span class="p">],</span>
 		     <span class="n">partition</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">pivot</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">"""Partitions the collection around the last element</span>
+<span class="w">    </span><span class="sd">"""Partitions the collection around the last element</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     collection: the list to partition</span>
@@ -529,13 +539,13 @@ What happens if the input is already sorted?
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgaad27de" class="outline-3">
-<h3 id="orgaad27de">Randomized Levitin Swaps</h3>
-<div class="outline-text-3" id="text-orgaad27de">
+<div id="outline-container-orge4831b8" class="outline-3">
+<h3 id="orge4831b8">Randomized Levitin Swaps</h3>
+<div class="outline-text-3" id="text-orge4831b8">
 </div>
-<div id="outline-container-org1936ec6" class="outline-4">
-<h4 id="org1936ec6">Shuffled Input</h4>
-<div class="outline-text-4" id="text-org1936ec6">
+<div id="outline-container-orgcc5c742" class="outline-4">
+<h4 id="orgcc5c742">Shuffled Input</h4>
+<div class="outline-text-4" id="text-orgcc5c742">
 <div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">levitin_swaps</span><span class="p">,</span> <span class="n">randomized_levitin</span><span class="p">,</span> <span class="s2">"Levitin"</span><span class="p">,</span> <span class="s2">"Randomized Levitin"</span><span class="p">,</span>
 	    <span class="n">random_things_to_partition</span><span class="p">,</span>
 	   <span class="n">title</span><span class="o">=</span><span class="s2">"Levitin vs Randomized Levitin Partition Swap Count (Randomized Input)"</span><span class="p">,</span>
@@ -548,9 +558,9 @@ What happens if the input is already sorted?
 </div>
 </div>
 
-<div id="outline-container-org04fb20f" class="outline-4">
-<h4 id="org04fb20f">Smallest Item At the End</h4>
-<div class="outline-text-4" id="text-org04fb20f">
+<div id="outline-container-org235c8a0" class="outline-4">
+<h4 id="org235c8a0">Smallest Item At the End</h4>
+<div class="outline-text-4" id="text-org235c8a0">
 <div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100011</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="n">backwards_things_to_partition</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">count</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 				 <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">]</span>
@@ -568,9 +578,9 @@ What happens if the input is already sorted?
 </div>
 
 
-<div id="outline-container-orgba41239" class="outline-4">
-<h4 id="orgba41239">All The Same Input</h4>
-<div class="outline-text-4" id="text-orgba41239">
+<div id="outline-container-orgfd49a73" class="outline-4">
+<h4 id="orgfd49a73">All The Same Input</h4>
+<div class="outline-text-4" id="text-orgfd49a73">
 <p>
 Since only difference between the randomized and the non-randomized input is that the pivot was (probably) swapped out, the input will look the same when all the values are the same to start with so I'm not going to re-plot those.
 </p>
@@ -578,13 +588,13 @@ Since only difference between the randomized and the non-randomized input is tha
 </div>
 </div>
 
-<div id="outline-container-org753907b" class="outline-3">
-<h3 id="org753907b">Randomized CLRS Swaps</h3>
-<div class="outline-text-3" id="text-org753907b">
+<div id="outline-container-org1af35d4" class="outline-3">
+<h3 id="org1af35d4">Randomized CLRS Swaps</h3>
+<div class="outline-text-3" id="text-org1af35d4">
 </div>
-<div id="outline-container-orgd365ef1" class="outline-4">
-<h4 id="orgd365ef1">Shuffled Input</h4>
-<div class="outline-text-4" id="text-orgd365ef1">
+<div id="outline-container-org9f68e1c" class="outline-4">
+<h4 id="org9f68e1c">Shuffled Input</h4>
+<div class="outline-text-4" id="text-org9f68e1c">
 <div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
 	    <span class="n">random_things_to_partition</span><span class="p">,</span>
 	   <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Randomized Input)"</span><span class="p">,</span>
@@ -597,9 +607,9 @@ Since only difference between the randomized and the non-randomized input is tha
 </div>
 </div>
 
-<div id="outline-container-orge64edee" class="outline-4">
-<h4 id="orge64edee">Biggest Item at the End</h4>
-<div class="outline-text-4" id="text-orge64edee">
+<div id="outline-container-org826e536" class="outline-4">
+<h4 id="org826e536">Biggest Item at the End</h4>
+<div class="outline-text-4" id="text-org826e536">
 <div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
 	    <span class="n">big_ended_things_to_partition</span><span class="p">,</span>
 	    <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Big-Ended Input)"</span><span class="p">,</span>
@@ -612,9 +622,9 @@ Since only difference between the randomized and the non-randomized input is tha
 </div>
 </div>
 
-<div id="outline-container-org5f90079" class="outline-4">
-<h4 id="org5f90079">Sorted</h4>
-<div class="outline-text-4" id="text-org5f90079">
+<div id="outline-container-org62c2fdf" class="outline-4">
+<h4 id="org62c2fdf">Sorted</h4>
+<div class="outline-text-4" id="text-org62c2fdf">
 <div class="highlight"><pre><span></span><span class="n">swap_runner</span><span class="p">(</span><span class="n">clrs_swaps</span><span class="p">,</span> <span class="n">randomized_clrs</span><span class="p">,</span> <span class="s2">"CLRS"</span><span class="p">,</span> <span class="s2">"Randomized CLRS"</span><span class="p">,</span>
 	    <span class="n">sorted_things_to_partition</span><span class="p">,</span>
 	    <span class="n">title</span><span class="o">=</span><span class="s2">"CLRS vs Randomized CLRS Partition Swap Count (Sorted Input)"</span><span class="p">,</span>
@@ -630,23 +640,28 @@ Since only difference between the randomized and the non-randomized input is tha
 </div>
     </div>
     <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
-<li><a class="tag p-category" href="../../categories/algorithms/" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/sorting/" rel="tag">sorting</a></li>
+<li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
+            <li><a class="tag p-category" href="../../categories/sorting/index.html" rel="tag">sorting</a></li>
         </ul>
 <ul class="pager hidden-print">
 <li class="previous">
-                <a href="../clrs-partition/" rel="prev" title="CLRS Partition">Previous post</a>
+                <a href="../clrs-partition/index.html" rel="prev" title="CLRS Partition">Previous post</a>
             </li>
             <li class="next">
-                <a href="../randomized-partition/" rel="next" title="Randomized Partition">Next post</a>
+                <a href="../randomized-partition/index.html" rel="next" title="Randomized Partition">Next post</a>
             </li>
-        </ul></nav></aside></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
- <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
- <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+        </ul></nav></aside></article><!--End of body content--><footer id="footer">
+            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+<span property="dct:title">Ape-Iron</span> is licensed under
+<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
+<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
+
             
             
-        </footer>
-</div>
+        
+    </div>
+</footer>
 </div>
 
 
@@ -655,5 +670,6 @@ Since only difference between the randomized and the non-randomized input is tha
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
     </script>
+</div>
 </body>
 </html>

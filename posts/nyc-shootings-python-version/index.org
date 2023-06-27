@@ -1,0 +1,1073 @@
+#+BEGIN_COMMENT
+.. title: NYC Shootings (Python Version)
+.. slug: nyc-shootings-python-version
+.. date: 2023-03-22 13:18:14 UTC-07:00
+.. tags: pandas,data science,data exploration
+.. category: Data Exploration
+.. link: 
+.. description: The NYPD Shooting Incident Data (Python Version)
+.. type: text
+
+#+END_COMMENT
+
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-4f550039-1d70-49d3-aa85-6d7afcd087cf-ssh.json
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+* NYPD Shooting Incident Data Version 2 (with python)
+
+This is a replication (more or less) of the {{% doc %}}nypd-shooting-incident-data{{%  /doc %}} post which we did using R but this time we'll use python and pandas instead. Once again we'll be looking at the [[https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic][NYPD Shooting Incident Data (Historic)]] from the [[https://catalog.data.gov/dataset][DATA.gov]] catalog of datasets, which lists every shooting from 2006 through the last updated incident (as of March 22, 2023 it shows that it was last updated June 9, 2022 but we'll have to look at it to see what the date of the last incident was).
+
+** Imports and Setup
+
+#+begin_src python :results none
+# python
+from datetime import datetime
+from functools import partial
+import sys
+
+# pypi
+from expects import equal, expect
+from tabulate import tabulate
+
+import altair
+import geopandas
+import pandas
+
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+First, let's double-check which version of python we're using.
+
+#+begin_src python :results output :exports both
+print(sys.version)
+#+end_src
+
+#+RESULTS:
+: 3.9.9 (main, Dec  3 2021, 01:15:49) 
+: [GCC 10.2.1 20210110]
+
+We're running python 3.9.9. I was running it in pypy but for some reason the pandas' ~groupby~ method would hang so this is done in cPython.
+
+#+begin_src python :results output :exports both
+print(altair.__version__)
+#+end_src
+
+#+RESULTS:
+: 5.0.0rc1
+
+I found out after I'd been struggling with altair for a little while that they're about to make a major release that breaks some of the ways you use it (in the prior versions). Since it's been a while since I've used altair I decided to go with the newer, upcoming version rather than re-learn the current one and then learn the new version of altair once it's released.
+
+This next bit is a little setup to make nicer tables.
+
+#+begin_src python :results none
+TABLE = partial(tabulate, headers="keys", showindex=False, tablefmt="orgtbl")
+#+end_src
+
+This is to help with the plotting.
+
+#+begin_src python :results none
+SLUG = "nyc-shootings-python-version"
+OUTPUT_PATH = output_path(SLUG)
+save_it = partial(save_chart, output_path=OUTPUT_PATH, height=650)
+#+end_src
+
+* The Data
+** Loading It
+
+The data is available to download as a CSV so we'll pass the URL for the CSV to pandas and make a dataframe.
+
+#+begin_src python :results none
+URL = "https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD"
+data = pandas.read_csv(URL)
+#+end_src
+
+#+begin_src python :results output :exports both
+rows, columns = data.shape
+print(f"Rows: {rows:,}\tColumns: {columns}")
+#+end_src
+
+#+RESULTS:
+: Rows: 25,596	Columns: 19
+
+** The Columns
+
+We'll start looking at the data by examining what's in the columns. We saw from the data frame's shape that we have 19 columns, how many of them does pandas think are numeric?
+
+#+begin_src python :results output :exports both
+print(TABLE(data.describe(), showindex=True))
+#+end_src
+
+#+RESULTS:
+|       |    INCIDENT_KEY |   PRECINCT |   JURISDICTION_CODE |       X_COORD_CD |   Y_COORD_CD |     Latitude |     Longitude |
+|-------+-----------------+------------+---------------------+------------------+--------------+--------------+---------------|
+| count | 25596           | 25596      |        25594        |  25596           |      25596   | 25596        | 25596         |
+| mean  |     1.12383e+08 |    65.8694 |            0.331601 |      1.00945e+06 |     207894   |    40.7372   |   -73.909     |
+| std   |     6.78612e+07 |    27.2019 |            0.742266 |  18421.4         |      31857.4 |     0.087447 |     0.0664265 |
+| min   |     9.95324e+06 |     1      |            0        | 914928           |     125757   |    40.5116   |   -74.2493    |
+| 25%   |     6.15936e+07 |    44      |            0        |      1.00001e+06 |     182782   |    40.6683   |   -73.9431    |
+| 50%   |     8.64373e+07 |    69      |            0        |      1.00772e+06 |     194038   |    40.6991   |   -73.9153    |
+| 75%   |     1.66661e+08 |    81      |            0        |      1.01684e+06 |     239429   |    40.8238   |   -73.8824    |
+| max   |     2.3849e+08  |   123      |            2        |      1.06682e+06 |     271128   |    40.9108   |   -73.702     |
+
+Just seven of them, and four are coordinates and the other three are categorical. This isn't really surprising, since the data isn't measuring anything but is rather a listing of shooting incidents reported (each row represents a single incident).
+
+There's a table on the [[https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8][NYPD-Shooting-Incident-Data]] page that describes the columns.
+
+| Column Name             | Description                                                      | Type        |
+|-------------------------+------------------------------------------------------------------+-------------|
+| INCIDENT_KEY            | Randomly generated persistent ID for each arrest                 | Plain Text  |
+| OCCUR_DATE              | Exact date of the shooting incident                              | Date & Time |
+| OCCUR_TIME              | Exact time of the shooting incident                              | Plain Text  |
+| BORO                    | Borough where the shooting incident occurred                     | Plain Text  |
+| PRECINCT                | Precinct where the shooting incident occurred                    | Plain Text  |
+| JURISDICTIONAL_CODE     | Jurisdiction where it occurred                                   | Number      |
+| LOCATION_DESC           | Location of the incident                                         | Plain Text  |
+| STATISTICAL_MURDER_FLAG | Victim died                                                      | Checkbox    |
+| PERP_AGE_GROUP          | Perpetrator's age within a category                              | Plain Text  |
+| PERP_SEX                | Pepetrator's sex.                                                | Plain Text  |
+| PERP_RACE               | Perpetrator's race.                                              | Plain Text  |
+| VIC_AGE_GROUP           | Victim's age with a category.                                    | Plain Text  |
+| VIC_SEX                 | Victim's sex.                                                    | Plain Text  |
+| VIC_RACE                | Victim's Race                                                    | Plain Text  |
+| X_COORD_CD              | Midblock X-coordinate for New York State Plane Coordinate System | Plain Text  |
+| Y_COORD_CD              | Midblock Y-coordinate                                            | Plain Text  |
+| Latitude                | Latitude coordinate                                              | Number      |
+| Longitude               | Longitude                                                        | Number      |
+| Lon_Lat                 | Longitude and Latitude Coordinate for mapping                    | Point       |
+
+** Missing Data
+
+#+begin_src python :results output :exports both
+missing = len(data) - data.count()
+missing = missing.reset_index().rename(
+    columns={"index": "Column",
+             0: "Missing"})
+
+some_missing = missing[missing.Missing > 0].copy()
+some_missing.loc[:, "Fraction"] = some_missing.Missing/len(data)
+print(TABLE(some_missing))
+#+end_src
+
+| Column            |   Missing |    Fraction |
+|-------------------+-----------+-------------|
+| JURISDICTION_CODE |         2 | 7.81372e-05 |
+| LOCATION_DESC     |     14977 | 0.58513     |
+| PERP_AGE_GROUP    |      9344 | 0.365057    |
+| PERP_SEX          |      9310 | 0.363729    |
+| PERP_RACE         |      9310 | 0.363729    |
+
+Most entries are missing location descriptions for some reason, and quite a lot of perpertator data is missing, possibly because they didn't catch whoever did the shooting in those cases.
+* Incident Key
+
+The incident key is an identifier for a specific incident so it's only really useful if you need to look up or refer to one or more of them, but we'll be looking at things in aggregate making them less useful for us, except maybe for looking at anomalies. Let's just make sure that the identifiers are unique as I'm asserting that they are.
+
+#+begin_src python :results output :exports both
+id_count = len(data.INCIDENT_KEY.unique())
+incidents = len(data)
+print(f"Identifiers: {id_count:,}\tIncidents: {incidents:,}")
+print(f"There are {incidents - id_count:,} more rows than incident IDs.")
+#+end_src
+
+#+RESULTS:
+: Identifiers: 20,126	Incidents: 25,596
+: There are 5,470 more rows than incident IDs.
+
+It appears that I wasn't correct in my assumption... let's take a look at one of the incidents.
+
+#+begin_src python :results output :exports both
+counts = data.INCIDENT_KEY.value_counts()
+up_counts = counts[counts > 1]
+top = counts.head(1)
+top_id = top.index[0]
+print(f"Incident: {top_id}\tCount: {top.iloc[0]}")
+#+end_src
+
+#+RESULTS:
+: Incident: 173354054	Count: 18
+
+Inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess. Reading the [[https://data.cityofnewyork.us/api/views/833y-fsy8/files/e4e3d86c-348f-4a16-a17f-19480c089429?download=true&filename=NYPD_Shootings_Incident_Level_Data_Footnotes.pdf][Footnotes]] (link is to a PDF) it says:
+
+#+begin_quote
+A shooting incident can have multiple victims involved and as a result duplicate INCIDENT_KEYs are produced.
+#+end_quote
+
+So it appears each row represents the victim of a shooting and each ~INCIDENT_KEY~ represents a shooting where one or more person was shot. The footnotes also note that only incidents where a victim was shot are included. If someone fired a gun but didn't hit anyone then it isn't represented in the data set.
+
+**Note:** There's actually a slight discrepancy between the descriptions of the ~INCIDENT_KEY~ between the web-page and the PDF footnotes. According to the Web-Page the ID is for each arrest while the footnotes make it sound like they represent cases where there was at least one victim, whether or not someone was arrested. For our purposes this won't matter, since we're only using the data as a source for data visualization, but if one were really trying to understand what was happening in NYC knowing exactly what the data represents might be important (assuming not all cases with a shooting victim leads to an arrest).
+
+#+begin_src python :results output :exports both
+use_counts = up_counts.reset_index()
+chart = altair.Chart(use_counts).mark_bar().encode(
+    x = altair.X("INCIDENT_KEY",
+                 type="nominal",
+                 sort="-y",
+                 axis=altair.Axis(labels=False)),
+    y="count",
+    tooltip=[altair.Tooltip("INCIDENT_KEY", type="nominal"),
+             altair.Tooltip("count")]
+).interactive().properties(
+   title="Incidents with Multiple Shots",
+   width=800,
+   height=525
+)
+
+save_it(chart, "multiple_shot_incidents")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="multiple_shot_incidents.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+It looks like a lot of entries have more than one row. Does this mean many incidents have more than one victim? More than one shooter?
+
+#+begin_src python :results output :exports both
+fractions = 100 * counts.value_counts()/len(data)
+fractions = fractions.reset_index(name="Percent of Rows").rename(columns={
+    "count": "Rows"})
+
+chart = altair.Chart(fractions).mark_bar().encode(
+    x=altair.X("Rows", sort=fractions["Percent of Rows"].values),
+    y=altair.Y("Percent of Rows", scale=altair.Scale(domain=(-1, 70))),
+    tooltip=[altair.Tooltip("Rows"),
+             altair.Tooltip("Percent of Rows")]).properties(
+                 title="Percent Of Incidents with Multiple Rows",
+                 width=800,
+                 height=525)
+
+save_it(chart, "fraction_row_incidents")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="fraction_row_incidents.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+The majority of the incidents do have only one row in the dataset. Perhaps it's not as unusual as I think it is to have multiple people involved in a shooting.
+
+* OCCUR_DATE and OCCUR_TIME
+
+There are two columns that tell us when the shooting is supposed to have happened.
+
+#+begin_src python :results output :exports both
+example = data[data.INCIDENT_KEY==top_id].iloc[0]
+print(f"OCCUR_DATE: {example.OCCUR_DATE} ({data.OCCUR_DATE.dtype})")
+print(f"OCCUR_TIME: {example.OCCUR_TIME} ({data.OCCUR_TIME.dtype})")
+#+end_src
+
+#+RESULTS:
+: OCCUR_DATE: 01/06/2018 (object)
+: OCCUR_TIME: 21:05:00 (object)
+
+Pandas interpreted both of these as strings, but it'd probably be more useful for us if they were datetime objects.
+
+#+begin_src python :results none
+MONTH, DAY, YEAR = "%m", "%d", "%Y"
+HOUR, MINUTE, SECOND = "%H", "%M", "%S"
+DATE_FORMAT = "/".join((MONTH, DAY, YEAR))
+TIME_FORMAT = ":".join((HOUR, MINUTE, SECOND))
+FORMAT = f"{DATE_FORMAT} {TIME_FORMAT}"
+DATE_COLUMN = "date_time"
+data[DATE_COLUMN] = pandas.to_datetime(data.OCCUR_DATE + " " + data.OCCUR_TIME, format=FORMAT)
+#+end_src
+
+#+begin_src python :results output :exports both
+check_date = data[data.INCIDENT_KEY==top_id].iloc[0]
+print(f"OCCUR_DATE: {check_date.OCCUR_DATE}")
+print(f"New Date: {check_date.date_time.date()}")
+print(f"OCCUR_TIME: {check_date.OCCUR_TIME}")
+print(f"New Time: {check_date.date_time.time()}")
+#+end_src
+
+#+RESULTS:
+: OCCUR_DATE: 01/06/2018
+: New Date: 2018-01-06
+: OCCUR_TIME: 21:05:00
+: New Time: 21:05:00
+
+#+begin_src python :results output :exports both
+print(data.OCCUR_DATE.min())
+print(data.OCCUR_DATE.max())
+#+end_src
+
+#+RESULTS:
+: 01/01/2006
+: 12/31/2021
+
+Our dataset covers the years from 2006 throught 20021. Let's see how many there are from month to month.
+
+** Shootings By Month
+
+#+begin_src python :results none
+indexed = data.set_index(DATE_COLUMN)
+monthly = indexed.groupby(pandas.Grouper(freq="M"))
+monthly_counts = monthly.count()["INCIDENT_KEY"].reset_index().rename(
+    columns={"INCIDENT_KEY": "Shootings",
+             "date_time": "Month"}
+)
+expect(monthly_counts["Shootings"].sum()).to(equal(len(data)))
+#+end_src
+
+#+begin_src python :results output :exports both
+MONTH_YEAR = "%B %Y"
+chart = altair.Chart(monthly_counts).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+    x=altair.X("Month", type="temporal"),
+    y=altair.Y("Shootings"),
+    tooltip=[altair.Tooltip("Month", format=MONTH_YEAR),
+             altair.Tooltip("Shootings")]
+).properties(
+    width=800,
+    height=525,
+    title="NYC Shootings By Month"
+)
+
+save_it(chart, "monthly_incidents")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="monthly_incidents.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+It looks like shootings went down in 2013 then shot back up again in the Summer of 2020.
+
+** 90 Day Rolling Window
+
+#+begin_src python :results output :exports both
+monthly_counts["Rolling Mean"] = monthly_counts["Shootings"].ewm(
+    halflife="90 days", times=monthly_counts.Month).mean()
+pre_melt = monthly_counts.rename(columns={"Shootings": "Sum"})
+melted = pre_melt.melt("Month", var_name="Aggregation", value_name="Aggregated Value")
+chart = altair.Chart(melted).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+               x=altair.X("Month"),
+               y=altair.Y("Aggregated Value"),
+               color="Aggregation",
+               tooltip=[altair.Tooltip("Month", format=MONTH_YEAR),
+                        altair.Tooltip("Aggregated Value")]
+).properties(
+    width=800,
+    height=525,
+    title="NYC Shootings By 90 Day Exponential Weighted Mean"
+)
+
+save_it(chart, "monthly_rolling_incidents")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="monthly_rolling_incidents.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Using a ninety-day window gives a little better sense of the overall trend downwards until 2020 reversed it.
+
+** By Year
+
+#+begin_src python :results output :exports both
+yearly = indexed.groupby(pandas.Grouper(freq="Y"))
+yearly_counts = yearly.count()["INCIDENT_KEY"].reset_index().rename(
+    columns={"INCIDENT_KEY": "Shootings"}
+)
+
+yearly_counts["Year"] = yearly_counts.date_time.dt.year
+expect(yearly_counts["Shootings"].sum()).to(equal(len(data)))
+
+chart = altair.Chart(yearly_counts).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+    x=altair.X("Year", type="ordinal"),
+    y=altair.Y("Shootings"),
+    tooltip=[altair.Tooltip("Year"),
+             altair.Tooltip("Shootings", format=",")]
+).properties(
+    width=800,
+    height=525,
+    title="NYC Shootings By year"
+)
+
+save_it(chart, "yearly_incidents")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="yearly_incidents.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Although 2020 had that crazy summer, 2021 still exceeded it overall.
+
+** Monthly By Year
+
+#+begin_src python :results none
+monthly_counts = monthly.count()["INCIDENT_KEY"].reset_index().rename(
+    columns={"INCIDENT_KEY": "Shootings"}
+)
+# monthly_counts = monthly_counts.rename(columns={"Month": "date-time"})
+
+month_map = dict(zip(range(1, 13), "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()))
+monthly_counts["Year"] = monthly_counts["date_time"].dt.year
+monthly_counts["Month"] = monthly_counts["date_time"].dt.month.apply(lambda month: month_map[month])
+#+end_src
+
+#+begin_src python :results output :exports both
+selection = altair.selection_point(fields=["Year"],
+                                   bind="legend")
+
+chart = altair.Chart(monthly_counts).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+    x=altair.X("Month",
+               sort=monthly_counts["date_time"].values),
+    y=altair.Y("Shootings"),
+    color=altair.Color("Year", type="nominal"),
+    tooltip=[altair.Tooltip("date_time", title="Month", format=MONTH_YEAR),
+             altair.Tooltip("Shootings")],
+    opacity=altair.condition(selection,
+                             altair.value(0.8),
+                             altair.value(0.2))
+).properties(
+    width=800,
+    height=525,
+    title="NYC Monthly Shootings By year"
+).add_params(selection)
+
+save_it(chart, "month_year_shootings")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="month_year_shootings.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+Click on a year in the legend to isolate it from the other lines in the plot and on a space somewhere on the legend to highlight all the years again.
+
+It looks like there was an unusually large surge in the Summer of 2020 after years of declining shootings, but regardless of the year there's at least a slight increase in shootings during the Summer months.
+
+** Medain By Month
+#+begin_src python :results output :exports both
+by_month_median = monthly_counts.groupby("Month").median().reset_index()
+
+chart = altair.Chart(by_month_median).mark_bar().encode(
+    x=altair.X("Month", sort=list(month_map.values())),
+    y="Shootings",
+    tooltip=[altair.Tooltip("Month"),
+             altair.Tooltip("Shootings"),]
+).properties(
+    width=800,
+    height=525,
+    title="NYC Median Shootings By Month (2006 through 2012)"
+)
+
+save_it(chart, "monthly_shootings")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="monthly_shootings.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+It looks like there's a definite seasonal effect on shootings. Must be all those farmer's kids off from school to work the fields and shoot each other.
+
+* Location
+** Descriptions
+*** BORO
+
+The ~BORO~ column identifies which of the [[https://en.wikipedia.org/wiki/Boroughs_of_New_York_City?useskin=vector][five boroughs of New York City]] the victim was shot in.
+
+[[img-url:https://upload.wikimedia.org/wikipedia/commons/3/34/5_Boroughs_Labels_New_York_City_Map.svg][Five Boroughs]]
+
+
+1. Manhattan
+2. Brooklyn
+3. Queens
+4. Bronx
+5. Staten Island
+
+
+#+begin_src python :results output :exports both
+boroughs = data.BORO.value_counts().reset_index().rename(
+    columns=dict(BORO="Borough", count="Shootings"))
+
+
+chart = altair.Chart(boroughs).mark_bar().encode(
+    x="Borough",
+    y="Shootings",
+    tooltip=[altair.Tooltip("Borough"),
+             altair.Tooltip("Shootings", format=",")]
+).properties(
+    width=800,
+    height=520,
+    title="Shootings by Borough"
+)
+
+save_it(chart, "shootings-by-borough")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="shootings-by-borough.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+#+begin_src python :results output :exports both
+borough_monthly = monthly.agg({"BORO": "first",
+                               "INCIDENT_KEY": "count"}).reset_index().rename(
+                                   columns=dict(BORO="Borough", INCIDENT_KEY="Shootings", date_time="Month"))
+
+selection = altair.selection_point(fields=["Borough"], bind="legend")
+chart = altair.Chart(borough_monthly).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+               x=altair.X("Month"),
+               y=altair.Y("Shootings"),
+               color="Borough",
+               tooltip=[
+                   altair.Tooltip("Borough"),
+                   altair.Tooltip("Month", format=MONTH_YEAR),
+                   altair.Tooltip("Shootings")
+               ],
+               opacity=altair.condition(selection,
+                                        altair.value(0.8),
+                                        altair.value(0.2))
+).properties(
+    width=900,
+    height=525,
+    title="Monthly Borough Shootings"
+).add_params(selection)
+
+save_it(chart, "borough-monthly-shootings")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="borough-monthly-shootings.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+The Bronx and Brooklyn look like they have the most shootings, although I didn't weight it by population so I don't know how they compare as a fraction of the population.
+
+#+begin_src python :results output :exports both
+borough_bar = data[["BORO", "date_time"]].rename(
+    columns=dict(BORO="Borough"))
+borough_bar["Month"] = pandas.to_datetime({
+    "year": borough_bar.date_time.dt.year,
+    "month": borough_bar.date_time.dt.month,
+    "day": 1
+})
+
+chart = altair.Chart(borough_bar).mark_bar().encode(
+    x="Month",
+    y="count()",
+    color="Borough").properties(
+        width=800,
+        height=525,
+        title="Monthly Shootings With Borough Breakdowns")
+
+save_it(chart, "borough-monthly-bar-chart")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="borough-monthly-bar-chart.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+By clicking on the legend you can isolate plot-lines by borough and it makes it clearer that the surge in 2020 happened primarily in the Bronx and Manhattan, although the plot is a little deceptive since Manhattan had some months where there were no shootings, but I didn't infill them with zeros so it doesn't show those months dropping back down.
+
+
+*** PRECINCT & JURISDICTION_CODE
+There are seventy-seven police precincts in New York City, subdividing the boroughs. This might be useful for isolating where the shootings are occuring even further, but I'll skip it. Same with the JURISDICTION_CODE.
+*** LOCATION_DESC
+
+#+begin_src python :results output :exports both
+missing_locations = data[data.LOCATION_DESC.isna()].rename(columns=dict(LOCATION_DESC="Location Description"))
+missing_locations = missing_locations[["Location Description", "date_time", "BORO"]]
+missing_locations["Year"] = missing_locations.date_time.dt.year
+
+chart = altair.Chart(missing_locations).mark_bar().encode(
+    x=altair.X("Year", type="ordinal"),
+    y="count()",
+    tooltip=[altair.Tooltip("count()"), altair.Tooltip("BORO"), altair.Tooltip("Year")],
+    color="BORO"
+).properties(
+    width=800,
+    height=525,
+    title="Missing Location Descriptions by Year"
+)
+
+save_it(chart, "missing-locations-descriptions")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="missing-locations-descriptions.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+I was hoping the missing locations might be because they only started recording it after some point, but it looks like it's an ongoing problem not local to any one borough, so the location descriptions are interesting, but the number of missing entries makes it hard to say that they're meaningful.
+
+#+begin_src python :results output :exports both
+locations = data.LOCATION_DESC.value_counts().reset_index().rename(columns=dict(count="Count", LOCATION_DESC="Location"))
+
+chart = altair.Chart(locations).mark_bar().encode(
+    x=altair.X("Location", sort=locations.Location.values,
+               axis=altair.Axis(labelAngle=30)),
+    y=altair.Y("Count"),
+    tooltip=[altair.Tooltip("Location"), altair.Tooltip("Count", format=",")]
+).properties(
+    width=900,
+    height=525,
+    title="Shooting Location Counts"
+)
+
+save_it(chart, "shooting-locations-count")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="shooting-locations-count.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+It looks like most shootings happened at homes, and to avoid being shot you should move to a storage facility.
+
+** Coordinates
+*** X_COORD_CD & Y_COORD_CD
+
+These coordinates use the State Plane Coordinate System (see [[https://www.usgs.gov/faqs/what-state-plane-coordinate-system-can-gps-provide-coordinates-these-values][What is the State Plane Coordinate System?]]) Long Island Zone. The coordinates are mid-block locations with the units in feet.
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(
+    data[["X_COORD_CD", "Y_COORD_CD", "BORO"]]).mark_point(opacity=0.2).encode(
+        x=altair.X("X_COORD_CD").scale(domain=(data.X_COORD_CD.min(), data.X_COORD_CD.max())),
+        y=altair.Y("Y_COORD_CD").scale(domain=(data.Y_COORD_CD.min(), data.Y_COORD_CD.max())),
+        color="BORO"
+).properties(
+    width=800,
+    height=525,
+    title="Shootings By Coordinates",
+)
+
+save_it(chart, "shootings-by-coordinates")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="shootings-by-coordinates.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+#+begin_src python :results output :exports both
+coordinates = data[["X_COORD_CD", "Y_COORD_CD",
+                    "BORO", "date_time",
+                    "Longitude", "Latitude"]].rename(columns=dict(
+    BORO="Borough",
+    X_COORD_CD="X-Coordinate",
+    Y_COORD_CD="Y-Coordinate"
+))
+
+coordinates["Year"] = coordinates.date_time.dt.year
+
+select_year = altair.selection_point(
+    name="Year",
+    fields=["Year"],
+    bind=altair.binding_range(min=2006, max=2021, step=1, name="Year"),
+    value=[{"Year": 2006}],
+)
+
+chart = altair.Chart(coordinates).mark_point(opacity=0.2).encode(
+    x=altair.X("X-Coordinate").scale(
+        domain=(coordinates["X-Coordinate"].min(),
+                coordinates["X-Coordinate"].max())),
+    y=altair.Y("Y-Coordinate").scale(
+        domain=(coordinates["Y-Coordinate"].min(),
+                coordinates["Y-Coordinate"].max())),
+    color="Borough",
+    tooltip=[altair.Tooltip("Borough"),
+             altair.Tooltip("date_time")],
+).properties(
+    width=800,
+    height=525,
+    title="Shootings By Coordinates and Year",
+).add_params(select_year).transform_filter(select_year)
+
+save_it(chart, "shootings-by-coordinates-and-year")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="shootings-by-coordinates-and-year.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+*** Latitude & Longitude
+
+** With GeoPandas
+
+It turns out than the boroughs of New York City are one of the three datasets that come with GeoPandas so we can bring it in to make a map.
+
+#+begin_src python :results output :exports both
+path_to_data = geopandas.datasets.get_path("nybb")
+nyc_geopandas = geopandas.read_file(path_to_data)
+
+print(nyc_geopandas.head(1))
+#+end_src
+
+#+RESULTS:
+:    BoroCode       BoroName     Shape_Leng    Shape_Area   
+: 0         5  Staten Island  330470.010332  1.623820e+09  \
+: 
+:                                             geometry  
+: 0  MULTIPOLYGON (((970217.022 145643.332, 970227....  
+
+Let's look at a map colored with the 2021 shooting counts.
+
+#+begin_src python :results none
+BOROUGH_COLUMN = "BoroName"
+SHOOTINGS_COLUMN = "Shootings"
+latest = data[data.date_time.dt.year==2021]
+latest_count = latest.groupby("BORO").count().reset_index()
+expect(latest_count.INCIDENT_KEY.sum()).to(equal(len(latest)))
+latest_count = latest_count.rename(columns=dict(BORO=BOROUGH_COLUMN))
+latest_count[BOROUGH_COLUMN] = latest_count[BOROUGH_COLUMN].str.title()
+latest_count[SHOOTINGS_COLUMN] = latest_count["INCIDENT_KEY"].copy()
+latest_count = latest_count[[BOROUGH_COLUMN, SHOOTINGS_COLUMN]]
+merged = nyc_geopandas.merge(latest_count, on=BOROUGH_COLUMN)
+
+merged = merged[[BOROUGH_COLUMN, SHOOTINGS_COLUMN, "geometry"]]
+explorer = merged.explore(column=SHOOTINGS_COLUMN,
+                          tooltip=BOROUGH_COLUMN,
+                          popup=True)
+explorer.save(f"{OUTPUT_PATH}/nyc-shootings-explore.html")
+#+end_src
+
+#+begin_export html
+<object type="text/html" data="nyc-shootings-explore.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+This is probably most interesting to someone like me who doesn't know much about New York City. I wonder why Queens has so much fewer shootings than Brooklyn or the Bronx when it sits between them? Demographics?
+
+* Murder or Not
+** By Year
+#+begin_src python :results output :exports both
+MURDER_FLAG = "STATISTICAL_MURDER_FLAG"
+MURDERED = "Murdered"
+BOROUGH = "Borough"
+YEAR = "Year"
+data[YEAR] = data.date_time.dt.to_period("Y").dt.to_timestamp()
+yearly_murders = data.groupby([YEAR, "BORO"]).sum(
+    MURDER_FLAG).reset_index().rename(
+        columns={
+            "BORO": BOROUGH,
+            MURDER_FLAG: MURDERED})
+yearly_murders = yearly_murders[[YEAR, BOROUGH, MURDERED]]
+
+SELECTION = altair.selection_point(fields=[BOROUGH], bind="legend")
+
+chart = altair.Chart(yearly_murders).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+               x=altair.X(YEAR),
+               y=altair.Y(MURDERED),
+               color=BOROUGH,
+               tooltip=[altair.Tooltip(YEAR),
+                        altair.Tooltip(MURDERED),
+                        altair.Tooltip(BOROUGH)],
+               opacity=altair.condition(SELECTION,
+                                        altair.value(0.8),
+                                        altair.value(0.2))
+           ).add_params(SELECTION).properties(
+               width=800,
+               height=525,
+               title="NYC Murders By Year"
+           )
+
+save_it(chart, "yearly_borough_murders")
+,#+end_src
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="yearly_borough_murders.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+** By Month
+#+begin_src python :results output :exports both
+MONTH = "Month"
+data[MONTH] = data.date_time.dt.to_period("M").dt.to_timestamp()
+murdered = data.groupby([MONTH, "BORO"]).sum(MURDER_FLAG).reset_index()
+murdered = murdered[[MONTH, "BORO", MURDER_FLAG]].rename(columns={
+    "BORO": BOROUGH,
+    MURDER_FLAG: MURDERED,    
+})
+
+SELECTION = altair.selection_point(fields=[BOROUGH], bind="legend")
+
+chart = altair.Chart(murdered).mark_line(
+    point={"filled": False,
+           "fill": "white"}).encode(
+               x=altair.X(MONTH),
+               y=altair.Y(MURDERED),
+               color=BOROUGH,
+               tooltip=[altair.Tooltip(MONTH, format=MONTH_YEAR),
+                        altair.Tooltip(MURDERED),
+                        altair.Tooltip(BOROUGH)],
+               opacity=altair.condition(SELECTION,
+                                        altair.value(0.8),
+                                        altair.value(0.2))
+           ).add_params(SELECTION).properties(
+               width=800,
+               height=525,
+               title="NYC Murders By Month"
+           )
+
+save_it(chart, "monthly_borough_murders")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="monthly_borough_murders.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+It looks like Brooklyn lead in murders in the Summer of 2020, 
+
+** By Coordinate
+
+#+begin_src python :results output :exports both
+murdered = data[data[MURDER_FLAG]]
+
+murder_coordinates = murdered[["BORO", "date_time",
+                               "Longitude", "Latitude"
+                               ]].rename(columns=dict(
+                                   BORO="Borough",
+                               ))
+murder_coordinates["Year"] = murder_coordinates.date_time.dt.year
+
+chart = (altair.Chart(murder_coordinates)
+         .mark_point(opacity=0.2)
+         .encode(
+             x=altair.X("Longitude").scale(
+                 domain=(murder_coordinates["Longitude"].min(),
+                         murder_coordinates["Longitude"].max())),
+             y=altair.Y("Latitude").scale(
+                 domain=(murder_coordinates["Latitude"].min(),
+                         murder_coordinates["Latitude"].max())),
+             color="Borough",
+             tooltip=[altair.Tooltip("Borough"),
+                      altair.Tooltip("date_time")],
+         ).properties(
+             width=800,
+             height=525,
+             title="Murders By Longitude, Latitude and Year",
+    ).add_params(select_year)
+         .transform_filter(select_year))
+
+save_it(chart, "murders-by-coordinates-and-year")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="murders-by-coordinates-and-year.html" style="width:100%" height=650>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+* Victims and Perpetrators
+** Perpetrators
+*** PERP_AGE_GROUP
+
+#+begin_src python :results output :exports both
+print(TABLE(data.PERP_AGE_GROUP.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_AGE_GROUP   |   count |
+|------------------+---------|
+| nan              |    9344 |
+| 18-24            |    5844 |
+| 25-44            |    5202 |
+| UNKNOWN          |    3148 |
+| <18              |    1463 |
+| 45-64            |     535 |
+| 65+              |      57 |
+| 1020             |       1 |
+| 940              |       1 |
+| 224              |       1 |
+
+*** PEPR_SEX
+
+#+begin_src python :results output :exports both
+print(TABLE(data.PERP_SEX.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_SEX   |   count |
+|------------+---------|
+| M          |   14416 |
+| nan        |    9310 |
+| U          |    1499 |
+| F          |     371 |
+
+*** PERP_RACE
+
+#+begin_src python :results output :exports both
+print(TABLE(data.PERP_RACE.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_RACE                      |   count |
+|--------------------------------+---------|
+| BLACK                          |   10668 |
+| nan                            |    9310 |
+| WHITE HISPANIC                 |    2164 |
+| UNKNOWN                        |    1836 |
+| BLACK HISPANIC                 |    1203 |
+| WHITE                          |     272 |
+| ASIAN / PACIFIC ISLANDER       |     141 |
+| AMERICAN INDIAN/ALASKAN NATIVE |       2 |
+
+
+It looks like besides the ~NaN~ values, missing data is also classified as ~U~ or ~UNKNOWN~. 
+*** Handling the Unknowns
+
+Let's try and unify the missing values.
+
+#+begin_src python :results output :exports both
+data[data.PERP_AGE_GROUP.isna()] = "UNKNOWN"
+data[data.PERP_AGE_GROUP == "U"] = "UNKNOWN"
+
+print(TABLE(data.PERP_AGE_GROUP.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_AGE_GROUP   |   count |
+|------------------+---------|
+| UNKNOWN          |   12492 |
+| 18-24            |    5844 |
+| 25-44            |    5202 |
+| <18              |    1463 |
+| 45-64            |     535 |
+| 65+              |      57 |
+| 1020             |       1 |
+| 940              |       1 |
+| 224              |       1 |
+
+#+begin_src python :results output :exports both
+data[data.PERP_SEX.isna()] = "UNKNOWN"
+data[data.PERP_SEX == "U"] = "UNKNOWN"
+
+print(TABLE(data.PERP_SEX.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_SEX   |   count |
+|------------+---------|
+| M          |   14416 |
+| UNKNOWN    |   10809 |
+| F          |     371 |
+
+#+begin_src python :results output :exports both
+data[data.PERP_RACE.isna()] = "UNKNOWN"
+data[data.PERP_RACE == "U"] = "UNKNOWN"
+
+print(TABLE(data.PERP_RACE.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| PERP_RACE                      |   count |
+|--------------------------------+---------|
+| UNKNOWN                        |   11166 |
+| BLACK                          |   10650 |
+| WHITE HISPANIC                 |    2164 |
+| BLACK HISPANIC                 |    1201 |
+| WHITE                          |     272 |
+| ASIAN / PACIFIC ISLANDER       |     141 |
+| AMERICAN INDIAN/ALASKAN NATIVE |       2 |
+
+So, the first thing we can notice is that the ~UNKNOWN~ counts don't match so sometims some attributes were known but not others, so they don't just represent cases where the perpetrator wasn't caught like I thought it might be. The second thing is that for age and race the unknowns have the highest counts. For all three categories the numbers of unknowns are so high that it's hard to say how they might affect the cases where the values are known.
+
+** Victims
+*** VIC_AGE_GROUP
+#+begin_src python :results output :exports both
+print(TABLE(data.VIC_AGE_GROUP.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| VIC_AGE_GROUP   |   count |
+|-----------------+---------|
+| UNKNOWN         |   10863 |
+| 25-44           |    6500 |
+| 18-24           |    5389 |
+| <18             |    1657 |
+| 45-64           |    1070 |
+| 65+             |     117 |
+
+*** VIC_SEX
+
+#+begin_src python :results output :exports both
+print(TABLE(data.VIC_SEX.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| VIC_SEX   |   count |
+|-----------+---------|
+| M         |   13182 |
+| UNKNOWN   |   10809 |
+| F         |    1598 |
+| U         |       7 |
+
+*** VIC_RACE
+
+#+begin_src python :results output :exports both
+print(TABLE(data.VIC_RACE.value_counts(dropna=False).reset_index()))
+#+end_src
+
+#+RESULTS:
+| VIC_RACE                       |   count |
+|--------------------------------+---------|
+| UNKNOWN                        |   10851 |
+| BLACK                          |    9962 |
+| WHITE HISPANIC                 |    2515 |
+| BLACK HISPANIC                 |    1528 |
+| WHITE                          |     485 |
+| ASIAN / PACIFIC ISLANDER       |     249 |
+| AMERICAN INDIAN/ALASKAN NATIVE |       6 |
+
+Somewhat unexpectedly, the unknowns are also alarmingly high for the victims, suggesting that they represent poor case records and perhaps the demographic information isn't reliable enough to be useful.
+
+* Sources
+- [[https://commons.wikimedia.org/wiki/File:5_Boroughs_Labels_New_York_City_Map.svg][New York City Map]] via WikiMedia Commons

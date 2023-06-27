@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
+" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="The NYPD Shooting Incident Data (Python Version)">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NYC Shootings (Python Version) | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/nyc-shootings-python-version/index.html">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
+<link rel="prev" href="../bubba-sort-page-1/index.html" title="I, Bubba" type="text/html">
+<link rel="next" href="../bubba-sort-page-2/index.html" title="A Ray" type="text/html">
+<meta property="og:site_name" content="Bowling For Data">
+<meta property="og:title" content="NYC Shootings (Python Version)">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/nyc-shootings-python-version/index.html">
+<meta property="og:description" content="The NYPD Shooting Incident Data (Python Version)">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2023-03-22T13:18:14-07:00">
+<meta property="article:tag" content="data exploration">
+<meta property="article:tag" content="data science">
+<meta property="article:tag" content="pandas">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-expand-md static-top mb-4
+navbar-light
+bg-light
+"><div class="container">
+<!-- This keeps the margins nice -->
+        <a class="navbar-brand" href="../../">
+
+            <span id="blog-title">Bowling For Data</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="bs-navbar">
+            <ul class="navbar-nav mr-auto">
+<li class="nav-item">
+<a href="../../pages/" class="nav-link">Pages</a>
+                </li>
+<li class="nav-item">
+<a href="../../archive.html" class="nav-link">Archive</a>
+                </li>
+<li class="nav-item">
+<a href="../../categories/" class="nav-link">Tags</a>
+                </li>
+<li class="nav-item">
+<a href="../../rss.xml" class="nav-link">RSS feed</a>
+            </li>
+<li class="nav-item dropdown">
+<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
+            <div class="dropdown-menu">
+                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
+                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
+                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
+                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
+                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
+            </div>
+
+                
+            </li>
+</ul>
+<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
+ <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
+</form>
+ <!-- End of custom search -->
+ 
+
+            <ul class="navbar-nav navbar-right">
+<li class="nav-item">
+    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
+    </li>
+
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        
+        
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">NYC Shootings (Python Version)</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
+                    The Cloistered Monkey
+            </span></p>
+            <p class="dateline">
+            <a href="#" rel="bookmark">
+            <time class="published dt-published" datetime="2023-03-22T13:18:14-07:00" itemprop="datePublished" title="2023-03-22 13:18">2023-03-22 13:18</time></a>
+            </p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li>
+<a href="index.html#org64b4ed3">NYPD Shooting Incident Data Version 2 (with python)</a>
+<ul>
+<li><a href="index.html#org728dfee">Imports and Setup</a></li>
+</ul>
+</li>
+<li>
+<a href="index.html#orgd8e8a83">The Data</a>
+<ul>
+<li><a href="index.html#org8f426c3">Loading It</a></li>
+<li><a href="index.html#orgf539cbf">The Columns</a></li>
+<li><a href="index.html#orgce6f148">Missing Data</a></li>
+</ul>
+</li>
+<li><a href="index.html#org72407fc">Incident Key</a></li>
+<li>
+<a href="index.html#org3157945">OCCUR_DATE and OCCUR_TIME</a>
+<ul>
+<li><a href="index.html#org4497f90">Shootings By Month</a></li>
+<li><a href="index.html#org9ab793a">90 Day Rolling Window</a></li>
+<li><a href="index.html#orgb7f75f1">By Year</a></li>
+<li><a href="index.html#org5b51f8f">Monthly By Year</a></li>
+<li><a href="index.html#orgd4e184e">Medain By Month</a></li>
+</ul>
+</li>
+<li>
+<a href="index.html#orgec616b1">Location</a>
+<ul>
+<li>
+<a href="index.html#orge08e565">Descriptions</a>
+<ul>
+<li><a href="index.html#orga4dc220">BORO</a></li>
+<li><a href="index.html#orgf1a2579">PRECINCT &amp; JURISDICTION_CODE</a></li>
+<li><a href="index.html#org1ec5757">LOCATION_DESC</a></li>
+</ul>
+</li>
+<li>
+<a href="index.html#orgd7b6677">Coordinates</a>
+<ul>
+<li><a href="index.html#org424e5d3">X_COORD_CD &amp; Y_COORD_CD</a></li>
+<li><a href="index.html#org98096f1">Latitude &amp; Longitude</a></li>
+</ul>
+</li>
+<li><a href="index.html#org0377c8b">With GeoPandas</a></li>
+</ul>
+</li>
+<li>
+<a href="index.html#org942e262">Murder or Not</a>
+<ul>
+<li><a href="index.html#org62c52a3">By Year</a></li>
+<li><a href="index.html#org9a5fbfc">By Month</a></li>
+<li><a href="index.html#orgab955bf">By Coordinate</a></li>
+</ul>
+</li>
+<li>
+<a href="index.html#orgdcaac13">Victims and Perpetrators</a>
+<ul>
+<li>
+<a href="index.html#orgf0dd83c">Perpetrators</a>
+<ul>
+<li><a href="index.html#org3335cad">PERP_AGE_GROUP</a></li>
+<li><a href="index.html#orgaa382e6">PEPR_SEX</a></li>
+<li><a href="index.html#org489fecc">PERP_RACE</a></li>
+<li><a href="index.html#org9c9c574">Handling the Unknowns</a></li>
+</ul>
+</li>
+<li>
+<a href="index.html#orgd13c407">Victims</a>
+<ul>
+<li><a href="index.html#org5387ebd">VIC_AGE_GROUP</a></li>
+<li><a href="index.html#orge9d1cfb">VIC_SEX</a></li>
+<li><a href="index.html#org1f69448">VIC_RACE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="index.html#orgfc57088">Sources</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org64b4ed3" class="outline-2">
+<h2 id="org64b4ed3">NYPD Shooting Incident Data Version 2 (with python)</h2>
+<div class="outline-text-2" id="text-org64b4ed3">
+<p>
+This is a replication (more or less) of the <a href="../nypd-shooting-incident-data/">NYPD Shooting Incident Data</a> post which we did using R but this time we'll use python and pandas instead. Once again we'll be looking at the <a href="https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic">NYPD Shooting Incident Data (Historic)</a> from the <a href="https://catalog.data.gov/dataset">DATA.gov</a> catalog of datasets, which lists every shooting from 2006 through the last updated incident (as of March 22, 2023 it shows that it was last updated June 9, 2022 but we'll have to look at it to see what the date of the last incident was).
+</p>
+</div>
+
+<div id="outline-container-org728dfee" class="outline-3">
+<h3 id="org728dfee">Imports and Setup</h3>
+<div class="outline-text-3" id="text-org728dfee">
+<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+
+<span class="kn">import</span> <span class="nn">altair</span>
+<span class="kn">import</span> <span class="nn">geopandas</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+
+<span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_chart</span>
+</pre></div>
+
+<p>
+First, let's double-check which version of python we're using.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+3.9.9 (main, Dec  3 2021, 01:15:49) 
+[GCC 10.2.1 20210110]
+</pre>
+
+
+<p>
+We're running python 3.9.9. I was running it in pypy but for some reason the pandas' <code>groupby</code> method would hang so this is done in cPython.
+</p>
+
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">altair</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+5.0.0rc1
+</pre>
+
+
+<p>
+I found out after I'd been struggling with altair for a little while that they're about to make a major release that breaks some of the ways you use it (in the prior versions). Since it's been a while since I've used altair I decided to go with the newer, upcoming version rather than re-learn the current one and then learn the new version of altair once it's released.
+</p>
+
+<p>
+This next bit is a little setup to make nicer tables.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">TABLE</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">tabulate</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">"keys"</span><span class="p">,</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">"orgtbl"</span><span class="p">)</span>
+</pre></div>
+
+<p>
+This is to help with the plotting.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"nyc-shootings-python-version"</span>
+<span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
+<span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">650</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd8e8a83" class="outline-2">
+<h2 id="orgd8e8a83">The Data</h2>
+<div class="outline-text-2" id="text-orgd8e8a83">
+</div>
+<div id="outline-container-org8f426c3" class="outline-3">
+<h3 id="org8f426c3">Loading It</h3>
+<div class="outline-text-3" id="text-org8f426c3">
+<p>
+The data is available to download as a CSV so we'll pass the URL for the CSV to pandas and make a dataframe.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">URL</span> <span class="o">=</span> <span class="s2">"https://data.cityofnewyork.us/api/views/833y-fsy8/rows.csv?accessType=DOWNLOAD"</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">rows</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows: </span><span class="si">{</span><span class="n">rows</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="se">\t</span><span class="s2">Columns: </span><span class="si">{</span><span class="n">columns</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Rows: 25,596	Columns: 19
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgf539cbf" class="outline-3">
+<h3 id="orgf539cbf">The Columns</h3>
+<div class="outline-text-3" id="text-orgf539cbf">
+<p>
+We'll start looking at the data by examining what's in the columns. We saw from the data frame's shape that we have 19 columns, how many of them does pandas think are numeric?
+</p>
+
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">describe</span><span class="p">(),</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left"> </th>
+<th scope="col" class="org-right">INCIDENT_KEY</th>
+<th scope="col" class="org-right">PRECINCT</th>
+<th scope="col" class="org-right">JURISDICTION_CODE</th>
+<th scope="col" class="org-right">X_COORD_CD</th>
+<th scope="col" class="org-right">Y_COORD_CD</th>
+<th scope="col" class="org-right">Latitude</th>
+<th scope="col" class="org-right">Longitude</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">count</td>
+<td class="org-right">25596</td>
+<td class="org-right">25596</td>
+<td class="org-right">25594</td>
+<td class="org-right">25596</td>
+<td class="org-right">25596</td>
+<td class="org-right">25596</td>
+<td class="org-right">25596</td>
+</tr>
+<tr>
+<td class="org-left">mean</td>
+<td class="org-right">1.12383e+08</td>
+<td class="org-right">65.8694</td>
+<td class="org-right">0.331601</td>
+<td class="org-right">1.00945e+06</td>
+<td class="org-right">207894</td>
+<td class="org-right">40.7372</td>
+<td class="org-right">-73.909</td>
+</tr>
+<tr>
+<td class="org-left">std</td>
+<td class="org-right">6.78612e+07</td>
+<td class="org-right">27.2019</td>
+<td class="org-right">0.742266</td>
+<td class="org-right">18421.4</td>
+<td class="org-right">31857.4</td>
+<td class="org-right">0.087447</td>
+<td class="org-right">0.0664265</td>
+</tr>
+<tr>
+<td class="org-left">min</td>
+<td class="org-right">9.95324e+06</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+<td class="org-right">914928</td>
+<td class="org-right">125757</td>
+<td class="org-right">40.5116</td>
+<td class="org-right">-74.2493</td>
+</tr>
+<tr>
+<td class="org-left">25%</td>
+<td class="org-right">6.15936e+07</td>
+<td class="org-right">44</td>
+<td class="org-right">0</td>
+<td class="org-right">1.00001e+06</td>
+<td class="org-right">182782</td>
+<td class="org-right">40.6683</td>
+<td class="org-right">-73.9431</td>
+</tr>
+<tr>
+<td class="org-left">50%</td>
+<td class="org-right">8.64373e+07</td>
+<td class="org-right">69</td>
+<td class="org-right">0</td>
+<td class="org-right">1.00772e+06</td>
+<td class="org-right">194038</td>
+<td class="org-right">40.6991</td>
+<td class="org-right">-73.9153</td>
+</tr>
+<tr>
+<td class="org-left">75%</td>
+<td class="org-right">1.66661e+08</td>
+<td class="org-right">81</td>
+<td class="org-right">0</td>
+<td class="org-right">1.01684e+06</td>
+<td class="org-right">239429</td>
+<td class="org-right">40.8238</td>
+<td class="org-right">-73.8824</td>
+</tr>
+<tr>
+<td class="org-left">max</td>
+<td class="org-right">2.3849e+08</td>
+<td class="org-right">123</td>
+<td class="org-right">2</td>
+<td class="org-right">1.06682e+06</td>
+<td class="org-right">271128</td>
+<td class="org-right">40.9108</td>
+<td class="org-right">-73.702</td>
+</tr>
+</tbody>
+</table>
+<p>
+Just seven of them, and four are coordinates and the other three are categorical. This isn't really surprising, since the data isn't measuring anything but is rather a listing of shooting incidents reported (each row represents a single incident).
+</p>
+
+<p>
+There's a table on the <a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Shooting-Incident-Data-Historic-/833y-fsy8">NYPD-Shooting-Incident-Data</a> page that describes the columns.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-left">
+<col class="org-left">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left">Column Name</th>
+<th scope="col" class="org-left">Description</th>
+<th scope="col" class="org-left">Type</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">INCIDENT_KEY</td>
+<td class="org-left">Randomly generated persistent ID for each arrest</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">OCCUR_DATE</td>
+<td class="org-left">Exact date of the shooting incident</td>
+<td class="org-left">Date &amp; Time</td>
+</tr>
+<tr>
+<td class="org-left">OCCUR_TIME</td>
+<td class="org-left">Exact time of the shooting incident</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">BORO</td>
+<td class="org-left">Borough where the shooting incident occurred</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">PRECINCT</td>
+<td class="org-left">Precinct where the shooting incident occurred</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">JURISDICTIONAL_CODE</td>
+<td class="org-left">Jurisdiction where it occurred</td>
+<td class="org-left">Number</td>
+</tr>
+<tr>
+<td class="org-left">LOCATION_DESC</td>
+<td class="org-left">Location of the incident</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">STATISTICAL_MURDER_FLAG</td>
+<td class="org-left">Victim died</td>
+<td class="org-left">Checkbox</td>
+</tr>
+<tr>
+<td class="org-left">PERP_AGE_GROUP</td>
+<td class="org-left">Perpetrator's age within a category</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">PERP_SEX</td>
+<td class="org-left">Pepetrator's sex.</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">PERP_RACE</td>
+<td class="org-left">Perpetrator's race.</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">VIC_AGE_GROUP</td>
+<td class="org-left">Victim's age with a category.</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">VIC_SEX</td>
+<td class="org-left">Victim's sex.</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">VIC_RACE</td>
+<td class="org-left">Victim's Race</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">X_COORD_CD</td>
+<td class="org-left">Midblock X-coordinate for New York State Plane Coordinate System</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">Y_COORD_CD</td>
+<td class="org-left">Midblock Y-coordinate</td>
+<td class="org-left">Plain Text</td>
+</tr>
+<tr>
+<td class="org-left">Latitude</td>
+<td class="org-left">Latitude coordinate</td>
+<td class="org-left">Number</td>
+</tr>
+<tr>
+<td class="org-left">Longitude</td>
+<td class="org-left">Longitude</td>
+<td class="org-left">Number</td>
+</tr>
+<tr>
+<td class="org-left">Lon_Lat</td>
+<td class="org-left">Longitude and Latitude Coordinate for mapping</td>
+<td class="org-left">Point</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgce6f148" class="outline-3">
+<h3 id="orgce6f148">Missing Data</h3>
+<div class="outline-text-3" id="text-orgce6f148">
+<div class="highlight"><pre><span></span><span class="n">missing</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">missing</span> <span class="o">=</span> <span class="n">missing</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"index"</span><span class="p">:</span> <span class="s2">"Column"</span><span class="p">,</span>
+	     <span class="mi">0</span><span class="p">:</span> <span class="s2">"Missing"</span><span class="p">})</span>
+
+<span class="n">some_missing</span> <span class="o">=</span> <span class="n">missing</span><span class="p">[</span><span class="n">missing</span><span class="o">.</span><span class="n">Missing</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">some_missing</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">"Fraction"</span><span class="p">]</span> <span class="o">=</span> <span class="n">some_missing</span><span class="o">.</span><span class="n">Missing</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">some_missing</span><span class="p">))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left">Column</th>
+<th scope="col" class="org-right">Missing</th>
+<th scope="col" class="org-right">Fraction</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">JURISDICTION_CODE</td>
+<td class="org-right">2</td>
+<td class="org-right">7.81372e-05</td>
+</tr>
+<tr>
+<td class="org-left">LOCATION_DESC</td>
+<td class="org-right">14977</td>
+<td class="org-right">0.58513</td>
+</tr>
+<tr>
+<td class="org-left">PERP_AGE_GROUP</td>
+<td class="org-right">9344</td>
+<td class="org-right">0.365057</td>
+</tr>
+<tr>
+<td class="org-left">PERP_SEX</td>
+<td class="org-right">9310</td>
+<td class="org-right">0.363729</td>
+</tr>
+<tr>
+<td class="org-left">PERP_RACE</td>
+<td class="org-right">9310</td>
+<td class="org-right">0.363729</td>
+</tr>
+</tbody>
+</table>
+<p>
+Most entries are missing location descriptions for some reason, and quite a lot of perpertator data is missing, possibly because they didn't catch whoever did the shooting in those cases.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org72407fc" class="outline-2">
+<h2 id="org72407fc">Incident Key</h2>
+<div class="outline-text-2" id="text-org72407fc">
+<p>
+The incident key is an identifier for a specific incident so it's only really useful if you need to look up or refer to one or more of them, but we'll be looking at things in aggregate making them less useful for us, except maybe for looking at anomalies. Let's just make sure that the identifiers are unique as I'm asserting that they are.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">id_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">INCIDENT_KEY</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+<span class="n">incidents</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Identifiers: </span><span class="si">{</span><span class="n">id_count</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="se">\t</span><span class="s2">Incidents: </span><span class="si">{</span><span class="n">incidents</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"There are </span><span class="si">{</span><span class="n">incidents</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">id_count</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> more rows than incident IDs."</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Identifiers: 20,126	Incidents: 25,596
+There are 5,470 more rows than incident IDs.
+</pre>
+
+
+<p>
+It appears that I wasn't correct in my assumption… let's take a look at one of the incidents.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">counts</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">INCIDENT_KEY</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">up_counts</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">top</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">top_id</span> <span class="o">=</span> <span class="n">top</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Incident: </span><span class="si">{</span><span class="n">top_id</span><span class="si">}</span><span class="se">\t</span><span class="s2">Count: </span><span class="si">{</span><span class="n">top</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+Incident: 173354054	Count: 18
+</pre>
+
+
+<p>
+Inspecting the dataframe it looks like in some cases more than one person was shot per incident, so there's multiple rows (one per person shot) for a single incident. Kind of scary that eighteen people got shot at one incident, if my interpretation is correct, but that's life in the big city, I guess. Reading the <a href="https://data.cityofnewyork.us/api/views/833y-fsy8/files/e4e3d86c-348f-4a16-a17f-19480c089429?download=true&amp;filename=NYPD_Shootings_Incident_Level_Data_Footnotes.pdf">Footnotes</a> (link is to a PDF) it says:
+</p>
+
+<blockquote>
+<p>
+A shooting incident can have multiple victims involved and as a result duplicate INCIDENT_KEYs are produced.
+</p>
+</blockquote>
+
+<p>
+So it appears each row represents the victim of a shooting and each <code>INCIDENT_KEY</code> represents a shooting where one or more person was shot. The footnotes also note that only incidents where a victim was shot are included. If someone fired a gun but didn't hit anyone then it isn't represented in the data set.
+</p>
+
+<p>
+<b><b>Note:</b></b> There's actually a slight discrepancy between the descriptions of the <code>INCIDENT_KEY</code> between the web-page and the PDF footnotes. According to the Web-Page the ID is for each arrest while the footnotes make it sound like they represent cases where there was at least one victim, whether or not someone was arrested. For our purposes this won't matter, since we're only using the data as a source for data visualization, but if one were really trying to understand what was happening in NYC knowing exactly what the data represents might be important (assuming not all cases with a shooting victim leads to an arrest).
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">use_counts</span> <span class="o">=</span> <span class="n">up_counts</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">use_counts</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"INCIDENT_KEY"</span><span class="p">,</span>
+		 <span class="nb">type</span><span class="o">=</span><span class="s2">"nominal"</span><span class="p">,</span>
+		 <span class="n">sort</span><span class="o">=</span><span class="s2">"-y"</span><span class="p">,</span>
+		 <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)),</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"count"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"INCIDENT_KEY"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"nominal"</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+   <span class="n">title</span><span class="o">=</span><span class="s2">"Incidents with Multiple Shots"</span><span class="p">,</span>
+   <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+   <span class="n">height</span><span class="o">=</span><span class="mi">525</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"multiple_shot_incidents"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="multiple_shot_incidents.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+It looks like a lot of entries have more than one row. Does this mean many incidents have more than one victim? More than one shooter?
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">fractions</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">counts</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">fractions</span> <span class="o">=</span> <span class="n">fractions</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Percent of Rows"</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"count"</span><span class="p">:</span> <span class="s2">"Rows"</span><span class="p">})</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">fractions</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Rows"</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">fractions</span><span class="p">[</span><span class="s2">"Percent of Rows"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Percent of Rows"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">70</span><span class="p">))),</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Rows"</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Percent of Rows"</span><span class="p">)])</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+		 <span class="n">title</span><span class="o">=</span><span class="s2">"Percent Of Incidents with Multiple Rows"</span><span class="p">,</span>
+		 <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+		 <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"fraction_row_incidents"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="fraction_row_incidents.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+The majority of the incidents do have only one row in the dataset. Perhaps it's not as unusual as I think it is to have multiple people involved in a shooting.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3157945" class="outline-2">
+<h2 id="org3157945">OCCUR_DATE and OCCUR_TIME</h2>
+<div class="outline-text-2" id="text-org3157945">
+<p>
+There are two columns that tell us when the shooting is supposed to have happened.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">example</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">INCIDENT_KEY</span><span class="o">==</span><span class="n">top_id</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OCCUR_DATE: </span><span class="si">{</span><span class="n">example</span><span class="o">.</span><span class="n">OCCUR_DATE</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">OCCUR_DATE</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OCCUR_TIME: </span><span class="si">{</span><span class="n">example</span><span class="o">.</span><span class="n">OCCUR_TIME</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">OCCUR_TIME</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+OCCUR_DATE: 01/06/2018 (object)
+OCCUR_TIME: 21:05:00 (object)
+</pre>
+
+
+<p>
+Pandas interpreted both of these as strings, but it'd probably be more useful for us if they were datetime objects.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">MONTH</span><span class="p">,</span> <span class="n">DAY</span><span class="p">,</span> <span class="n">YEAR</span> <span class="o">=</span> <span class="s2">"%m"</span><span class="p">,</span> <span class="s2">"</span><span class="si">%d</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"%Y"</span>
+<span class="n">HOUR</span><span class="p">,</span> <span class="n">MINUTE</span><span class="p">,</span> <span class="n">SECOND</span> <span class="o">=</span> <span class="s2">"%H"</span><span class="p">,</span> <span class="s2">"%M"</span><span class="p">,</span> <span class="s2">"%S"</span>
+<span class="n">DATE_FORMAT</span> <span class="o">=</span> <span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">MONTH</span><span class="p">,</span> <span class="n">DAY</span><span class="p">,</span> <span class="n">YEAR</span><span class="p">))</span>
+<span class="n">TIME_FORMAT</span> <span class="o">=</span> <span class="s2">":"</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">HOUR</span><span class="p">,</span> <span class="n">MINUTE</span><span class="p">,</span> <span class="n">SECOND</span><span class="p">))</span>
+<span class="n">FORMAT</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">DATE_FORMAT</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">TIME_FORMAT</span><span class="si">}</span><span class="s2">"</span>
+<span class="n">DATE_COLUMN</span> <span class="o">=</span> <span class="s2">"date_time"</span>
+<span class="n">data</span><span class="p">[</span><span class="n">DATE_COLUMN</span><span class="p">]</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">OCCUR_DATE</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">OCCUR_TIME</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">FORMAT</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">check_date</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">INCIDENT_KEY</span><span class="o">==</span><span class="n">top_id</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OCCUR_DATE: </span><span class="si">{</span><span class="n">check_date</span><span class="o">.</span><span class="n">OCCUR_DATE</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"New Date: </span><span class="si">{</span><span class="n">check_date</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"OCCUR_TIME: </span><span class="si">{</span><span class="n">check_date</span><span class="o">.</span><span class="n">OCCUR_TIME</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"New Time: </span><span class="si">{</span><span class="n">check_date</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+
+<pre class="example">
+OCCUR_DATE: 01/06/2018
+New Date: 2018-01-06
+OCCUR_TIME: 21:05:00
+New Time: 21:05:00
+</pre>
+
+
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">OCCUR_DATE</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">OCCUR_DATE</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+</pre></div>
+
+<pre class="example">
+01/01/2006
+12/31/2021
+</pre>
+
+
+<p>
+Our dataset covers the years from 2006 throught 20021. Let's see how many there are from month to month.
+</p>
+</div>
+
+<div id="outline-container-org4497f90" class="outline-3">
+<h3 id="org4497f90">Shootings By Month</h3>
+<div class="outline-text-3" id="text-org4497f90">
+<div class="highlight"><pre><span></span><span class="n">indexed</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">DATE_COLUMN</span><span class="p">)</span>
+<span class="n">monthly</span> <span class="o">=</span> <span class="n">indexed</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">pandas</span><span class="o">.</span><span class="n">Grouper</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s2">"M"</span><span class="p">))</span>
+<span class="n">monthly_counts</span> <span class="o">=</span> <span class="n">monthly</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="s2">"INCIDENT_KEY"</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"INCIDENT_KEY"</span><span class="p">:</span> <span class="s2">"Shootings"</span><span class="p">,</span>
+	     <span class="s2">"date_time"</span><span class="p">:</span> <span class="s2">"Month"</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">monthly_counts</span><span class="p">[</span><span class="s2">"Shootings"</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">MONTH_YEAR</span> <span class="o">=</span> <span class="s2">"%B %Y"</span>
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">monthly_counts</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span>
+    <span class="n">point</span><span class="o">=</span><span class="p">{</span><span class="s2">"filled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+	   <span class="s2">"fill"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">})</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"temporal"</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">),</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">MONTH_YEAR</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">)]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"NYC Shootings By Month"</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"monthly_incidents"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="monthly_incidents.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+It looks like shootings went down in 2013 then shot back up again in the Summer of 2020.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9ab793a" class="outline-3">
+<h3 id="org9ab793a">90 Day Rolling Window</h3>
+<div class="outline-text-3" id="text-org9ab793a">
+<div class="highlight"><pre><span></span><span class="n">monthly_counts</span><span class="p">[</span><span class="s2">"Rolling Mean"</span><span class="p">]</span> <span class="o">=</span> <span class="n">monthly_counts</span><span class="p">[</span><span class="s2">"Shootings"</span><span class="p">]</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span>
+    <span class="n">halflife</span><span class="o">=</span><span class="s2">"90 days"</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">monthly_counts</span><span class="o">.</span><span class="n">Month</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">pre_melt</span> <span class="o">=</span> <span class="n">monthly_counts</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"Shootings"</span><span class="p">:</span> <span class="s2">"Sum"</span><span class="p">})</span>
+<span class="n">melted</span> <span class="o">=</span> <span class="n">pre_melt</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">"Aggregation"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Aggregated Value"</span><span class="p">)</span>
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span>
+    <span class="n">point</span><span class="o">=</span><span class="p">{</span><span class="s2">"filled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+	   <span class="s2">"fill"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">})</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+	       <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">),</span>
+	       <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Aggregated Value"</span><span class="p">),</span>
+	       <span class="n">color</span><span class="o">=</span><span class="s2">"Aggregation"</span><span class="p">,</span>
+	       <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">MONTH_YEAR</span><span class="p">),</span>
+			<span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Aggregated Value"</span><span class="p">)]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"NYC Shootings By 90 Day Exponential Weighted Mean"</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"monthly_rolling_incidents"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="monthly_rolling_incidents.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+Using a ninety-day window gives a little better sense of the overall trend downwards until 2020 reversed it.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb7f75f1" class="outline-3">
+<h3 id="orgb7f75f1">By Year</h3>
+<div class="outline-text-3" id="text-orgb7f75f1">
+<div class="highlight"><pre><span></span><span class="n">yearly</span> <span class="o">=</span> <span class="n">indexed</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">pandas</span><span class="o">.</span><span class="n">Grouper</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s2">"Y"</span><span class="p">))</span>
+<span class="n">yearly_counts</span> <span class="o">=</span> <span class="n">yearly</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="s2">"INCIDENT_KEY"</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"INCIDENT_KEY"</span><span class="p">:</span> <span class="s2">"Shootings"</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">yearly_counts</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">]</span> <span class="o">=</span> <span class="n">yearly_counts</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">yearly_counts</span><span class="p">[</span><span class="s2">"Shootings"</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">yearly_counts</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span>
+    <span class="n">point</span><span class="o">=</span><span class="p">{</span><span class="s2">"filled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+	   <span class="s2">"fill"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">})</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Year"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"ordinal"</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">),</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Year"</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">)]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"NYC Shootings By year"</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"yearly_incidents"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="yearly_incidents.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+Although 2020 had that crazy summer, 2021 still exceeded it overall.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5b51f8f" class="outline-3">
+<h3 id="org5b51f8f">Monthly By Year</h3>
+<div class="outline-text-3" id="text-org5b51f8f">
+<div class="highlight"><pre><span></span><span class="n">monthly_counts</span> <span class="o">=</span> <span class="n">monthly</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="s2">"INCIDENT_KEY"</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"INCIDENT_KEY"</span><span class="p">:</span> <span class="s2">"Shootings"</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="c1"># monthly_counts = monthly_counts.rename(columns={"Month": "date-time"})</span>
+
+<span class="n">month_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span> <span class="s2">"Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+<span class="n">monthly_counts</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">]</span> <span class="o">=</span> <span class="n">monthly_counts</span><span class="p">[</span><span class="s2">"date_time"</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>
+<span class="n">monthly_counts</span><span class="p">[</span><span class="s2">"Month"</span><span class="p">]</span> <span class="o">=</span> <span class="n">monthly_counts</span><span class="p">[</span><span class="s2">"date_time"</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">month</span><span class="p">:</span> <span class="n">month_map</span><span class="p">[</span><span class="n">month</span><span class="p">])</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">selection</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">selection_point</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">],</span>
+				   <span class="n">bind</span><span class="o">=</span><span class="s2">"legend"</span><span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">monthly_counts</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span>
+    <span class="n">point</span><span class="o">=</span><span class="p">{</span><span class="s2">"filled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+	   <span class="s2">"fill"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">})</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span>
+	       <span class="n">sort</span><span class="o">=</span><span class="n">monthly_counts</span><span class="p">[</span><span class="s2">"date_time"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">),</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Color</span><span class="p">(</span><span class="s2">"Year"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"nominal"</span><span class="p">),</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"date_time"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Month"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">MONTH_YEAR</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">)],</span>
+    <span class="n">opacity</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">selection</span><span class="p">,</span>
+			     <span class="n">altair</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mf">0.8</span><span class="p">),</span>
+			     <span class="n">altair</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mf">0.2</span><span class="p">))</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"NYC Monthly Shootings By year"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">add_params</span><span class="p">(</span><span class="n">selection</span><span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"month_year_shootings"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="month_year_shootings.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+Click on a year in the legend to isolate it from the other lines in the plot and on a space somewhere on the legend to highlight all the years again.
+</p>
+
+<p>
+It looks like there was an unusually large surge in the Summer of 2020 after years of declining shootings, but regardless of the year there's at least a slight increase in shootings during the Summer months.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd4e184e" class="outline-3">
+<h3 id="orgd4e184e">Medain By Month</h3>
+<div class="outline-text-3" id="text-orgd4e184e">
+<div class="highlight"><pre><span></span><span class="n">by_month_median</span> <span class="o">=</span> <span class="n">monthly_counts</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">by_month_median</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">month_map</span><span class="o">.</span><span class="n">values</span><span class="p">())),</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"Shootings"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">),]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"NYC Median Shootings By Month (2006 through 2012)"</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"monthly_shootings"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="monthly_shootings.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+It looks like there's a definite seasonal effect on shootings. Must be all those farmer's kids off from school to work the fields and shoot each other.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgec616b1" class="outline-2">
+<h2 id="orgec616b1">Location</h2>
+<div class="outline-text-2" id="text-orgec616b1">
+</div>
+<div id="outline-container-orge08e565" class="outline-3">
+<h3 id="orge08e565">Descriptions</h3>
+<div class="outline-text-3" id="text-orge08e565">
+</div>
+<div id="outline-container-orga4dc220" class="outline-4">
+<h4 id="orga4dc220">BORO</h4>
+<div class="outline-text-4" id="text-orga4dc220">
+<p>
+The <code>BORO</code> column identifies which of the <a href="https://en.wikipedia.org/wiki/Boroughs_of_New_York_City?useskin=vector">five boroughs of New York City</a> the victim was shot in.
+</p>
+
+<p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/34/5_Boroughs_Labels_New_York_City_Map.svg" alt="Five Boroughs"></p>
+
+
+<ol class="org-ol">
+<li>Manhattan</li>
+<li>Brooklyn</li>
+<li>Queens</li>
+<li>Bronx</li>
+<li>Staten Island</li>
+</ol>
+<div class="highlight"><pre><span></span><span class="n">boroughs</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">BORO</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">BORO</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="s2">"Shootings"</span><span class="p">))</span>
+
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">boroughs</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"Shootings"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Borough"</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">)]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">520</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Shootings by Borough"</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"shootings-by-borough"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="shootings-by-borough.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<div class="highlight"><pre><span></span><span class="n">borough_monthly</span> <span class="o">=</span> <span class="n">monthly</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s2">"BORO"</span><span class="p">:</span> <span class="s2">"first"</span><span class="p">,</span>
+			       <span class="s2">"INCIDENT_KEY"</span><span class="p">:</span> <span class="s2">"count"</span><span class="p">})</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+				   <span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">BORO</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">,</span> <span class="n">INCIDENT_KEY</span><span class="o">=</span><span class="s2">"Shootings"</span><span class="p">,</span> <span class="n">date_time</span><span class="o">=</span><span class="s2">"Month"</span><span class="p">))</span>
+
+<span class="n">selection</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">selection_point</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">"Borough"</span><span class="p">],</span> <span class="n">bind</span><span class="o">=</span><span class="s2">"legend"</span><span class="p">)</span>
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">borough_monthly</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span>
+    <span class="n">point</span><span class="o">=</span><span class="p">{</span><span class="s2">"filled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+	   <span class="s2">"fill"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">})</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+	       <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">),</span>
+	       <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">),</span>
+	       <span class="n">color</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">,</span>
+	       <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span>
+		   <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Borough"</span><span class="p">),</span>
+		   <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">MONTH_YEAR</span><span class="p">),</span>
+		   <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Shootings"</span><span class="p">)</span>
+	       <span class="p">],</span>
+	       <span class="n">opacity</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">selection</span><span class="p">,</span>
+					<span class="n">altair</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mf">0.8</span><span class="p">),</span>
+					<span class="n">altair</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mf">0.2</span><span class="p">))</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">900</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Monthly Borough Shootings"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">add_params</span><span class="p">(</span><span class="n">selection</span><span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"borough-monthly-shootings"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="borough-monthly-shootings.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+The Bronx and Brooklyn look like they have the most shootings, although I didn't weight it by population so I don't know how they compare as a fraction of the population.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">borough_bar</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s2">"BORO"</span><span class="p">,</span> <span class="s2">"date_time"</span><span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+    <span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">BORO</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">))</span>
+<span class="n">borough_bar</span><span class="p">[</span><span class="s2">"Month"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">({</span>
+    <span class="s2">"year"</span><span class="p">:</span> <span class="n">borough_bar</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>
+    <span class="s2">"month"</span><span class="p">:</span> <span class="n">borough_bar</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span><span class="p">,</span>
+    <span class="s2">"day"</span><span class="p">:</span> <span class="mi">1</span>
+<span class="p">})</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">borough_bar</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"Month"</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"count()"</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+	<span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+	<span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+	<span class="n">title</span><span class="o">=</span><span class="s2">"Monthly Shootings With Borough Breakdowns"</span><span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"borough-monthly-bar-chart"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="borough-monthly-bar-chart.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+By clicking on the legend you can isolate plot-lines by borough and it makes it clearer that the surge in 2020 happened primarily in the Bronx and Manhattan, although the plot is a little deceptive since Manhattan had some months where there were no shootings, but I didn't infill them with zeros so it doesn't show those months dropping back down.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgf1a2579" class="outline-4">
+<h4 id="orgf1a2579">PRECINCT &amp; JURISDICTION_CODE</h4>
+<div class="outline-text-4" id="text-orgf1a2579">
+<p>
+There are seventy-seven police precincts in New York City, subdividing the boroughs. This might be useful for isolating where the shootings are occuring even further, but I'll skip it. Same with the JURISDICTION_CODE.
+</p>
+</div>
+</div>
+<div id="outline-container-org1ec5757" class="outline-4">
+<h4 id="org1ec5757">LOCATION_DESC</h4>
+<div class="outline-text-4" id="text-org1ec5757">
+<div class="highlight"><pre><span></span><span class="n">missing_locations</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">LOCATION_DESC</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">LOCATION_DESC</span><span class="o">=</span><span class="s2">"Location Description"</span><span class="p">))</span>
+<span class="n">missing_locations</span> <span class="o">=</span> <span class="n">missing_locations</span><span class="p">[[</span><span class="s2">"Location Description"</span><span class="p">,</span> <span class="s2">"date_time"</span><span class="p">,</span> <span class="s2">"BORO"</span><span class="p">]]</span>
+<span class="n">missing_locations</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">]</span> <span class="o">=</span> <span class="n">missing_locations</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">missing_locations</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Year"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"ordinal"</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"count()"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"count()"</span><span class="p">),</span> <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"BORO"</span><span class="p">),</span> <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Year"</span><span class="p">)],</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"BORO"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Missing Location Descriptions by Year"</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"missing-locations-descriptions"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="missing-locations-descriptions.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+I was hoping the missing locations might be because they only started recording it after some point, but it looks like it's an ongoing problem not local to any one borough, so the location descriptions are interesting, but the number of missing entries makes it hard to say that they're meaningful.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">locations</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">LOCATION_DESC</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="s2">"Count"</span><span class="p">,</span> <span class="n">LOCATION_DESC</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">))</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Location"</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">locations</span><span class="o">.</span><span class="n">Location</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+	       <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">labelAngle</span><span class="o">=</span><span class="mi">30</span><span class="p">)),</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Count"</span><span class="p">),</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Location"</span><span class="p">),</span> <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Count"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">)]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">900</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Shooting Location Counts"</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"shooting-locations-count"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="shooting-locations-count.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+It looks like most shootings happened at homes, and to avoid being shot you should move to a storage facility.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd7b6677" class="outline-3">
+<h3 id="orgd7b6677">Coordinates</h3>
+<div class="outline-text-3" id="text-orgd7b6677">
+</div>
+<div id="outline-container-org424e5d3" class="outline-4">
+<h4 id="org424e5d3">X_COORD_CD &amp; Y_COORD_CD</h4>
+<div class="outline-text-4" id="text-org424e5d3">
+<p>
+These coordinates use the State Plane Coordinate System (see <a href="https://www.usgs.gov/faqs/what-state-plane-coordinate-system-can-gps-provide-coordinates-these-values">What is the State Plane Coordinate System?</a>) Long Island Zone. The coordinates are mid-block locations with the units in feet.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">[[</span><span class="s2">"X_COORD_CD"</span><span class="p">,</span> <span class="s2">"Y_COORD_CD"</span><span class="p">,</span> <span class="s2">"BORO"</span><span class="p">]])</span><span class="o">.</span><span class="n">mark_point</span><span class="p">(</span><span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+	<span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"X_COORD_CD"</span><span class="p">)</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">X_COORD_CD</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">data</span><span class="o">.</span><span class="n">X_COORD_CD</span><span class="o">.</span><span class="n">max</span><span class="p">())),</span>
+	<span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Y_COORD_CD"</span><span class="p">)</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">Y_COORD_CD</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">data</span><span class="o">.</span><span class="n">Y_COORD_CD</span><span class="o">.</span><span class="n">max</span><span class="p">())),</span>
+	<span class="n">color</span><span class="o">=</span><span class="s2">"BORO"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Shootings By Coordinates"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"shootings-by-coordinates"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="shootings-by-coordinates.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<div class="highlight"><pre><span></span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s2">"X_COORD_CD"</span><span class="p">,</span> <span class="s2">"Y_COORD_CD"</span><span class="p">,</span>
+		    <span class="s2">"BORO"</span><span class="p">,</span> <span class="s2">"date_time"</span><span class="p">,</span>
+		    <span class="s2">"Longitude"</span><span class="p">,</span> <span class="s2">"Latitude"</span><span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+    <span class="n">BORO</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">,</span>
+    <span class="n">X_COORD_CD</span><span class="o">=</span><span class="s2">"X-Coordinate"</span><span class="p">,</span>
+    <span class="n">Y_COORD_CD</span><span class="o">=</span><span class="s2">"Y-Coordinate"</span>
+<span class="p">))</span>
+
+<span class="n">coordinates</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">]</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>
+
+<span class="n">select_year</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">selection_point</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"Year"</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">],</span>
+    <span class="n">bind</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">binding_range</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">2006</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2021</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Year"</span><span class="p">),</span>
+    <span class="n">value</span><span class="o">=</span><span class="p">[{</span><span class="s2">"Year"</span><span class="p">:</span> <span class="mi">2006</span><span class="p">}],</span>
+<span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">(</span><span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"X-Coordinate"</span><span class="p">)</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+	<span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="n">coordinates</span><span class="p">[</span><span class="s2">"X-Coordinate"</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+		<span class="n">coordinates</span><span class="p">[</span><span class="s2">"X-Coordinate"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())),</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Y-Coordinate"</span><span class="p">)</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+	<span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="n">coordinates</span><span class="p">[</span><span class="s2">"Y-Coordinate"</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+		<span class="n">coordinates</span><span class="p">[</span><span class="s2">"Y-Coordinate"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())),</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">,</span>
+    <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Borough"</span><span class="p">),</span>
+	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"date_time"</span><span class="p">)],</span>
+<span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Shootings By Coordinates and Year"</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">add_params</span><span class="p">(</span><span class="n">select_year</span><span class="p">)</span><span class="o">.</span><span class="n">transform_filter</span><span class="p">(</span><span class="n">select_year</span><span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"shootings-by-coordinates-and-year"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="shootings-by-coordinates-and-year.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+<div id="outline-container-org98096f1" class="outline-4">
+<h4 id="org98096f1">Latitude &amp; Longitude</h4>
+</div>
+</div>
+
+<div id="outline-container-org0377c8b" class="outline-3">
+<h3 id="org0377c8b">With GeoPandas</h3>
+<div class="outline-text-3" id="text-org0377c8b">
+<p>
+It turns out than the boroughs of New York City are one of the three datasets that come with GeoPandas so we can bring it in to make a map.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">path_to_data</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">"nybb"</span><span class="p">)</span>
+<span class="n">nyc_geopandas</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">path_to_data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">nyc_geopandas</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+
+<pre class="example">
+   BoroCode       BoroName     Shape_Leng    Shape_Area   
+0         5  Staten Island  330470.010332  1.623820e+09  \
+
+                                            geometry  
+0  MULTIPOLYGON (((970217.022 145643.332, 970227....  
+</pre>
+
+
+<p>
+Let's look at a map colored with the 2021 shooting counts.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">BOROUGH_COLUMN</span> <span class="o">=</span> <span class="s2">"BoroName"</span>
+<span class="n">SHOOTINGS_COLUMN</span> <span class="o">=</span> <span class="s2">"Shootings"</span>
+<span class="n">latest</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span><span class="o">==</span><span class="mi">2021</span><span class="p">]</span>
+<span class="n">latest_count</span> <span class="o">=</span> <span class="n">latest</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"BORO"</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">latest_count</span><span class="o">.</span><span class="n">INCIDENT_KEY</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">latest</span><span class="p">)))</span>
+<span class="n">latest_count</span> <span class="o">=</span> <span class="n">latest_count</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">BORO</span><span class="o">=</span><span class="n">BOROUGH_COLUMN</span><span class="p">))</span>
+<span class="n">latest_count</span><span class="p">[</span><span class="n">BOROUGH_COLUMN</span><span class="p">]</span> <span class="o">=</span> <span class="n">latest_count</span><span class="p">[</span><span class="n">BOROUGH_COLUMN</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+<span class="n">latest_count</span><span class="p">[</span><span class="n">SHOOTINGS_COLUMN</span><span class="p">]</span> <span class="o">=</span> <span class="n">latest_count</span><span class="p">[</span><span class="s2">"INCIDENT_KEY"</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">latest_count</span> <span class="o">=</span> <span class="n">latest_count</span><span class="p">[[</span><span class="n">BOROUGH_COLUMN</span><span class="p">,</span> <span class="n">SHOOTINGS_COLUMN</span><span class="p">]]</span>
+<span class="n">merged</span> <span class="o">=</span> <span class="n">nyc_geopandas</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">latest_count</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">BOROUGH_COLUMN</span><span class="p">)</span>
+
+<span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[[</span><span class="n">BOROUGH_COLUMN</span><span class="p">,</span> <span class="n">SHOOTINGS_COLUMN</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">]]</span>
+<span class="n">explorer</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">explore</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="n">SHOOTINGS_COLUMN</span><span class="p">,</span>
+			  <span class="n">tooltip</span><span class="o">=</span><span class="n">BOROUGH_COLUMN</span><span class="p">,</span>
+			  <span class="n">popup</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">explorer</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">OUTPUT_PATH</span><span class="si">}</span><span class="s2">/nyc-shootings-explore.html"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="nyc-shootings-explore.html" style="width:100%" height="800">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+This is probably most interesting to someone like me who doesn't know much about New York City. I wonder why Queens has so much fewer shootings than Brooklyn or the Bronx when it sits between them? Demographics?
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org942e262" class="outline-2">
+<h2 id="org942e262">Murder or Not</h2>
+<div class="outline-text-2" id="text-org942e262">
+</div>
+<div id="outline-container-org62c52a3" class="outline-3">
+<h3 id="org62c52a3">By Year</h3>
+<div class="outline-text-3" id="text-org62c52a3">
+<div class="highlight"><pre><span></span><span class="n">MURDER_FLAG</span> <span class="o">=</span> <span class="s2">"STATISTICAL_MURDER_FLAG"</span>
+<span class="n">MURDERED</span> <span class="o">=</span> <span class="s2">"Murdered"</span>
+<span class="n">BOROUGH</span> <span class="o">=</span> <span class="s2">"Borough"</span>
+<span class="n">YEAR</span> <span class="o">=</span> <span class="s2">"Year"</span>
+<span class="n">data</span><span class="p">[</span><span class="n">YEAR</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">to_period</span><span class="p">(</span><span class="s2">"Y"</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">to_timestamp</span><span class="p">()</span>
+<span class="n">yearly_murders</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">YEAR</span><span class="p">,</span> <span class="s2">"BORO"</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+    <span class="n">MURDER_FLAG</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+	<span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+	    <span class="s2">"BORO"</span><span class="p">:</span> <span class="n">BOROUGH</span><span class="p">,</span>
+	    <span class="n">MURDER_FLAG</span><span class="p">:</span> <span class="n">MURDERED</span><span class="p">})</span>
+<span class="n">yearly_murders</span> <span class="o">=</span> <span class="n">yearly_murders</span><span class="p">[[</span><span class="n">YEAR</span><span class="p">,</span> <span class="n">BOROUGH</span><span class="p">,</span> <span class="n">MURDERED</span><span class="p">]]</span>
+
+<span class="n">SELECTION</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">selection_point</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="n">BOROUGH</span><span class="p">],</span> <span class="n">bind</span><span class="o">=</span><span class="s2">"legend"</span><span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">yearly_murders</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span>
+    <span class="n">point</span><span class="o">=</span><span class="p">{</span><span class="s2">"filled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+	   <span class="s2">"fill"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">})</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+	       <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="n">YEAR</span><span class="p">),</span>
+	       <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="n">MURDERED</span><span class="p">),</span>
+	       <span class="n">color</span><span class="o">=</span><span class="n">BOROUGH</span><span class="p">,</span>
+	       <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="n">YEAR</span><span class="p">),</span>
+			<span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="n">MURDERED</span><span class="p">),</span>
+			<span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="n">BOROUGH</span><span class="p">)],</span>
+	       <span class="n">opacity</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">SELECTION</span><span class="p">,</span>
+					<span class="n">altair</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mf">0.8</span><span class="p">),</span>
+					<span class="n">altair</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mf">0.2</span><span class="p">))</span>
+	   <span class="p">)</span><span class="o">.</span><span class="n">add_params</span><span class="p">(</span><span class="n">SELECTION</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+	       <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+	       <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+	       <span class="n">title</span><span class="o">=</span><span class="s2">"NYC Murders By Year"</span>
+	   <span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"yearly_borough_murders"</span><span class="p">)</span>
+<span class="c1">#+end_src</span>
+</pre></div>
+
+<object type="text/html" data="yearly_borough_murders.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+
+<div id="outline-container-org9a5fbfc" class="outline-3">
+<h3 id="org9a5fbfc">By Month</h3>
+<div class="outline-text-3" id="text-org9a5fbfc">
+<div class="highlight"><pre><span></span><span class="n">MONTH</span> <span class="o">=</span> <span class="s2">"Month"</span>
+<span class="n">data</span><span class="p">[</span><span class="n">MONTH</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">to_period</span><span class="p">(</span><span class="s2">"M"</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">to_timestamp</span><span class="p">()</span>
+<span class="n">murdered</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">MONTH</span><span class="p">,</span> <span class="s2">"BORO"</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">MURDER_FLAG</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+<span class="n">murdered</span> <span class="o">=</span> <span class="n">murdered</span><span class="p">[[</span><span class="n">MONTH</span><span class="p">,</span> <span class="s2">"BORO"</span><span class="p">,</span> <span class="n">MURDER_FLAG</span><span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"BORO"</span><span class="p">:</span> <span class="n">BOROUGH</span><span class="p">,</span>
+    <span class="n">MURDER_FLAG</span><span class="p">:</span> <span class="n">MURDERED</span><span class="p">,</span>    
+<span class="p">})</span>
+
+<span class="n">SELECTION</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">selection_point</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="n">BOROUGH</span><span class="p">],</span> <span class="n">bind</span><span class="o">=</span><span class="s2">"legend"</span><span class="p">)</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">murdered</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span>
+    <span class="n">point</span><span class="o">=</span><span class="p">{</span><span class="s2">"filled"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+	   <span class="s2">"fill"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">})</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+	       <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="n">MONTH</span><span class="p">),</span>
+	       <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="n">MURDERED</span><span class="p">),</span>
+	       <span class="n">color</span><span class="o">=</span><span class="n">BOROUGH</span><span class="p">,</span>
+	       <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="n">MONTH</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">MONTH_YEAR</span><span class="p">),</span>
+			<span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="n">MURDERED</span><span class="p">),</span>
+			<span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="n">BOROUGH</span><span class="p">)],</span>
+	       <span class="n">opacity</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">condition</span><span class="p">(</span><span class="n">SELECTION</span><span class="p">,</span>
+					<span class="n">altair</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mf">0.8</span><span class="p">),</span>
+					<span class="n">altair</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mf">0.2</span><span class="p">))</span>
+	   <span class="p">)</span><span class="o">.</span><span class="n">add_params</span><span class="p">(</span><span class="n">SELECTION</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+	       <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+	       <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+	       <span class="n">title</span><span class="o">=</span><span class="s2">"NYC Murders By Month"</span>
+	   <span class="p">)</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"monthly_borough_murders"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="monthly_borough_murders.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+
+<p>
+It looks like Brooklyn lead in murders in the Summer of 2020, 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgab955bf" class="outline-3">
+<h3 id="orgab955bf">By Coordinate</h3>
+<div class="outline-text-3" id="text-orgab955bf">
+<div class="highlight"><pre><span></span><span class="n">murdered</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">MURDER_FLAG</span><span class="p">]]</span>
+
+<span class="n">murder_coordinates</span> <span class="o">=</span> <span class="n">murdered</span><span class="p">[[</span><span class="s2">"BORO"</span><span class="p">,</span> <span class="s2">"date_time"</span><span class="p">,</span>
+			       <span class="s2">"Longitude"</span><span class="p">,</span> <span class="s2">"Latitude"</span>
+			       <span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+				   <span class="n">BORO</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">,</span>
+			       <span class="p">))</span>
+<span class="n">murder_coordinates</span><span class="p">[</span><span class="s2">"Year"</span><span class="p">]</span> <span class="o">=</span> <span class="n">murder_coordinates</span><span class="o">.</span><span class="n">date_time</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="p">(</span><span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">murder_coordinates</span><span class="p">)</span>
+	 <span class="o">.</span><span class="n">mark_point</span><span class="p">(</span><span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+	 <span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+	     <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Longitude"</span><span class="p">)</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+		 <span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="n">murder_coordinates</span><span class="p">[</span><span class="s2">"Longitude"</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+			 <span class="n">murder_coordinates</span><span class="p">[</span><span class="s2">"Longitude"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())),</span>
+	     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Latitude"</span><span class="p">)</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+		 <span class="n">domain</span><span class="o">=</span><span class="p">(</span><span class="n">murder_coordinates</span><span class="p">[</span><span class="s2">"Latitude"</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+			 <span class="n">murder_coordinates</span><span class="p">[</span><span class="s2">"Latitude"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())),</span>
+	     <span class="n">color</span><span class="o">=</span><span class="s2">"Borough"</span><span class="p">,</span>
+	     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Borough"</span><span class="p">),</span>
+		      <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"date_time"</span><span class="p">)],</span>
+	 <span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+	     <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+	     <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">,</span>
+	     <span class="n">title</span><span class="o">=</span><span class="s2">"Murders By Longitude, Latitude and Year"</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">add_params</span><span class="p">(</span><span class="n">select_year</span><span class="p">)</span>
+	 <span class="o">.</span><span class="n">transform_filter</span><span class="p">(</span><span class="n">select_year</span><span class="p">))</span>
+
+<span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"murders-by-coordinates-and-year"</span><span class="p">)</span>
+</pre></div>
+
+<object type="text/html" data="murders-by-coordinates-and-year.html" style="width:100%" height="650">
+  <p>Figure Missing</p>
+</object>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdcaac13" class="outline-2">
+<h2 id="orgdcaac13">Victims and Perpetrators</h2>
+<div class="outline-text-2" id="text-orgdcaac13">
+</div>
+<div id="outline-container-orgf0dd83c" class="outline-3">
+<h3 id="orgf0dd83c">Perpetrators</h3>
+<div class="outline-text-3" id="text-orgf0dd83c">
+</div>
+<div id="outline-container-org3335cad" class="outline-4">
+<h4 id="org3335cad">PERP_AGE_GROUP</h4>
+<div class="outline-text-4" id="text-org3335cad">
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_AGE_GROUP</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-right">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-right">PERP_AGE_GROUP</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-right">nan</td>
+<td class="org-right">9344</td>
+</tr>
+<tr>
+<td class="org-right">18-24</td>
+<td class="org-right">5844</td>
+</tr>
+<tr>
+<td class="org-right">25-44</td>
+<td class="org-right">5202</td>
+</tr>
+<tr>
+<td class="org-right">UNKNOWN</td>
+<td class="org-right">3148</td>
+</tr>
+<tr>
+<td class="org-right">&lt;18</td>
+<td class="org-right">1463</td>
+</tr>
+<tr>
+<td class="org-right">45-64</td>
+<td class="org-right">535</td>
+</tr>
+<tr>
+<td class="org-right">65+</td>
+<td class="org-right">57</td>
+</tr>
+<tr>
+<td class="org-right">1020</td>
+<td class="org-right">1</td>
+</tr>
+<tr>
+<td class="org-right">940</td>
+<td class="org-right">1</td>
+</tr>
+<tr>
+<td class="org-right">224</td>
+<td class="org-right">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgaa382e6" class="outline-4">
+<h4 id="orgaa382e6">PEPR_SEX</h4>
+<div class="outline-text-4" id="text-orgaa382e6">
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_SEX</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left">PERP_SEX</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">M</td>
+<td class="org-right">14416</td>
+</tr>
+<tr>
+<td class="org-left">nan</td>
+<td class="org-right">9310</td>
+</tr>
+<tr>
+<td class="org-left">U</td>
+<td class="org-right">1499</td>
+</tr>
+<tr>
+<td class="org-left">F</td>
+<td class="org-right">371</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org489fecc" class="outline-4">
+<h4 id="org489fecc">PERP_RACE</h4>
+<div class="outline-text-4" id="text-org489fecc">
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_RACE</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left">PERP_RACE</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">BLACK</td>
+<td class="org-right">10668</td>
+</tr>
+<tr>
+<td class="org-left">nan</td>
+<td class="org-right">9310</td>
+</tr>
+<tr>
+<td class="org-left">WHITE HISPANIC</td>
+<td class="org-right">2164</td>
+</tr>
+<tr>
+<td class="org-left">UNKNOWN</td>
+<td class="org-right">1836</td>
+</tr>
+<tr>
+<td class="org-left">BLACK HISPANIC</td>
+<td class="org-right">1203</td>
+</tr>
+<tr>
+<td class="org-left">WHITE</td>
+<td class="org-right">272</td>
+</tr>
+<tr>
+<td class="org-left">ASIAN / PACIFIC ISLANDER</td>
+<td class="org-right">141</td>
+</tr>
+<tr>
+<td class="org-left">AMERICAN INDIAN/ALASKAN NATIVE</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table>
+<p>
+It looks like besides the <code>NaN</code> values, missing data is also classified as <code>U</code> or <code>UNKNOWN</code>. 
+</p>
+</div>
+</div>
+<div id="outline-container-org9c9c574" class="outline-4">
+<h4 id="org9c9c574">Handling the Unknowns</h4>
+<div class="outline-text-4" id="text-org9c9c574">
+<p>
+Let's try and unify the missing values.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_AGE_GROUP</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span> <span class="o">=</span> <span class="s2">"UNKNOWN"</span>
+<span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_AGE_GROUP</span> <span class="o">==</span> <span class="s2">"U"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"UNKNOWN"</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_AGE_GROUP</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-right">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-right">PERP_AGE_GROUP</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-right">UNKNOWN</td>
+<td class="org-right">12492</td>
+</tr>
+<tr>
+<td class="org-right">18-24</td>
+<td class="org-right">5844</td>
+</tr>
+<tr>
+<td class="org-right">25-44</td>
+<td class="org-right">5202</td>
+</tr>
+<tr>
+<td class="org-right">&lt;18</td>
+<td class="org-right">1463</td>
+</tr>
+<tr>
+<td class="org-right">45-64</td>
+<td class="org-right">535</td>
+</tr>
+<tr>
+<td class="org-right">65+</td>
+<td class="org-right">57</td>
+</tr>
+<tr>
+<td class="org-right">1020</td>
+<td class="org-right">1</td>
+</tr>
+<tr>
+<td class="org-right">940</td>
+<td class="org-right">1</td>
+</tr>
+<tr>
+<td class="org-right">224</td>
+<td class="org-right">1</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_SEX</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span> <span class="o">=</span> <span class="s2">"UNKNOWN"</span>
+<span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_SEX</span> <span class="o">==</span> <span class="s2">"U"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"UNKNOWN"</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_SEX</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left">PERP_SEX</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">M</td>
+<td class="org-right">14416</td>
+</tr>
+<tr>
+<td class="org-left">UNKNOWN</td>
+<td class="org-right">10809</td>
+</tr>
+<tr>
+<td class="org-left">F</td>
+<td class="org-right">371</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_RACE</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span> <span class="o">=</span> <span class="s2">"UNKNOWN"</span>
+<span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_RACE</span> <span class="o">==</span> <span class="s2">"U"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"UNKNOWN"</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">PERP_RACE</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left">PERP_RACE</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">UNKNOWN</td>
+<td class="org-right">11166</td>
+</tr>
+<tr>
+<td class="org-left">BLACK</td>
+<td class="org-right">10650</td>
+</tr>
+<tr>
+<td class="org-left">WHITE HISPANIC</td>
+<td class="org-right">2164</td>
+</tr>
+<tr>
+<td class="org-left">BLACK HISPANIC</td>
+<td class="org-right">1201</td>
+</tr>
+<tr>
+<td class="org-left">WHITE</td>
+<td class="org-right">272</td>
+</tr>
+<tr>
+<td class="org-left">ASIAN / PACIFIC ISLANDER</td>
+<td class="org-right">141</td>
+</tr>
+<tr>
+<td class="org-left">AMERICAN INDIAN/ALASKAN NATIVE</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table>
+<p>
+So, the first thing we can notice is that the <code>UNKNOWN</code> counts don't match so sometims some attributes were known but not others, so they don't just represent cases where the perpetrator wasn't caught like I thought it might be. The second thing is that for age and race the unknowns have the highest counts. For all three categories the numbers of unknowns are so high that it's hard to say how they might affect the cases where the values are known.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd13c407" class="outline-3">
+<h3 id="orgd13c407">Victims</h3>
+<div class="outline-text-3" id="text-orgd13c407">
+</div>
+<div id="outline-container-org5387ebd" class="outline-4">
+<h4 id="org5387ebd">VIC_AGE_GROUP</h4>
+<div class="outline-text-4" id="text-org5387ebd">
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">VIC_AGE_GROUP</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-right">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-right">VIC_AGE_GROUP</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-right">UNKNOWN</td>
+<td class="org-right">10863</td>
+</tr>
+<tr>
+<td class="org-right">25-44</td>
+<td class="org-right">6500</td>
+</tr>
+<tr>
+<td class="org-right">18-24</td>
+<td class="org-right">5389</td>
+</tr>
+<tr>
+<td class="org-right">&lt;18</td>
+<td class="org-right">1657</td>
+</tr>
+<tr>
+<td class="org-right">45-64</td>
+<td class="org-right">1070</td>
+</tr>
+<tr>
+<td class="org-right">65+</td>
+<td class="org-right">117</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orge9d1cfb" class="outline-4">
+<h4 id="orge9d1cfb">VIC_SEX</h4>
+<div class="outline-text-4" id="text-orge9d1cfb">
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">VIC_SEX</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left">VIC_SEX</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">M</td>
+<td class="org-right">13182</td>
+</tr>
+<tr>
+<td class="org-left">UNKNOWN</td>
+<td class="org-right">10809</td>
+</tr>
+<tr>
+<td class="org-left">F</td>
+<td class="org-right">1598</td>
+</tr>
+<tr>
+<td class="org-left">U</td>
+<td class="org-right">7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org1f69448" class="outline-4">
+<h4 id="org1f69448">VIC_RACE</h4>
+<div class="outline-text-4" id="text-org1f69448">
+<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">VIC_RACE</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()))</span>
+</pre></div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+</colgroup>
+<thead><tr>
+<th scope="col" class="org-left">VIC_RACE</th>
+<th scope="col" class="org-right">count</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="org-left">UNKNOWN</td>
+<td class="org-right">10851</td>
+</tr>
+<tr>
+<td class="org-left">BLACK</td>
+<td class="org-right">9962</td>
+</tr>
+<tr>
+<td class="org-left">WHITE HISPANIC</td>
+<td class="org-right">2515</td>
+</tr>
+<tr>
+<td class="org-left">BLACK HISPANIC</td>
+<td class="org-right">1528</td>
+</tr>
+<tr>
+<td class="org-left">WHITE</td>
+<td class="org-right">485</td>
+</tr>
+<tr>
+<td class="org-left">ASIAN / PACIFIC ISLANDER</td>
+<td class="org-right">249</td>
+</tr>
+<tr>
+<td class="org-left">AMERICAN INDIAN/ALASKAN NATIVE</td>
+<td class="org-right">6</td>
+</tr>
+</tbody>
+</table>
+<p>
+Somewhat unexpectedly, the unknowns are also alarmingly high for the victims, suggesting that they represent poor case records and perhaps the demographic information isn't reliable enough to be useful.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfc57088" class="outline-2">
+<h2 id="orgfc57088">Sources</h2>
+<div class="outline-text-2" id="text-orgfc57088">
+<ul class="org-ul">
+<li>
+<a href="https://commons.wikimedia.org/wiki/File:5_Boroughs_Labels_New_York_City_Map.svg">New York City Map</a> via WikiMedia Commons</li>
+</ul>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/data-exploration/index.html" rel="tag">data exploration</a></li>
+            <li><a class="tag p-category" href="../../categories/data-science/index.html" rel="tag">data science</a></li>
+            <li><a class="tag p-category" href="../../categories/pandas/index.html" rel="tag">pandas</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../bubba-sort-page-1/index.html" rel="prev" title="I, Bubba">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../bubba-sort-page-2/index.html" rel="next" title="A Ray">Next post</a>
+            </li>
+        </ul></nav></aside></article><!--End of body content--><footer id="footer">
+            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+<span property="dct:title">Ape-Iron</span> is licensed under
+<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
+<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
+
+            
+            
+        
+    </div>
+</footer>
+</div>
+
+
+        <script src="../../assets/js/all-nocdn.js"></script><script>
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+    </script>
+</div>
+</body>
+</html>

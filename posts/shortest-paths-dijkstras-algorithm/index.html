@@ -9,13 +9,13 @@
 <meta name="theme-color" content="#5670d4">
 <meta name="generator" content="Nikola (getnikola.com)">
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/shortest-paths-dijkstras-algorithm/">
+<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/shortest-paths-dijkstras-algorithm/index.html">
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../shortest-paths-bellman-ford/" title="Shortest Paths: Bellman-Ford" type="text/html">
-<link rel="next" href="../the-maximum-subarray-problem/" title="The Maximum-Subarray Problem" type="text/html">
+<link rel="prev" href="../shortest-paths-bellman-ford/index.html" title="Shortest Paths: Bellman-Ford" type="text/html">
+<link rel="next" href="../the-maximum-subarray-problem/index.html" title="The Maximum-Subarray Problem" type="text/html">
 <meta property="og:site_name" content="Bowling For Data">
 <meta property="og:title" content="Shortest Paths: Dijkstra's Algorithm">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/shortest-paths-dijkstras-algorithm/">
+<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/shortest-paths-dijkstras-algorithm/index.html">
 <meta property="og:description" content="Table of Contents
 
 
@@ -70,6 +70,16 @@ bg-light
                 </li>
 <li class="nav-item">
 <a href="../../rss.xml" class="nav-link">RSS feed</a>
+            </li>
+<li class="nav-item dropdown">
+<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
+            <div class="dropdown-menu">
+                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
+                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
+                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
+                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
+                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
+            </div>
 
                 
             </li>
@@ -98,14 +108,14 @@ bg-light
         
         
         
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Shortest Paths: Dijkstra's Algorithm</a></h1>
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Shortest Paths: Dijkstra's Algorithm</a></h1>
 
         <div class="metadata">
             <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
                     The Cloistered Monkey
             </span></p>
             <p class="dateline">
-            <a href="." rel="bookmark">
+            <a href="#" rel="bookmark">
             <time class="published dt-published" datetime="2022-04-27T19:59:56-07:00" itemprop="datePublished" title="2022-04-27 19:59">2022-04-27 19:59</time></a>
             </p>
             
@@ -115,19 +125,19 @@ bg-light
         
 
     </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents">
+    <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org38780ae">Setup</a></li>
-<li><a href="#org5bb31c7">Dijkstra's Algorithm</a></li>
-<li><a href="#orgd99ae48">Test It</a></li>
+<li><a href="index.html#org02d60c6">Setup</a></li>
+<li><a href="index.html#org82312a9">Dijkstra's Algorithm</a></li>
+<li><a href="index.html#orge24803e">Test It</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org38780ae" class="outline-2">
-<h2 id="org38780ae">Setup</h2>
-<div class="outline-text-2" id="text-org38780ae">
+<div id="outline-container-org02d60c6" class="outline-2">
+<h2 id="org02d60c6">Setup</h2>
+<div class="outline-text-2" id="text-org02d60c6">
 <div class="highlight"><pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">PriorityQueue</span>
@@ -145,11 +155,11 @@ bg-light
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org5bb31c7" class="outline-2">
-<h2 id="org5bb31c7">Dijkstra's Algorithm</h2>
-<div class="outline-text-2" id="text-org5bb31c7">
+<div id="outline-container-org82312a9" class="outline-2">
+<h2 id="org82312a9">Dijkstra's Algorithm</h2>
+<div class="outline-text-2" id="text-org82312a9">
 <div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">dijkstras_shortest_paths</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">"""Find the shortest paths beginning at the source</span>
+<span class="w">    </span><span class="sd">"""Find the shortest paths beginning at the source</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     graph: the vertices and edges to use</span>
@@ -169,9 +179,9 @@ bg-light
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgd99ae48" class="outline-2">
-<h2 id="orgd99ae48">Test It</h2>
-<div class="outline-text-2" id="text-orgd99ae48">
+<div id="outline-container-orge24803e" class="outline-2">
+<h2 id="orge24803e">Test It</h2>
+<div class="outline-text-2" id="text-orge24803e">
 <div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="s2">"stxyz"</span><span class="p">:</span>
     <span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="n">node</span><span class="p">)</span>
@@ -220,18 +230,23 @@ bg-light
     </div>
     <aside class="postpromonav"><nav><ul class="pager hidden-print">
 <li class="previous">
-                <a href="../shortest-paths-bellman-ford/" rel="prev" title="Shortest Paths: Bellman-Ford">Previous post</a>
+                <a href="../shortest-paths-bellman-ford/index.html" rel="prev" title="Shortest Paths: Bellman-Ford">Previous post</a>
             </li>
             <li class="next">
-                <a href="../the-maximum-subarray-problem/" rel="next" title="The Maximum-Subarray Problem">Next post</a>
+                <a href="../the-maximum-subarray-problem/index.html" rel="next" title="The Maximum-Subarray Problem">Next post</a>
             </li>
-        </ul></nav></aside></article><!--End of body content--><footer id="footer"><a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
- <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
- <img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+        </ul></nav></aside></article><!--End of body content--><footer id="footer">
+            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+<span property="dct:title">Ape-Iron</span> is licensed under
+<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
+<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
+
             
             
-        </footer>
-</div>
+        
+    </div>
+</footer>
 </div>
 
 
@@ -240,5 +255,6 @@ bg-light
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
     </script>
+</div>
 </body>
 </html>
