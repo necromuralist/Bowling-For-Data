@@ -144,6 +144,16 @@ NAVIGATION_LINKS = {
         ("/archive.html", "Archive"),
         ("/categories/", "Tags"),
         ("/rss.xml", "RSS feed"),
+          (
+            (
+                ("https://necromuralist.github.io/", "The Cloistered Monkey"),
+                ("https://necromuralist.github.io/Ape-Iron/", "Ape Iron"),
+                ("https://necromuralist.github.io/Beach-Pig-Thigh/", "Beach-Pig Rump & Thigh"),
+                ("https://necromuralist.github.io/Neurotic-Networking/", "Neurotic Networking"),
+                ("https://necromuralist.github.io/Visions-Voices-Data/", "Visions, Voices, Data")
+                ),
+            "Monkey Pages"
+        ),
     ),
 }
 
@@ -977,15 +987,17 @@ LICENSE = ""
 # LICENSE = """
 # <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 # """
-LICENSE = """
- <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
- <img alt="Creative Commons License BY-NC-SA"
- style="border-width:0; margin-bottom:12px;"
- src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>"""
 
+LICENSE = '''
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under
+<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
+<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1">
+<img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1">
+<img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></p> 
+'''
 # A small copyright notice for the page footer (in HTML).
 # (translatable)
-CONTENT_FOOTER = '<a href="mailto:{email}">{author}</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         {license}'
+CONTENT_FOOTER = 'Scribbles by <a href="mailto:{email}">{author}</a> &copy; {date} - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         {license}'
 
 # Things that will be passed to CONTENT_FOOTER.format().  This is done
 # for translatability, as dicts are not formattable.  Nikola will
@@ -1048,7 +1060,7 @@ COMMENT_SYSTEM_ID = ""
 # http://mysite/foo/bar/index.html => http://mysite/foo/bar/
 # (Uses the INDEX_FILE setting, so if that is, say, default.html,
 # it will instead /foo/default.html => /foo)
-STRIP_INDEXES = True
+STRIP_INDEXES = False
 
 # List of files relative to the server root (!) that will be asked to be excluded
 # from indexing and other robotic spidering. * is supported. Will only be effective
