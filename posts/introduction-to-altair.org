@@ -1,0 +1,199 @@
+#+BEGIN_COMMENT
+.. title: Introduction To Altair
+.. slug: introduction-to-altair
+.. date: 2024-01-29 19:52:49 UTC-08:00
+.. tags: altair,bowling,visualization
+.. category: Visualization
+.. link: 
+.. description: An introduction to Vega-Altair.
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-480fcb19-5525-4016-b58a-102bb346db03-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+* Setup
+
+#+begin_src python :results none
+# python
+from functools import partial
+from pathlib import Path
+import os
+
+# pypi
+from dotenv import load_dotenv
+from expects import be_true, expect
+from tabulate import tabulate
+
+import altair
+import pandas
+
+# monkey
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+#+begin_src python :results none
+SLUG = "introduction-to-altair"
+OUTPUT_PATH = output_path(SLUG)
+
+HEIGHT, WIDTH = 600, 800
+SAVE_IT = partial(save_chart, output_path=OUTPUT_PATH, height=HEIGHT + 100)
+#+end_src
+
+#+begin_src python :results none
+TABLE = partial(partial(tabulate,
+                        headers="keys",
+                        tablefmt="orgtbl",
+                        showindex=False))
+#+end_src
+
+* The Data
+
+#+begin_src python :results output :exports both
+load_dotenv(override=True)
+table_path = Path(os.getenv("WORLD_HAPPINESS_TABLE"))
+
+expect(table_path.is_file()).to(be_true)
+
+table = pandas.read_csv(table_path)
+print(table.shape)
+#+end_src
+
+#+RESULTS:
+: (2199, 11)
+
+
+#+begin_src python :results none
+def column_printer(table, headers=("Column", "Type")):
+    print(TABLE(
+        ((column, str(table[column].dtype))
+         for column in table.columns),
+        headers=headers))
+    return
+#+end_src
+
+#+begin_src python :results output :exports both
+column_printer(table)
+#+end_src
+
+| Column                           | Type    |
+|----------------------------------+---------|
+| Country name                     | object  |
+| year                             | int64   |
+| Life Ladder                      | float64 |
+| Log GDP per capita               | float64 |
+| Social support                   | float64 |
+| Healthy life expectancy at birth | float64 |
+| Freedom to make life choices     | float64 |
+| Generosity                       | float64 |
+| Perceptions of corruption        | float64 |
+| Positive affect                  | float64 |
+| Negative affect                  | float64 |
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(table)
+print(type(chart))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+#+begin_src python :results output :exports both
+bar_chart = chart.mark_bar()
+print(type(bar_chart))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+#+begin_src python :results output :exports both
+print("Chart Mark: '{}'".format(chart.mark))
+print("Bart Chart Mark: '{}'".format(bar_chart.mark))
+#+end_src
+
+#+RESULTS:
+: Chart Mark: Undefined
+: Bart Chart Mark: bar
+
+** Year
+
+#+begin_src python :results output :exports both
+year_counts = table.year.value_counts().reset_index().sort_values("year")
+print(TABLE(year_counts))
+#+end_src
+
+|   year |   count |
+|--------+---------|
+|   2005 |      27 |
+|   2006 |      89 |
+|   2007 |     102 |
+|   2008 |     110 |
+|   2009 |     114 |
+|   2010 |     124 |
+|   2011 |     146 |
+|   2012 |     141 |
+|   2013 |     136 |
+|   2014 |     144 |
+|   2015 |     142 |
+|   2016 |     141 |
+|   2017 |     147 |
+|   2018 |     141 |
+|   2019 |     143 |
+|   2020 |     116 |
+|   2021 |     122 |
+|   2022 |     114 |
+
+#+begin_src python :results output :exports both
+year_chart = bar_chart.encode(
+    x="year",
+    y="count()")
+
+year_chart = year_chart.properties(height=HEIGHT, width=WIDTH)
+
+SAVE_IT(year_chart, "year-counts-bar-chart")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="year-counts-bar-chart.html" style="width:100%" height=700>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+* Setup
+** Imports
+
+#+begin_src python :results none
+# python
+from functools import partial
+from pathlib import Path
+
+# pypi
+from tabulate import tabulate
+
+import altair
+import pandas
+
+# monkey
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+** Set Up
+* Links
+** Tutorial Sources
+- [[https://www.coursera.org/learn/fundamentals-of-data-visualization/home/week/1][/Fundamentals of Visualization with Dr. Danielle Albers Szafir/]]: Coursera course where the original tutorial came from.
+  - [[https://infovis.fh-potsdam.de/tutorials/][InfoVis Course from Marian Dork]]: Iniversity of Applied Sciences Potsdam that the Coursera course cites as the source for their tutorial.
+** The Data
+- World Happiness Report Dataset [Internet]. [cited 2023 Dec 11]. Available from: https://www.kaggle.com/datasets/unsdsn/world-happiness
+- Inc G. Gallup.com. 2009 [cited 2023 Dec 11]. Understanding How Gallup Uses the Cantril Scale. Available from: https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx
+- World Happiness Report [Internet]. 2023 [cited 2023 Dec 11]. Available from: https://worldhappiness.report/
+
+** Altair
+- Layered and Multi-View Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2023 Dec 12]. Available from: https://altair-viz.github.io/user_guide/compound_charts.html
+
