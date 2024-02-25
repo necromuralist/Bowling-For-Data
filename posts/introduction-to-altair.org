@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-480fcb19-5525-4016-b58a-102bb346db03-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-b90f8f5c-d6a8-46d7-8b2f-ec7b5bc2ae44-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -96,6 +96,16 @@ column_printer(table)
 | Positive affect                  | float64 |
 | Negative affect                  | float64 |
 
+#+begin_src python :results none
+class Column:
+    __slots__ = ()
+    country = "Country name"
+    year = "year"
+    happiness = "Life Ladder"
+    gdp = "Log GDP per capita"
+    generosity = "Generosity"
+#+end_src
+
 #+begin_src python :results output :exports both
 chart = altair.Chart(table)
 print(type(chart))
@@ -118,8 +128,8 @@ print("Bart Chart Mark: '{}'".format(bar_chart.mark))
 #+end_src
 
 #+RESULTS:
-: Chart Mark: Undefined
-: Bart Chart Mark: bar
+: Chart Mark: 'Undefined'
+: Bart Chart Mark: 'bar'
 
 ** Year
 
@@ -151,7 +161,7 @@ print(TABLE(year_counts))
 
 #+begin_src python :results output :exports both
 year_chart = bar_chart.encode(
-    x="year",
+    x="year:N",
     y="count()")
 
 year_chart = year_chart.properties(height=HEIGHT, width=WIDTH)
@@ -162,6 +172,84 @@ SAVE_IT(year_chart, "year-counts-bar-chart")
 #+RESULTS:
 #+begin_export html
 <object type="text/html" data="year-counts-bar-chart.html" style="width:100%" height=700>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+** Life Ladder
+
+#+begin_src python :results output :exports both
+print(table.year.dtype)
+#+end_src
+
+#+RESULTS:
+: int64
+
+#+begin_src python :results output :exports both
+data_2022 = table[table.year==2022]
+chart_2022 = altair.Chart(data_2022).properties(
+    height=HEIGHT, width=WIDTH)
+
+bar_chart_2022 = chart_2022.mark_bar()
+
+ladder_chart = bar_chart_2022.encode(
+    x=altair.X(Column.happiness, bin=True),
+    y="count()"
+)
+
+SAVE_IT(ladder_chart, "ladder-histogram")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="ladder-histogram.html" style="width:100%" height=700>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+** GDP
+
+#+begin_src python :results output :exports both
+scatter = chart_2022.mark_circle()
+print(scatter.mark)
+#+end_src
+
+#+RESULTS:
+: circle
+
+#+begin_src python :results output :exports both
+gdp_scatter = scatter.encode(
+    x=Column.gdp,
+    y=Column.happiness
+)
+
+SAVE_IT(gdp_scatter, "gdp-vs-happiness")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="gdp-vs-happiness.html" style="width:100%" height=700>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+** With Generosity
+
+#+begin_src python :results output :exports both
+gdp_generosity = scatter.encode(
+    x=Column.happiness,
+    y=Column.generosity,
+    color=Column.gdp,
+    tooltip=[Column.country, Column.happiness, Column.gdp,
+             Column.generosity]
+)
+
+SAVE_IT(gdp_generosity, "gdp-and-generosity")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="gdp-and-generosity.html" style="width:100%" height=700>
   <p>Figure Missing</p>
 </object>
 #+end_export
