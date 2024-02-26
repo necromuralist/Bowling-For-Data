@@ -134,30 +134,18 @@ print("Bart Chart Mark: '{}'".format(bar_chart.mark))
 ** Year
 
 #+begin_src python :results output :exports both
-year_counts = table.year.value_counts().reset_index().sort_values("year")
-print(TABLE(year_counts))
+year_counts = table.year.value_counts().reset_index().sort_values("year").T
+year_counts.columns = year_counts.iloc[0]
+year_counts = year_counts.drop(year_counts.index[0])
+print(TABLE(year_counts, showindex=True))
 #+end_src
 
-|   year |   count |
-|--------+---------|
-|   2005 |      27 |
-|   2006 |      89 |
-|   2007 |     102 |
-|   2008 |     110 |
-|   2009 |     114 |
-|   2010 |     124 |
-|   2011 |     146 |
-|   2012 |     141 |
-|   2013 |     136 |
-|   2014 |     144 |
-|   2015 |     142 |
-|   2016 |     141 |
-|   2017 |     147 |
-|   2018 |     141 |
-|   2019 |     143 |
-|   2020 |     116 |
-|   2021 |     122 |
-|   2022 |     114 |
+
+|       |   2005 |   2006 |   2007 |   2008 |   2009 |   2010 |   2011 |   2012 |   2013 |   2014 |   2015 |   2016 |   2017 |   2018 |   2019 |   2020 |   2021 |   2022 |
+|-------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------|
+| count |     27 |     89 |    102 |    110 |    114 |    124 |    146 |    141 |    136 |    144 |    142 |    141 |    147 |    141 |    143 |    116 |    122 |    114 |
+
+Now as a bar-chart.
 
 #+begin_src python :results output :exports both
 year_chart = bar_chart.encode(
@@ -177,7 +165,25 @@ SAVE_IT(year_chart, "year-counts-bar-chart")
 #+end_export
 
 ** Life Ladder
+*** By Year
 
+#+begin_src python :results output :exports both
+boxplot = chart.mark_boxplot(extent="min-max").encode(
+    x="{}:O".format(Column.year),
+    y=Column.happiness
+).properties(height=HEIGHT, width=WIDTH)
+
+SAVE_IT(boxplot, "happiness-year-boxplots")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="happiness-year-boxplots.html" style="width:100%" height=700>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+*** The Most Recent Year (2022)
 #+begin_src python :results output :exports both
 print(table.year.dtype)
 #+end_src
@@ -206,6 +212,7 @@ SAVE_IT(ladder_chart, "ladder-histogram")
   <p>Figure Missing</p>
 </object>
 #+end_export
+
 
 ** GDP
 
@@ -254,29 +261,11 @@ SAVE_IT(gdp_generosity, "gdp-and-generosity")
 </object>
 #+end_export
 
-* Setup
-** Imports
 
-#+begin_src python :results none
-# python
-from functools import partial
-from pathlib import Path
-
-# pypi
-from tabulate import tabulate
-
-import altair
-import pandas
-
-# monkey
-from graeae.visualization.altair_helpers import output_path, save_chart
-#+end_src
-
-** Set Up
 * Links
 ** Tutorial Sources
 - [[https://www.coursera.org/learn/fundamentals-of-data-visualization/home/week/1][/Fundamentals of Visualization with Dr. Danielle Albers Szafir/]]: Coursera course where the original tutorial came from.
-  - [[https://infovis.fh-potsdam.de/tutorials/][InfoVis Course from Marian Dork]]: Iniversity of Applied Sciences Potsdam that the Coursera course cites as the source for their tutorial.
+- [[https://infovis.fh-potsdam.de/tutorials/][InfoVis Course from Marian Dork]]: Iniversity of Applied Sciences Potsdam that the Coursera course cites as the source for their tutorial.
 ** The Data
 - World Happiness Report Dataset [Internet]. [cited 2023 Dec 11]. Available from: https://www.kaggle.com/datasets/unsdsn/world-happiness
 - Inc G. Gallup.com. 2009 [cited 2023 Dec 11]. Understanding How Gallup Uses the Cantril Scale. Available from: https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx
