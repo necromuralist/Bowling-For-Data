@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-b90f8f5c-d6a8-46d7-8b2f-ec7b5bc2ae44-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-6a3f8aa8-27ba-49fa-bf84-cdb1c18e2a3a-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -106,6 +106,8 @@ class Column:
     generosity = "Generosity"
 #+end_src
 
+** Creating a Chart
+
 #+begin_src python :results output :exports both
 chart = altair.Chart(table)
 print(type(chart))
@@ -113,6 +115,96 @@ print(type(chart))
 
 #+RESULTS:
 : <class 'altair.vegalite.v5.api.Chart'>
+
+The ~Chart~ class is defined in ~altair.vegalite.v5.api~. This is its docstring description:
+
+#+begin_quote
+Create a basic Altair/Vega-Lite chart.
+
+Although it is possible to set all Chart properties as constructor attributes,
+it is more idiomatic to use methods such as ~mark_point()~, ~encode()~,
+~transform_filter()~, ~properties()~, etc. See Altair's documentation
+for details and examples: http://altair-viz.github.io/.
+#+end_quote
+
+The attributes set by the ~Chart~ class' constructor (as opposed to being passed to its parent classes) are:
+
+ - data
+ - encoding
+ - mark
+ - width
+ - height
+
+By default they're set to ~Undefined~ which is an altair-defined object (see ~altair.utils.schemapi~), and as noted, you don't normally set the attributes using the constructor (other than ~data~ which isn't mentioned in the docstring but appears to be passed to the ~Chart~ constructor by convention).
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair/chart.png :exports none
+!theme mars
+
+class Chart {
+ + data: DataFrameLike
+ + encoding: core.FacetedEncoding
+ + mark: str
+ + width: int
+ + height: int
+
+ + from_dict():  core.SchemaBase
+ + to_dict(): dict
+ + transformed_data(): DataFrameLike
+ + add_params(): Chart
+ + interactive(): Chart
+}
+
+TopLevelMixin <|- Chart
+_EncodingMixin <|- Chart
+mixin.MarkMethodMixin <|- Chart
+core.TopLevelUnitSpec <|- Chart
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair/chart.png]]
+
+[[img-url:chart.png][Chart Class]]
+
+The methods take arguments, but I believe ~interactive~ (which I haven't seen called with arguments) is the only method that I'll be using - all the other methods you use belong to parent classes.
+
+*** TopLevelUnitSpec
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair/top-level-unit-spec.png :exports none
+!theme mars
+
+SchemaBase <|- VegaLiteSchema
+VegaLiteSchema <|- TopLevelSpec
+TopLevelSpec <|-TopLevelUnitSpec
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair/top-level-unit-spec.png]]
+
+[[img-url:top-level-unit-spec.png]]
+
+Only the top-most parent (~SchemaBase~) has a method of intererst here.
+
+*** SchemaBase
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair/schema-base.png :exports none
+!theme mars
+
+class SchemaBase {
+
++ copy(): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair/schema-base.png]]
+
+[[img-url:schema-base.png]]
+
+There are many more methods in ~altair.utils.schemapi.SchemaBase~ but I'm highlighting ~copy~ here because it gets used quite a bit by the other classes but is defined in this somewhat obscure place. The behavior is what you'd expect so I don't see a need to go over it, but it's one of those mystery methods that just pops up when you use deep inheritance like this that makes you wonder what's going on so I'll document it here, for now.
+
+**note:** The details of the code probably shouldn't go into the introduction-introduction. Maybe put this stuff further down or in another post.
+
+** Making It a Bar Chart
 
 #+begin_src python :results output :exports both
 bar_chart = chart.mark_bar()
@@ -122,9 +214,42 @@ print(type(bar_chart))
 #+RESULTS:
 : <class 'altair.vegalite.v5.api.Chart'>
 
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair/mark-mixin.png :exports none
+!theme mars
+
+class MarkMethodMixin {
+
+mark_arc(): Self
+mark_area(): Self
+mark_bar(): Self
+mark_image(): Self
+mark_line(): Self
+mark_point(): Self
+mark_rect(): Self
+mark_rule(): Self
+mark_text(): Self
+mark_tick(): Self
+mark_trail(): Self
+mark_circle(): Self
+mark_square(): Self
+mark_geoshape(): Self
+mark_boxplot(): Self
+mark_errorbar(): Self
+mark_errorband(): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair/mark-mixin.png]]
+
+[[img-url:mark-mixin.png][MarkMixin Class]]
+
+Looking in the ~mark_bar~ method, there's a lot of arguments you could pass to it, but fundamentally all it's really doing is setting the ~mark~ attribute to ~bar~.
+
 #+begin_src python :results output :exports both
 print("Chart Mark: '{}'".format(chart.mark))
-print("Bart Chart Mark: '{}'".format(bar_chart.mark))
+print("Bar Chart Mark: '{}'".format(bar_chart.mark))
 #+end_src
 
 #+RESULTS:
@@ -163,6 +288,22 @@ SAVE_IT(year_chart, "year-counts-bar-chart")
   <p>Figure Missing</p>
 </object>
 #+end_export
+
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair/top-level-mixin.png :exports none
+!theme mars
+
+mixins.ConfigMethodMixin <|-
+
+class MarkMethodMixin {
+
++ properties(**kwargs): Self
+}
+#+end_src
+
+[[img-url:top-level-mixin.png]]
+
+This method makes a copy of the class, validates the arguments and then sets the properties on itself. The arguments are based on the JSON Schema passed to vega-lite.
 
 ** Life Ladder
 *** By Year
@@ -213,7 +354,6 @@ SAVE_IT(ladder_chart, "ladder-histogram")
 </object>
 #+end_export
 
-
 ** GDP
 
 #+begin_src python :results output :exports both
@@ -260,7 +400,6 @@ SAVE_IT(gdp_generosity, "gdp-and-generosity")
   <p>Figure Missing</p>
 </object>
 #+end_export
-
 
 * Links
 ** Tutorial Sources
