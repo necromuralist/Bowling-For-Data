@@ -1,0 +1,76 @@
+{# the original template comes from <virtualenv>/lib/python3.11/site-packages/nikola/data/themes/base-jinja/templates/math_helper.tmpl #}
+{# The hacked template is in the Beach Pig Thigh repo #}
+{#  Note: at present, MathJax and KaTeX do not respect the USE_CDN configuration option #}
+
+{# This is for pseudocode.js #}
+{# https://github.com/SaswatPadhi/pseudocode.js #}
+
+{% macro pseudocode() %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css">
+{% endmacro %}
+
+{% macro code_styles() %}
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js">
+</script>
+{% endmacro %}
+
+{% macro math_scripts() %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script>
+  {% if mathjax_config %}
+    {{ mathjax_config }}
+  {% else %}
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+      </script>
+  {% endif %}
+{% endmacro %}
+
+{% macro math_scripts_ifpost(post) %}
+  {% if post.has_math %}
+   {{ math_scripts() }}
+  {% elif post.meta("has_pseudocode") %}
+    {# the call to math_scripts is in the CSS call to put it in the HEAD #}
+    {{ pseudocode() }}
+  {% endif %}
+{% endmacro %}
+
+{% macro math_scripts_ifposts(posts) %}
+    {% if posts|selectattr("has_math")|list %}
+      {{ math_scripts() }}
+    {% else %}
+      {% set not_yet = namespace(set_up=true) %}
+      {% for post in posts %}
+        {% if post.meta("has_pseudocode") and not_yet.set_up %}
+          {{ pseudocode() }}
+          {% set not_yet.set_up = false %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+{% endmacro %}
+
+{% macro math_styles_ifpost(post) %}
+    {% if post.meta("has_pseudocode") %}
+      {{ math_scripts() }}
+      {{ code_styles() }}
+    {% endif %}
+{% endmacro %}
+
+
+{% macro math_styles_ifposts(posts) %}
+  {% set not_yet = namespace(set_up=true) %}
+  {% for post in posts %}
+    {% if post.meta("has_pseudocode") and not_yet.set_up %}
+      {{ math_scripts() }}
+      {{ code_styles() }}
+      {% set not_yet.set_up = false %}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}

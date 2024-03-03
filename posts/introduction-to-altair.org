@@ -121,6 +121,7 @@ The ~Chart~ class is defined in ~altair.vegalite.v5.api~. This is its docstring 
 #+begin_quote
 Create a basic Altair/Vega-Lite chart.
 
+
 Although it is possible to set all Chart properties as constructor attributes,
 it is more idiomatic to use methods such as ~mark_point()~, ~encode()~,
 ~transform_filter()~, ~properties()~, etc. See Altair's documentation
@@ -204,6 +205,25 @@ There are many more methods in ~altair.utils.schemapi.SchemaBase~ but I'm highli
 
 **note:** The details of the code probably shouldn't go into the introduction-introduction. Maybe put this stuff further down or in another post.
 
+*** _EncodingMixin
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair/encoding-mixin.png :exports none
+!theme mars
+
+class _EncodingMixin {
+  encode(*args, **kwargs): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair/encoding-mixin.png]]
+
+[[img-url:encoding-mixin.png]]
+
+The ~encoding~ method takes in whatever combination of positional and keyword arguments you pass into it and uses them along with the values that are already set in the Chart's ~encoding~ attribute to update the ~encoding~ before returning the chart (a copy so the original chart isn't changed).
+
+The ~encoding~ attribute is an instance of the ~altair.vegalite.v5.schema.FacetedEncoding~ class.
+
 ** Making It a Bar Chart
 
 #+begin_src python :results output :exports both
@@ -223,20 +243,20 @@ class MarkMethodMixin {
 mark_arc(): Self
 mark_area(): Self
 mark_bar(): Self
+mark_boxplot(): Self
+mark_circle(): Self
+mark_errorband(): Self
+mark_errorbar(): Self
+mark_geoshape(): Self
 mark_image(): Self
 mark_line(): Self
 mark_point(): Self
 mark_rect(): Self
 mark_rule(): Self
+mark_square(): Self
 mark_text(): Self
 mark_tick(): Self
 mark_trail(): Self
-mark_circle(): Self
-mark_square(): Self
-mark_geoshape(): Self
-mark_boxplot(): Self
-mark_errorbar(): Self
-mark_errorband(): Self
 }
 #+end_src
 
@@ -293,13 +313,16 @@ SAVE_IT(year_chart, "year-counts-bar-chart")
 #+begin_src plantuml :file ../files/posts/introduction-to-altair/top-level-mixin.png :exports none
 !theme mars
 
-mixins.ConfigMethodMixin <|-
+mixins.ConfigMethodMixin <|- MarkMethodMixin
 
 class MarkMethodMixin {
 
 + properties(**kwargs): Self
 }
 #+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair/top-level-mixin.png]]
 
 [[img-url:top-level-mixin.png]]
 

@@ -166,7 +166,7 @@ NAVIGATION_ALT_LINKS = {
 }
 
 # Name of the theme to use.
-THEME = "custom"
+THEME = "custom-jinja"
 
 # A theme color. In default themes, it might be displayed by some browsers as
 # the browser UI color (eg. Chrome on Android). Other themes might also use it
@@ -938,7 +938,10 @@ IMAGE_FOLDERS = {'images': 'images'}
 # This list MAY be incomplete since pygments adds styles every now and then.
 # Check with list(pygments.styles.get_all_styles()) in an interpreter.
 #
-# CODE_COLOR_SCHEME = 'default'
+
+# if we provide code.css it creates a conflict unless we set the next variable to None
+# https://github.com/getnikola/nikola/issues/3282#issuecomment-518621576
+CODE_COLOR_SCHEME = None
 
 # FAVICONS contains (name, file, size) tuples.
 # Used to create favicon link like this:
