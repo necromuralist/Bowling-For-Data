@@ -199,18 +199,6 @@ THEME_CONFIG = {
         "navbar_light": True,
     }
 }
-# Config for bootstrap4:
-# THEME_CONFIG = {
-#     DEFAULT_LANG: {
-#         # Use a light navbar with dark text. Defaults to False.
-#         'navbar_light': False,
-#         # Use a custom navbar color. If unset, 'navbar_light' sets text +
-#         # background color. If set, navbar_light controls only background
-#         # color. Supported values: bg-dark, bg-light, bg-primary, bg-secondary,
-#         # bg-success, bg-danger, bg-warning, bg-info, bg-white, bg-transparent.
-#         'navbar_custom_bg': '',
-#     }
-# }
 
 # POSTS and PAGES contains (wildcard, destination, template) tuples.
 # (translatable)
@@ -247,9 +235,9 @@ THEME_CONFIG = {
 #     )
 
 POSTS = (
-    ("posts/*.org", "posts/", "post.tmpl"),
-    ("posts/*.rst", "posts/", "post.tmpl"),
-#    ("posts/*.md", "posts/", "post.tmpl"),
+    ("posts/*.org", "posts", "post.tmpl"),
+    ("posts/*.rst", "posts", "post.tmpl"),
+#    ("posts/*.md", "posts", "post.tmpl"),
 #    ("posts/*.txt", "posts", "post.tmpl"),
 #    ("posts/*.html", "posts", "post.tmpl"),
 )
@@ -739,6 +727,14 @@ GITHUB_COMMIT_SOURCE = False
 #    ".jpg": ["jpegoptim --strip-all -m75 -v %s"],
 # }
 
+FILTERS = {
+    ".html": ["filters.html_tidy_mini"],
+#    ".js": ["filters.closure_compiler"],
+#    ".css": ["filter.yui_compressor"],
+    ".jpg": ["jpegoptim --strip-all -m75 -v %s"],
+    ".png": ["filters.optipng"],
+ }
+
 # Executable for the "yui_compressor" filter (defaults to 'yui-compressor').
 # YUI_COMPRESSOR_EXECUTABLE = 'yui-compressor'
 
@@ -754,7 +750,7 @@ GITHUB_COMMIT_SOURCE = False
 # Executable for the "html_tidy_withconfig", "html_tidy_nowrap",
 # "html_tidy_wrap", "html_tidy_wrap_attr" and "html_tidy_mini" filters
 # (defaults to 'tidy5').
-# HTML_TIDY_EXECUTABLE = 'tidy5'
+HTML_TIDY_EXECUTABLE = 'tidy'
 
 # List of XPath expressions which should be used for finding headers
 # ({hx} is replaced by headers h1 through h6).
@@ -939,9 +935,7 @@ IMAGE_FOLDERS = {'images': 'images'}
 # Check with list(pygments.styles.get_all_styles()) in an interpreter.
 #
 
-# if we provide code.css it creates a conflict unless we set the next variable to None
-# https://github.com/getnikola/nikola/issues/3282#issuecomment-518621576
-CODE_COLOR_SCHEME = None
+# CODE_COLOR_SCHEME = ""
 
 # FAVICONS contains (name, file, size) tuples.
 # Used to create favicon link like this:
@@ -983,14 +977,6 @@ FEED_READ_MORE_LINK = '<p><a href="{link}">{read_more}…</a> ({min_remaining_re
 FEED_LINKS_APPEND_QUERY = False
 
 # A HTML fragment describing the license, for the sidebar.
-# (translatable)
-LICENSE = ""
-# I recommend using the Creative Commons' wizard:
-# https://creativecommons.org/choose/
-# compact
-# LICENSE = """
-# <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
-# """
 
 LICENSE = '''
 <div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under
