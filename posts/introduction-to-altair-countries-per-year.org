@@ -33,7 +33,7 @@ import os
 
 # pypi
 from dotenv import load_dotenv
-from expects import be_true, expect
+from expects import be_true, equal, expect
 from tabulate import tabulate
 
 # monkey
@@ -196,17 +196,30 @@ Here's one of the problems with ~altair~ - it passes along the entire dataset an
 
 I'll convert the chart back to a dictionary to show what I'm saying.
 
-#+begin_src python :results output :exports both
+#+begin_src python :results none
 chart_dictionary = altair_counts_chart.to_dict()
-data = chart_dictionary["datasets"][chart_dictionary["data"]["name"]]
-print("chart_data: {:,} original data: {:,}\n".format(len(data), len(table)))
+#+end_src
+
+It stores the data that was in the original data-frame in a list of dictionaries under the key called "datasets" - each dictionary represents one row in the original data-frame.
+
+#+begin_src python :results output :exports both
+chart_data = chart_dictionary["datasets"][chart_dictionary["data"]["name"]]
+expect(len(chart_data)).to(equal(len(table)))
+
+print("chart_data: {:,} original data: {:,}".format(len(chart_data), len(table)))
+#+end_src
+
+#+RESULTS:
+: chart_data: 2,199 original data: 2,199
+
+Here's the first entry in the chart data.
+
+#+begin_src python :results output :exports both
 pprint(data[0])
 #+end_src
 
 #+RESULTS:
 #+begin_example
-chart_data: 2,199 original data: 2,199
-
 {'Country name': 'Afghanistan',
  'Freedom to make life choices': 0.718,
  'Generosity': 0.168,
@@ -219,6 +232,44 @@ chart_data: 2,199 original data: 2,199
  'Social support': 0.451,
  'year': 2008}
 #+end_example
+
+And here's the first row of the original data-frame.
+
+#+begin_src python :results output :exports both
+print(table.iloc[0])
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Country name                        Afghanistan
+year                                       2008
+Life Ladder                               3.724
+Log GDP per capita                         7.35
+Social support                            0.451
+Healthy life expectancy at birth           50.5
+Freedom to make life choices              0.718
+Generosity                                0.168
+Perceptions of corruption                 0.882
+Positive affect                           0.414
+Negative affect                           0.258
+Name: 0, dtype: object
+#+end_example
+
+By contrast, here's what's in the chart created from the pandas ~value_counts~ object.
+
+#+begin_src python :results output :exports both
+pandas_dictionary = value_counts_chart.to_dict()
+pandas_data = pandas_dictionary["datasets"][pandas_dictionary["data"]["name"]]
+print("Entries in value_counts chart data: {}".format(len(pandas_data)))
+print("\nFirst Row:")
+print(pandas_data[0])
+#+end_src
+
+#+RESULTS:
+: Entries in value_counts chart data: 18
+: 
+: First Row:
+: {'year': 2005, 'count': 27}
 
 There's a project called [[https://vegafusion.io/][vegafusion]] that is supposed to help with reducing the size but it requires that you use a jupyter notebook for interactivity (it uses python to make a jupyter widget or some such) so it won't work for a static site like this one. So when using altair we have to think about what we're doing if the size of the files is going to be a problem. In most cases it probably makes sense to do the transformations in pandas first and then only pass the data to plot to altair.
 
