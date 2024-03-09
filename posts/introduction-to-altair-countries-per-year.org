@@ -27,6 +27,8 @@ These initial imports are supports to make creating this post easier and aren't 
 # python
 from functools import partial
 from pathlib import Path
+from pprint import pprint
+
 import os
 
 # pypi
@@ -147,7 +149,8 @@ value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
     x="{}:N".format(Column.year),
     y="count").properties(height=HEIGHT, width=WIDTH)
 
-SAVE_IT(value_counts_chart, "value-counts-bar-chart")
+VALUE_COUNTS_HTML = "value-counts-bar-chart"
+SAVE_IT(value_counts_chart, VALUE_COUNTS_HTML)
 #+end_src
 
 #+RESULTS:
@@ -164,7 +167,8 @@ altair_counts_chart = altair.Chart(table).mark_bar().encode(
     x="{}:N".format(Column.year),
     y="count()").properties(height=HEIGHT, width=WIDTH)
 
-SAVE_IT(altair_counts_chart, "altair-counts-bar-chart")
+ALTAIR_COUNTS_HTML = "altair-counts-bar-chart"
+SAVE_IT(altair_counts_chart, ALTAIR_COUNTS_HTML)
 #+end_src
 
 #+RESULTS:
@@ -174,7 +178,51 @@ SAVE_IT(altair_counts_chart, "altair-counts-bar-chart")
 </object>
 #+end_export
 
+** Comparing the File Sizes
 
+#+begin_src python :results output :exports both
+HTML_FILE = ".html"
+altair_counts_html = OUTPUT_PATH/(ALTAIR_COUNTS_HTML + HTML_FILE)
+pandas_counts_html = OUTPUT_PATH/(VALUE_COUNTS_HTML + HTML_FILE)
+print("Altair counts(): {:,} bytes".format(altair_counts_html.stat().st_size))
+print("Pandas value_counts: {:,} bytes".format(pandas_counts_html.stat().st_size))
+#+end_src
+
+#+RESULTS:
+: Altair counts(): 685,111 bytes
+: Pandas value_counts: 2,067 bytes
+
+Here's one of the problems with ~altair~ - it passes along the entire dataset and then tells ~vega~ to work with it in the browser. So, in this case it's passing all our happiness data, even though the chart doesn't use any of the columns.
+
+I'll convert the chart back to a dictionary to show what I'm saying.
+
+#+begin_src python :results output :exports both
+chart_dictionary = altair_counts_chart.to_dict()
+data = chart_dictionary["datasets"][chart_dictionary["data"]["name"]]
+print("chart_data: {:,} original data: {:,}\n".format(len(data), len(table)))
+pprint(data[0])
+#+end_src
+
+#+RESULTS:
+#+begin_example
+chart_data: 2,199 original data: 2,199
+
+{'Country name': 'Afghanistan',
+ 'Freedom to make life choices': 0.718,
+ 'Generosity': 0.168,
+ 'Healthy life expectancy at birth': 50.5,
+ 'Life Ladder': 3.724,
+ 'Log GDP per capita': 7.35,
+ 'Negative affect': 0.258,
+ 'Perceptions of corruption': 0.882,
+ 'Positive affect': 0.414,
+ 'Social support': 0.451,
+ 'year': 2008}
+#+end_example
+
+There's a project called [[https://vegafusion.io/][vegafusion]] that is supposed to help with reducing the size but it requires that you use a jupyter notebook for interactivity (it uses python to make a jupyter widget or some such) so it won't work for a static site like this one. So when using altair we have to think about what we're doing if the size of the files is going to be a problem. In most cases it probably makes sense to do the transformations in pandas first and then only pass the data to plot to altair.
+
+See the [[https://altair-viz.github.io/user_guide/large_datasets.html][altair documentation on Large Datasets]] for more information.
 * Links
 ** The Posts In This Series
 
@@ -190,4 +238,5 @@ SAVE_IT(altair_counts_chart, "altair-counts-bar-chart")
 
 ** Altair
 - Layered and Multi-View Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2023 Dec 12]. Available from: https://altair-viz.github.io/user_guide/compound_charts.html
+- Large Datasets — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 8]. Available from: https://altair-viz.github.io/user_guide/large_datasets.html
 
