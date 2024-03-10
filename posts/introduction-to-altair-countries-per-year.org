@@ -33,7 +33,7 @@ import os
 
 # pypi
 from dotenv import load_dotenv
-from expects import be_true, equal, expect
+from expects import be, be_true, equal, expect
 from tabulate import tabulate
 
 # monkey
@@ -274,6 +274,240 @@ print(pandas_data[0])
 There's a project called [[https://vegafusion.io/][vegafusion]] that is supposed to help with reducing the size but it requires that you use a jupyter notebook for interactivity (it uses python to make a jupyter widget or some such) so it won't work for a static site like this one. So when using altair we have to think about what we're doing if the size of the files is going to be a problem. In most cases it probably makes sense to do the transformations in pandas first and then only pass the data to plot to altair.
 
 See the [[https://altair-viz.github.io/user_guide/large_datasets.html][altair documentation on Large Datasets]] for more information.
+* A Chart, Part By Part
+
+** Altair's Chart
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(year_counts)
+print(type(chart))
+expect(chart.data).to(be(year_counts))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+The ~Chart~ class is defined in ~altair.vegalite.v5.api~. This is its docstring description:
+
+#+begin_quote
+Create a basic Altair/Vega-Lite chart.
+
+
+Although it is possible to set all Chart properties as constructor attributes,
+it is more idiomatic to use methods such as ~mark_point()~, ~encode()~,
+~transform_filter()~, ~properties()~, etc. See Altair's documentation
+for details and examples: http://altair-viz.github.io/.
+#+end_quote
+
+The attributes set by the ~Chart~ class' constructor (as opposed to being passed to its parent classes) are:
+
+ - data
+ - encoding
+ - mark
+ - width
+ - height
+
+By default they're set to ~Undefined~ which is an altair-defined object (see ~altair.utils.schemapi~), and as noted, you don't normally set the attributes using the constructor (other than ~data~ which isn't mentioned in the docstring but appears to be passed to the ~Chart~ constructor by convention).
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/chart.png :exports none
+!theme mars
+
+class Chart {
+ + data: DataFrameLike
+ + encoding: core.FacetedEncoding
+ + mark: str
+ + width: int
+ + height: int
+
+ + from_dict():  core.SchemaBase
+ + to_dict(): dict
+ + transformed_data(): DataFrameLike
+ + add_params(): Chart
+ + interactive(): Chart
+}
+
+TopLevelMixin <|- Chart
+_EncodingMixin <|- Chart
+mixin.MarkMethodMixin <|- Chart
+core.TopLevelUnitSpec <|- Chart
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/chart.png]]
+
+[[img-url:chart.png]]
+
+** A Bar Chart
+
+#+begin_src python :results output :exports both
+bar_chart = chart.mark_bar()
+print(type(bar_chart))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/mark-mixin.png :exports none
+!theme mars
+
+class MarkMethodMixin {
+
+mark_arc(): Self
+mark_area(): Self
+mark_bar(): Self
+mark_boxplot(): Self
+mark_circle(): Self
+mark_errorband(): Self
+mark_errorbar(): Self
+mark_geoshape(): Self
+mark_image(): Self
+mark_line(): Self
+mark_point(): Self
+mark_rect(): Self
+mark_rule(): Self
+mark_square(): Self
+mark_text(): Self
+mark_tick(): Self
+mark_trail(): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/mark-mixin.png]]
+
+[[img-url:mark-mixin.png][MarkMixin Class]]
+
+Looking in the ~mark_bar~ method, there's a lot of arguments you could pass to it, but fundamentally all it's really doing is setting the ~mark~ attribute to ~bar~.
+
+#+begin_src python :results output :exports both
+print("Original Chart mark: '{}'".format(chart.mark))
+print("Bar Chart mark: '{}'".format(bar_chart.mark))
+#+end_src
+
+#+RESULTS:
+: Original Chart mark: 'Undefined'
+: Bar Chart mark: 'bar'
+
+** Encoded
+
+#+begin_src python :results output :exports both
+encoded = bar_chart.encode(
+    x="{}:N".format(Column.year),
+    y="count")
+
+print(type(encoded))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+*** TopLevelUnitSpec
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/top-level-unit-spec.png :exports none
+!theme mars
+
+SchemaBase <|- VegaLiteSchema
+VegaLiteSchema <|- TopLevelSpec
+TopLevelSpec <|-TopLevelUnitSpec
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/top-level-unit-spec.png]]
+
+[[img-url:top-level-unit-spec.png]]
+
+Only the top-most parent (~SchemaBase~) has a method of interest here.
+
+*** SchemaBase
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/schema-base.png :exports none
+!theme mars
+
+class SchemaBase {
+
++ copy(): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/schema-base.png]]
+
+[[img-url:schema-base.png]]
+
+There are many more methods in ~altair.utils.schemapi.SchemaBase~ but I'm highlighting ~copy~ here because it gets used quite a bit by the other classes but is defined in this somewhat obscure place. The behavior is what you'd expect so I don't see a need to go over it, but it's one of those mystery methods that just pops up when you use deep inheritance like this that makes you wonder what's going on so I'll document it here, for now.
+
+**note:** The details of the code probably shouldn't go into the introduction-introduction. Maybe put this stuff further down or in another post.
+
+*** _EncodingMixin
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/encoding-mixin.png :exports none
+!theme mars
+
+class _EncodingMixin {
+  encode(*args, **kwargs): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/encoding-mixin.png]]
+
+[[img-url:encoding-mixin.png]]
+
+The ~encoding~ method takes in whatever combination of positional and keyword arguments you pass into it and uses them along with the values that are already set in the Chart's ~encoding~ attribute to update the ~encoding~ before returning the chart (a copy so the original chart isn't changed).
+
+The ~encoding~ attribute is an instance of the ~altair.vegalite.v5.schema.FacetedEncoding~ class.
+
+** Properties
+
+#+begin_src python :results output :exports both
+propertied = encoded.properties(height=HEIGHT, width=WIDTH)
+print(type(propertied))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/top-level-mixin.png :exports none
+!theme mars
+
+class TopLevelMixin {
+  to_dict(validate, *, format, ignore, context): dict
+  to_json(validate, indent, sort_keys, *, format, ignore, context, **kwargs) : str
+  to_html(base_url, output_div, embed_options, json_kwds, fullhtml, requirejs, inline, **kwargs): str
+  to_url(*, fullscreen): str
+
+  properties(**kwargs) : Self
+  save(fp, format, override_data_transformer, scale_factor, mode, vegalite_version, vega_version, vegaembed_version, embed_options, json_kwds, webdriver, engine, inline, **kwargs): None
+}
+
+mixins.ConfigMethodMixin <|-- TopLevelMixin
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/top-level-mixin.png]]
+
+[[img-url:top-level-mixin.png]]
+
+#+begin_quote
+**Note:** This is a huge class with more methods than I'm showing here. The only ones we've encountered so far are ~to_dict~, ~save~ and ~properties~.
+#+end_quote
+
+The first thing to note about the ~properties~ method is that it doesn't define any arguments, it takes in any keyword arguments (and only keyword arguments, no positional arguments) and values for the arguments. Then it makes a copy of the chart, validates the arguments (unless it's the ~data~) and sets it as an attribute of the copy. So, since we passed in ~height~ and ~width~ to the ~properties~ method, we get back a copy of our bar chart with the ~height~ and ~width~ set on the copy.
+
+#+begin_src python :results output :exports both
+print(propertied.mark)
+print(propertied.width)
+print(propertied.height)
+expect(propertied.mark).to(equal("bar"))
+expect(propertied.width).to(equal(WIDTH))
+expect(propertied.height).to(equal(HEIGHT))
+#+end_src
+
+#+RESULTS:
+: bar
+: 800
+: 600
+
 * Links
 ** The Posts In This Series
 
