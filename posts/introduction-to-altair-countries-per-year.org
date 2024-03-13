@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-76c5ec68-5d1a-42ef-884d-8579ffd0de57-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-8eee42ba-b056-4500-aa70-5bbe84db530c-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -29,9 +29,12 @@ from functools import partial
 from pathlib import Path
 from pprint import pprint
 
+import json
 import os
+import re
 
 # pypi
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from expects import be, be_true, equal, expect
 from tabulate import tabulate
@@ -57,6 +60,8 @@ OUTPUT_PATH = output_path(SLUG)
 
 HEIGHT, WIDTH = 600, 800
 SAVE_IT = partial(save_chart, output_path=OUTPUT_PATH, height=HEIGHT + 100)
+
+SOUPER = partial(BeautifulSoup, features="lxml")
 #+end_src
 
 This is to make printing out a pandas dataframe as a table a little nicer.
@@ -116,11 +121,7 @@ For this initial post I'll only use the year, but
 
 #+begin_src python :results none
 class Column:
-    country = "Country name"
     year = "year"
-    happiness = "Life Ladder"
-    gdp = "Log GDP per capita"
-    generosity = "Generosity"
 #+end_src
 
 * Year
@@ -149,8 +150,9 @@ value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
     x="{}:N".format(Column.year),
     y="count").properties(height=HEIGHT, width=WIDTH)
 
-VALUE_COUNTS_HTML = "value-counts-bar-chart"
-SAVE_IT(value_counts_chart, VALUE_COUNTS_HTML)
+VALUE_COUNTS_NAME = "value-counts-bar-chart"
+VALUE_COUNTS_HTML = VALUE_COUNTS_NAME + ".html"
+SAVE_IT(value_counts_chart, VALUE_COUNTS_NAME)
 #+end_src
 
 #+RESULTS:
@@ -167,8 +169,9 @@ altair_counts_chart = altair.Chart(table).mark_bar().encode(
     x="{}:N".format(Column.year),
     y="count()").properties(height=HEIGHT, width=WIDTH)
 
-ALTAIR_COUNTS_HTML = "altair-counts-bar-chart"
-SAVE_IT(altair_counts_chart, ALTAIR_COUNTS_HTML)
+ALTAIR_COUNTS_NAME = "altair-counts-bar-chart"
+ALTAIR_COUNTS_HTML = ALTAIR_COUNTS_NAME + ".html"
+SAVE_IT(altair_counts_chart, ALTAIR_COUNTS_NAME)
 #+end_src
 
 #+RESULTS:
@@ -181,9 +184,9 @@ SAVE_IT(altair_counts_chart, ALTAIR_COUNTS_HTML)
 ** Comparing the File Sizes
 
 #+begin_src python :results output :exports both
-HTML_FILE = ".html"
-altair_counts_html = OUTPUT_PATH/(ALTAIR_COUNTS_HTML + HTML_FILE)
-pandas_counts_html = OUTPUT_PATH/(VALUE_COUNTS_HTML + HTML_FILE)
+
+altair_counts_html = OUTPUT_PATH/(ALTAIR_COUNTS_HTML)
+pandas_counts_html = OUTPUT_PATH/(VALUE_COUNTS_HTML)
 print("Altair counts(): {:,} bytes".format(altair_counts_html.stat().st_size))
 print("Pandas value_counts: {:,} bytes".format(pandas_counts_html.stat().st_size))
 #+end_src
@@ -194,32 +197,91 @@ print("Pandas value_counts: {:,} bytes".format(pandas_counts_html.stat().st_size
 
 Here's one of the problems with ~altair~ - it passes along the entire dataset and then tells ~vega~ to work with it in the browser. So, in this case it's passing all our happiness data, even though the chart doesn't use any of the columns.
 
-I'll convert the chart back to a dictionary to show what I'm saying.
-
 #+begin_src python :results none
-chart_dictionary = altair_counts_chart.to_dict()
+with altair_counts_html.open() as reader:
+    altair_soup = SOUPER(reader)
+
+with pandas_counts_html.open() as reader:
+    pandas_soup = SOUPER(reader)
 #+end_src
 
-It stores the data that was in the original data-frame in a list of dictionaries under the key called "datasets" - each dictionary represents one row in the original data-frame.
+#+begin_src python :results none
+def data_printer(soup: BeautifulSoup, index:int=0) -> None:
+    """Gets the data from the soup and prints the entry
+
+    Params:
+
+     - soup: BeautifulSoup with the HTML for the chart
+     - index: which data row to show
+    """
+    EVERYTHING = ".*"
+    EXTRA_BRACE = "(?=})"
+    
+    DATASETS_EXPRESSION = "datasets" + EVERYTHING + "}}"
+    DATASET_EXPRESSION = "{" + EVERYTHING + "}" + EXTRA_BRACE
+
+    script = soup.find_all("script")[-1].string
+    dataset = re.search(DATASETS_EXPRESSION, script).group()
+    dataset = re.search(DATASET_EXPRESSION, dataset).group()
+    json_dataset = json.loads(dataset)
+    data_key = list(json_dataset.keys())[0]
+    data = json_dataset[data_key]
+    
+    print("'dataset' has {:,} data entries\n".format(len(data)))
+    print("Entry {}:\n".format(index))
+    pprint(data[index])
+    return
+#+end_src
 
 #+begin_src python :results output :exports both
-chart_data = chart_dictionary["datasets"][chart_dictionary["data"]["name"]]
-expect(len(chart_data)).to(equal(len(table)))
-
-print("chart_data: {:,} original data: {:,}".format(len(chart_data), len(table)))
+data_printer(pandas_soup)
 #+end_src
 
 #+RESULTS:
-: chart_data: 2,199 original data: 2,199
+: 'dataset' has 18 data entries
+: 
+: Entry 0:
+: 
+: {'count': 27, 'year': 2005}
 
-Here's the first entry in the chart data.
+#+begin_src python :results none
+def frame_print(frame: pandas.DataFrame, index: int=0) -> None:
+    """print length and one row of frame
+
+    Params:
+
+     - frame: data-frame to query
+     - index: index of row to print
+    """
+    print("Frame has {:,} rows.".format(len(frame)))
+    print("\nRow {}:\n".format(index))
+    print(frame.iloc[0])
+    return
+#+end_src
 
 #+begin_src python :results output :exports both
-pprint(data[0])
+frame_print(year_counts)
+#+end_src
+
+#+RESULTS:
+: Frame has 18 rows.
+: 
+: Row 0:
+: 
+: year     2005
+: count      27
+: Name: 17, dtype: int64
+
+#+begin_src python :results output :exports both
+data_printer(altair_soup)
 #+end_src
 
 #+RESULTS:
 #+begin_example
+'dataset' has 2,199 data entries
+
+Entry 0:
+
 {'Country name': 'Afghanistan',
  'Freedom to make life choices': 0.718,
  'Generosity': 0.168,
@@ -233,14 +295,16 @@ pprint(data[0])
  'year': 2008}
 #+end_example
 
-And here's the first row of the original data-frame.
-
 #+begin_src python :results output :exports both
-print(table.iloc[0])
+frame_print(table)
 #+end_src
 
 #+RESULTS:
 #+begin_example
+Frame has 2,199 rows.
+
+Row 0:
+
 Country name                        Afghanistan
 year                                       2008
 Life Ladder                               3.724
@@ -254,22 +318,6 @@ Positive affect                           0.414
 Negative affect                           0.258
 Name: 0, dtype: object
 #+end_example
-
-By contrast, here's what's in the chart created from the pandas ~value_counts~ object.
-
-#+begin_src python :results output :exports both
-pandas_dictionary = value_counts_chart.to_dict()
-pandas_data = pandas_dictionary["datasets"][pandas_dictionary["data"]["name"]]
-print("Entries in value_counts chart data: {}".format(len(pandas_data)))
-print("\nFirst Row:")
-print(pandas_data[0])
-#+end_src
-
-#+RESULTS:
-: Entries in value_counts chart data: 18
-: 
-: First Row:
-: {'year': 2005, 'count': 27}
 
 There's a project called [[https://vegafusion.io/][vegafusion]] that is supposed to help with reducing the size but it requires that you use a jupyter notebook for interactivity (it uses python to make a jupyter widget or some such) so it won't work for a static site like this one. So when using altair we have to think about what we're doing if the size of the files is going to be a problem. In most cases it probably makes sense to do the transformations in pandas first and then only pass the data to plot to altair.
 
