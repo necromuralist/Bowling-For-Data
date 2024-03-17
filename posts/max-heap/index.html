@@ -1,223 +1,157 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="A max-heap.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="A max-heap." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>Heap! | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/max-heap/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../quicksort/index.html" title="Quicksort" type="text/html">
-<link rel="next" href="../the-selection-problem/index.html" title="The Selection Problem" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="Heap!">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/max-heap/index.html">
-<meta property="og:description" content="A max-heap.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-02-08T13:40:58-08:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="data structures">
-<meta property="article:tag" content="heap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/max-heap/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../quicksort/index.html" rel="prev" title="Quicksort" type="text/html">
+<link href="../the-selection-problem/index.html" rel="next" title="The Selection Problem" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Heap!" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/max-heap/index.html" property="og:url">
+<meta content="A max-heap." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-02-08T13:40:58-08:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="data structures" property="article:tag">
+<meta content="heap" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Heap!</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-02-08T13:40:58-08:00" itemprop="datePublished" title="2022-02-08 13:40">2022-02-08 13:40</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Heap!</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-02-08T13:40:58-08:00" itemprop="datePublished" title="2022-02-08 13:40">2022-02-08 13:40</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li>
-<a href="index.html#org7e87c49">Beginning</a>
+<li><a href="index.html#orgfc176b7">Beginning</a>
 <ul>
-<li><a href="index.html#orgbf2bd26">What's a Heap?</a></li>
-<li>
-<a href="index.html#org06813d6">Some Functions</a>
+<li><a href="index.html#orgab9fc42">What's a Heap?</a></li>
+<li><a href="index.html#org4fe497c">Some Functions</a>
 <ul>
-<li><a href="index.html#org400c9c3">Some Requirements</a></li>
-<li><a href="index.html#orgc2fdb69">Heap Properties</a></li>
+<li><a href="index.html#org4dfba6c">Some Requirements</a></li>
+<li><a href="index.html#org9440e63">Heap Properties</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>
-<a href="index.html#org0c4cc42">The Max Heap</a>
+<li><a href="index.html#org58c6f42">The Max Heap</a>
 <ul>
-<li><a href="index.html#orgd644011">The Imports</a></li>
-<li>
-<a href="index.html#org42482ea">The Class</a>
+<li><a href="index.html#orgbf60578">The Imports</a></li>
+<li><a href="index.html#orge34d1a1">The Class</a>
 <ul>
-<li><a href="index.html#orgba0aa39">Imports</a></li>
-<li><a href="index.html#org872e7f4">The Definition</a></li>
-<li><a href="index.html#orgfaefdf3">From List</a></li>
-<li><a href="index.html#org3072c3a">The Heap Size</a></li>
-<li><a href="index.html#org271b881">Length</a></li>
-<li><a href="index.html#org5152b34">Maximum</a></li>
-<li><a href="index.html#orgcbd2f61">Finding the Parent, Left-Child, and Right-Child of a Node</a></li>
-<li><a href="index.html#orgde66da8">Heapify A Sub Tree</a></li>
-<li><a href="index.html#org75623d2">The Call</a></li>
-<li><a href="index.html#org072c82e">Increase a Key</a></li>
-<li><a href="index.html#org7539e9f">Insert a Value</a></li>
-<li><a href="index.html#orgecd13f4">Check the Heap Property</a></li>
-<li><a href="index.html#orgfe7ab02">Get and Set Item</a></li>
+<li><a href="index.html#orgde1117d">Imports</a></li>
+<li><a href="index.html#orgf38e1fb">The Definition</a></li>
+<li><a href="index.html#org433877d">From List</a></li>
+<li><a href="index.html#org9e674a3">The Heap Size</a></li>
+<li><a href="index.html#org4a83d3b">Length</a></li>
+<li><a href="index.html#org612e0da">Maximum</a></li>
+<li><a href="index.html#org1268cea">Finding the Parent, Left-Child, and Right-Child of a Node</a></li>
+<li><a href="index.html#org3742565">Heapify A Sub Tree</a></li>
+<li><a href="index.html#orgdc42242">The Call</a></li>
+<li><a href="index.html#org768065f">Increase a Key</a></li>
+<li><a href="index.html#orgeccb8cc">Insert a Value</a></li>
+<li><a href="index.html#org53d9d07">Check the Heap Property</a></li>
+<li><a href="index.html#org2b66a44">Get and Set Item</a></li>
 </ul>
 </li>
-<li><a href="index.html#org069a793">The Tests</a></li>
+<li><a href="index.html#org38fffe8">The Tests</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org405045e">Heap Sort</a>
+<li><a href="index.html#org1e99c6c">Heap Sort</a>
 <ul>
-<li><a href="index.html#orgc9806be">Imports</a></li>
-<li><a href="index.html#org5963304">The Heap Sort Class</a></li>
-<li><a href="index.html#org431d5fb">The Tests</a></li>
+<li><a href="index.html#orgdcf94b0">Imports</a></li>
+<li><a href="index.html#org6032aca">The Heap Sort Class</a></li>
+<li><a href="index.html#orgb01712f">The Tests</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org9089801">A Priority Queue</a>
+<li><a href="index.html#org9794151">A Priority Queue</a>
 <ul>
-<li><a href="index.html#org879a7e4">The Tests</a></li>
+<li><a href="index.html#org61e8578">The Tests</a></li>
 </ul>
 </li>
-<li><a href="index.html#org6b86413">Plotting</a></li>
-<li><a href="index.html#orge5c5804">End</a></li>
+<li><a href="index.html#org5ffdff7">Plotting</a></li>
+<li><a href="index.html#orgb451d50">End</a></li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-org7e87c49" class="outline-2">
-<h2 id="org7e87c49">Beginning</h2>
-<div class="outline-text-2" id="text-org7e87c49">
-</div>
-<div id="outline-container-orgbf2bd26" class="outline-3">
-<h3 id="orgbf2bd26">What's a Heap?</h3>
-<div class="outline-text-3" id="text-orgbf2bd26">
-<p>
-This is a post that looks at <a href="https://en.wikipedia.org/wiki/Heap_(data_structure)">Heaps</a>. According to <a href="../clrs/">Introduction To Algorithms (CLRS)</a>, a heap is an array that can be thought of as a nearly complete binary tree which satisfies the <b><b>Heap Property</b></b>. There are actually two heap properties, one for a <b><b>Max Heap</b></b> and one for a <b><b>Min Heap</b></b>.
-</p>
-
+<div class="outline-2" id="outline-container-orgfc176b7">
+<h2 id="orgfc176b7">Beginning</h2>
+<div class="outline-text-2" id="text-orgfc176b7"></div>
+<div class="outline-3" id="outline-container-orgab9fc42">
+<h3 id="orgab9fc42">What's a Heap?</h3>
+<div class="outline-text-3" id="text-orgab9fc42">
+<p>This is a post that looks at <a href="https://en.wikipedia.org/wiki/Heap_(data_structure)">Heaps</a>. According to <a href="../clrs/index.html">Introduction To Algorithms (CLRS)</a>, a heap is an array that can be thought of as a nearly complete binary tree which satisfies the <b>Heap Property</b>. There are actually two heap properties, one for a <b>Max Heap</b> and one for a <b>Min Heap</b>.</p>
 <ul class="org-ul">
-<li>
-<b><b>Max-Heap Property</b></b>: \(A[Parent(i)]) \ge A[i]\)</li>
-<li>
-<b><b>Min-Heap Property</b></b>: \(A[Parent(i)]) \le A[i]\)</li>
+<li><b>Max-Heap Property</b>: \(A[Parent(i)]) \ge A[i]\)</li>
+<li><b>Min-Heap Property</b>: \(A[Parent(i)]) \le A[i]\)</li>
 </ul>
-<p>
-Which means that for any node in a MaxHeap, its value is greater than or equal to that of any of its children, and for any node in a MinHeap, the node's value is less than or equal to its children.
-</p>
-
-<p>
-The heap has (at least) two attributes.
-</p>
-
+<p>Which means that for any node in a MaxHeap, its value is greater than or equal to that of any of its children, and for any node in a MinHeap, the node's value is less than or equal to its children.</p>
+<p>The heap has (at least) two attributes.</p>
 <ul class="org-ul">
-<li>
-<i>A.length</i>: the number of elements in the array</li>
-<li>
-<i>A.heap-size</i>: the number of elements in the heap (not all elements in the array need to be in the heap)</li>
+<li><i>A.length</i>: the number of elements in the array</li>
+<li><i>A.heap-size</i>: the number of elements in the heap (not all elements in the array need to be in the heap)</li>
 </ul>
-<p>
-The first element in the heap is the root (for the Max-Heap it is the largest element, for the Min-Heap it is the smallest).
-</p>
+<p>The first element in the heap is the root (for the Max-Heap it is the largest element, for the Min-Heap it is the smallest).</p>
 </div>
 </div>
-
-<div id="outline-container-org06813d6" class="outline-3">
-<h3 id="org06813d6">Some Functions</h3>
-<div class="outline-text-3" id="text-org06813d6">
-<p>
-For any Node in the Heap located at <i>i</i>:
-</p>
-
+<div class="outline-3" id="outline-container-org4fe497c">
+<h3 id="org4fe497c">Some Functions</h3>
+<div class="outline-text-3" id="text-org4fe497c">
+<p>For any Node in the Heap located at <i>i</i>:</p>
 <pre id="parent" style="display:hidden;">
 \begin{algorithm}
 \caption{Parent}
@@ -230,7 +164,6 @@ For any Node in the Heap located at <i>i</i>:
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
 <pre id="left" style="display:hidden;">
 \begin{algorithm}
 \caption{Left}
@@ -243,7 +176,6 @@ For any Node in the Heap located at <i>i</i>:
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
 <pre id="right" style="display:hidden;">
 \begin{algorithm}
 \caption{Right}
@@ -256,37 +188,23 @@ For any Node in the Heap located at <i>i</i>:
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<p>
-These Functions show the relationship between the location of a node and its children in the array that makes up the heap.
-</p>
+<p>These Functions show the relationship between the location of a node and its children in the array that makes up the heap.</p>
 </div>
-
-<div id="outline-container-org400c9c3" class="outline-4">
-<h4 id="org400c9c3">Some Requirements</h4>
-<div class="outline-text-4" id="text-org400c9c3">
-<p>
-There are also two requirements:
-</p>
-
+<div class="outline-4" id="outline-container-org4dfba6c">
+<h4 id="org4dfba6c">Some Requirements</h4>
+<div class="outline-text-4" id="text-org4dfba6c">
+<p>There are also two requirements:</p>
 <ul class="org-ul">
-<li>
-<b><b>Shape Requirement</b></b>: All levels but the last have to be complete (only the rightmost leaves can be incomplete)</li>
-<li>
-<b><b>Dominance Requirement</b></b>: Every node is greater than or equal to its children (in the Max-Heap, less than or equal for the Min-Heap)</li>
+<li><b>Shape Requirement</b>: All levels but the last have to be complete (only the rightmost leaves can be incomplete)</li>
+<li><b>Dominance Requirement</b>: Every node is greater than or equal to its children (in the Max-Heap, less than or equal for the Min-Heap)</li>
 </ul>
-<p>
-That Dominance Requirement is also covered by the Heap Property.
-</p>
+<p>That Dominance Requirement is also covered by the Heap Property.</p>
 </div>
 </div>
-<div id="outline-container-orgc2fdb69" class="outline-4">
-<h4 id="orgc2fdb69">Heap Properties</h4>
-<div class="outline-text-4" id="text-orgc2fdb69">
-<p>
-These are from <a href="../itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a>.
-</p>
-
+<div class="outline-4" id="outline-container-org9440e63">
+<h4 id="org9440e63">Heap Properties</h4>
+<div class="outline-text-4" id="text-org9440e63">
+<p>These are from <a href="../itdaa/index.html">Introduction to the Design & Analysis of Algorithms (Levitin)</a>.</p>
 <ol class="org-ol">
 <li>There exists exactly one essentially complete binary tree with <i>n</i> nodes. It's a binary tree so its height is \(\lfloor \log_2 n\rfloor\).</li>
 <li>The root of a (Max) Heap always has the largest element.</li>
@@ -299,31 +217,21 @@ These are from <a href="../itdaa/">Introduction to the Design &amp; Analysis of 
 </ul>
 </li>
 </ol>
-<p>
-Property four is what was defined in the functions up above. Levitin also gives a slightly different variation on stating the heap property.
-</p>
-
-<p>
-\[
-H[i] \ge \max{H[2i], H[2i + 1]} \textrm{ for } i= 1, \ldots, \lfloor \frac{n}{2} \rfloor.
-\]
-</p>
-
-<p>
-This is sort of an inversion of the Max-Heap Property stated above. While the Max-Heap Property was given as every node is less than or equal to its parent, this says that every parent is greater than or equal to its children.
-</p>
+<p>Property four is what was defined in the functions up above. Levitin also gives a slightly different variation on stating the heap property.</p>
+<p>\[ H[i] \ge \max{H[2i], H[2i + 1]} \textrm{ for } i= 1, \ldots, \lfloor \frac{n}{2} \rfloor. \]</p>
+<p>This is sort of an inversion of the Max-Heap Property stated above. While the Max-Heap Property was given as every node is less than or equal to its parent, this says that every parent is greater than or equal to its children.</p>
 </div>
 </div>
 </div>
 </div>
-<div id="outline-container-org0c4cc42" class="outline-2">
-<h2 id="org0c4cc42">The Max Heap</h2>
-<div class="outline-text-2" id="text-org0c4cc42">
-</div>
-<div id="outline-container-orgd644011" class="outline-3">
-<h3 id="orgd644011">The Imports</h3>
-<div class="outline-text-3" id="text-orgd644011">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<div class="outline-2" id="outline-container-org58c6f42">
+<h2 id="org58c6f42">The Max Heap</h2>
+<div class="outline-text-2" id="text-org58c6f42"></div>
+<div class="outline-3" id="outline-container-orgbf60578">
+<h3 id="orgbf60578">The Imports</h3>
+<div class="outline-text-3" id="text-orgbf60578">
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span>
@@ -338,35 +246,32 @@ This is sort of an inversion of the Max-Heap Property stated above. While the Ma
 
 <span class="kn">from</span> <span class="nn">graeae</span> <span class="kn">import</span> <span class="n">EmbedHoloviews</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"max-heap"</span>
+<div class="highlight">
+<pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"max-heap"</span>
 <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
 <span class="n">Embed</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">EmbedHoloviews</span><span class="p">,</span> <span class="n">folder_path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org42482ea" class="outline-3">
-<h3 id="org42482ea">The Class</h3>
-<div class="outline-text-3" id="text-org42482ea">
-</div>
-<div id="outline-container-orgba0aa39" class="outline-4">
-<h4 id="orgba0aa39">Imports</h4>
-<div class="outline-text-4" id="text-orgba0aa39">
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<div class="outline-3" id="outline-container-orge34d1a1">
+<h3 id="orge34d1a1">The Class</h3>
+<div class="outline-text-3" id="text-orge34d1a1"></div>
+<div class="outline-4" id="outline-container-orgde1117d">
+<h4 id="orgde1117d">Imports</h4>
+<div class="outline-text-4" id="text-orgde1117d">
+<div class="highlight">
+<pre><span></span><span class="c1"># pypi</span>
 <span class="c1"># https://www.attrs.org/en/stable/index.html</span>
 <span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org872e7f4" class="outline-4">
-<h4 id="org872e7f4">The Definition</h4>
-<div class="outline-text-4" id="text-org872e7f4">
-<p>
-Besides declaring the class definition, the MaxHeap will hold some constants to hopefully make the code easier to read.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@define</span>
+<div class="outline-4" id="outline-container-orgf38e1fb">
+<h4 id="orgf38e1fb">The Definition</h4>
+<div class="outline-text-4" id="text-orgf38e1fb">
+<p>Besides declaring the class definition, the MaxHeap will hold some constants to hopefully make the code easier to read.</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@define</span>
 <span class="k">class</span> <span class="nc">MaxHeap</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Build and maintain a max-heap</span>
 
@@ -383,15 +288,12 @@ Besides declaring the class definition, the MaxHeap will hold some constants to 
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgfaefdf3" class="outline-4">
-<h4 id="orgfaefdf3">From List</h4>
-<div class="outline-text-4" id="text-orgfaefdf3">
-<p>
-This is a class method to create the list for the heap. The calculations for the locations in the array of parent and child nodes is easier if we have a 1-based list so I'll pad the list being passed in. Additionally, I'll set the first value to \(\infty\) so that the Heap Property will pass for the root node without needing any special consideration for what its parent is.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@classmethod</span>
+<div class="outline-4" id="outline-container-org433877d">
+<h4 id="org433877d">From List</h4>
+<div class="outline-text-4" id="text-org433877d">
+<p>This is a class method to create the list for the heap. The calculations for the locations in the array of parent and child nodes is easier if we have a 1-based list so I'll pad the list being passed in. Additionally, I'll set the first value to \(\infty\) so that the Heap Property will pass for the root node without needing any special consideration for what its parent is.</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">from_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">heap</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Builds a max-heap instance from the starter list</span>
 
@@ -405,19 +307,16 @@ This is a class method to create the list for the heap. The calculations for the
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org3072c3a" class="outline-4">
-<h4 id="org3072c3a">The Heap Size</h4>
-<div class="outline-text-4" id="text-org3072c3a">
-<p>
-Since we padded the list holding the heap the length of the list will never be the same as the number of nodes in the heap. Additionally we'll sometimes manipulate things so things that were in the heap are later excluded but still in the list so the <code>size</code> property will help us to keep track of how big we think our heap is.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-org9e674a3">
+<h4 id="org9e674a3">The Heap Size</h4>
+<div class="outline-text-4" id="text-org9e674a3">
+<p>Since we padded the list holding the heap the length of the list will never be the same as the number of nodes in the heap. Additionally we'll sometimes manipulate things so things that were in the heap are later excluded but still in the list so the <code>size</code> property will help us to keep track of how big we think our heap is.</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The size of the max heap"""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span>
 
 <span class="nd">@size</span><span class="o">.</span><span class="n">setter</span>
@@ -436,19 +335,13 @@ Since we padded the list holding the heap the length of the list will never be t
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org271b881" class="outline-4">
-<h4 id="org271b881">Length</h4>
-<div class="outline-text-4" id="text-org271b881">
-<p>
-This is the length of the array, not necessarily of the heap. This one's a little tricky, since the padding throws it off by one it would seem that it should be lowered by one, but if you use it to figure out the last index that will mess it up a little. Since we already have the size for the number of nodes I'll just pass the length of the list on and see what happens.
-</p>
-
-<p>
-I was debating whether to use <code>__len__</code> but I decided that this is really an internal measure and <code>size</code> is meant to be the attribute to use. I'm mostly keeping this around so that it matches the CLRS attributes.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-org4a83d3b">
+<h4 id="org4a83d3b">Length</h4>
+<div class="outline-text-4" id="text-org4a83d3b">
+<p>This is the length of the array, not necessarily of the heap. This one's a little tricky, since the padding throws it off by one it would seem that it should be lowered by one, but if you use it to figure out the last index that will mess it up a little. Since we already have the size for the number of nodes I'll just pass the length of the list on and see what happens.</p>
+<p>I was debating whether to use <code>__len__</code> but I decided that this is really an internal measure and <code>size</code> is meant to be the attribute to use. I'm mostly keeping this around so that it matches the CLRS attributes.</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The size of the array for the heap</span>
 
@@ -459,28 +352,24 @@ I was debating whether to use <code>__len__</code> but I decided that this is re
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org5152b34" class="outline-4">
-<h4 id="org5152b34">Maximum</h4>
-<div class="outline-text-4" id="text-org5152b34">
-<p>
-Since this is a max-heap the largest element is in the root, this just makes getting it more explicit.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-org612e0da">
+<h4 id="org612e0da">Maximum</h4>
+<div class="outline-text-4" id="text-org612e0da">
+<p>Since this is a max-heap the largest element is in the root, this just makes getting it more explicit.</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The value in the root node"""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ROOT_NODE</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgcbd2f61" class="outline-4">
-<h4 id="orgcbd2f61">Finding the Parent, Left-Child, and Right-Child of a Node</h4>
-<div class="outline-text-4" id="text-orgcbd2f61">
-<p>
-These are the implementations of the functions at the start of the post.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-org1268cea">
+<h4 id="org1268cea">Finding the Parent, Left-Child, and Right-Child of a Node</h4>
+<div class="outline-text-4" id="text-org1268cea">
+<p>These are the implementations of the functions at the start of the post.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the parent of a node</span>
 
 <span class="sd">    Args:</span>
@@ -491,8 +380,8 @@ These are the implementations of the functions at the start of the post.
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">node</span><span class="o">//</span><span class="mi">2</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">left_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">left_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the left child of a parent</span>
 
 <span class="sd">    Args:</span>
@@ -503,8 +392,8 @@ These are the implementations of the functions at the start of the post.
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">parent</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">right_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">right_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the right child of a parent</span>
 
 <span class="sd">    Args:</span>
@@ -517,15 +406,12 @@ These are the implementations of the functions at the start of the post.
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgde66da8" class="outline-4">
-<h4 id="orgde66da8">Heapify A Sub Tree</h4>
-<div class="outline-text-4" id="text-orgde66da8">
-<p>
-CLRS just calls this MaxHeapify. But then the bottoms-up heapification of the tree seemed more like it should be called heapify so I called it <code>heapify_subtree</code> to note that it starts at a specific node which might not be the root.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">heapify_subtree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="outline-4" id="outline-container-org3742565">
+<h4 id="org3742565">Heapify A Sub Tree</h4>
+<div class="outline-text-4" id="text-org3742565">
+<p>CLRS just calls this MaxHeapify. But then the bottoms-up heapification of the tree seemed more like it should be called heapify so I called it <code>heapify_subtree</code> to note that it starts at a specific node which might not be the root.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">heapify_subtree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Heapify the tree rooted at the node</span>
 
 <span class="sd">    Args:</span>
@@ -535,54 +421,50 @@ CLRS just calls this MaxHeapify. But then the bottoms-up heapification of the tr
     <span class="n">largest</span> <span class="o">=</span> <span class="n">node</span>
 
     <span class="k">if</span> <span class="n">left</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">]:</span>
-	<span class="c1"># the left child was larger than the current parent node</span>
-	<span class="n">largest</span> <span class="o">=</span> <span class="n">left</span>
+        <span class="c1"># the left child was larger than the current parent node</span>
+        <span class="n">largest</span> <span class="o">=</span> <span class="n">left</span>
 
     <span class="k">if</span> <span class="n">right</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">right</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">]:</span>
-	<span class="c1"># the right child is larger than the left and the current parent</span>
-	<span class="n">largest</span> <span class="o">=</span> <span class="n">right</span>
+        <span class="c1"># the right child is larger than the left and the current parent</span>
+        <span class="n">largest</span> <span class="o">=</span> <span class="n">right</span>
 
     <span class="k">if</span> <span class="n">largest</span> <span class="o">!=</span> <span class="n">node</span><span class="p">:</span>
-	<span class="c1"># the current parent is out of place, swap it with the larger child</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">],</span>
-					       <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
+        <span class="c1"># the current parent is out of place, swap it with the larger child</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">largest</span><span class="p">],</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
 
-	<span class="c1"># after the swap the item at "largest" is the value from the </span>
-	<span class="c1"># "node" we started with so try it again with this new location</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heapify_subtree</span><span class="p">(</span><span class="n">largest</span><span class="p">)</span>
+        <span class="c1"># after the swap the item at "largest" is the value from the </span>
+        <span class="c1"># "node" we started with so try it again with this new location</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heapify_subtree</span><span class="p">(</span><span class="n">largest</span><span class="p">)</span>
     <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org75623d2" class="outline-4">
-<h4 id="org75623d2">The Call</h4>
-<div class="outline-text-4" id="text-org75623d2">
-<p>
-This makes the MaxHeap callable and heapifies the entire heap using a bottoms-up construction.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="outline-4" id="outline-container-orgdc42242">
+<h4 id="orgdc42242">The Call</h4>
+<div class="outline-text-4" id="text-orgdc42242">
+<p>This makes the MaxHeap callable and heapifies the entire heap using a bottoms-up construction.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Heapifies the heap</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">     AssertionError: something bad happened and the Heap Property failed</span>
 <span class="sd">    """</span>
     <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="o">//</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heapify_subtree</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heapify_subtree</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">check_rep</span><span class="p">()</span>
     <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org072c82e" class="outline-4">
-<h4 id="org072c82e">Increase a Key</h4>
-<div class="outline-text-4" id="text-org072c82e">
-<p>
-When we change the value of a node, if the value is higher than the previous value it might be in the wrong place in the heap (e.g. it might be bigger than its parent) so we need to traverse upward, swapping it with parents smaller than it, until we find where it should go. CLRS made it a requirement that the new value is larger than the old one, which makes sense in light of the name <code>IncreaseKey</code>, but it seems to me that you could just call it <code>ChangeKey</code> and use a conditional instead of raise an exception, but I'll stick with the error for now.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">increase_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<div class="outline-4" id="outline-container-org768065f">
+<h4 id="org768065f">Increase a Key</h4>
+<div class="outline-text-4" id="text-org768065f">
+<p>When we change the value of a node, if the value is higher than the previous value it might be in the wrong place in the heap (e.g. it might be bigger than its parent) so we need to traverse upward, swapping it with parents smaller than it, until we find where it should go. CLRS made it a requirement that the new value is larger than the old one, which makes sense in light of the name <code>IncreaseKey</code>, but it seems to me that you could just call it <code>ChangeKey</code> and use a conditional instead of raise an exception, but I'll stick with the error for now.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">increase_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Increase the node's value</span>
 
 <span class="sd">    Args:</span>
@@ -596,22 +478,20 @@ When we change the value of a node, if the value is higher than the previous val
     <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
 
     <span class="k">while</span> <span class="p">(</span><span class="n">node</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">ROOT_NODE</span> <span class="ow">and</span>
-	   <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]):</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
-	<span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
     <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org7539e9f" class="outline-4">
-<h4 id="org7539e9f">Insert a Value</h4>
-<div class="outline-text-4" id="text-org7539e9f">
-<p>
-CLRS describes <code>insert</code> and <code>increase_key</code> as part of updating a priority queue, but Levitin's description of <code>top-down heap construction</code> seems to use them as an alternative way to create the heap. He describes this method of construction (top-down) as starting with an empty heap and repeatedly inserting elements from the original array until you have a heap.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<div class="outline-4" id="outline-container-orgeccb8cc">
+<h4 id="orgeccb8cc">Insert a Value</h4>
+<div class="outline-text-4" id="text-orgeccb8cc">
+<p>CLRS describes <code>insert</code> and <code>increase_key</code> as part of updating a priority queue, but Levitin's description of <code>top-down heap construction</code> seems to use them as an alternative way to create the heap. He describes this method of construction (top-down) as starting with an empty heap and repeatedly inserting elements from the original array until you have a heap.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Insert the key into the heap</span>
 
 <span class="sd">    Args:</span>
@@ -624,36 +504,31 @@ CLRS describes <code>insert</code> and <code>increase_key</code> as part of upda
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgecd13f4" class="outline-4">
-<h4 id="orgecd13f4">Check the Heap Property</h4>
-<div class="outline-text-4" id="text-orgecd13f4">
-<p>
-This checks that the Heap Property holds for all the nodes.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_rep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-org53d9d07">
+<h4 id="org53d9d07">Check the Heap Property</h4>
+<div class="outline-text-4" id="text-org53d9d07">
+<p>This checks that the Heap Property holds for all the nodes.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">check_rep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Checks the heap property</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">     AssertionError: the heap property has been violated</span>
 <span class="sd">    """</span>
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="p">(</span>
-	    <span class="sa">f</span><span class="s2">"Parent node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span><span class="si">}</span><span class="s2"> "</span>
-	    <span class="sa">f</span><span class="s2">"not &gt;= </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Parent node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"not &gt;= </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgfe7ab02" class="outline-4">
-<h4 id="orgfe7ab02">Get and Set Item</h4>
-<div class="outline-text-4" id="text-orgfe7ab02">
-<p>
-I threw these in because I kept forgetting that the heap is an attribute of the MaxHeap, but it's only for convenience.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="outline-4" id="outline-container-org2b66a44">
+<h4 id="org2b66a44">Get and Set Item</h4>
+<div class="outline-text-4" id="text-org2b66a44">
+<p>I threw these in because I kept forgetting that the heap is an attribute of the MaxHeap, but it's only for convenience.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Gets an item from the heap</span>
 
 <span class="sd">    Args: </span>
@@ -674,10 +549,11 @@ I threw these in because I kept forgetting that the heap is an attribute of the 
 </div>
 </div>
 </div>
-<div id="outline-container-org069a793" class="outline-3">
-<h3 id="org069a793">The Tests</h3>
-<div class="outline-text-3" id="text-org069a793">
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<div class="outline-3" id="outline-container-org38fffe8">
+<h3 id="org38fffe8">The Tests</h3>
+<div class="outline-text-3" id="text-org38fffe8">
+<div class="highlight">
+<pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
 <span class="n">max_heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">heap</span><span class="o">=</span><span class="n">start</span><span class="p">)</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">([</span><span class="n">max_heap</span><span class="o">.</span><span class="n">INFINITY</span><span class="p">]</span> <span class="o">+</span> <span class="n">start</span><span class="p">))</span>
@@ -697,8 +573,8 @@ I threw these in because I kept forgetting that the heap is an attribute of the 
 
 <span class="n">expect</span><span class="p">(</span><span class="n">max_heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<div class="highlight">
+<pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>
 
@@ -711,14 +587,14 @@ I threw these in because I kept forgetting that the heap is an attribute of the 
 <span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">]</span>
+<div class="highlight">
+<pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">]</span>
 <span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
 <span class="n">heap</span><span class="p">()</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">40</span><span class="p">))</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
+<div class="highlight">
+<pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
 <span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 
@@ -728,19 +604,20 @@ I threw these in because I kept forgetting that the heap is an attribute of the 
 </div>
 </div>
 </div>
-<div id="outline-container-org405045e" class="outline-2">
-<h2 id="org405045e">Heap Sort</h2>
-<div class="outline-text-2" id="text-org405045e">
-<div class="highlight"><pre><span></span><span class="o">&lt;&lt;</span><span class="n">heapsort</span><span class="o">-</span><span class="n">imports</span><span class="o">&gt;&gt;</span>
+<div class="outline-2" id="outline-container-org1e99c6c">
+<h2 id="org1e99c6c">Heap Sort</h2>
+<div class="outline-text-2" id="text-org1e99c6c">
+<div class="highlight">
+<pre><span></span><span class="o">&lt;&lt;</span><span class="n">heapsort</span><span class="o">-</span><span class="n">imports</span><span class="o">&gt;&gt;</span>
 
 <span class="o">&lt;&lt;</span><span class="n">heap</span><span class="o">-</span><span class="n">sort</span><span class="o">&gt;&gt;</span>
 </pre></div>
 </div>
-
-<div id="outline-container-orgc9806be" class="outline-3">
-<h3 id="orgc9806be">Imports</h3>
-<div class="outline-text-3" id="text-orgc9806be">
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<div class="outline-3" id="outline-container-orgdcf94b0">
+<h3 id="orgdcf94b0">Imports</h3>
+<div class="outline-text-3" id="text-orgdcf94b0">
+<div class="highlight">
+<pre><span></span><span class="c1"># pypi</span>
 <span class="c1"># https://www.attrs.org/en/stable/index.html</span>
 <span class="kn">from</span> <span class="nn">attrs</span> <span class="kn">import</span> <span class="n">define</span>
 
@@ -749,15 +626,12 @@ I threw these in because I kept forgetting that the heap is an attribute of the 
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org5963304" class="outline-3">
-<h3 id="org5963304">The Heap Sort Class</h3>
-<div class="outline-text-3" id="text-org5963304">
-<p>
-The HeapSort uses the fact that a Max Heap always has the largest element at the root and repeatedly puts the root at the end of the list then shrinks the heap so it doesn't include the value that was moved over.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@define</span>
+<div class="outline-3" id="outline-container-org6032aca">
+<h3 id="org6032aca">The Heap Sort Class</h3>
+<div class="outline-text-3" id="text-org6032aca">
+<p>The HeapSort uses the fact that a Max Heap always has the largest element at the root and repeatedly puts the root at the end of the list then shrinks the heap so it doesn't include the value that was moved over.</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@define</span>
 <span class="k">class</span> <span class="nc">HeapSort</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Sort using a heap</span>
 
@@ -769,35 +643,35 @@ The HeapSort uses the fact that a Max Heap always has the largest element at the
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">heap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MaxHeap</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""The heap of items"""</span>
-	<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span><span class="p">()</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span>
+<span class="w">        </span><span class="sd">"""The heap of items"""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heap</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">without_root</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""The items without the root """</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">ROOT_NODE</span><span class="p">:]</span>
+<span class="w">        </span><span class="sd">"""The items without the root """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">ROOT_NODE</span><span class="p">:]</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">	</span><span class="sd">"""sorts the items"""</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">()</span>
-	<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">ROOT_NODE</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">size</span> <span class="o">-=</span> <span class="mi">1</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">()</span>
-	<span class="k">return</span>
+<span class="w">        </span><span class="sd">"""sorts the items"""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">ROOT_NODE</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">maximum</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="o">.</span><span class="n">size</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">heap</span><span class="p">()</span>
+        <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org431d5fb" class="outline-3">
-<h3 id="org431d5fb">The Tests</h3>
-<div class="outline-text-3" id="text-org431d5fb">
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.sort.heap</span> <span class="kn">import</span> <span class="n">HeapSort</span>
+<div class="outline-3" id="outline-container-orgb01712f">
+<h3 id="orgb01712f">The Tests</h3>
+<div class="outline-text-3" id="text-orgb01712f">
+<div class="highlight">
+<pre><span></span><span class="kn">from</span> <span class="nn">bowling.sort.heap</span> <span class="kn">import</span> <span class="n">HeapSort</span>
 <span class="n">k</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">items</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
 <span class="n">sorter</span> <span class="o">=</span> <span class="n">HeapSort</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
@@ -810,18 +684,16 @@ The HeapSort uses the fact that a Max Heap always has the largest element at the
 </div>
 </div>
 </div>
-<div id="outline-container-org9089801" class="outline-2">
-<h2 id="org9089801">A Priority Queue</h2>
-<div class="outline-text-2" id="text-org9089801">
-<p>
-Although some books mention that MinHeaps are used for priority queues, CLRS shows a MaxHeap version. This involves adding a couple of methods to the MaxHeap so there's no special class.
-</p>
+<div class="outline-2" id="outline-container-org9794151">
+<h2 id="org9794151">A Priority Queue</h2>
+<div class="outline-text-2" id="text-org9794151">
+<p>Although some books mention that MinHeaps are used for priority queues, CLRS shows a MaxHeap version. This involves adding a couple of methods to the MaxHeap so there's no special class.</p>
 </div>
-
-<div id="outline-container-org879a7e4" class="outline-3">
-<h3 id="org879a7e4">The Tests</h3>
-<div class="outline-text-3" id="text-org879a7e4">
-<div class="highlight"><pre><span></span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<div class="outline-3" id="outline-container-org61e8578">
+<h3 id="org61e8578">The Tests</h3>
+<div class="outline-text-3" id="text-org61e8578">
+<div class="highlight">
+<pre><span></span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 <span class="n">heap</span> <span class="o">=</span> <span class="n">MaxHeap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 <span class="n">heap</span><span class="p">()</span>
 
@@ -844,95 +716,76 @@ Although some books mention that MinHeaps are used for priority queues, CLRS sho
 </div>
 </div>
 </div>
-<div id="outline-container-org6b86413" class="outline-2">
-<h2 id="org6b86413">Plotting</h2>
-<div class="outline-text-2" id="text-org6b86413">
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">networkx</span> <span class="kn">import</span> <span class="n">Graph</span>
+<div class="outline-2" id="outline-container-org5ffdff7">
+<h2 id="org5ffdff7">Plotting</h2>
+<div class="outline-text-2" id="text-org5ffdff7">
+<div class="highlight">
+<pre><span></span><span class="kn">from</span> <span class="nn">networkx</span> <span class="kn">import</span> <span class="n">Graph</span>
 <span class="kn">import</span> <span class="nn">holoviews</span>
 
 <span class="n">graph</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">heap</span><span class="o">.</span><span class="n">left</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">heap</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
-	<span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">heap</span><span class="o">.</span><span class="n">left</span><span class="p">(</span><span class="n">node</span><span class="p">)])</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">heap</span><span class="o">.</span><span class="n">left</span><span class="p">(</span><span class="n">node</span><span class="p">)])</span>
     <span class="k">if</span> <span class="n">heap</span><span class="o">.</span><span class="n">right</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">heap</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
-	<span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">heap</span><span class="o">.</span><span class="n">right</span><span class="p">(</span><span class="n">node</span><span class="p">)])</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">heap</span><span class="o">.</span><span class="n">heap</span><span class="p">[</span><span class="n">heap</span><span class="o">.</span><span class="n">right</span><span class="p">(</span><span class="n">node</span><span class="p">)])</span>
 <span class="n">positions</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">drawing</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">graphviz_layout</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s2">"dot"</span><span class="p">)</span>
 
 <span class="n">plot</span> <span class="o">=</span> <span class="n">holoviews</span><span class="o">.</span><span class="n">Graph</span><span class="o">.</span><span class="n">from_networkx</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
 
 <span class="n">output</span> <span class="o">=</span> <span class="n">Embed</span><span class="p">(</span><span class="n">plot</span><span class="o">=</span><span class="n">plot</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">"heap-plot"</span><span class="p">)()</span>
 </pre></div>
-
-<object type="text/html" data="heap-plot.html" style="width:100%" height="800">
-  <p>Figure Missing</p>
-</object>
+<object data="heap-plot.html" height="800" style="width:100%" type="text/html">
+<p>Figure Missing</p>
+</object></div>
 </div>
-</div>
-
-<div id="outline-container-orge5c5804" class="outline-2">
-<h2 id="orge5c5804">End</h2>
-<div class="outline-text-2" id="text-orge5c5804">
+<div class="outline-2" id="outline-container-orgb451d50">
+<h2 id="orgb451d50">End</h2>
+<div class="outline-text-2" id="text-orgb451d50">
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("parent"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("left"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("right"));
 });
-</script>
+</script></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
-            <li><a class="tag p-category" href="../../categories/heap/index.html" rel="tag">heap</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
+<li><a class="tag p-category" href="../../categories/heap/index.html" rel="tag">heap</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../quicksort/index.html" rel="prev" title="Quicksort">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../the-selection-problem/index.html" rel="next" title="The Selection Problem">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../quicksort/index.html" rel="prev" title="Quicksort">Previous post</a></li>
+<li class="next"><a href="../the-selection-problem/index.html" rel="next" title="The Selection Problem">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

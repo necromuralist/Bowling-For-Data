@@ -1,208 +1,150 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="A look at the Binary Search algorithm.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="A look at the Binary Search algorithm." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>Binary Search | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../decrease-and-conquer/index.html" title="Decrease And Conquer" type="text/html">
-<link rel="next" href="../the-merge/index.html" title="The Merge" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="Binary Search">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search/index.html">
-<meta property="og:description" content="A look at the Binary Search algorithm.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-01-14T16:22:42-08:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="divide-and-conquer">
-<meta property="article:tag" content="search">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../decrease-and-conquer/index.html" rel="prev" title="Decrease And Conquer" type="text/html">
+<link href="../the-merge/index.html" rel="next" title="The Merge" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Binary Search" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search/index.html" property="og:url">
+<meta content="A look at the Binary Search algorithm." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-01-14T16:22:42-08:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="divide-and-conquer" property="article:tag">
+<meta content="search" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Binary Search</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-01-14T16:22:42-08:00" itemprop="datePublished" title="2022-01-14 16:22">2022-01-14 16:22</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Binary Search</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-01-14T16:22:42-08:00" itemprop="datePublished" title="2022-01-14 16:22">2022-01-14 16:22</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li>
-<a href="index.html#orgc4a7e4d">Beginning</a>
+<li><a href="index.html#orgd904a3a">Beginning</a>
 <ul>
-<li><a href="index.html#orgfeda955">The Algorithm Parts</a></li>
+<li><a href="index.html#org452673a">The Algorithm Parts</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org92e95fc">Implementation</a>
+<li><a href="index.html#org49388c8">Implementation</a>
 <ul>
-<li><a href="index.html#org89685f3">Imports</a></li>
-<li><a href="index.html#org3e7648d">Set Up</a></li>
-<li>
-<a href="index.html#orgb220ced">Binary Search One</a>
+<li><a href="index.html#org846df4c">Imports</a></li>
+<li><a href="index.html#orga08d31f">Set Up</a></li>
+<li><a href="index.html#org7d86f9e">Binary Search One</a>
 <ul>
-<li><a href="index.html#org79f342f">The Pseudocode</a></li>
-<li><a href="index.html#orgb84993f">The Function</a></li>
+<li><a href="index.html#org086ab2a">The Pseudocode</a></li>
+<li><a href="index.html#org854127f">The Function</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org7daad3c">Levitin's Version</a>
+<li><a href="index.html#org5520101">Levitin's Version</a>
 <ul>
-<li><a href="index.html#orgfe710ce">The Pseudocode</a></li>
-<li><a href="index.html#org1dfc5fe">The Function</a></li>
+<li><a href="index.html#org1410e3b">The Pseudocode</a></li>
+<li><a href="index.html#org4be6447">The Function</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org1f2e36a">Recursive Version</a>
+<li><a href="index.html#org5211a49">Recursive Version</a>
 <ul>
-<li><a href="index.html#org85b532d">The Pseudocode</a></li>
-<li><a href="index.html#org789567e">The Implementation</a></li>
+<li><a href="index.html#org6e95372">The Pseudocode</a></li>
+<li><a href="index.html#orgc808ee0">The Implementation</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>
-<a href="index.html#org930bf50">Some Plotting</a>
+<li><a href="index.html#org92b4122">Some Plotting</a>
 <ul>
-<li><a href="index.html#org98bdd61">Left and Right</a></li>
-<li><a href="index.html#orgf31b4a1">Runtime</a></li>
+<li><a href="index.html#org51acfdb">Left and Right</a></li>
+<li><a href="index.html#org279c571">Runtime</a></li>
 </ul>
 </li>
-<li><a href="index.html#org09df3c7">See Also</a></li>
+<li><a href="index.html#org377085c">See Also</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgc4a7e4d" class="outline-2">
-<h2 id="orgc4a7e4d">Beginning</h2>
-<div class="outline-text-2" id="text-orgc4a7e4d">
-</div>
-<div id="outline-container-orgfeda955" class="outline-3">
-<h3 id="orgfeda955">The Algorithm Parts</h3>
-<div class="outline-text-3" id="text-orgfeda955">
+<div class="outline-2" id="outline-container-orgd904a3a">
+<h2 id="orgd904a3a">Beginning</h2>
+<div class="outline-text-2" id="text-orgd904a3a"></div>
+<div class="outline-3" id="outline-container-org452673a">
+<h3 id="org452673a">The Algorithm Parts</h3>
+<div class="outline-text-3" id="text-org452673a">
 <ul class="org-ul">
-<li>
-<b><b>Precondition:</b></b> The input array (A) is sorted in non-decreasing order and the key \(k\) is in \(A\).</li>
-<li>
-<b><b>Postcondition:</b></b> The index of the matching element is output</li>
-<li>
-<b><b>Loop Invariant:</b></b> The key is in our current sublist: \(k \in A[left \ldots right]\).</li>
-<li>
-<b><b>Basic Step:</b></b> Find the midpoint of the sub-array, adjust the sub-array to use the midpoint such that the key is in the new sub-array.</li>
-<li>
-<b><b>Exit Condition:</b></b> \(left \le right\).</li>
-<li>
-<b><b>Make Progress:</b></b> After each loop the sublist is half the size of the previous sublist.</li>
-<li>
-<b><b>Maintain the Loop Invariant:</b></b> Pick the half of the sublist whose boundary value would allow the key.</li>
-<li>
-<b><b>Establish the Loop Invariant:</b></b> The initial sublist is the original list (\(left = 0, right=A.length -1\)).</li>
-<li>
-<b><b>Worst Case Runtime:</b></b> Since the input is repeatedly halved, the worst-case is \(\Theta(\log_{2} n)\).</li>
+<li><b>Precondition:</b> The input array (A) is sorted in non-decreasing order and the key \(k\) is in \(A\).</li>
+<li><b>Postcondition:</b> The index of the matching element is output</li>
+<li><b>Loop Invariant:</b> The key is in our current sublist: \(k \in A[left \ldots right]\).</li>
+<li><b>Basic Step:</b> Find the midpoint of the sub-array, adjust the sub-array to use the midpoint such that the key is in the new sub-array.</li>
+<li><b>Exit Condition:</b> \(left \le right\).</li>
+<li><b>Make Progress:</b> After each loop the sublist is half the size of the previous sublist.</li>
+<li><b>Maintain the Loop Invariant:</b> Pick the half of the sublist whose boundary value would allow the key.</li>
+<li><b>Establish the Loop Invariant:</b> The initial sublist is the original list (\(left = 0, right=A.length -1\)).</li>
+<li><b>Worst Case Runtime:</b> Since the input is repeatedly halved, the worst-case is \(\Theta(\log_{2} n)\).</li>
 </ul>
-<p>
-Rather than saying "if k is in A" over and over, the search precondition requires that \(k\) is in \(A\) and if it isn't it's considered a failed search - which doesn't mean the algorithm is incorrect, just that the pre-condition wasn't met. We have to handle the other case, but for the purpose of defining the algorithm we'll set a stricter pre-condition.
-</p>
+<p>Rather than saying "if k is in A" over and over, the search precondition requires that \(k\) is in \(A\) and if it isn't it's considered a failed search - which doesn't mean the algorithm is incorrect, just that the pre-condition wasn't met. We have to handle the other case, but for the purpose of defining the algorithm we'll set a stricter pre-condition.</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org92e95fc" class="outline-2">
-<h2 id="org92e95fc">Implementation</h2>
-<div class="outline-text-2" id="text-org92e95fc">
-</div>
-<div id="outline-container-org89685f3" class="outline-3">
-<h3 id="org89685f3">Imports</h3>
-<div class="outline-text-3" id="text-org89685f3">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<div class="outline-2" id="outline-container-org49388c8">
+<h2 id="org49388c8">Implementation</h2>
+<div class="outline-text-2" id="text-org49388c8"></div>
+<div class="outline-3" id="outline-container-org846df4c">
+<h3 id="org846df4c">Imports</h3>
+<div class="outline-text-3" id="text-org846df4c">
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
@@ -222,10 +164,11 @@ Rather than saying "if k is in A" over and over, the search precondition require
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org3e7648d" class="outline-3">
-<h3 id="org3e7648d">Set Up</h3>
-<div class="outline-text-3" id="text-org3e7648d">
-<div class="highlight"><pre><span></span><span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
+<div class="outline-3" id="outline-container-orga08d31f">
+<h3 id="orga08d31f">Set Up</h3>
+<div class="outline-text-3" id="text-orga08d31f">
+<div class="highlight">
+<pre><span></span><span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
 <span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="s2">"binary-search"</span><span class="p">)</span>
 <span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
 
@@ -233,14 +176,12 @@ Rather than saying "if k is in A" over and over, the search precondition require
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgb220ced" class="outline-3">
-<h3 id="orgb220ced">Binary Search One</h3>
-<div class="outline-text-3" id="text-orgb220ced">
-</div>
-<div id="outline-container-org79f342f" class="outline-4">
-<h4 id="org79f342f">The Pseudocode</h4>
-<div class="outline-text-4" id="text-org79f342f">
+<div class="outline-3" id="outline-container-org7d86f9e">
+<h3 id="org7d86f9e">Binary Search One</h3>
+<div class="outline-text-3" id="text-org7d86f9e"></div>
+<div class="outline-4" id="outline-container-org086ab2a">
+<h4 id="org086ab2a">The Pseudocode</h4>
+<div class="outline-text-4" id="text-org086ab2a">
 <pre id="binarysearch" style="display:hidden;">
 \begin{algorithm}
 \caption{BinarySearch}
@@ -269,14 +210,13 @@ Rather than saying "if k is in A" over and over, the search precondition require
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-
-<div id="outline-container-orgb84993f" class="outline-4">
-<h4 id="orgb84993f">The Function</h4>
-<div class="outline-text-4" id="text-orgb84993f">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">binary_search</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchOutput</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-org854127f">
+<h4 id="org854127f">The Function</h4>
+<div class="outline-text-4" id="text-org854127f">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">binary_search</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchOutput</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Does an iterative binary search for the key</span>
 
 <span class="sd">    Args:</span>
@@ -290,29 +230,28 @@ Rather than saying "if k is in A" over and over, the search precondition require
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="n">elements</span><span class="p">[</span><span class="n">right</span><span class="p">]):</span>
-	<span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">while</span> <span class="n">right</span> <span class="o">&gt;</span> <span class="n">left</span><span class="p">:</span>
-	<span class="k">assert</span> <span class="n">elements</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="n">elements</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
-	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-	<span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="k">assert</span> <span class="n">elements</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="n">elements</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
 
-	<span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">middle</span><span class="p">)</span> <span class="k">if</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="n">elements</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span>
-		       <span class="k">else</span> <span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">middle</span><span class="p">)</span> <span class="k">if</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="n">elements</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span>
+                       <span class="k">else</span> <span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span>
 
     <span class="n">location</span> <span class="o">=</span> <span class="n">left</span> <span class="k">if</span> <span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">==</span> <span class="n">element</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
 </pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_it</span><span class="p">(</span><span class="n">searcher</span><span class="p">):</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">test_it</span><span class="p">(</span><span class="n">searcher</span><span class="p">):</span>
     <span class="n">test_case</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">))</span>
     <span class="n">expect</span><span class="p">(</span><span class="n">searcher</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="n">test_case</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
 
     <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">50</span><span class="p">)))</span>
 
     <span class="k">for</span> <span class="n">expected</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
-	<span class="n">expect</span><span class="p">(</span><span class="n">searcher</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="n">item</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="n">items</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">expected</span><span class="p">))</span>
+        <span class="n">expect</span><span class="p">(</span><span class="n">searcher</span><span class="p">(</span><span class="n">element</span><span class="o">=</span><span class="n">item</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="n">items</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">expected</span><span class="p">))</span>
 
     <span class="n">expect</span><span class="p">(</span><span class="n">searcher</span><span class="p">(</span><span class="n">element</span><span class="o">=-</span><span class="mi">5</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="n">items</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
 
@@ -330,18 +269,14 @@ Rather than saying "if k is in A" over and over, the search precondition require
 </div>
 </div>
 </div>
-
-
-<div id="outline-container-org7daad3c" class="outline-3">
-<h3 id="org7daad3c">Levitin's Version</h3>
-<div class="outline-text-3" id="text-org7daad3c">
-<p>
-The version I entered above is one that I found on the web (<a href="https://www.eecs.yorku.ca/course_archive/2013-14/W/2011/lectures/09%20Loop%20Invariants%20and%20Binary%20Search.pdf">PDF Lecture Notes</a>), and is roughly what CLRS has. The one in <a href="../itdaa/">Levitin's Book</a> is clearer to me but has one more comparison.
-</p>
+<div class="outline-3" id="outline-container-org5520101">
+<h3 id="org5520101">Levitin's Version</h3>
+<div class="outline-text-3" id="text-org5520101">
+<p>The version I entered above is one that I found on the web (<a href="https://www.eecs.yorku.ca/course_archive/2013-14/W/2011/lectures/09%20Loop%20Invariants%20and%20Binary%20Search.pdf">PDF Lecture Notes</a>), and is roughly what CLRS has. The one in <a href="../itdaa/index.html">Levitin's Book</a> is clearer to me but has one more comparison.</p>
 </div>
-<div id="outline-container-orgfe710ce" class="outline-4">
-<h4 id="orgfe710ce">The Pseudocode</h4>
-<div class="outline-text-4" id="text-orgfe710ce">
+<div class="outline-4" id="outline-container-org1410e3b">
+<h4 id="org1410e3b">The Pseudocode</h4>
+<div class="outline-text-4" id="text-org1410e3b">
 <pre id="binarysearch2" style="display:hidden;">
 \begin{algorithm}
 \caption{BinarySearchTwo}
@@ -372,14 +307,13 @@ The version I entered above is one that I found on the web (<a href="https://www
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-
-<div id="outline-container-org1dfc5fe" class="outline-4">
-<h4 id="org1dfc5fe">The Function</h4>
-<div class="outline-text-4" id="text-org1dfc5fe">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">binary_search_two</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchOutput</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-org4be6447">
+<h4 id="org4be6447">The Function</h4>
+<div class="outline-text-4" id="text-org4be6447">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">binary_search_two</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchOutput</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Iterative Binary Search</span>
 
 <span class="sd">    Args:</span>
@@ -396,33 +330,29 @@ The version I entered above is one that I found on the web (<a href="https://www
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">location</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;=</span> <span class="n">right</span> <span class="ow">and</span> <span class="n">location</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
 
-	<span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="n">elements</span><span class="p">[</span><span class="n">middle</span><span class="p">]:</span>
-	    <span class="n">location</span> <span class="o">=</span> <span class="n">middle</span>
+        <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="n">elements</span><span class="p">[</span><span class="n">middle</span><span class="p">]:</span>
+            <span class="n">location</span> <span class="o">=</span> <span class="n">middle</span>
 
-	<span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">middle</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="n">elements</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span> <span class="k">else</span>
-		       <span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">middle</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="n">elements</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span> <span class="k">else</span>
+                       <span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">test_it</span><span class="p">(</span><span class="n">binary_search_two</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">test_it</span><span class="p">(</span><span class="n">binary_search_two</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org1f2e36a" class="outline-3">
-<h3 id="org1f2e36a">Recursive Version</h3>
-<div class="outline-text-3" id="text-org1f2e36a">
-<p>
-Although it is pretty straightforward as an iterative function, divide and conquer lends itself to recursion so, just for completeness, here's a recursive version of the binary search.
-</p>
+<div class="outline-3" id="outline-container-org5211a49">
+<h3 id="org5211a49">Recursive Version</h3>
+<div class="outline-text-3" id="text-org5211a49">
+<p>Although it is pretty straightforward as an iterative function, divide and conquer lends itself to recursion so, just for completeness, here's a recursive version of the binary search.</p>
 </div>
-
-<div id="outline-container-org85b532d" class="outline-4">
-<h4 id="org85b532d">The Pseudocode</h4>
-<div class="outline-text-4" id="text-org85b532d">
+<div class="outline-4" id="outline-container-org6e95372">
+<h4 id="org6e95372">The Pseudocode</h4>
+<div class="outline-text-4" id="text-org6e95372">
 <pre id="binarysearch3" style="display:hidden;">
 \begin{algorithm}
 \caption{Recursive Binary Search}
@@ -451,16 +381,15 @@ Although it is pretty straightforward as an iterative function, divide and conqu
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-
-<div id="outline-container-org789567e" class="outline-4">
-<h4 id="org789567e">The Implementation</h4>
-<div class="outline-text-4" id="text-org789567e">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">recursive_binary_search</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-			    <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-			    <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="outline-4" id="outline-container-orgc808ee0">
+<h4 id="orgc808ee0">The Implementation</h4>
+<div class="outline-text-4" id="text-orgc808ee0">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">recursive_binary_search</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                            <span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                            <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Recursive binary search</span>
 
 <span class="sd">    Args:</span>
@@ -475,28 +404,25 @@ Although it is pretty straightforward as an iterative function, divide and conqu
 <span class="sd">    """</span>
     <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;</span> <span class="n">right</span><span class="p">:</span>
-	<span class="c1"># we missed it, the element isn't in the elements</span>
-	<span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">count</span>
+        <span class="c1"># we missed it, the element isn't in the elements</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">count</span>
 
     <span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
 
     <span class="k">if</span> <span class="n">elements</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
-	<span class="c1"># we found it</span>
-	<span class="k">return</span> <span class="n">middle</span><span class="p">,</span> <span class="n">count</span>
+        <span class="c1"># we found it</span>
+        <span class="k">return</span> <span class="n">middle</span><span class="p">,</span> <span class="n">count</span>
 
     <span class="c1"># move one of the boundaries to the middle</span>
     <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="n">elements</span><span class="p">[</span><span class="n">middle</span><span class="p">]:</span>
-	<span class="n">right</span> <span class="o">=</span> <span class="n">middle</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">middle</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
-	<span class="n">left</span> <span class="o">=</span> <span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">recursive_binary_search</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
 </pre></div>
-
-<p>
-This is a helper to get the recursive call started and to handle empty lists or search terms that are outside of the range of the list.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<p>This is a helper to get the recursive call started and to handle empty lists or search terms that are outside of the range of the list.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""calls the recursive binary search</span>
 
 <span class="sd">    Args:</span>
@@ -506,29 +432,25 @@ This is a helper to get the recursive call started and to handle empty lists or 
     <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="ow">or</span>  <span class="ow">not</span> <span class="n">elements</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">element</span> <span class="o">&lt;=</span> <span class="n">elements</span><span class="p">[</span><span class="n">right</span><span class="p">]:</span>
-	<span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">recursive_binary_search</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">test_it</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">test_it</span><span class="p">(</span><span class="n">search</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org930bf50" class="outline-2">
-<h2 id="org930bf50">Some Plotting</h2>
-<div class="outline-text-2" id="text-org930bf50">
-</div>
-<div id="outline-container-org98bdd61" class="outline-3">
-<h3 id="org98bdd61">Left and Right</h3>
-<div class="outline-text-3" id="text-org98bdd61">
-<p>
-Let's look at how the search updates the left and right boundaries. First we'll need a function that records the locations.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">binary_search_points</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-org92b4122">
+<h2 id="org92b4122">Some Plotting</h2>
+<div class="outline-text-2" id="text-org92b4122"></div>
+<div class="outline-3" id="outline-container-org51acfdb">
+<h3 id="org51acfdb">Left and Right</h3>
+<div class="outline-text-3" id="text-org51acfdb">
+<p>Let's look at how the search updates the left and right boundaries. First we'll need a function that records the locations.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">binary_search_points</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Iterative Binary Search</span>
 
 <span class="sd">    Args:</span>
@@ -546,29 +468,26 @@ Let's look at how the search updates the left and right boundaries. First we'll 
     <span class="n">rights</span> <span class="o">=</span> <span class="p">[</span><span class="n">right</span><span class="p">]</span>
 
     <span class="k">while</span> <span class="n">right</span> <span class="o">&gt;</span> <span class="n">left</span><span class="p">:</span>
-	<span class="k">assert</span> <span class="n">source</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">key</span> <span class="o">&lt;=</span> <span class="n">source</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
-	<span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+        <span class="k">assert</span> <span class="n">source</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">key</span> <span class="o">&lt;=</span> <span class="n">source</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
+        <span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
 
-	<span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span> <span class="o">=</span> <span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">middle</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;=</span> <span class="n">source</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span>
-			 <span class="k">else</span> <span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span>
-	<span class="n">lefts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
-	<span class="n">rights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span> <span class="o">=</span> <span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">middle</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;=</span> <span class="n">source</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span>
+                         <span class="k">else</span> <span class="p">(</span><span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span>
+        <span class="n">lefts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+        <span class="n">rights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">lefts</span><span class="p">,</span> <span class="n">rights</span>
 </pre></div>
-
-<p>
-Now we'll plot it.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">101</span><span class="p">))</span>
+<p>Now we'll plot it.</p>
+<div class="highlight">
+<pre><span></span><span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">101</span><span class="p">))</span>
 <span class="n">key</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="mi">24</span><span class="p">]</span>
 <span class="n">lefts</span><span class="p">,</span> <span class="n">rights</span> <span class="o">=</span> <span class="n">binary_search_points</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
 
 <span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">Left</span><span class="o">=</span><span class="n">lefts</span><span class="p">,</span> <span class="n">Right</span><span class="o">=</span><span class="n">rights</span><span class="p">,</span> <span class="n">Split</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lefts</span><span class="p">)))))</span>
 
 <span class="n">melted</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Split"</span><span class="p">],</span> <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Left"</span><span class="p">,</span> <span class="s2">"Right"</span><span class="p">],</span>
-		   <span class="n">var_name</span><span class="o">=</span><span class="s2">"left_or_right"</span><span class="p">,</span>
-		   <span class="n">value_name</span><span class="o">=</span><span class="s2">"Index"</span><span class="p">)</span>
+                   <span class="n">var_name</span><span class="o">=</span><span class="s2">"left_or_right"</span><span class="p">,</span>
+                   <span class="n">value_name</span><span class="o">=</span><span class="s2">"Index"</span><span class="p">)</span>
 <span class="n">base</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span>
 
 <span class="n">lines</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
@@ -591,69 +510,57 @@ Now we'll plot it.
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="o">=</span><span class="n">chart</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"binary-search"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="binary-search.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="binary-search.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-So, it isn't really so pretty as with the sorting plots. As the plot confirms, the left and right slowly narrow to find the item in the list.
-</p>
+<p>So, it isn't really so pretty as with the sorting plots. As the plot confirms, the left and right slowly narrow to find the item in the list.</p>
 </div>
 </div>
-
-<div id="outline-container-orgf31b4a1" class="outline-3">
-<h3 id="orgf31b4a1">Runtime</h3>
-<div class="outline-text-3" id="text-orgf31b4a1">
-<p>
-Let's see how the number of loops goes up with the size of the search space.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">EXPONENT</span> <span class="o">=</span> <span class="mi">5</span>
+<div class="outline-3" id="outline-container-org279c571">
+<h3 id="org279c571">Runtime</h3>
+<div class="outline-text-3" id="text-org279c571">
+<p>Let's see how the number of loops goes up with the size of the search space.</p>
+<div class="highlight">
+<pre><span></span><span class="n">EXPONENT</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">numba_search</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="n">binary_search</span><span class="p">)</span>
 
 <span class="n">sizes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="n">EXPONENT</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
 <span class="n">random_source</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">count</span><span class="p">))</span>
-		    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">sizes</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">sizes</span><span class="p">]</span>
 <span class="n">random_things</span> <span class="o">=</span> <span class="p">[(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span> <span class="n">elements</span><span class="p">)</span>
-		    <span class="k">for</span> <span class="n">elements</span> <span class="ow">in</span> <span class="n">random_source</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">elements</span> <span class="ow">in</span> <span class="n">random_source</span><span class="p">]</span>
 
 <span class="n">worst_things</span> <span class="o">=</span> <span class="p">[(</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">elements</span><span class="p">)</span> <span class="k">for</span> <span class="n">elements</span> <span class="ow">in</span> <span class="n">random_source</span><span class="p">]</span>
 
 <span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
     <span class="n">random_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-	<span class="n">delayed</span><span class="p">(</span><span class="n">numba_search</span><span class="p">)(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
-	<span class="k">for</span> <span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span> <span class="ow">in</span> <span class="n">random_things</span><span class="p">)</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">numba_search</span><span class="p">)(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span> <span class="ow">in</span> <span class="n">random_things</span><span class="p">)</span>
 
     <span class="n">worst_output</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-	<span class="n">delayed</span><span class="p">(</span><span class="n">numba_search</span><span class="p">)(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
-	<span class="k">for</span> <span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span> <span class="ow">in</span> <span class="n">worst_things</span><span class="p">)</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">numba_search</span><span class="p">)(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span> <span class="ow">in</span> <span class="n">worst_things</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Started: 2022-01-16 21:33:07.668315
 Ended: 2022-01-16 21:33:08.905390
 Elapsed: 0:00:01.237075
 </pre>
-
-
-<div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
+<div class="highlight">
+<pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span>
     <span class="n">Count</span><span class="o">=</span><span class="n">sizes</span><span class="p">,</span>
     <span class="n">Random</span><span class="o">=</span><span class="p">[</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">random_output</span><span class="p">],</span>
     <span class="n">First</span><span class="o">=</span><span class="p">[</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">worst_output</span><span class="p">]</span>
 <span class="p">))</span>
 
 <span class="n">melted</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Count"</span><span class="p">],</span> <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Random"</span><span class="p">,</span> <span class="s2">"First"</span><span class="p">],</span>
-		   <span class="n">var_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Bisections"</span><span class="p">)</span>
+                   <span class="n">var_name</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Bisections"</span><span class="p">)</span>
 
 <span class="n">theoretical</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">Count</span><span class="o">=</span><span class="n">sizes</span><span class="p">,</span> <span class="n">Theoretical</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">sizes</span><span class="p">)))</span>
 </pre></div>
-
-<p>
-Now, to plot.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+<p>Now, to plot.</p>
+<div class="highlight">
+<pre><span></span><span class="n">points</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_point</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Count"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="s2">"Bisections"</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Location"</span><span class="p">)</span>
@@ -662,7 +569,7 @@ Now, to plot.
     <span class="n">x</span><span class="o">=</span><span class="s2">"Count"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="s2">"Theoretical"</span><span class="p">,</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Count"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">),</span>
-	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Theoretical"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">".2f"</span><span class="p">)],</span>
+             <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Theoretical"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">".2f"</span><span class="p">)],</span>
 <span class="p">)</span>
 <span class="n">chart</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="n">points</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
     <span class="n">title</span><span class="o">=</span><span class="s2">"Binary Search Bisections"</span><span class="p">,</span>
@@ -671,85 +578,64 @@ Now, to plot.
 <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
 
 <span class="n">save_chart</span><span class="p">(</span><span class="n">chart</span><span class="o">=</span><span class="n">chart</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"binary-search-comparisons"</span><span class="p">,</span>
-	   <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
+           <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="binary-search-comparisons.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
+<object data="binary-search-comparisons.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
+</object></div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-org09df3c7" class="outline-2">
-<h2 id="org09df3c7">See Also</h2>
-<div class="outline-text-2" id="text-org09df3c7">
+<div class="outline-2" id="outline-container-org377085c">
+<h2 id="org377085c">See Also</h2>
+<div class="outline-text-2" id="text-org377085c">
 <ul class="org-ul">
-<li>Loop Invariants [Internet]. [cited 2022 Jan 15]. Available from: <a href="https://www.cs.cornell.edu/courses/cs2112/2018fa/lectures/lec_loopinv/">https://www.cs.cornell.edu/courses/cs2112/2018fa/lectures/lec_loopinv/</a>
-</li>
-<li><a href="../itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
+<li>Loop Invariants [Internet]. [cited 2022 Jan 15]. Available from: <a href="https://www.cs.cornell.edu/courses/cs2112/2018fa/lectures/lec_loopinv/">https://www.cs.cornell.edu/courses/cs2112/2018fa/lectures/lec_loopinv/</a></li>
+<li><a href="../itdaa/index.html">Introduction to the Design & Analysis of Algorithms (Levitin)</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("binarysearch"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("binarysearch2"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("binarysearch3"));
 });
-</script>
+</script></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/divide-and-conquer/index.html" rel="tag">divide-and-conquer</a></li>
-            <li><a class="tag p-category" href="../../categories/search/index.html" rel="tag">search</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/divide-and-conquer/index.html" rel="tag">divide-and-conquer</a></li>
+<li><a class="tag p-category" href="../../categories/search/index.html" rel="tag">search</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../decrease-and-conquer/index.html" rel="prev" title="Decrease And Conquer">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../the-merge/index.html" rel="next" title="The Merge">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../decrease-and-conquer/index.html" rel="prev" title="Decrease And Conquer">Previous post</a></li>
+<li class="next"><a href="../the-merge/index.html" rel="next" title="The Merge">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

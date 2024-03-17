@@ -1,0 +1,177 @@
+#+BEGIN_COMMENT
+.. title: Testing the Altair Shortcode
+.. slug: testing-the-altair-shortcode
+.. date: 2024-03-15 20:25:34 UTC-07:00
+.. tags: altair,bowling,visualization,testing
+.. category: Altair
+.. link: 
+.. description: Testing the nikola/Altair shortcode and templates.
+.. type: text
+.. template: altair.tmpl
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-775cd3d0-abdd-45c6-90a5-35ac49bfade2-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+* Introduction
+
+The way I've been using [[https://altair-viz.github.io/index.html][altair]] is by saving the charts as HTML documents and then embedding them into the posts as pages within the page. This works, so I don't know if this is a good idea or not, but I'm going to try embedding them as HTML elements only, the way I do with p5.js. This is a check to make sure I've got the parts working so nikola will compile everything the way I'm expecting it to.
+
+* Setup
+** Imports
+
+These initial imports are for the plotting and not really what this post is testing.
+
+#+begin_src python :results none
+# python
+from pathlib import Path
+
+import os
+
+# pypi
+from dotenv import load_dotenv
+from tabulate import tabulate
+
+import altair
+import pandas
+#+end_src
+
+Next is the function I'm testing - a new function I created in ~graeae~, called ~save_vega_embed~. Which maybe isn't the best name but it shouldn't clash with my other functions, hopefully. Its purpose is to create the JavaScript function that Altair's ~Chart.save~ was creating for me in the earlier posts and then save it where nikola can find it.
+
+#+begin_src python :results none
+from graeae.visualization.altair_helpers import output_path, save_vega_embed
+#+end_src
+
+#+begin_notecard
+**Note to self:** Since I usually run the code to create the plot on a different machine from the one where the nikola code is being run to create this site, the ~graeae~ function has to be installed on the remote machine where the plots are created.
+#+end_notecard
+
+** The Output Path
+
+The ~output_path~ function takes the slug and checks if there's a folder matching it in the ~files/posts~ folder and creates it if it doesn't exist. Its output is a Path to that folder which we can use to tell the code where to save files for the chart.
+
+#+begin_src python :results none
+SLUG = "testing-the-altair-shortcode"
+OUTPUT_PATH = output_path(SLUG)
+#+end_src
+
+* The Data
+
+To have something to plot I'll use the United Nation's World Happiness data, which I downloaded (as excel spreadsheets) and converted to a CSV.
+
+#+begin_src python :results output :exports both
+load_dotenv(override=True)
+table_path = Path(os.getenv("WORLD_HAPPINESS_TABLE"))
+
+expect(table_path.is_file()).to(be_true)
+
+table = pandas.read_csv(table_path)
+print(table.shape)
+#+end_src
+
+#+RESULTS:
+: (2199, 11)
+
+This is overkill, but I had the idea to do this while in the middle of another post that uses this dataset so it was convenient to cut-and-paste the block here.
+
+* Counting the Years
+
+The test-plot will be a bar-graph showing the number of entries (countries) for each year in the dataset. The data uses "year" as the name of the column with the years so I'll make a little name holder and then create a data-frame with the counts.
+
+#+begin_src python :results none
+class Column:
+    year = "year"
+#+end_src
+
+#+begin_src python :results none
+year_counts = (table.year.value_counts()
+               .reset_index()
+               .sort_values(Column.year))
+#+end_src
+
+The ~value_counts~ output has the years as the index of the Series so I'm calling ~reset_index~ to move it into a column, giving us a two-column data-frame (with "year" and "counts" as columns).
+
+** A Table To Show the Counts
+
+This is to show the values that we're going to plot.
+
+#+begin_src python :results output :exports both
+table_counts = year_counts.T
+
+table_counts.columns = table_counts.iloc[0]
+table_counts = table_counts.drop(table_counts.index[0])
+print(tabulate(table_counts, headers="keys", tablefmt="orgtbl"))
+#+end_src
+
+|       |   2005 |   2006 |   2007 |   2008 |   2009 |   2010 |   2011 |   2012 |   2013 |   2014 |   2015 |   2016 |   2017 |   2018 |   2019 |   2020 |   2021 |   2022 |
+|-------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------|
+| count |     27 |     89 |    102 |    110 |    114 |    124 |    146 |    141 |    136 |    144 |    142 |    141 |    147 |    141 |    143 |    116 |    122 |    114 |
+
+
+** Now the Bar-Chart
+
+So, here's what we're testing.
+
+First, we need an identifier for the HTML ~div~ tag so that we can tell Vega where to stick the chart.
+
+#+begin_src python :results none
+DIV_ID = "value-counts-0d454587"
+#+end_src
+
+Now we'll create the altair Chart.
+
+#+begin_src python :results none
+value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
+    x="{}:N".format(Column.year),
+    y="count").properties(height=600, width=800)
+#+end_src
+
+Now to save it. Previously I was using Altair's ~save~ method to save it as an HTML document and embedding the entire document within the post using an ~<object>~ tag, which seems to work kind of like a frame. I think. Anyway, this version saves the chart as a JavaScript function instead (using the name we pass in for the file-name) which then gets called by [[https://github.com/vega/vega-embed][vega-embed]] to create the chart. The ~graeae.visualization.altair_helpers.save_vega_embed~ function is extracting the JSON schema from the chart (using Altair's ~Chart.to_json()~) and adding it to a JavaScript function that I copied from the file created by Altair's ~Chart.save~. The output of the ~graeae~ function is the shortcode to tell nikola to embed the chart here.
+
+#+begin_notecard
+**Note:** I haven't figured out how to get ~jupyter-emacs~ to dump python output without formatting it as a ~#+RESULTS~ block so it will need a little clean up after the function is called. If not, the shortcode will work, but it will also create an empty box underneath it.
+#+end_notecard
+
+#+begin_src python :results output :exports both
+print(save_vega_embed(chart=value_counts_chart,
+                      name="value-counts-bar-chart",
+                      div_id=DIV_ID,
+                      output_path=OUTPUT_PATH))
+#+end_src
+
+{{% altairdiv source="value-counts-bar-chart.js" divid="value-counts-0d454587" %}}
+
+
+* And a Line Plot
+
+I'm going to re-plot the data as a line chart to make sure there's nothing I created that causes them to mess each other up.
+
+#+begin_src python :results output :exports both
+line_chart = value_counts_chart.mark_line()
+
+print(save_vega_embed(line_chart,
+                      name="value-counts-line-chart",
+                      div_id="line-chart-0d454587",
+                      output_path=OUTPUT_PATH))
+#+end_src
+
+{{% altairdiv source="value-counts-line-chart.js" divid="line-chart-0d454587" %}}
+
+#+begin_notecard
+**Note:** The ~altairdiv~ shortcode sets the HTML class for the chart's div to "altair-vega" in case it needs styling later.
+#+end_notecard
+
+* The End
+
+Well, that seems to work. I was originally going to throw this away once things seemed to be all right, but I'll keep it as a future reference in case I forget how to use this stuff later.
+
+* Links
+
+- Saving Altair Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 16]. Available from: https://altair-viz.github.io/user_guide/saving_charts.html
+- vega/vega-embed [Internet]. Vega; 2024 [cited 2024 Mar 16]. Available from: https://github.com/vega/vega-embed
+- World Happiness Report [Internet]. 2023 [cited 2023 Dec 11]. Available from: https://worldhappiness.report/

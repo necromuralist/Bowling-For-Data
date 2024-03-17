@@ -1,195 +1,139 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="Implementing a Binary Search Tree and Node Insertion.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="Implementing a Binary Search Tree and Node Insertion." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>Binary Search Tree Node Insertion | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search-tree-node-insertion/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../binary-search-tree-node/index.html" title="Binary Search Tree Node" type="text/html">
-<link rel="next" href="../binary-search-tree-queries/index.html" title="Binary Search Tree Queries" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="Binary Search Tree Node Insertion">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search-tree-node-insertion/index.html">
-<meta property="og:description" content="Implementing a Binary Search Tree and Node Insertion.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-03-12T15:23:47-08:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="binary search trees">
-<meta property="article:tag" content="data structures">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search-tree-node-insertion/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../binary-search-tree-node/index.html" rel="prev" title="Binary Search Tree Node" type="text/html">
+<link href="../binary-search-tree-queries/index.html" rel="next" title="Binary Search Tree Queries" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Binary Search Tree Node Insertion" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search-tree-node-insertion/index.html" property="og:url">
+<meta content="Implementing a Binary Search Tree and Node Insertion." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-03-12T15:23:47-08:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="binary search trees" property="article:tag">
+<meta content="data structures" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Binary Search Tree Node Insertion</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-03-12T15:23:47-08:00" itemprop="datePublished" title="2022-03-12 15:23">2022-03-12 15:23</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Binary Search Tree Node Insertion</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-03-12T15:23:47-08:00" itemprop="datePublished" title="2022-03-12 15:23">2022-03-12 15:23</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li>
-<a href="index.html#orgb539f20">The Tree</a>
+<li><a href="index.html#org057b5db">The Tree</a>
 <ul>
-<li><a href="index.html#orge4f0d1d">The Query</a></li>
-<li><a href="index.html#orge8df844">The Insertion Algorithm</a></li>
-<li><a href="index.html#orgeff2efd">The Insert Method</a></li>
-<li><a href="index.html#orgc6d43aa">Transplant</a></li>
-<li><a href="index.html#org26f13c5">Deletion</a></li>
+<li><a href="index.html#orgf3cc41e">The Query</a></li>
+<li><a href="index.html#org78fcfbd">The Insertion Algorithm</a></li>
+<li><a href="index.html#orgeb71225">The Insert Method</a></li>
+<li><a href="index.html#org25a882e">Transplant</a></li>
+<li><a href="index.html#org06634b3">Deletion</a></li>
 </ul>
 </li>
-<li><a href="index.html#orgf62afb0">Plotting</a></li>
-<li><a href="index.html#org8863f20">Sources</a></li>
+<li><a href="index.html#org9d2ac25">Plotting</a></li>
+<li><a href="index.html#orga9596ae">Sources</a></li>
 </ul>
 </div>
 </div>
-<p>
-This is the next post in a series on Binary Search Trees that start with <a href="../binary-search-trees/">this post</a>. In this post we'll be looking at creating a Tree class and the method of inserting a node into the tree.
-</p>
-
-<div id="outline-container-orgb539f20" class="outline-2">
-<h2 id="orgb539f20">The Tree</h2>
-<div class="outline-text-2" id="text-orgb539f20">
-<p>
-Although <a href="../clrs/">CLRS</a> use a <b>T</b> (as in tree) class in their algorithms, they only use it to store a <b>root</b> attribute. To make it a little more object-oriented I'll create a Tree class and add the <code>insert</code> method to it, rather than passing the tree to a function. Not a big change, but one that might be useful.
-</p>
-
-<p>
-<img src="tree.png" alt="nil"></p>
-
-<div class="highlight"><pre><span></span><span class="c1"># this project</span>
+<p>This is the next post in a series on Binary Search Trees that start with <a href="../binary-search-trees/index.html">this post</a>. In this post we'll be looking at creating a Tree class and the method of inserting a node into the tree.</p>
+<div class="outline-2" id="outline-container-org057b5db">
+<h2 id="org057b5db">The Tree</h2>
+<div class="outline-text-2" id="text-org057b5db">
+<p>Although <a href="../clrs/index.html">CLRS</a> use a <b>T</b> (as in tree) class in their algorithms, they only use it to store a <b>root</b> attribute. To make it a little more object-oriented I'll create a Tree class and add the <code>insert</code> method to it, rather than passing the tree to a function. Not a big change, but one that might be useful.</p>
+<p><img alt="nil" src="tree.png"></p>
+<div class="highlight">
+<pre><span></span><span class="c1"># this project</span>
 <span class="kn">from</span> <span class="nn">.node</span> <span class="kn">import</span> <span class="n">Node</span>
 <span class="kn">from</span> <span class="nn">.query</span> <span class="kn">import</span> <span class="n">Query</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Tree</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Binary Search Tree</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     root: the root node for the tree</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_query</span> <span class="o">=</span> <span class="kc">None</span>        
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_query</span> <span class="o">=</span> <span class="kc">None</span>        
+        <span class="k">return</span>
 </pre></div>
 </div>
-
-<div id="outline-container-orge4f0d1d" class="outline-3">
-<h3 id="orge4f0d1d">The Query</h3>
-<div class="outline-text-3" id="text-orge4f0d1d">
-<p>
-We have kind of a chicken and the egg problem here in that I defined the Query to contain the Tree, but we need to use its <code>min</code> function to delete nodes. We'll see how it goes.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-3" id="outline-container-orgf3cc41e">
+<h3 id="orgf3cc41e">The Query</h3>
+<div class="outline-text-3" id="text-orgf3cc41e">
+<p>We have kind of a chicken and the egg problem here in that I defined the Query to contain the Tree, but we need to use its <code>min</code> function to delete nodes. We'll see how it goes.</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A Tree Query"""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orge8df844" class="outline-3">
-<h3 id="orge8df844">The Insertion Algorithm</h3>
-<div class="outline-text-3" id="text-orge8df844">
-<p>
-This is the <a href="../clrs/">CLRS</a> insert algorithm. As I noted above they consider it a function, rather than a method of the tree.
-</p>
-
-<p>
-One thing that tripped me up initially was the term "insert". I thought that it would put the new node in between existing nodes, but it instead adds it as a leaf. The job of the algorithm is to find the correct leaf to add the new node to and which side to put it on (left or right).
-</p>
-
+<div class="outline-3" id="outline-container-org78fcfbd">
+<h3 id="org78fcfbd">The Insertion Algorithm</h3>
+<div class="outline-text-3" id="text-org78fcfbd">
+<p>This is the <a href="../clrs/index.html">CLRS</a> insert algorithm. As I noted above they consider it a function, rather than a method of the tree.</p>
+<p>One thing that tripped me up initially was the term "insert". I thought that it would put the new node in between existing nodes, but it instead adds it as a leaf. The job of the algorithm is to find the correct leaf to add the new node to and which side to put it on (left or right).</p>
 <pre id="insert-node" style="display:hidden;">
 \begin{algorithm}
 \caption{Insert Node}
@@ -225,17 +169,14 @@ One thing that tripped me up initially was the term "insert". I thought that it 
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<p>
-What we have here is sort of a hunter and hound scenario. The hunter <code>y</code> is pulled along by the hound <code>x</code> as the hound chases down the path to find the spot for the new node. Once the hound falls into the spot where there's no node, the hunter is in the location of the leaf that should be the new node's parent and the hound is where the new node should be inserted.
-</p>
+<p>What we have here is sort of a hunter and hound scenario. The hunter <code>y</code> is pulled along by the hound <code>x</code> as the hound chases down the path to find the spot for the new node. Once the hound falls into the spot where there's no node, the hunter is in the location of the leaf that should be the new node's parent and the hound is where the new node should be inserted.</p>
 </div>
 </div>
-
-<div id="outline-container-orgeff2efd" class="outline-3">
-<h3 id="orgeff2efd">The Insert Method</h3>
-<div class="outline-text-3" id="text-orgeff2efd">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-orgeb71225">
+<h3 id="orgeb71225">The Insert Method</h3>
+<div class="outline-text-3" id="text-orgeb71225">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Insert the node as a new leaf in the tree</span>
 
 <span class="sd">    Args:</span>
@@ -244,20 +185,20 @@ What we have here is sort of a hunter and hound scenario. The hunter <code>y</co
     <span class="n">hunter</span><span class="p">,</span> <span class="n">hound</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span>
 
     <span class="k">while</span> <span class="n">hound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">hunter</span><span class="p">,</span> <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="p">,</span> <span class="n">hound</span><span class="o">.</span><span class="n">left</span> <span class="k">if</span> <span class="n">node</span> <span class="o">&lt;</span> <span class="n">hound</span> <span class="k">else</span> <span class="n">hound</span><span class="o">.</span><span class="n">right</span>
+        <span class="n">hunter</span><span class="p">,</span> <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="p">,</span> <span class="n">hound</span><span class="o">.</span><span class="n">left</span> <span class="k">if</span> <span class="n">node</span> <span class="o">&lt;</span> <span class="n">hound</span> <span class="k">else</span> <span class="n">hound</span><span class="o">.</span><span class="n">right</span>
 
     <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">hunter</span>
 
     <span class="k">if</span> <span class="n">hunter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">node</span>
     <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">hunter</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
-	<span class="n">hunter</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="n">hunter</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span>
     <span class="k">else</span><span class="p">:</span>
-	<span class="n">hunter</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="n">hunter</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span>
     <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.tree</span> <span class="kn">import</span> <span class="n">Tree</span>
+<div class="highlight">
+<pre><span></span><span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree.tree</span> <span class="kn">import</span> <span class="n">Tree</span>
 <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">()</span>
 
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
@@ -274,14 +215,10 @@ What we have here is sort of a hunter and hound scenario. The hunter <code>y</co
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgc6d43aa" class="outline-3">
-<h3 id="orgc6d43aa">Transplant</h3>
-<div class="outline-text-3" id="text-orgc6d43aa">
-<p>
-This is an implementation of what CLRS calls <code>Transplant</code> (although I kind of think <code>replace</code> might be more to the point) where we are given two nodes - one to remove from the tree and the other to take its place. It might not seem obvious by itself why you would need it but it's used when you delete nodes.
-</p>
-
+<div class="outline-3" id="outline-container-org25a882e">
+<h3 id="org25a882e">Transplant</h3>
+<div class="outline-text-3" id="text-org25a882e">
+<p>This is an implementation of what CLRS calls <code>Transplant</code> (although I kind of think <code>replace</code> might be more to the point) where we are given two nodes - one to remove from the tree and the other to take its place. It might not seem obvious by itself why you would need it but it's used when you delete nodes.</p>
 <pre id="transplant-node" style="display:hidden;">
 \begin{algorithm}
 \caption{Transplant Node}
@@ -307,8 +244,8 @@ This is an implementation of what CLRS calls <code>Transplant</code> (although I
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">transplant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_be_replaced</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">transplant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_be_replaced</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Replace node with another</span>
 
 <span class="sd">    Args:</span>
@@ -316,18 +253,18 @@ This is an implementation of what CLRS calls <code>Transplant</code> (although I
 <span class="sd">     replacement: node to replace the incumbent</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">replacement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">replacement</span>
     <span class="k">elif</span> <span class="n">to_be_replaced</span> <span class="o">==</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">:</span>
-	<span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">replacement</span>
+        <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">replacement</span>
     <span class="k">else</span><span class="p">:</span>
-	<span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">replacement</span>
+        <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">replacement</span>
 
     <span class="k">if</span> <span class="n">replacement</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">replacement</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">replacement</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">to_be_replaced</span><span class="o">.</span><span class="n">parent</span>
     <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
 <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
 <span class="n">transplant</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">666</span><span class="p">)</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">transplant</span><span class="p">)</span>
@@ -356,13 +293,10 @@ This is an implementation of what CLRS calls <code>Transplant</code> (although I
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org26f13c5" class="outline-3">
-<h3 id="org26f13c5">Deletion</h3>
-<div class="outline-text-3" id="text-org26f13c5">
-<p>
-The uses for the <code>transplant</code> method might seem a little obscure, but it's a necessary function for our <code>delete</code> method to delete a node from the tree. There are three cases (four-ish really) to take care of:
-</p>
-
+<div class="outline-3" id="outline-container-org06634b3">
+<h3 id="org06634b3">Deletion</h3>
+<div class="outline-text-3" id="text-org06634b3">
+<p>The uses for the <code>transplant</code> method might seem a little obscure, but it's a necessary function for our <code>delete</code> method to delete a node from the tree. There are three cases (four-ish really) to take care of:</p>
 <ol class="org-ol">
 <li>The node to delete has no left child: transplant the right child with the node</li>
 <li>The node to delete has no right child: transplant the left child with the node</li>
@@ -396,30 +330,30 @@ The uses for the <code>transplant</code> method might seem a little obscure, but
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Remove the node from the tree</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     node: node to remove from the tree</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-	<span class="n">replacement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
-	<span class="k">if</span> <span class="n">replacement</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">node</span><span class="p">:</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">replacement</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
-	    <span class="n">replacement</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span>
-	    <span class="n">replacement</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">replacement</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">replacement</span><span class="p">)</span>
-	<span class="n">replacement</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
-	<span class="n">replacement</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">replacement</span>
+        <span class="n">replacement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">replacement</span><span class="o">.</span><span class="n">parent</span> <span class="o">!=</span> <span class="n">node</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">replacement</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+            <span class="n">replacement</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span>
+            <span class="n">replacement</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">replacement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transplant</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">replacement</span><span class="p">)</span>
+        <span class="n">replacement</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
+        <span class="n">replacement</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">replacement</span>
     <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+<div class="highlight">
+<pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
 <span class="n">child</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
 <span class="n">left</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -465,11 +399,11 @@ The uses for the <code>transplant</code> method might seem a little obscure, but
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgf62afb0" class="outline-2">
-<h2 id="orgf62afb0">Plotting</h2>
-<div class="outline-text-2" id="text-orgf62afb0">
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<div class="outline-2" id="outline-container-org9d2ac25">
+<h2 id="org9d2ac25">Plotting</h2>
+<div class="outline-text-2" id="text-org9d2ac25">
+<div class="highlight">
+<pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
     <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
 <span class="n">adjacencies</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -478,32 +412,28 @@ The uses for the <code>transplant</code> method might seem a little obscure, but
 <span class="w">    </span><span class="sd">"""Traverse the nodes and build an adjancency dictionary</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">)</span>
-	<span class="n">left</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="k">else</span> <span class="kc">None</span>
-	<span class="n">right</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="k">else</span> <span class="kc">None</span>
-	<span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)):</span>
-	    <span class="k">if</span> <span class="n">left</span> <span class="ow">and</span> <span class="n">right</span><span class="p">:</span>
-		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-	    <span class="k">elif</span> <span class="n">left</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
-		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="p">)</span>
-	    <span class="k">else</span><span class="p">:</span>
-		<span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span><span class="p">,)</span>
-	    <span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">)</span>
+        <span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">)</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">key</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">left</span> <span class="ow">and</span> <span class="n">right</span><span class="p">:</span>
+                <span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">left</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
+                <span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">adjacencies</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">right</span><span class="p">,)</span>
+            <span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">adjacencies</span><span class="p">)</span>
     <span class="k">return</span>
 
 <span class="n">inorder</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">adjacencies</span><span class="o">=</span><span class="n">adjacencies</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">adjacencies</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 {2: (1, 3), 5: (2, 7), 7: (6, 8), 10: (5, 15), 12: (11, 14), 15: (12, 17), 17: (16, 20)}
 </pre>
-
-
-<p>
-Now that we have an adjacency list, let's try and plot it.
-</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">networkx</span>
+<p>Now that we have an adjacency list, let's try and plot it.</p>
+<div class="highlight">
+<pre><span></span><span class="kn">import</span> <span class="nn">networkx</span>
 
 <span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"binary-search-tree-node-insertion"</span>
 <span class="n">OUTPUT</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
@@ -513,82 +443,60 @@ Now that we have an adjacency list, let's try and plot it.
 <span class="n">pygraph</span> <span class="o">=</span> <span class="n">networkx</span><span class="o">.</span><span class="n">nx_pydot</span><span class="o">.</span><span class="n">to_pydot</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
 <span class="n">pygraph</span><span class="o">.</span><span class="n">write_png</span><span class="p">(</span><span class="n">OUTPUT</span> <span class="o">+</span> <span class="s2">"first_tree.png"</span><span class="p">)</span>
 </pre></div>
-
-<p>
-<img src="first_tree.png" alt="nil"></p>
-
-<p>
-This is sort of an artificial example in that in order to get the plot right I had to insert nodes until they all had two (except the leaves), but it hopefully shows that it works.
-</p>
+<p><img alt="nil" src="first_tree.png"></p>
+<p>This is sort of an artificial example in that in order to get the plot right I had to insert nodes until they all had two (except the leaves), but it hopefully shows that it works.</p>
 </div>
 </div>
-<div id="outline-container-org8863f20" class="outline-2">
-<h2 id="org8863f20">Sources</h2>
-<div class="outline-text-2" id="text-org8863f20">
+<div class="outline-2" id="outline-container-orga9596ae">
+<h2 id="orga9596ae">Sources</h2>
+<div class="outline-text-2" id="text-orga9596ae">
 <ul class="org-ul">
-<li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
+<li><a href="../clrs/index.html">Introduction To Algorithms (CLRS)</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("insert-node"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("transplant-node"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("delete-node"));
 });
-</script>
+</script></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/binary-search-trees/index.html" rel="tag">binary search trees</a></li>
-            <li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/binary-search-trees/index.html" rel="tag">binary search trees</a></li>
+<li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../binary-search-tree-node/index.html" rel="prev" title="Binary Search Tree Node">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../binary-search-tree-queries/index.html" rel="next" title="Binary Search Tree Queries">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../binary-search-tree-node/index.html" rel="prev" title="Binary Search Tree Node">Previous post</a></li>
+<li class="next"><a href="../binary-search-tree-queries/index.html" rel="next" title="Binary Search Tree Queries">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

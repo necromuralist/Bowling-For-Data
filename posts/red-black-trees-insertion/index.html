@@ -1,201 +1,154 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="Inserting Nodes.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="Inserting Nodes." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>Red-Black Trees: Insertion | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/red-black-trees-insertion/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../red-black-trees-rotation/index.html" title="Red-Black Trees: Rotation" type="text/html">
-<link rel="next" href="../red-black-properties/index.html" title="Red-Black Properties" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="Red-Black Trees: Insertion">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/red-black-trees-insertion/index.html">
-<meta property="og:description" content="Inserting Nodes.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-03-23T16:37:50-07:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="binary search trees">
-<meta property="article:tag" content="data structures">
-<meta property="article:tag" content="red-black trees">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/red-black-trees-insertion/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../red-black-trees-rotation/index.html" rel="prev" title="Red-Black Trees: Rotation" type="text/html">
+<link href="../red-black-properties/index.html" rel="next" title="Red-Black Properties" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Red-Black Trees: Insertion" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/red-black-trees-insertion/index.html" property="og:url">
+<meta content="Inserting Nodes." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-03-23T16:37:50-07:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="binary search trees" property="article:tag">
+<meta content="data structures" property="article:tag">
+<meta content="red-black trees" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Red-Black Trees: Insertion</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-03-23T16:37:50-07:00" itemprop="datePublished" title="2022-03-23 16:37">2022-03-23 16:37</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Red-Black Trees: Insertion</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-03-23T16:37:50-07:00" itemprop="datePublished" title="2022-03-23 16:37">2022-03-23 16:37</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="index.html#orgff30274">Insertion</a></li>
-<li>
-<a href="index.html#org7e1ff4b">The Inserter</a>
+<li><a href="index.html#org4957953">Insertion</a></li>
+<li><a href="index.html#orgf17f0de">The Inserter</a>
 <ul>
-<li><a href="index.html#org8d640d8">The Tree Properties</a></li>
-<li><a href="index.html#orgae87146">The Rotator</a></li>
-<li>
-<a href="index.html#org53fb9ac">Insert</a>
+<li><a href="index.html#org0dc3d59">The Tree Properties</a></li>
+<li><a href="index.html#orgafcc644">The Rotator</a></li>
+<li><a href="index.html#orgba0028c">Insert</a>
 <ul>
-<li><a href="index.html#org4f490f9">The Pseudocode</a></li>
-<li><a href="index.html#orga498338">Some Code</a></li>
+<li><a href="index.html#orgc1c1490">The Pseudocode</a></li>
+<li><a href="index.html#orgd28628a">Some Code</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#orgb8c0a1a">Insert Fixup</a>
+<li><a href="index.html#org587bf1e">Insert Fixup</a>
 <ul>
-<li><a href="index.html#orgc28e5e1">The Pseudocode</a></li>
-<li><a href="index.html#org1e9b4d1">The Implementation</a></li>
-<li><a href="index.html#org79f8ad2">Some Testing</a></li>
+<li><a href="index.html#org0150b1a">The Pseudocode</a></li>
+<li><a href="index.html#org093e6f0">The Implementation</a></li>
+<li><a href="index.html#orgba63bc7">Some Testing</a></li>
 </ul>
 </li>
-<li><a href="index.html#org2689ca9">The Call</a></li>
-<li><a href="index.html#orgcfc4f32">All Together Now</a></li>
+<li><a href="index.html#orgbdc4f15">The Call</a></li>
+<li><a href="index.html#orgc492fc6">All Together Now</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org79ea9b3">The Arborist</a>
+<li><a href="index.html#org8ed7063">The Arborist</a>
 <ul>
 <li>
 <ul>
-<li><a href="index.html#org8f2755a">The Inserter Attribute</a></li>
+<li><a href="index.html#orgad82f0d">The Inserter Attribute</a></li>
 </ul>
 </li>
-<li><a href="index.html#orgdc2a1fd">Testing</a></li>
+<li><a href="index.html#orgb443283">Testing</a></li>
 </ul>
 </li>
-<li><a href="index.html#org66f300a">Sources</a></li>
+<li><a href="index.html#org404f516">Sources</a></li>
 </ul>
 </div>
 </div>
-<p>
-This is a post on inserting nodes into a tree. It is part of a series of posts starting with <a href="../red-black-trees/">this post</a>.
-</p>
-
-<div id="outline-container-orgff30274" class="outline-2">
-<h2 id="orgff30274">Insertion</h2>
-<div class="outline-text-2" id="text-orgff30274">
-<p>
-Because we need to maintain the <a href="../red-black-properties/">Red-Black Properties</a> inserting a node into a Red-Black Tree is similar to inserting a node into a Binary Search Tree, but it involves a second function that restores the Red-Black properties if needed.
-</p>
+<p>This is a post on inserting nodes into a tree. It is part of a series of posts starting with <a href="../red-black-trees/index.html">this post</a>.</p>
+<div class="outline-2" id="outline-container-org4957953">
+<h2 id="org4957953">Insertion</h2>
+<div class="outline-text-2" id="text-org4957953">
+<p>Because we need to maintain the <a href="../red-black-properties/index.html">Red-Black Properties</a> inserting a node into a Red-Black Tree is similar to inserting a node into a Binary Search Tree, but it involves a second function that restores the Red-Black properties if needed.</p>
 </div>
 </div>
-
-<div id="outline-container-org7e1ff4b" class="outline-2">
-<h2 id="org7e1ff4b">The Inserter</h2>
-<div class="outline-text-2" id="text-org7e1ff4b">
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Inserter</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-orgf17f0de">
+<h2 id="orgf17f0de">The Inserter</h2>
+<div class="outline-text-2" id="text-orgf17f0de">
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Inserter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Insert a node into the tree</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">      tree: Red-Black-Tree to insert nodes into</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span><span class="p">:</span> <span class="n">Rotator</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span><span class="p">:</span> <span class="n">Rotator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span>
 </pre></div>
 </div>
-<div id="outline-container-org8d640d8" class="outline-3">
-<h3 id="org8d640d8">The Tree Properties</h3>
-<div class="outline-text-3" id="text-org8d640d8">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-3" id="outline-container-org0dc3d59">
+<h3 id="org0dc3d59">The Tree Properties</h3>
+<div class="outline-text-3" id="text-org0dc3d59">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The tree we're inserting nodes into"""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="nd">@tree</span><span class="o">.</span><span class="n">setter</span>
+<div class="highlight">
+<pre><span></span><span class="nd">@tree</span><span class="o">.</span><span class="n">setter</span>
 <span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sapling</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""stores the tree, resets other objects that used the prior tree"""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="n">sapling</span>
@@ -204,25 +157,25 @@ Because we need to maintain the <a href="../red-black-properties/">Red-Black Pro
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgae87146" class="outline-3">
-<h3 id="orgae87146">The Rotator</h3>
-<div class="outline-text-3" id="text-orgae87146">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-3" id="outline-container-orgafcc644">
+<h3 id="orgafcc644">The Rotator</h3>
+<div class="outline-text-3" id="text-orgafcc644">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Rotator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A rotator for inserts"""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span> <span class="o">=</span> <span class="n">Rotator</span><span class="p">(</span><span class="n">tree</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span> <span class="o">=</span> <span class="n">Rotator</span><span class="p">(</span><span class="n">tree</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotate</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org53fb9ac" class="outline-3">
-<h3 id="org53fb9ac">Insert</h3>
-<div class="outline-text-3" id="text-org53fb9ac">
-</div>
-<div id="outline-container-org4f490f9" class="outline-4">
-<h4 id="org4f490f9">The Pseudocode</h4>
-<div class="outline-text-4" id="text-org4f490f9">
+<div class="outline-3" id="outline-container-orgba0028c">
+<h3 id="orgba0028c">Insert</h3>
+<div class="outline-text-3" id="text-orgba0028c"></div>
+<div class="outline-4" id="outline-container-orgc1c1490">
+<h4 id="orgc1c1490">The Pseudocode</h4>
+<div class="outline-text-4" id="text-orgc1c1490">
 <pre id="rb-insert" style="display:hidden;">
 \begin{algorithm}
 \caption{RBInsert}
@@ -261,13 +214,13 @@ Because we need to maintain the <a href="../red-black-properties/">Red-Black Pro
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-<div id="outline-container-orga498338" class="outline-4">
-<h4 id="orga498338">Some Code</h4>
-<div class="outline-text-4" id="text-orga498338">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-orgd28628a">
+<h4 id="orgd28628a">Some Code</h4>
+<div class="outline-text-4" id="text-orgd28628a">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Insert the node into to the tree</span>
 
 <span class="sd">    Args:</span>
@@ -277,24 +230,24 @@ Because we need to maintain the <a href="../red-black-properties/">Red-Black Pro
     <span class="n">hound</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
 
     <span class="k">while</span> <span class="n">hound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">LEAF</span><span class="p">:</span>
-	<span class="n">hunter</span> <span class="o">=</span> <span class="n">hound</span>
-	<span class="k">if</span> <span class="n">node</span> <span class="o">&gt;</span> <span class="n">hound</span><span class="p">:</span>
-	    <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="o">.</span><span class="n">right</span>
-	<span class="k">else</span><span class="p">:</span>
-	    <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="o">.</span><span class="n">left</span>
+        <span class="n">hunter</span> <span class="o">=</span> <span class="n">hound</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="o">&gt;</span> <span class="n">hound</span><span class="p">:</span>
+            <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="o">.</span><span class="n">right</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hound</span> <span class="o">=</span> <span class="n">hound</span><span class="o">.</span><span class="n">left</span>
 
     <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">hunter</span>
 
     <span class="k">if</span> <span class="n">hunter</span> <span class="ow">is</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">ROOT_PARENT</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">node</span>
     <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">LEAF</span>
     <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">LEAF</span>
     <span class="n">node</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">fixup</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
     <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<div class="highlight">
+<pre><span></span><span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
 <span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree</span> <span class="kn">import</span> <span class="n">tree</span>
 <span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree.arborist</span> <span class="kn">import</span> <span class="n">Arborist</span>
 <span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree.forester</span> <span class="kn">import</span> <span class="n">Forester</span>
@@ -340,18 +293,13 @@ Because we need to maintain the <a href="../red-black-properties/">Red-Black Pro
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgb8c0a1a" class="outline-3">
-<h3 id="orgb8c0a1a">Insert Fixup</h3>
-<div class="outline-text-3" id="text-orgb8c0a1a">
-</div>
-<div id="outline-container-orgc28e5e1" class="outline-4">
-<h4 id="orgc28e5e1">The Pseudocode</h4>
-<div class="outline-text-4" id="text-orgc28e5e1">
-<p>
-This is a separate function to restore the red-black properties (if we messed them up with the insert). It's mostly from <a href="../clrs/">CLRS</a> but they used some kind of weird formatting that made it hard for me to tell what their first <code>else</code> conditional was supposed to contain so I'm using a slightly clearer version that I found at <a href="https://gcallah.github.io/algorithms/RedBlackTrees.html">https://gcallah.github.io/algorithms/RedBlackTrees.html</a>.
-</p>
-
+<div class="outline-3" id="outline-container-org587bf1e">
+<h3 id="org587bf1e">Insert Fixup</h3>
+<div class="outline-text-3" id="text-org587bf1e"></div>
+<div class="outline-4" id="outline-container-org0150b1a">
+<h4 id="org0150b1a">The Pseudocode</h4>
+<div class="outline-text-4" id="text-org0150b1a">
+<p>This is a separate function to restore the red-black properties (if we messed them up with the insert). It's mostly from <a href="../clrs/index.html">CLRS</a> but they used some kind of weird formatting that made it hard for me to tell what their first <code>else</code> conditional was supposed to contain so I'm using a slightly clearer version that I found at <a href="https://gcallah.github.io/algorithms/RedBlackTrees.html">https://gcallah.github.io/algorithms/RedBlackTrees.html</a>.</p>
 <pre id="rb-insert-fixup" style="display:hidden;">
 \begin{algorithm}
 \caption{RBInsertFixup}
@@ -386,19 +334,17 @@ This is a separate function to restore the red-black properties (if we messed th
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-
-<div id="outline-container-org1e9b4d1" class="outline-4">
-<h4 id="org1e9b4d1">The Implementation</h4>
-<div class="outline-text-4" id="text-org1e9b4d1">
-</div>
+<div class="outline-4" id="outline-container-org093e6f0">
+<h4 id="org093e6f0">The Implementation</h4>
+<div class="outline-text-4" id="text-org093e6f0"></div>
 <ul class="org-ul">
-<li>
-<a id="org6448987"></a>One Side<br><div class="outline-text-5" id="text-org6448987">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fixup_side</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span>
-	       <span class="n">swap_and_rotate</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<li><a id="org302db97"></a>One Side<br>
+<div class="outline-text-5" id="text-org302db97">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">fixup_side</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">,</span>
+               <span class="n">swap_and_rotate</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Fixup either the left or the right sides</span>
 
 <span class="sd">    Args:</span>
@@ -411,42 +357,42 @@ This is a separate function to restore the red-black properties (if we messed th
     <span class="n">final_rotate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="o">.</span><span class="n">right</span> <span class="k">if</span> <span class="n">left</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotate</span><span class="o">.</span><span class="n">left</span>
 
     <span class="k">if</span> <span class="n">uncle</span><span class="o">.</span><span class="n">is_red</span><span class="p">:</span>
-	<span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
-	<span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
-	<span class="n">uncle</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
-	<span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
+        <span class="n">uncle</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
     <span class="k">else</span><span class="p">:</span>
-	<span class="k">if</span> <span class="n">swap_and_rotate</span><span class="p">:</span>
-	    <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
-	    <span class="n">first_rotate</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
-	<span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
-	<span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
+        <span class="k">if</span> <span class="n">swap_and_rotate</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+            <span class="n">first_rotate</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
 
-	<span class="n">final_rotate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">final_rotate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
     <span class="k">return</span>
 </pre></div>
 </div>
 </li>
-
-<li>
-<a id="org6825b41"></a>Both Sides<br><div class="outline-text-5" id="text-org6825b41">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fixup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<li><a id="org75e0930"></a>Both Sides<br>
+<div class="outline-text-5" id="text-org75e0930">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">fixup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Fix-up the red-black properties after an insert</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     node: the node that was just inserted</span>
 <span class="sd">    """</span>
     <span class="k">while</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_red</span><span class="p">:</span>
-	<span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_left</span><span class="p">:</span>
-	    <span class="n">uncle</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">fixup_side</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">,</span>
-			    <span class="n">swap_and_rotate</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">is_right</span><span class="p">,</span>
-			    <span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-	<span class="k">else</span><span class="p">:</span>
-	    <span class="n">uncle</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">fixup_side</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">,</span>
-			    <span class="n">swap_and_rotate</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">is_left</span><span class="p">,</span>
-			    <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">is_left</span><span class="p">:</span>
+            <span class="n">uncle</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fixup_side</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">,</span>
+                            <span class="n">swap_and_rotate</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">is_right</span><span class="p">,</span>
+                            <span class="n">left</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">uncle</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fixup_side</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">uncle</span><span class="p">,</span>
+                            <span class="n">swap_and_rotate</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">is_left</span><span class="p">,</span>
+                            <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
     <span class="k">return</span>
 </pre></div>
@@ -454,11 +400,11 @@ This is a separate function to restore the red-black properties (if we messed th
 </li>
 </ul>
 </div>
-
-<div id="outline-container-org79f8ad2" class="outline-4">
-<h4 id="org79f8ad2">Some Testing</h4>
-<div class="outline-text-4" id="text-org79f8ad2">
-<div class="highlight"><pre><span></span><span class="c1"># the parent is black</span>
+<div class="outline-4" id="outline-container-orgba63bc7">
+<h4 id="orgba63bc7">Some Testing</h4>
+<div class="outline-text-4" id="text-orgba63bc7">
+<div class="highlight">
+<pre><span></span><span class="c1"># the parent is black</span>
 <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 <span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root</span>
@@ -479,8 +425,8 @@ This is a separate function to restore the red-black properties (if we messed th
 <span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">forester</span><span class="o">.</span><span class="n">black_height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="c1"># the parent is a RED left child and the uncle is red</span>
+<div class="highlight">
+<pre><span></span><span class="c1"># the parent is a RED left child and the uncle is red</span>
 <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root</span>
@@ -560,14 +506,12 @@ This is a separate function to restore the red-black properties (if we messed th
 </div>
 </div>
 </div>
-<div id="outline-container-org2689ca9" class="outline-3">
-<h3 id="org2689ca9">The Call</h3>
-<div class="outline-text-3" id="text-org2689ca9">
-<p>
-This is just a thing to make it look more like a function than a class.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-orgbdc4f15">
+<h3 id="orgbdc4f15">The Call</h3>
+<div class="outline-text-3" id="text-orgbdc4f15">
+<p>This is just a thing to make it look more like a function than a class.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Inserts the node into the tree</span>
 
 <span class="sd">    this is an alias for the ``insert`` method</span>
@@ -579,10 +523,11 @@ This is just a thing to make it look more like a function than a class.
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgcfc4f32" class="outline-3">
-<h3 id="orgcfc4f32">All Together Now</h3>
-<div class="outline-text-3" id="text-orgcfc4f32">
-<div class="highlight"><pre><span></span><span class="n">rb_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">()</span>
+<div class="outline-3" id="outline-container-orgc492fc6">
+<h3 id="orgc492fc6">All Together Now</h3>
+<div class="outline-text-3" id="text-orgc492fc6">
+<div class="highlight">
+<pre><span></span><span class="n">rb_tree</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">()</span>
 <span class="n">arborist</span> <span class="o">=</span> <span class="n">Arborist</span><span class="p">(</span><span class="n">rb_tree</span><span class="p">)</span>
 <span class="n">forester</span> <span class="o">=</span> <span class="n">Forester</span><span class="p">(</span><span class="n">rb_tree</span><span class="p">)</span>
 <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -642,45 +587,42 @@ This is just a thing to make it look more like a function than a class.
 <span class="n">expect</span><span class="p">(</span><span class="n">node_4</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">node_0</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">inorder</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">inorder</span><span class="p">(</span><span class="n">node</span><span class="p">:</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">tree</span><span class="o">.</span><span class="n">LEAF</span><span class="p">:</span>
-	<span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">", "</span><span class="p">)</span>
-	<span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+        <span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">node</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">", "</span><span class="p">)</span>
+        <span class="n">inorder</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
     <span class="k">return</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div id="outline-container-org79ea9b3" class="outline-2">
-<h2 id="org79ea9b3">The Arborist</h2>
-<div class="outline-text-2" id="text-org79ea9b3">
-<p>
-The arborist takes care of trees.
-</p>
-
-<div class="highlight"><pre><span></span><span class="c1"># this project</span>
+<div class="outline-2" id="outline-container-org8ed7063">
+<h2 id="org8ed7063">The Arborist</h2>
+<div class="outline-text-2" id="text-org8ed7063">
+<p>The arborist takes care of trees.</p>
+<div class="highlight">
+<pre><span></span><span class="c1"># this project</span>
 <span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree</span> <span class="kn">import</span> <span class="n">tree</span> <span class="k">as</span> <span class="n">rb_tree</span>
 <span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree.rotator</span> <span class="kn">import</span> <span class="n">Rotator</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Arborist</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Arborist</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""An arborist to take care of trees</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     tree: tree to take care of</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_delete</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delete</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span>
 </pre></div>
-
-
-<div class="highlight"><pre><span></span><span class="nd">@tree</span><span class="o">.</span><span class="n">setter</span>
+<div class="highlight">
+<pre><span></span><span class="nd">@tree</span><span class="o">.</span><span class="n">setter</span>
 <span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sapling</span><span class="p">:</span> <span class="n">rb_tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Sets the tree and wipes out other attributes that use it</span>
 
@@ -693,104 +635,78 @@ The arborist takes care of trees.
     <span class="k">return</span>
 </pre></div>
 </div>
-
-<div id="outline-container-org8f2755a" class="outline-4">
-<h4 id="org8f2755a">The Inserter Attribute</h4>
-<div class="outline-text-4" id="text-org8f2755a">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-orgad82f0d">
+<h4 id="orgad82f0d">The Inserter Attribute</h4>
+<div class="outline-text-4" id="text-orgad82f0d">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Inserter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Something to insert nodes"""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="o">=</span> <span class="n">Inserter</span><span class="p">(</span><span class="n">tree</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_insert</span> <span class="o">=</span> <span class="n">Inserter</span><span class="p">(</span><span class="n">tree</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_insert</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgdc2a1fd" class="outline-3">
-<h3 id="orgdc2a1fd">Testing</h3>
-<div class="outline-text-3" id="text-orgdc2a1fd">
-<div class="highlight"><pre><span></span><span class="n">arborist</span> <span class="o">=</span> <span class="n">Arborist</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">())</span>
+<div class="outline-3" id="outline-container-orgb443283">
+<h3 id="orgb443283">Testing</h3>
+<div class="outline-text-3" id="text-orgb443283">
+<div class="highlight">
+<pre><span></span><span class="n">arborist</span> <span class="o">=</span> <span class="n">Arborist</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">RedBlackTree</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div id="outline-container-org66f300a" class="outline-2">
-<h2 id="org66f300a">Sources</h2>
-<div class="outline-text-2" id="text-org66f300a">
-<p>
-The Main Source:
-</p>
-
+<div class="outline-2" id="outline-container-org404f516">
+<h2 id="org404f516">Sources</h2>
+<div class="outline-text-2" id="text-org404f516">
+<p>The Main Source:</p>
 <ul class="org-ul">
-<li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
+<li><a href="../clrs/index.html">Introduction To Algorithms (CLRS)</a></li>
 </ul>
-<p>
-The Clearer RB-Insert-Fixup Pseudocode:
-</p>
-
+<p>The Clearer RB-Insert-Fixup Pseudocode:</p>
 <ul class="org-ul">
-<li>Design and Analysis of Algorithms: Red-Black Trees [Internet]. [cited 2022 Mar 23]. Available from: <a href="https://gcallah.github.io/algorithms/RedBlackTrees.html">https://gcallah.github.io/algorithms/RedBlackTrees.html</a>
-</li>
+<li>Design and Analysis of Algorithms: Red-Black Trees [Internet]. [cited 2022 Mar 23]. Available from: <a href="https://gcallah.github.io/algorithms/RedBlackTrees.html">https://gcallah.github.io/algorithms/RedBlackTrees.html</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("rb-insert"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("rb-insert-fixup"));
 });
-</script>
+</script></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/binary-search-trees/index.html" rel="tag">binary search trees</a></li>
-            <li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
-            <li><a class="tag p-category" href="../../categories/red-black-trees/index.html" rel="tag">red-black trees</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/binary-search-trees/index.html" rel="tag">binary search trees</a></li>
+<li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
+<li><a class="tag p-category" href="../../categories/red-black-trees/index.html" rel="tag">red-black trees</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../red-black-trees-rotation/index.html" rel="prev" title="Red-Black Trees: Rotation">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../red-black-properties/index.html" rel="next" title="Red-Black Properties">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../red-black-trees-rotation/index.html" rel="prev" title="Red-Black Trees: Rotation">Previous post</a></li>
+<li class="next"><a href="../red-black-properties/index.html" rel="next" title="Red-Black Properties">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

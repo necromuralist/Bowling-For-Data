@@ -1,177 +1,117 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="Running and plotting the Bubble Sort's performance.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="Running and plotting the Bubble Sort's performance." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>Bubble Sort: An Empirical Look | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/bubble-sort-an-empirical-look/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../bubble-sort-the-implementation/index.html" title="Bubble Sort: The Implementation" type="text/html">
-<link rel="next" href="../double-bubble-sort/index.html" title="Bubble-Sort Revisited" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="Bubble Sort: An Empirical Look">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/bubble-sort-an-empirical-look/index.html">
-<meta property="og:description" content="Running and plotting the Bubble Sort's performance.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2021-11-17T10:57:02-08:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="brute-force">
-<meta property="article:tag" content="sorting">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/bubble-sort-an-empirical-look/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../bubble-sort-the-implementation/index.html" rel="prev" title="Bubble Sort: The Implementation" type="text/html">
+<link href="../double-bubble-sort/index.html" rel="next" title="Bubble-Sort Revisited" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Bubble Sort: An Empirical Look" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/bubble-sort-an-empirical-look/index.html" property="og:url">
+<meta content="Running and plotting the Bubble Sort's performance." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2021-11-17T10:57:02-08:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="brute-force" property="article:tag">
+<meta content="sorting" property="article:tag">
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Bubble Sort: An Empirical Look</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2021-11-17T10:57:02-08:00" itemprop="datePublished" title="2021-11-17 10:57">2021-11-17 10:57</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Bubble Sort: An Empirical Look</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2021-11-17T10:57:02-08:00" itemprop="datePublished" title="2021-11-17 10:57">2021-11-17 10:57</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li>
-<a href="index.html#org9871475">An Empirical Look</a>
+<li><a href="index.html#org796acdd">An Empirical Look</a>
 <ul>
-<li>
-<a href="index.html#orgf6ec983">Some Setup</a>
+<li><a href="index.html#orgbe32b92">Some Setup</a>
 <ul>
-<li><a href="index.html#org0460718">Stuff For Later</a></li>
-<li><a href="index.html#orgc500e04">Numba  Random</a></li>
+<li><a href="index.html#org132bcb9">Stuff For Later</a></li>
+<li><a href="index.html#org8a9206f">Numba Random</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org3a39b14">A Counter</a>
+<li><a href="index.html#orgb4ff737">A Counter</a>
 <ul>
-<li><a href="index.html#orge02032f">Some Types</a></li>
-<li><a href="index.html#org6f3aa14">The Sorting Function (With Counts)</a></li>
+<li><a href="index.html#org25ebd9b">Some Types</a></li>
+<li><a href="index.html#orge2289c2">The Sorting Function (With Counts)</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#orgc4bdd60">Testing the Counter</a>
+<li><a href="index.html#org6207bcc">Testing the Counter</a>
 <ul>
-<li><a href="index.html#org80d6ecf">A Random Input</a></li>
-<li><a href="index.html#org12450b6">The Worst Case</a></li>
+<li><a href="index.html#orge8d48e9">A Random Input</a></li>
+<li><a href="index.html#org5dc0b93">The Worst Case</a></li>
 </ul>
 </li>
-<li><a href="index.html#orgcb516a2">The Tracker</a></li>
-<li>
-<a href="index.html#orgbd308d1">Try Them Out</a>
+<li><a href="index.html#orgaf691ec">The Tracker</a></li>
+<li><a href="index.html#orgc889131">Try Them Out</a>
 <ul>
-<li><a href="index.html#org85f237b">Comparisons</a></li>
+<li><a href="index.html#orgd3f2cec">Comparisons</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org4f9f4ab">Swaps</a>
+<li><a href="index.html#orgc639cb2">Swaps</a>
 <ul>
-<li><a href="index.html#org7eec309">Worst Case</a></li>
+<li><a href="index.html#orga8356fc">Worst Case</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="index.html#org5c83d1f">Onward</a></li>
+<li><a href="index.html#org3276ecd">Onward</a></li>
 </ul>
 </div>
 </div>
-<p>
-This is a continuation of a <a href="../../pages/the-bubble-sort/">series on the Bubble Sort</a>. In the <a href="../bubble-sort-the-implementation/">previous post</a> I made an implementation of the Bubble Sort in python. In this post I'll run it with inputs of varying sizes to see how its runtime changes as well as do a plot to get a sense of how it rearranges the items its sorting as it works.
-</p>
-<div id="outline-container-org9871475" class="outline-2">
-<h2 id="org9871475">An Empirical Look</h2>
-<div class="outline-text-2" id="text-org9871475">
-<p>
-Using math to figure out the number of comparisons is nice and all, but let's do some counting using real code. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps.
-</p>
+<p>This is a continuation of a <a href="../../pages/the-bubble-sort/index.html">series on the Bubble Sort</a>. In the <a href="../bubble-sort-the-implementation/index.html">previous post</a> I made an implementation of the Bubble Sort in python. In this post I'll run it with inputs of varying sizes to see how its runtime changes as well as do a plot to get a sense of how it rearranges the items its sorting as it works.</p>
+<div class="outline-2" id="outline-container-org796acdd">
+<h2 id="org796acdd">An Empirical Look</h2>
+<div class="outline-text-2" id="text-org796acdd">
+<p>Using math to figure out the number of comparisons is nice and all, but let's do some counting using real code. I'm going to re-implement the bubble sort but this time keeping track of the comparisons and swaps.</p>
 </div>
-<div id="outline-container-orgf6ec983" class="outline-3">
-<h3 id="orgf6ec983">Some Setup</h3>
-<div class="outline-text-3" id="text-orgf6ec983">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<div class="outline-3" id="outline-container-orgbe32b92">
+<h3 id="orgbe32b92">Some Setup</h3>
+<div class="outline-text-3" id="text-orgbe32b92">
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
@@ -192,55 +132,54 @@ Using math to figure out the number of comparisons is nice and all, but let's do
 <span class="kn">from</span> <span class="nn">graeae</span> <span class="kn">import</span> <span class="n">EmbedHoloviews</span><span class="p">,</span> <span class="n">Timer</span>
 </pre></div>
 </div>
-<div id="outline-container-org0460718" class="outline-4">
-<h4 id="org0460718">Stuff For Later</h4>
-<div class="outline-text-4" id="text-org0460718">
-<div class="highlight"><pre><span></span><span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
+<div class="outline-4" id="outline-container-org132bcb9">
+<h4 id="org132bcb9">Stuff For Later</h4>
+<div class="outline-text-4" id="text-org132bcb9">
+<div class="highlight">
+<pre><span></span><span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
 <span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"bubble-sort-an-empirical-look"</span>
 <span class="n">PATH</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"files/posts/</span><span class="si">{</span><span class="n">SLUG</span><span class="si">}</span><span class="s2">/"</span>
 <span class="n">Embed</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">EmbedHoloviews</span><span class="p">,</span> <span class="n">folder_path</span><span class="o">=</span><span class="n">PATH</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgc500e04" class="outline-4">
-<h4 id="orgc500e04">Numba  Random</h4>
-<div class="outline-text-4" id="text-orgc500e04">
-<div class="highlight"><pre><span></span><span class="n">numba_random</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="mi">2021</span><span class="p">)</span>
+<div class="outline-4" id="outline-container-org8a9206f">
+<h4 id="org8a9206f">Numba Random</h4>
+<div class="outline-text-4" id="text-org8a9206f">
+<div class="highlight">
+<pre><span></span><span class="n">numba_random</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="mi">2021</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org3a39b14" class="outline-3">
-<h3 id="org3a39b14">A Counter</h3>
-<div class="outline-text-3" id="text-org3a39b14">
-<p>
-This is going to be a reimplementation of the Bubble Sort function but with variables added to keep track of the counts. I originally did this class-based so I could re-use the code but once I switched from pypy to numba that started to get problematic, and the functions are short anyway so I guess it's all the same.
-</p>
+<div class="outline-3" id="outline-container-orgb4ff737">
+<h3 id="orgb4ff737">A Counter</h3>
+<div class="outline-text-3" id="text-orgb4ff737">
+<p>This is going to be a reimplementation of the Bubble Sort function but with variables added to keep track of the counts. I originally did this class-based so I could re-use the code but once I switched from pypy to numba that started to get problematic, and the functions are short anyway so I guess it's all the same.</p>
 </div>
-
-<div id="outline-container-orge02032f" class="outline-4">
-<h4 id="orge02032f">Some Types</h4>
-<div class="outline-text-4" id="text-orge02032f">
-<div class="highlight"><pre><span></span><span class="n">ElementCount</span> <span class="o">=</span> <span class="nb">int</span>
+<div class="outline-4" id="outline-container-org25ebd9b">
+<h4 id="org25ebd9b">Some Types</h4>
+<div class="outline-text-4" id="text-org25ebd9b">
+<div class="highlight">
+<pre><span></span><span class="n">ElementCount</span> <span class="o">=</span> <span class="nb">int</span>
 <span class="n">ComparisonCount</span> <span class="o">=</span> <span class="nb">int</span>
 <span class="n">SwapCount</span> <span class="o">=</span> <span class="nb">int</span>
 <span class="n">SortedElements</span> <span class="o">=</span> <span class="n">MutableSequence</span>
 <span class="n">Counts</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ElementCount</span><span class="p">,</span> <span class="n">ComparisonCount</span><span class="p">,</span> <span class="n">SwapCount</span><span class="p">,</span> <span class="n">SortedElements</span><span class="p">]</span>
 
 <span class="n">BubbleOutput</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"BubbleOutput"</span><span class="p">,</span>
-			  <span class="p">[</span>
-			      <span class="s2">"element_count"</span><span class="p">,</span> <span class="s2">"comparisons"</span><span class="p">,</span>
-			      <span class="s2">"swaps"</span><span class="p">,</span>
-			      <span class="s2">"elements"</span><span class="p">])</span>
+                          <span class="p">[</span>
+                              <span class="s2">"element_count"</span><span class="p">,</span> <span class="s2">"comparisons"</span><span class="p">,</span>
+                              <span class="s2">"swaps"</span><span class="p">,</span>
+                              <span class="s2">"elements"</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org6f3aa14" class="outline-4">
-<h4 id="org6f3aa14">The Sorting Function (With Counts)</h4>
-<div class="outline-text-4" id="text-org6f3aa14">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">bubble</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counts</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-orge2289c2">
+<h4 id="orge2289c2">The Sorting Function (With Counts)</h4>
+<div class="outline-text-4" id="text-orge2289c2">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">bubble</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Counts</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Sorts the list in place</span>
 
 <span class="sd">    Args:</span>
@@ -252,27 +191,25 @@ This is going to be a reimplementation of the Bubble Sort function but with vari
     <span class="n">all_but_one</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="n">comparisons</span> <span class="o">=</span> <span class="n">swaps</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">items_sorted</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_but_one</span><span class="p">):</span>
-	<span class="k">for</span> <span class="n">in_front_of_us</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_but_one</span> <span class="o">-</span> <span class="n">items_sorted</span><span class="p">):</span>
-	    <span class="n">comparisons</span> <span class="o">+=</span> <span class="mi">1</span>
-	    <span class="n">to_the_right</span> <span class="o">=</span> <span class="n">in_front_of_us</span> <span class="o">+</span> <span class="mi">1</span>
-	    <span class="k">if</span> <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">]:</span>
-		<span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">],</span>
-		 <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">])</span> <span class="o">=</span> <span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">],</span>
-					  <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">])</span>
-		<span class="n">swaps</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">in_front_of_us</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_but_one</span> <span class="o">-</span> <span class="n">items_sorted</span><span class="p">):</span>
+            <span class="n">comparisons</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">to_the_right</span> <span class="o">=</span> <span class="n">in_front_of_us</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">]:</span>
+                <span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">],</span>
+                 <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">])</span> <span class="o">=</span> <span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">],</span>
+                                          <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">])</span>
+                <span class="n">swaps</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">BubbleOutput</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span> <span class="n">comparisons</span><span class="p">,</span> <span class="n">swaps</span><span class="p">,</span> <span class="n">elements</span><span class="p">)</span>
 </pre></div>
-
-<p>
-One thing to note is that in the algorithm the outer loop stops at \(n-2\), which it also does here, but since the <code>range</code> function doesn't include the last number our argument is only \(n-1\), which might look confusing at first, and might sound even more confusing when you read this, but the point is they're the same even though they might not look exactly the same.
-</p>
+<p>One thing to note is that in the algorithm the outer loop stops at \(n-2\), which it also does here, but since the <code>range</code> function doesn't include the last number our argument is only \(n-1\), which might look confusing at first, and might sound even more confusing when you read this, but the point is they're the same even though they might not look exactly the same.</p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgc4bdd60" class="outline-3">
-<h3 id="orgc4bdd60">Testing the Counter</h3>
-<div class="outline-text-3" id="text-orgc4bdd60">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_non_decreasing</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-org6207bcc">
+<h3 id="org6207bcc">Testing the Counter</h3>
+<div class="outline-text-3" id="text-org6207bcc">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">check_non_decreasing</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Checks that all the elements in the list are non-decreasing</span>
 
 <span class="sd">    Args:</span>
@@ -283,21 +220,18 @@ One thing to note is that in the algorithm the outer loop stops at \(n-2\), whic
 <span class="sd">    """</span>
     <span class="n">last_one</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-	<span class="n">this_one</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-	<span class="n">expect</span><span class="p">(</span><span class="n">this_one</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above_or_equal</span><span class="p">(</span><span class="n">last_one</span><span class="p">))</span>
-	<span class="n">last_one</span> <span class="o">=</span> <span class="n">this_one</span>
+        <span class="n">this_one</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">expect</span><span class="p">(</span><span class="n">this_one</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_above_or_equal</span><span class="p">(</span><span class="n">last_one</span><span class="p">))</span>
+        <span class="n">last_one</span> <span class="o">=</span> <span class="n">this_one</span>
     <span class="k">return</span>
 </pre></div>
 </div>
-
-<div id="outline-container-org80d6ecf" class="outline-4">
-<h4 id="org80d6ecf">A Random Input</h4>
-<div class="outline-text-4" id="text-org80d6ecf">
-<p>
-Because we aren't using any kind of short-circuiting to stop once the data is sorted, it will always loop \(\Omega(n^2)\), but the number of swaps will depend on the input.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>
+<div class="outline-4" id="outline-container-orge8d48e9">
+<h4 id="orge8d48e9">A Random Input</h4>
+<div class="outline-text-4" id="text-orge8d48e9">
+<p>Because we aren't using any kind of short-circuiting to stop once the data is sorted, it will always loop \(\Omega(n^2)\), but the number of swaps will depend on the input.</p>
+<div class="highlight">
+<pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="n">inputs</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)),</span> <span class="n">k</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
 
 <span class="n">output</span> <span class="o">=</span> <span class="n">bubble</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
@@ -310,14 +244,12 @@ Because we aren't using any kind of short-circuiting to stop once the data is so
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org12450b6" class="outline-4">
-<h4 id="org12450b6">The Worst Case</h4>
-<div class="outline-text-4" id="text-org12450b6">
-<p>
-In the worst case where it's in the exact opposite sorted order (non-increasing instead of non-decreasing) the number of comparisons should equaly the number of swaps.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="n">bubble</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)))))</span>
+<div class="outline-4" id="outline-container-org5dc0b93">
+<h4 id="org5dc0b93">The Worst Case</h4>
+<div class="outline-text-4" id="text-org5dc0b93">
+<p>In the worst case where it's in the exact opposite sorted order (non-increasing instead of non-decreasing) the number of comparisons should equaly the number of swaps.</p>
+<div class="highlight">
+<pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="n">bubble</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)))))</span>
 <span class="n">check_non_decreasing</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">comparisons</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">expected_runtime</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">swaps</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">expected_swaps</span><span class="p">))</span>
@@ -325,20 +257,17 @@ In the worst case where it's in the exact opposite sorted order (non-increasing 
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgcb516a2" class="outline-3">
-<h3 id="orgcb516a2">The Tracker</h3>
-<div class="outline-text-3" id="text-orgcb516a2">
-<p>
-To visualize what the sort is doing I'm going to update the bubble sort to keep track of the order of the items as it's being sorted. I'm using a dictionary to map the list values to their locations so we can't use inputs where there are repeated elements or more than one list of locations will be mapped to a element value.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">IndexHistory</span> <span class="o">=</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+<div class="outline-3" id="outline-container-orgaf691ec">
+<h3 id="orgaf691ec">The Tracker</h3>
+<div class="outline-text-3" id="text-orgaf691ec">
+<p>To visualize what the sort is doing I'm going to update the bubble sort to keep track of the order of the items as it's being sorted. I'm using a dictionary to map the list values to their locations so we can't use inputs where there are repeated elements or more than one list of locations will be mapped to a element value.</p>
+<div class="highlight">
+<pre><span></span><span class="n">IndexHistory</span> <span class="o">=</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="n">ElementValue</span> <span class="o">=</span> <span class="nb">int</span>
 <span class="n">Swaps</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="n">ElementValue</span><span class="p">,</span> <span class="n">IndexHistory</span><span class="p">]</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">swap_tracker</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Swaps</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">swap_tracker</span><span class="p">(</span><span class="n">elements</span><span class="p">:</span> <span class="n">MutableSequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Swaps</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Does the bubble-sort and tracks the locations</span>
 
 <span class="sd">    Args:</span>
@@ -352,28 +281,25 @@ To visualize what the sort is doing I'm going to update the bubble sort to keep 
     <span class="n">swaps</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elements</span><span class="p">)}</span>
 
     <span class="k">for</span> <span class="n">items_sorted</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_but_one</span><span class="p">):</span>
-	<span class="k">for</span> <span class="n">in_front_of_us</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_but_one</span> <span class="o">-</span> <span class="n">items_sorted</span><span class="p">):</span>
-	    <span class="n">to_the_right</span> <span class="o">=</span> <span class="n">in_front_of_us</span> <span class="o">+</span> <span class="mi">1</span>
-	    <span class="k">if</span> <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">]:</span>
-		<span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">],</span>
-		 <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">])</span> <span class="o">=</span> <span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">],</span>
-					  <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">])</span>
-		<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
-		    <span class="n">swaps</span><span class="p">[</span><span class="n">element</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">in_front_of_us</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">all_but_one</span> <span class="o">-</span> <span class="n">items_sorted</span><span class="p">):</span>
+            <span class="n">to_the_right</span> <span class="o">=</span> <span class="n">in_front_of_us</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">]:</span>
+                <span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">],</span>
+                 <span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">])</span> <span class="o">=</span> <span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">to_the_right</span><span class="p">],</span>
+                                          <span class="n">elements</span><span class="p">[</span><span class="n">in_front_of_us</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+                    <span class="n">swaps</span><span class="p">[</span><span class="n">element</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">swaps</span>
 </pre></div>
-
-<p>
-First a little sanity check just to make sure it still works.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<p>First a little sanity check just to make sure it still works.</p>
+<div class="highlight">
+<pre><span></span><span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 
 <span class="n">swaps</span> <span class="o">=</span> <span class="n">swap_tracker</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">swaps</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">)))</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
+<div class="highlight">
+<pre><span></span><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">inputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
 <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
 
@@ -384,48 +310,38 @@ First a little sanity check just to make sure it still works.
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgbd308d1" class="outline-3">
-<h3 id="orgbd308d1">Try Them Out</h3>
-<div class="outline-text-3" id="text-orgbd308d1">
-</div>
-<div id="outline-container-org85f237b" class="outline-4">
-<h4 id="org85f237b">Comparisons</h4>
-<div class="outline-text-4" id="text-org85f237b">
-<p>
-Let's look at how the comparisons and swaps change as the input gets bigger. To speed this up I'm going to run the sort in numba.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">numba_bubble</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="n">bubble</span><span class="p">)</span>
+<div class="outline-3" id="outline-container-orgc889131">
+<h3 id="orgc889131">Try Them Out</h3>
+<div class="outline-text-3" id="text-orgc889131"></div>
+<div class="outline-4" id="outline-container-orgd3f2cec">
+<h4 id="orgd3f2cec">Comparisons</h4>
+<div class="outline-text-4" id="text-orgd3f2cec">
+<p>Let's look at how the comparisons and swaps change as the input gets bigger. To speed this up I'm going to run the sort in numba.</p>
+<div class="highlight">
+<pre><span></span><span class="n">numba_bubble</span> <span class="o">=</span> <span class="n">njit</span><span class="p">(</span><span class="n">bubble</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="p">{}</span>
+<div class="highlight">
+<pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">things_to_sort</span> <span class="o">=</span> <span class="p">[</span><span class="n">numba_random</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
-		  <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)]</span>
+                  <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)]</span>
 
 <span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
     <span class="n">comparisons_and_swaps</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-	<span class="n">delayed</span><span class="p">(</span><span class="n">numba_bubble</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">numba_bubble</span><span class="p">)(</span><span class="n">thing_to_sort</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">thing_to_sort</span> <span class="ow">in</span> <span class="n">things_to_sort</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Started: 2021-12-22 02:49:12.003456
 Ended: 2021-12-22 02:50:44.485043
 Elapsed: 0:01:32.481587
 </pre>
-
-
-
-<p>
-Now we'll plot it.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">SIZE</span><span class="p">,</span> <span class="n">COMPARISONS</span><span class="p">,</span> <span class="n">SWAPS</span><span class="p">,</span> <span class="n">ELEMENTS</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
+<p>Now we'll plot it.</p>
+<div class="highlight">
+<pre><span></span><span class="n">SIZE</span><span class="p">,</span> <span class="n">COMPARISONS</span><span class="p">,</span> <span class="n">SWAPS</span><span class="p">,</span> <span class="n">ELEMENTS</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
 <span class="n">unzipped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">comparisons_and_swaps</span><span class="p">))</span>
 <span class="n">bubba_frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Elements"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">SIZE</span><span class="p">],</span>
-				<span class="s2">"Comparisons"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">COMPARISONS</span><span class="p">],</span>
-				<span class="s2">"Swaps"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">SWAPS</span><span class="p">]})</span>
+                                <span class="s2">"Comparisons"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">COMPARISONS</span><span class="p">],</span>
+                                <span class="s2">"Swaps"</span><span class="p">:</span> <span class="n">unzipped</span><span class="p">[</span><span class="n">SWAPS</span><span class="p">]})</span>
 <span class="n">bubba_frame</span><span class="p">[</span><span class="s2">"n^2"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bubba_frame</span><span class="p">[</span><span class="s2">"Elements"</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
 <span class="n">tooltips_comparisons</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">(</span><span class="s2">"Elements"</span><span class="p">,</span> <span class="s2">"@Elements{0,}"</span><span class="p">),</span>
@@ -458,25 +374,19 @@ Now we'll plot it.
     <span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
 <span class="n">output</span> <span class="o">=</span> <span class="n">Embed</span><span class="p">(</span><span class="n">plot</span><span class="o">=</span><span class="n">plot</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">"bubble_sort_comparisons"</span><span class="p">)()</span>
 </pre></div>
-
-<object type="text/html" data="bubble_sort_comparisons.html" style="width:100%" height="800">
-  <p>Figure Missing</p>
+<object data="bubble_sort_comparisons.html" height="800" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of comparisons, and the bottom line (blue) is the number of swaps. If you hover over the lines you can see that each line is roughly double the one below it - there are around twice as many comparisons as swaps for a given input and \(n^2\) is around twice as big as the comparison count for a given input.
-</p>
+<p>The top line (yellow) is the square of the size of the inputs, the middle (red) is the number of comparisons, and the bottom line (blue) is the number of swaps. If you hover over the lines you can see that each line is roughly double the one below it - there are around twice as many comparisons as swaps for a given input and \(n^2\) is around twice as big as the comparison count for a given input.</p>
 </div>
 </div>
 </div>
-<div id="outline-container-org4f9f4ab" class="outline-3">
-<h3 id="org4f9f4ab">Swaps</h3>
-<div class="outline-text-3" id="text-org4f9f4ab">
-<p>
-The comparisons and swaps are pretty much what we expected to see, they just confirm the theoretical assessment, but now let's look at plotting the swaps as they occur to see if we can understand what the bubble sort is doing.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">COUNT</span> <span class="o">=</span> <span class="mi">20</span>
+<div class="outline-3" id="outline-container-orgc639cb2">
+<h3 id="orgc639cb2">Swaps</h3>
+<div class="outline-text-3" id="text-orgc639cb2">
+<p>The comparisons and swaps are pretty much what we expected to see, they just confirm the theoretical assessment, but now let's look at plotting the swaps as they occur to see if we can understand what the bubble sort is doing.</p>
+<div class="highlight">
+<pre><span></span><span class="n">COUNT</span> <span class="o">=</span> <span class="mi">20</span>
 <span class="n">inputs</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">COUNT</span><span class="p">)),</span> <span class="n">k</span><span class="o">=</span><span class="n">COUNT</span><span class="p">)</span>
 <span class="n">swaps</span> <span class="o">=</span> <span class="n">swap_tracker</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
 
@@ -495,39 +405,27 @@ The comparisons and swaps are pretty much what we expected to see, they just con
 
 <span class="n">ticks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">COUNT</span><span class="p">)]</span>
 <span class="n">plot</span> <span class="o">=</span> <span class="n">melted</span><span class="o">.</span><span class="n">hvplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"Swap"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"Location In Array"</span><span class="p">,</span>
-		     <span class="n">by</span><span class="o">=</span><span class="s2">"Value To Sort"</span><span class="p">)</span><span class="o">.</span><span class="n">opts</span><span class="p">(</span><span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">hover</span><span class="p">],</span>
-					      <span class="n">show_legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-		     <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">yticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
-			    <span class="n">title</span><span class="o">=</span><span class="s2">"Bubble Sort Swaps"</span><span class="p">,)</span>
+                     <span class="n">by</span><span class="o">=</span><span class="s2">"Value To Sort"</span><span class="p">)</span><span class="o">.</span><span class="n">opts</span><span class="p">(</span><span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">hover</span><span class="p">],</span>
+                                              <span class="n">show_legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">yticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
+                            <span class="n">title</span><span class="o">=</span><span class="s2">"Bubble Sort Swaps"</span><span class="p">,)</span>
 
 
 <span class="n">output</span> <span class="o">=</span> <span class="n">Embed</span><span class="p">(</span><span class="n">plot</span><span class="o">=</span><span class="n">plot</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">"bubble_sort_swaps"</span><span class="p">)()</span>
 </pre></div>
-
-<object type="text/html" data="bubble_sort_swaps.html" style="width:100%" height="800">
-  <p>Figure Missing</p>
+<object data="bubble_sort_swaps.html" height="800" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-<b><b>Aside:</b></b>
-</p>
-
-<p>
-HoloViews seems to not let you set the Tooltips if you use multiple columns, which is why I went through all the rigamarole of melting it. If you just plot it as the DataFrame with each column being one of the tracked locations for a sort value (e.g. the column name is '1' and the rows are the positions in the array at each swap) then the plot comes out okay, but the labels are kind of confusing.
-</p>
-
-<p>
-The plot is hopefully a useful way to figure out what's going on. If you look at the unsorted values you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (1 and 2) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down.
-</p>
+<p><b>Aside:</b></p>
+<p>HoloViews seems to not let you set the Tooltips if you use multiple columns, which is why I went through all the rigamarole of melting it. If you just plot it as the DataFrame with each column being one of the tracked locations for a sort value (e.g. the column name is '1' and the rows are the positions in the array at each swap) then the plot comes out okay, but the labels are kind of confusing.</p>
+<p>The plot is hopefully a useful way to figure out what's going on. If you look at the unsorted values you can see that once they are the largest of the unsorted values, they "bubble up" in a diagonal but straight line. Before this plot I would have said that the largest elements are the ones that get sorted first, but if you look at the plot (assuming I don't re-run it and change the arrangements) and in particular you look at the least-valued elements (1 and 2) you can see that they reach their final position fairly early, just by virtue of being in a position to get pushed down.</p>
 </div>
-<div id="outline-container-org7eec309" class="outline-4">
-<h4 id="org7eec309">Worst Case</h4>
-<div class="outline-text-4" id="text-org7eec309">
-<p>
-The random-input gives an interesting view of how the algorithm might work in practice, but let's look at the worst-case input where the values are in the opposite of the sorted order.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">COUNT</span> <span class="o">=</span> <span class="mi">20</span>
+<div class="outline-4" id="outline-container-orga8356fc">
+<h4 id="orga8356fc">Worst Case</h4>
+<div class="outline-text-4" id="text-orga8356fc">
+<p>The random-input gives an interesting view of how the algorithm might work in practice, but let's look at the worst-case input where the values are in the opposite of the sorted order.</p>
+<div class="highlight">
+<pre><span></span><span class="n">COUNT</span> <span class="o">=</span> <span class="mi">20</span>
 <span class="n">inputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">COUNT</span><span class="p">)))</span>
 <span class="n">swaps</span> <span class="o">=</span> <span class="n">swap_tracker</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
 
@@ -538,80 +436,65 @@ The random-input gives an interesting view of how the algorithm might work in pr
 
 <span class="n">ticks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">COUNT</span><span class="p">)]</span>
 <span class="n">plot</span> <span class="o">=</span> <span class="n">melted</span><span class="o">.</span><span class="n">hvplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"Swap"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"Location In Array"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"blues"</span><span class="p">,</span>
-		     <span class="n">by</span><span class="o">=</span><span class="s2">"Value To Sort"</span><span class="p">)</span><span class="o">.</span><span class="n">opts</span><span class="p">(</span><span class="n">show_legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-		     <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">yticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
-			    <span class="n">title</span><span class="o">=</span><span class="s2">"Bubble Sort Swaps (Worst Case)"</span><span class="p">,)</span>
+                     <span class="n">by</span><span class="o">=</span><span class="s2">"Value To Sort"</span><span class="p">)</span><span class="o">.</span><span class="n">opts</span><span class="p">(</span><span class="n">show_legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">yticks</span><span class="o">=</span><span class="n">ticks</span><span class="p">,</span>
+                            <span class="n">title</span><span class="o">=</span><span class="s2">"Bubble Sort Swaps (Worst Case)"</span><span class="p">,)</span>
 
 
 <span class="n">output</span> <span class="o">=</span> <span class="n">Embed</span><span class="p">(</span><span class="n">plot</span><span class="o">=</span><span class="n">plot</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="s2">"bubble_sort_worst_swaps"</span><span class="p">)()</span>
 </pre></div>
-
-<object type="text/html" data="bubble_sort_worst_swaps.html" style="width:100%" height="800">
-  <p>Figure Missing</p>
+<object data="bubble_sort_worst_swaps.html" height="800" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-This image gives an even better sense of the way that the bubble sort works. Since the Bubble Sort uses a left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.
-</p>
+<p>This image gives an even better sense of the way that the bubble sort works. Since the Bubble Sort uses a left-to-right traversal and swapping as you go, the largest values shoot up to their final positions in straight lines, while the lesser values get pushed down a little with each traversal until they reach the correct position.</p>
 </div>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org5c83d1f" class="outline-2">
-<h2 id="org5c83d1f">Onward</h2>
-<div class="outline-text-2" id="text-org5c83d1f">
-<p>
-The <a href="../double-bubble-sort/">final post in this series</a> (maybe) will look at a variation on the Bubble Sort that can improve the performance in special cases.
-</p>
+<div class="outline-2" id="outline-container-org3276ecd">
+<h2 id="org3276ecd">Onward</h2>
+<div class="outline-text-2" id="text-org3276ecd">
+<p>The <a href="../double-bubble-sort/index.html">final post in this series</a> (maybe) will look at a variation on the Bubble Sort that can improve the performance in special cases.</p>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+</div>
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/brute-force/index.html" rel="tag">brute-force</a></li>
-            <li><a class="tag p-category" href="../../categories/sorting/index.html" rel="tag">sorting</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/brute-force/index.html" rel="tag">brute-force</a></li>
+<li><a class="tag p-category" href="../../categories/sorting/index.html" rel="tag">sorting</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../bubble-sort-the-implementation/index.html" rel="prev" title="Bubble Sort: The Implementation">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../double-bubble-sort/index.html" rel="next" title="Bubble-Sort Revisited">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
+<li class="previous"><a href="../bubble-sort-the-implementation/index.html" rel="prev" title="Bubble Sort: The Implementation">Previous post</a></li>
+<li class="next"><a href="../double-bubble-sort/index.html" rel="next" title="Bubble-Sort Revisited">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
 
-            
-            
-        
-    </div>
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

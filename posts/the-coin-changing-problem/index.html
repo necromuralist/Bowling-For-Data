@@ -1,237 +1,159 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>The Coin Changing Problem | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/the-coin-changing-problem/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../course-global-warming/index.html" title="Global Warming I: The Science and Modeling of Climate Change" type="text/html">
-<link rel="next" href="../latpaps/index.html" title="Learning Algorithms Through Programming and Problem Solving" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="The Coin Changing Problem">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/the-coin-changing-problem/index.html">
-<meta property="og:description" content="Table of Contents
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/the-coin-changing-problem/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../course-global-warming/index.html" rel="prev" title="Global Warming I: The Science and Modeling of Climate Change" type="text/html">
+<link href="../latpaps/index.html" rel="next" title="Learning Algorithms Through Programming and Problem Solving" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="The Coin Changing Problem" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/the-coin-changing-problem/index.html" property="og:url">
+<meta content="Table of Contents The Change Problem SetUp Imports Setup The Cashier's Algorithm Pseudocode Python Implementation A First Test U.S. Denominations Plotting the Coin Counts/Loops The Double-Di" property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-06-16T15:11:33-07:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="dynamic programming" property="article:tag">
+<meta content="greedy" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
 
-
-The Change Problem
-SetUp
-
-Imports
-Setup
-
-
-The Cashier's Algorithm
-
-Pseudocode
-Python Implementation
-
-A First Test
-U.S. Denominations
-
-
-Plotting the Coin Counts/Loops
-
-The Double-Di">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-06-16T15:11:33-07:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="dynamic programming">
-<meta property="article:tag" content="greedy">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">The Coin Changing Problem</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-06-16T15:11:33-07:00" itemprop="datePublished" title="2022-06-16 15:11">2022-06-16 15:11</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">The Coin Changing Problem</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-06-16T15:11:33-07:00" itemprop="datePublished" title="2022-06-16 15:11">2022-06-16 15:11</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="index.html#orgdf72830">The Change Problem</a></li>
-<li>
-<a href="index.html#orgd71690c">SetUp</a>
+<li><a href="index.html#org3e88245">The Change Problem</a></li>
+<li><a href="index.html#org932da7e">SetUp</a>
 <ul>
-<li><a href="index.html#orgd222ae5">Imports</a></li>
-<li><a href="index.html#orgcd66f91">Setup</a></li>
+<li><a href="index.html#org80f8cf1">Imports</a></li>
+<li><a href="index.html#orgca59ff1">Setup</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org1019a55">The Cashier's Algorithm</a>
+<li><a href="index.html#orge8e46b1">The Cashier's Algorithm</a>
 <ul>
-<li><a href="index.html#orgadb3dc4">Pseudocode</a></li>
-<li>
-<a href="index.html#orgc9495ff">Python Implementation</a>
+<li><a href="index.html#org171cc54">Pseudocode</a></li>
+<li><a href="index.html#org4433c2d">Python Implementation</a>
 <ul>
-<li><a href="index.html#org228e5b0">A First Test</a></li>
-<li><a href="index.html#orge3342e8">U.S. Denominations</a></li>
+<li><a href="index.html#org23da1cd">A First Test</a></li>
+<li><a href="index.html#orga878600">U.S. Denominations</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#orgf88f6b6">Plotting the Coin Counts/Loops</a>
+<li><a href="index.html#org247f16d">Plotting the Coin Counts/Loops</a>
 <ul>
-<li><a href="index.html#org0f76c92">The Double-Dime</a></li>
+<li><a href="index.html#org8d76623">The Double-Dime</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>
-<a href="index.html#org96ba792">A Greedy Version</a>
+<li><a href="index.html#org3285c46">A Greedy Version</a>
 <ul>
-<li><a href="index.html#orgf9ba6ed">In Pseudocode</a></li>
-<li><a href="index.html#org3092916">In Python</a></li>
-<li>
-<a href="index.html#orgc1422f8">Testing It Out</a>
+<li><a href="index.html#org9fc9080">In Pseudocode</a></li>
+<li><a href="index.html#org6ccbeaa">In Python</a></li>
+<li><a href="index.html#org4d1db8e">Testing It Out</a>
 <ul>
-<li><a href="index.html#orgda89eef">A First Test</a></li>
-<li><a href="index.html#orgb1f9ef9">U.S. Denominations</a></li>
-<li><a href="index.html#org52d8e81">The Double-Dime</a></li>
+<li><a href="index.html#org5c0bda5">A First Test</a></li>
+<li><a href="index.html#org66a2096">U.S. Denominations</a></li>
+<li><a href="index.html#orgdbf8ad8">The Double-Dime</a></li>
 </ul>
 </li>
-<li><a href="index.html#orgf8a04a1">Plotting</a></li>
+<li><a href="index.html#orgd1d532a">Plotting</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org30e5885">A Brute Force Changer</a>
+<li><a href="index.html#org08e3650">A Brute Force Changer</a>
 <ul>
-<li><a href="index.html#org3d41db1">Plotting</a></li>
+<li><a href="index.html#org29c6d70">Plotting</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#orgbc3485d">Memoized Changer</a>
+<li><a href="index.html#orgeff0268">Memoized Changer</a>
 <ul>
-<li><a href="index.html#orgf9a2462">Checking the Memoized Changer</a></li>
-<li>
-<a href="index.html#org1a69abe">Plotting</a>
+<li><a href="index.html#org37359c0">Checking the Memoized Changer</a></li>
+<li><a href="index.html#orgec61090">Plotting</a>
 <ul>
-<li><a href="index.html#org3ffcb3d">All the Methods So Far</a></li>
-<li><a href="index.html#org25b5fac">Obsolete Coins</a></li>
+<li><a href="index.html#orgc0073d5">All the Methods So Far</a></li>
+<li><a href="index.html#orgc14e917">Obsolete Coins</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>
-<a href="index.html#org19cd147">Iterative Dynamic Programming</a>
+<li><a href="index.html#org99586a1">Iterative Dynamic Programming</a>
 <ul>
-<li><a href="index.html#org324956a">Plotting</a></li>
+<li><a href="index.html#orgf2cc28e">Plotting</a></li>
 </ul>
 </li>
-<li><a href="index.html#org4eabbd7">Sources</a></li>
+<li><a href="index.html#org7ced12a">Sources</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgdf72830" class="outline-2">
-<h2 id="orgdf72830">The Change Problem</h2>
-<div class="outline-text-2" id="text-orgdf72830">
-<p>
-The <i>Change Problem (Coin Changing Problem)</i> asks us to convert some amount of money into denominations using the fewest coins.
-</p>
-
-<p>
-<b><b>Input:</b></b> An integer (<i>money</i>) and an array of <i>d</i> denominations (\(c = c_1, c_2, \ldots, c_d\)) in decreasing order of value (\(c_1 &gt; c_2&gt; \cdots &gt; c_d\)).
-</p>
-
-<p>
-<b><b>Output:</b></b> A list of <i>d</i> integers \(i_1, i_2, \ldots, i_d\) such that \(c_1 \cdot i_1 + c_2 \cdot i_2 + \cdots + c_d \cdot i_d = money\)  and \(i_1 + i_2 + \cdots + i_d\) is as small as possible.
-</p>
+<div class="outline-2" id="outline-container-org3e88245">
+<h2 id="org3e88245">The Change Problem</h2>
+<div class="outline-text-2" id="text-org3e88245">
+<p>The <i>Change Problem (Coin Changing Problem)</i> asks us to convert some amount of money into denominations using the fewest coins.</p>
+<p><b>Input:</b> An integer (<i>money</i>) and an array of <i>d</i> denominations (\(c = c_1, c_2, \ldots, c_d\)) in decreasing order of value (\(c_1 &gt; c_2&gt; \cdots &gt; c_d\)).</p>
+<p><b>Output:</b> A list of <i>d</i> integers \(i_1, i_2, \ldots, i_d\) such that \(c_1 \cdot i_1 + c_2 \cdot i_2 + \cdots + c_d \cdot i_d = money\) and \(i_1 + i_2 + \cdots + i_d\) is as small as possible.</p>
 </div>
 </div>
-<div id="outline-container-orgd71690c" class="outline-2">
-<h2 id="orgd71690c">SetUp</h2>
-<div class="outline-text-2" id="text-orgd71690c">
-</div>
-<div id="outline-container-orgd222ae5" class="outline-3">
-<h3 id="orgd222ae5">Imports</h3>
-<div class="outline-text-3" id="text-orgd222ae5">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<div class="outline-2" id="outline-container-org932da7e">
+<h2 id="org932da7e">SetUp</h2>
+<div class="outline-text-2" id="text-org932da7e"></div>
+<div class="outline-3" id="outline-container-org80f8cf1">
+<h3 id="org80f8cf1">Imports</h3>
+<div class="outline-text-3" id="text-org80f8cf1">
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
@@ -246,11 +168,11 @@ The <i>Change Problem (Coin Changing Problem)</i> asks us to convert some amount
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgcd66f91" class="outline-3">
-<h3 id="orgcd66f91">Setup</h3>
-<div class="outline-text-3" id="text-orgcd66f91">
-<div class="highlight"><pre><span></span><span class="n">ChangeCounts</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"ChangeCounts"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"coin_counts"</span><span class="p">,</span> <span class="s2">"run_count"</span><span class="p">])</span>
+<div class="outline-3" id="outline-container-orgca59ff1">
+<h3 id="orgca59ff1">Setup</h3>
+<div class="outline-text-3" id="text-orgca59ff1">
+<div class="highlight">
+<pre><span></span><span class="n">ChangeCounts</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"ChangeCounts"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"coin_counts"</span><span class="p">,</span> <span class="s2">"run_count"</span><span class="p">])</span>
 <span class="n">ChangeCountsTable</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"ChangeCounts"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"coin_counts"</span><span class="p">,</span> <span class="s2">"run_count"</span><span class="p">,</span> <span class="s2">"table"</span><span class="p">])</span>
 
 <span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"the-coin-changing-problem"</span>
@@ -258,27 +180,24 @@ The <i>Change Problem (Coin Changing Problem)</i> asks us to convert some amount
 <span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
 
 <span class="n">PlotParameters</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"PlotParameters"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"height"</span><span class="p">,</span> <span class="s2">"width"</span><span class="p">],</span>
-			    <span class="n">defaults</span><span class="o">=</span><span class="p">[</span><span class="mi">525</span><span class="p">,</span> <span class="mi">750</span><span class="p">])()</span>
+                            <span class="n">defaults</span><span class="o">=</span><span class="p">[</span><span class="mi">525</span><span class="p">,</span> <span class="mi">750</span><span class="p">])()</span>
 
 <span class="n">Denominations</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">"Denominations"</span><span class="p">,</span> <span class="s2">"US double_dime obsolete"</span><span class="p">,</span>
-			   <span class="n">defaults</span><span class="o">=</span><span class="p">[[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-				    <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-				    <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])()</span>
+                           <span class="n">defaults</span><span class="o">=</span><span class="p">[[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                    <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                    <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])()</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div id="outline-container-org1019a55" class="outline-2">
-<h2 id="org1019a55">The Cashier's Algorithm</h2>
-<div class="outline-text-2" id="text-org1019a55">
-<p>
-The way many cashier's make change for customers is using a greedy approach.
-</p>
+<div class="outline-2" id="outline-container-orge8e46b1">
+<h2 id="orge8e46b1">The Cashier's Algorithm</h2>
+<div class="outline-text-2" id="text-orge8e46b1">
+<p>The way many cashier's make change for customers is using a greedy approach.</p>
 </div>
-
-<div id="outline-container-orgadb3dc4" class="outline-3">
-<h3 id="orgadb3dc4">Pseudocode</h3>
-<div class="outline-text-3" id="text-orgadb3dc4">
+<div class="outline-3" id="outline-container-org171cc54">
+<h3 id="org171cc54">Pseudocode</h3>
+<div class="outline-text-3" id="text-org171cc54">
 <pre id="cashiers-algorithm" style="display:hidden;">
 \begin{algorithm}
 \caption{CashiersChange}
@@ -293,14 +212,13 @@ The way many cashier's make change for customers is using a greedy approach.
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-
-<div id="outline-container-orgc9495ff" class="outline-3">
-<h3 id="orgc9495ff">Python Implementation</h3>
-<div class="outline-text-3" id="text-orgc9495ff">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cashier_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCounts</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-org4433c2d">
+<h3 id="org4433c2d">Python Implementation</h3>
+<div class="outline-text-3" id="text-org4433c2d">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">cashier_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCounts</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Implements the cashier's method for making change</span>
 
 <span class="sd">    Args:</span>
@@ -315,27 +233,24 @@ The way many cashier's make change for customers is using a greedy approach.
     <span class="n">loop_count</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">denominations</span><span class="p">):</span>
-	<span class="n">coin_count</span> <span class="o">=</span> <span class="mi">0</span>
-	<span class="k">while</span> <span class="n">denomination</span> <span class="o">&lt;=</span> <span class="n">remainder</span><span class="p">:</span>
-	    <span class="n">coin_count</span> <span class="o">+=</span> <span class="mi">1</span>
-	    <span class="n">loop_count</span> <span class="o">+=</span> <span class="mi">1</span>
-	    <span class="n">remainder</span> <span class="o">=</span> <span class="n">remainder</span> <span class="o">-</span> <span class="n">denomination</span>
+        <span class="n">coin_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">denomination</span> <span class="o">&lt;=</span> <span class="n">remainder</span><span class="p">:</span>
+            <span class="n">coin_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">loop_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">remainder</span> <span class="o">=</span> <span class="n">remainder</span> <span class="o">-</span> <span class="n">denomination</span>
 
-	<span class="n">coins</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">coin_count</span>
+        <span class="n">coins</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">coin_count</span>
     <span class="k">return</span> <span class="n">ChangeCounts</span><span class="p">(</span><span class="n">coin_counts</span><span class="o">=</span><span class="n">coins</span><span class="p">,</span> <span class="n">run_count</span><span class="o">=</span><span class="n">loop_count</span><span class="p">)</span>
 </pre></div>
 </div>
-
-<div id="outline-container-org228e5b0" class="outline-4">
-<h4 id="org228e5b0">A First Test</h4>
-<div class="outline-text-4" id="text-org228e5b0">
-<p>
-Examples from <a href="../latpaps/">LATPAPS</a>.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_coins</span><span class="p">(</span><span class="n">answer</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-		<span class="n">expected_coins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-		<span class="n">expected_total</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-org23da1cd">
+<h4 id="org23da1cd">A First Test</h4>
+<div class="outline-text-4" id="text-org23da1cd">
+<p>Examples from <a href="../latpaps/index.html">LATPAPS</a>.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">check_coins</span><span class="p">(</span><span class="n">answer</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+                <span class="n">expected_coins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="n">expected_total</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check that our answer matches the expected</span>
 
 <span class="sd">    Args:</span>
@@ -350,12 +265,12 @@ Examples from <a href="../latpaps/">LATPAPS</a>.
     <span class="n">expect</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">answer</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">expected_coins</span><span class="p">)))</span>
     <span class="n">expect</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="o">*</span><span class="n">expected_coins</span><span class="p">))</span>
     <span class="n">expect</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">count</span> <span class="o">*</span> <span class="n">coin</span> <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">coin</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">answer</span><span class="p">,</span> <span class="n">denominations</span><span class="p">)))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
-	<span class="n">equal</span><span class="p">(</span><span class="n">expected_total</span><span class="p">)</span>
+        <span class="n">equal</span><span class="p">(</span><span class="n">expected_total</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="c1"># case 1</span>
+<div class="highlight">
+<pre><span></span><span class="c1"># case 1</span>
 <span class="n">money</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">actual</span> <span class="o">=</span> <span class="n">cashier_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">coins</span><span class="p">)</span>
@@ -374,36 +289,26 @@ Examples from <a href="../latpaps/">LATPAPS</a>.
 <span class="n">check_coins</span><span class="p">(</span><span class="n">actual</span><span class="o">.</span><span class="n">coin_counts</span><span class="p">,</span> <span class="n">coins</span><span class="p">,</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">money</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"case 2: </span><span class="si">{</span><span class="n">actual</span><span class="o">.</span><span class="n">run_count</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 case 1: 2
 case 2: 6
 case 2: 14
 </pre>
-
-
-<p>
-The number of loops is dependent on the change owed, with an upper limit based on the denominations. In this case if we assume you wouldn't give out more than 99 cents in change then we would cap out at \( 9 \times 10 + 1 \times 5 + 4 \times 1\) = 14 coins/loops.
-</p>
+<p>The number of loops is dependent on the change owed, with an upper limit based on the denominations. In this case if we assume you wouldn't give out more than 99 cents in change then we would cap out at \( 9 \times 10 + 1 \times 5 + 4 \times 1\) = 14 coins/loops.</p>
 </div>
 </div>
-
-<div id="outline-container-orge3342e8" class="outline-4">
-<h4 id="orge3342e8">U.S. Denominations</h4>
-<div class="outline-text-4" id="text-orge3342e8">
-<p>
-This is a quick check using the U.S. coins most commonly used by cashiers. By adding a 25 cent piece we reduce the upper limit on the amount of coins needed to \(3 \times 25 + 2 \times 10 + 4 \times 1\) = 9 coins.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span>
+<div class="outline-4" id="outline-container-orga878600">
+<h4 id="orga878600">U.S. Denominations</h4>
+<div class="outline-text-4" id="text-orga878600">
+<p>This is a quick check using the U.S. coins most commonly used by cashiers. By adding a 25 cent piece we reduce the upper limit on the amount of coins needed to \(3 \times 25 + 2 \times 10 + 4 \times 1\) = 9 coins.</p>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 [25, 10, 5, 1]
 </pre>
-
-
-<div class="highlight"><pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">28</span>
+<div class="highlight">
+<pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">28</span>
 <span class="n">actual</span> <span class="o">=</span> <span class="n">cashier_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span>
 <span class="n">check_coins</span><span class="p">(</span><span class="n">actual</span><span class="o">.</span><span class="n">coin_counts</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">money</span><span class="p">)</span>
 
@@ -414,54 +319,44 @@ This is a quick check using the U.S. coins most commonly used by cashiers. By ad
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgf88f6b6" class="outline-3">
-<h3 id="orgf88f6b6">Plotting the Coin Counts/Loops</h3>
-<div class="outline-text-3" id="text-orgf88f6b6">
-<div class="highlight"><pre><span></span><span class="n">PLOT_AMOUNTS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+<div class="outline-3" id="outline-container-org247f16d">
+<h3 id="org247f16d">Plotting the Coin Counts/Loops</h3>
+<div class="outline-text-3" id="text-org247f16d">
+<div class="highlight">
+<pre><span></span><span class="n">PLOT_AMOUNTS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
 <span class="n">CASHIER_COUNTS</span> <span class="o">=</span> <span class="p">[</span><span class="n">cashier_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
-		  <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+                  <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 
 <span class="n">PLOT_FRAME</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Amount to Change"</span><span class="p">:</span> <span class="n">PLOT_AMOUNTS</span><span class="p">,</span>
-			       <span class="s2">"Coins"</span><span class="p">:</span> <span class="n">CASHIER_COUNTS</span><span class="p">})</span>
+                               <span class="s2">"Coins"</span><span class="p">:</span> <span class="n">CASHIER_COUNTS</span><span class="p">})</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">PLOT_FRAME</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Coins"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="s2">"Coins"</span><span class="p">])</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="s2">"Cashier's Change Coin Counts (Common U.S. Coins)"</span><span class="p">,</span>
-	<span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-	<span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Cashier's Change Coin Counts (Common U.S. Coins)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"cashiers-change-us-coins"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="cashiers-change-us-coins.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
-</div>
-
-<div id="outline-container-org0f76c92" class="outline-4">
-<h4 id="org0f76c92">The Double-Dime</h4>
-<div class="outline-text-4" id="text-org0f76c92">
-<p>
-Our cashier algorithm turns out to work for the specific set of coins that cashiers commonly use, but will it work for other coins as well?
-</p>
-
-<p>
-According to Wikipedia, there was at one time a proposal in the United States for a <a href="https://en.wikipedia.org/wiki/Twenty-cent_piece_(United_States_coin)">twenty-cent piece</a> (and at one time there were <a href="https://en.wikipedia.org/wiki/Obsolete_denominations_of_United_States_currency#Coinage">half-cent, two-cent, and three-cent coins</a>).If we include the twenty cent piece amongst our denominations, we find that there are cases where the cashier algorithm will miss the optimal solution.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Denominations</span><span class="o">.</span><span class="n">double_dime</span><span class="p">)</span>
+<object data="cashiers-change-us-coins.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
+</object></div>
+<div class="outline-4" id="outline-container-org8d76623">
+<h4 id="org8d76623">The Double-Dime</h4>
+<div class="outline-text-4" id="text-org8d76623">
+<p>Our cashier algorithm turns out to work for the specific set of coins that cashiers commonly use, but will it work for other coins as well?</p>
+<p>According to Wikipedia, there was at one time a proposal in the United States for a <a href="https://en.wikipedia.org/wiki/Twenty-cent_piece_(United_States_coin)">twenty-cent piece</a> (and at one time there were <a href="https://en.wikipedia.org/wiki/Obsolete_denominations_of_United_States_currency#Coinage">half-cent, two-cent, and three-cent coins</a>).If we include the twenty cent piece amongst our denominations, we find that there are cases where the cashier algorithm will miss the optimal solution.</p>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Denominations</span><span class="o">.</span><span class="n">double_dime</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 [25, 20, 10, 5, 1]
 </pre>
-
-
-<div class="highlight"><pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">40</span>
+<div class="highlight">
+<pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">40</span>
 <span class="n">actual</span> <span class="o">=</span> <span class="n">cashier_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">double_dime</span><span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -469,32 +364,23 @@ According to Wikipedia, there was at one time a proposal in the United States fo
 <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"AssertionError: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 AssertionError: 
 expected: 3 to equal 2
 </pre>
-
-
-<p>
-Because the cashier algorithm always takes the largest possible coins first, it ends up using 25¢ + 10¢ + 5¢ as the solution instead of the optimal 20¢ + 20¢. While it might seem artificial, given the characterization of this as a solution to making change, it's important to note that generalizing the cashier algorithm beyond the curated denominations or even beyond coins specifically leaves it vulnerable to cases where it will fail.
-</p>
+<p>Because the cashier algorithm always takes the largest possible coins first, it ends up using 25¢ + 10¢ + 5¢ as the solution instead of the optimal 20¢ + 20¢. While it might seem artificial, given the characterization of this as a solution to making change, it's important to note that generalizing the cashier algorithm beyond the curated denominations or even beyond coins specifically leaves it vulnerable to cases where it will fail.</p>
 </div>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org96ba792" class="outline-2">
-<h2 id="org96ba792">A Greedy Version</h2>
-<div class="outline-text-2" id="text-org96ba792">
-<p>
-As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it into a silghtly smarter version which uses a little arithmetic to get to the same point.
-</p>
+<div class="outline-2" id="outline-container-org3285c46">
+<h2 id="org3285c46">A Greedy Version</h2>
+<div class="outline-text-2" id="text-org3285c46">
+<p>As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it into a silghtly smarter version which uses a little arithmetic to get to the same point.</p>
 </div>
-
-<div id="outline-container-orgf9ba6ed" class="outline-3">
-<h3 id="orgf9ba6ed">In Pseudocode</h3>
-<div class="outline-text-3" id="text-orgf9ba6ed">
+<div class="outline-3" id="outline-container-org9fc9080">
+<h3 id="org9fc9080">In Pseudocode</h3>
+<div class="outline-text-3" id="text-org9fc9080">
 <pre id="greedy-algorithm" style="display:hidden;">
 \begin{algorithm}
 \caption{GreedyChange}
@@ -512,13 +398,13 @@ As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it 
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-<div id="outline-container-org3092916" class="outline-3">
-<h3 id="org3092916">In Python</h3>
-<div class="outline-text-3" id="text-org3092916">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">greedy_changer</span><span class="p">(</span><span class="n">money</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCounts</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-org6ccbeaa">
+<h3 id="org6ccbeaa">In Python</h3>
+<div class="outline-text-3" id="text-org6ccbeaa">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">greedy_changer</span><span class="p">(</span><span class="n">money</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCounts</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make change using the fewest coins</span>
 
 <span class="sd">    Args:</span>
@@ -532,22 +418,21 @@ As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it 
     <span class="n">remainder</span> <span class="o">=</span> <span class="n">money</span>
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">location</span><span class="p">,</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">denominations</span><span class="p">):</span>
-	<span class="n">coins</span><span class="p">[</span><span class="n">location</span><span class="p">]</span> <span class="o">=</span> <span class="n">remainder</span> <span class="o">//</span> <span class="n">denomination</span>
-	<span class="n">remainder</span> <span class="o">=</span> <span class="n">remainder</span> <span class="o">-</span> <span class="n">denomination</span> <span class="o">*</span> <span class="n">coins</span><span class="p">[</span><span class="n">location</span><span class="p">]</span>
-	<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">coins</span><span class="p">[</span><span class="n">location</span><span class="p">]</span> <span class="o">=</span> <span class="n">remainder</span> <span class="o">//</span> <span class="n">denomination</span>
+        <span class="n">remainder</span> <span class="o">=</span> <span class="n">remainder</span> <span class="o">-</span> <span class="n">denomination</span> <span class="o">*</span> <span class="n">coins</span><span class="p">[</span><span class="n">location</span><span class="p">]</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">ChangeCounts</span><span class="p">(</span><span class="n">coins</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgc1422f8" class="outline-3">
-<h3 id="orgc1422f8">Testing It Out</h3>
-<div class="outline-text-3" id="text-orgc1422f8">
-</div>
-<div id="outline-container-orgda89eef" class="outline-4">
-<h4 id="orgda89eef">A First Test</h4>
-<div class="outline-text-4" id="text-orgda89eef">
-<div class="highlight"><pre><span></span><span class="c1"># case 1</span>
+<div class="outline-3" id="outline-container-org4d1db8e">
+<h3 id="org4d1db8e">Testing It Out</h3>
+<div class="outline-text-3" id="text-org4d1db8e"></div>
+<div class="outline-4" id="outline-container-org5c0bda5">
+<h4 id="org5c0bda5">A First Test</h4>
+<div class="outline-text-4" id="text-org5c0bda5">
+<div class="highlight">
+<pre><span></span><span class="c1"># case 1</span>
 <span class="n">money</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">actual</span> <span class="o">=</span> <span class="n">greedy_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">coins</span><span class="p">)</span>
@@ -560,11 +445,11 @@ As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it 
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgb1f9ef9" class="outline-4">
-<h4 id="orgb1f9ef9">U.S. Denominations</h4>
-<div class="outline-text-4" id="text-orgb1f9ef9">
-<div class="highlight"><pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">28</span>
+<div class="outline-4" id="outline-container-org66a2096">
+<h4 id="org66a2096">U.S. Denominations</h4>
+<div class="outline-text-4" id="text-org66a2096">
+<div class="highlight">
+<pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">28</span>
 <span class="n">actual</span> <span class="o">=</span> <span class="n">greedy_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span>
 <span class="n">check_coins</span><span class="p">(</span><span class="n">actual</span><span class="o">.</span><span class="n">coin_counts</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">money</span><span class="p">)</span>
 
@@ -574,15 +459,12 @@ As noted, the Cashier's Algorithm is a greedy algorithm, but let's translate it 
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org52d8e81" class="outline-4">
-<h4 id="org52d8e81">The Double-Dime</h4>
-<div class="outline-text-4" id="text-org52d8e81">
-<p>
-Looking at the greedy-algorithm you can see that it only has one loop that traverses the denominations of coins - so it is a very quick algorithm, but while our greedy algorithm turns out to work for the specific set of coins that cashiers use, it also falls prey to sometimes missing the optimal solution.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">40</span>
+<div class="outline-4" id="outline-container-orgdbf8ad8">
+<h4 id="orgdbf8ad8">The Double-Dime</h4>
+<div class="outline-text-4" id="text-orgdbf8ad8">
+<p>Looking at the greedy-algorithm you can see that it only has one loop that traverses the denominations of coins - so it is a very quick algorithm, but while our greedy algorithm turns out to work for the specific set of coins that cashiers use, it also falls prey to sometimes missing the optimal solution.</p>
+<div class="highlight">
+<pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">40</span>
 <span class="n">actual</span> <span class="o">=</span> <span class="n">greedy_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">double_dime</span><span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -590,59 +472,50 @@ Looking at the greedy-algorithm you can see that it only has one loop that trave
 <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"AssertionError: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 AssertionError: 
 expected: 3 to equal 2
-</pre>
+</pre></div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-orgf8a04a1" class="outline-3">
-<h3 id="orgf8a04a1">Plotting</h3>
-<div class="outline-text-3" id="text-orgf8a04a1">
-<div class="highlight"><pre><span></span><span class="n">greedy_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">greedy_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
-		 <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+<div class="outline-3" id="outline-container-orgd1d532a">
+<h3 id="orgd1d532a">Plotting</h3>
+<div class="outline-text-3" id="text-orgd1d532a">
+<div class="highlight">
+<pre><span></span><span class="n">greedy_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">greedy_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
+                 <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 <span class="n">GREEDY_FRAME</span> <span class="o">=</span> <span class="n">PLOT_FRAME</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"Coins"</span><span class="p">:</span> <span class="s2">"Cashier"</span><span class="p">})</span>
 <span class="n">GREEDY_FRAME</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">]</span> <span class="o">=</span> <span class="n">greedy_counts</span>
 <span class="n">melted</span> <span class="o">=</span> <span class="n">GREEDY_FRAME</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">],</span>
-			   <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">,</span> <span class="s2">"Cashier"</span><span class="p">],</span>
-			   <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
-			   <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
+                           <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">,</span> <span class="s2">"Cashier"</span><span class="p">],</span>
+                           <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
+                           <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Amount to Change"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Loop Count"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="s2">"Loop Count"</span><span class="p">,</span> <span class="s2">"Change Method"</span><span class="p">],</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="s2">"Cashier's and Greedy Change Coin Counts (Common U.S. Coins)"</span><span class="p">,</span>
-	<span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-	<span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Cashier's and Greedy Change Coin Counts (Common U.S. Coins)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"cashiers-greedy-change-us-coins"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="cashiers-greedy-change-us-coins.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="cashiers-greedy-change-us-coins.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-Since the Cashier works by repeated subtraction instead of division it goes up with the amount of change owed, and so generally does worse than the Greedy changer, except in the cases where it takes fewer coins to make the change than the number of denominations there are. If I had included the fifty cent piece it would have done a little better in the second half of the plot.
-</p>
+<p>Since the Cashier works by repeated subtraction instead of division it goes up with the amount of change owed, and so generally does worse than the Greedy changer, except in the cases where it takes fewer coins to make the change than the number of denominations there are. If I had included the fifty cent piece it would have done a little better in the second half of the plot.</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org30e5885" class="outline-2">
-<h2 id="org30e5885">A Brute Force Changer</h2>
-<div class="outline-text-2" id="text-org30e5885">
-<p>
-To get around the limitations of the greedy-style of change making we'll figure out all the ways we can make change for a particular amount and pick the solution with the fewest coins.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">brute_changer</span><span class="p">(</span><span class="n">money</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCounts</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-org08e3650">
+<h2 id="org08e3650">A Brute Force Changer</h2>
+<div class="outline-text-2" id="text-org08e3650">
+<p>To get around the limitations of the greedy-style of change making we'll figure out all the ways we can make change for a particular amount and pick the solution with the fewest coins.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">brute_changer</span><span class="p">(</span><span class="n">money</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCounts</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make change using the fewest coins</span>
 
 <span class="sd">    Args:</span>
@@ -656,23 +529,23 @@ To get around the limitations of the greedy-style of change making we'll figure 
     <span class="n">number_of_denominations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">denominations</span><span class="p">)</span>
     <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">first</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_denominations</span><span class="p">):</span>
-	<span class="n">remainder</span> <span class="o">=</span> <span class="n">money</span>
-	<span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_denominations</span>
-	<span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
-	<span class="k">for</span> <span class="n">next_location</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">number_of_denominations</span><span class="p">):</span>
-	    <span class="n">denomination</span> <span class="o">=</span> <span class="n">denominations</span><span class="p">[</span><span class="n">next_location</span><span class="p">]</span>
-	    <span class="n">count</span> <span class="o">=</span> <span class="n">remainder</span><span class="o">//</span><span class="n">denomination</span>
-	    <span class="n">remainder</span> <span class="o">=</span> <span class="n">remainder</span> <span class="o">-</span> <span class="n">count</span> <span class="o">*</span> <span class="n">denomination</span>
-	    <span class="n">counts</span><span class="p">[</span><span class="n">next_location</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
-	    <span class="n">total</span> <span class="o">+=</span> <span class="n">count</span>
-	    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-	<span class="k">if</span> <span class="n">total</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">:</span>
-	    <span class="n">best_counts</span> <span class="o">=</span> <span class="n">counts</span>
-	    <span class="n">best</span> <span class="o">=</span> <span class="n">total</span>
+        <span class="n">remainder</span> <span class="o">=</span> <span class="n">money</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_of_denominations</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">next_location</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">number_of_denominations</span><span class="p">):</span>
+            <span class="n">denomination</span> <span class="o">=</span> <span class="n">denominations</span><span class="p">[</span><span class="n">next_location</span><span class="p">]</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">remainder</span><span class="o">//</span><span class="n">denomination</span>
+            <span class="n">remainder</span> <span class="o">=</span> <span class="n">remainder</span> <span class="o">-</span> <span class="n">count</span> <span class="o">*</span> <span class="n">denomination</span>
+            <span class="n">counts</span><span class="p">[</span><span class="n">next_location</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">count</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">total</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">:</span>
+            <span class="n">best_counts</span> <span class="o">=</span> <span class="n">counts</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="n">total</span>
     <span class="k">return</span> <span class="n">ChangeCounts</span><span class="p">(</span><span class="n">best_counts</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="c1"># case 1</span>
+<div class="highlight">
+<pre><span></span><span class="c1"># case 1</span>
 <span class="n">money</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">actual</span> <span class="o">=</span> <span class="n">brute_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">coins</span><span class="p">)</span>
@@ -693,99 +566,72 @@ To get around the limitations of the greedy-style of change making we'll figure 
 <span class="n">actual</span> <span class="o">=</span> <span class="n">brute_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">coins</span><span class="p">)</span>
 <span class="n">check_coins</span><span class="p">(</span><span class="n">actual</span><span class="o">.</span><span class="n">coin_counts</span><span class="p">,</span> <span class="n">coins</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">money</span><span class="p">)</span>
 </pre></div>
-
-<p>
-And now our double-dime case.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">40</span>
+<p>And now our double-dime case.</p>
+<div class="highlight">
+<pre><span></span><span class="n">money</span> <span class="o">=</span> <span class="mi">40</span>
 <span class="n">actual</span> <span class="o">=</span> <span class="n">brute_changer</span><span class="p">(</span><span class="n">money</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">double_dime</span><span class="p">)</span>
 
 <span class="n">check_coins</span><span class="p">(</span><span class="n">actual</span><span class="o">.</span><span class="n">coin_counts</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">double_dime</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">money</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 ChangeCounts(coin_counts=[0, 2, 0, 0, 0], run_count=15)
 </pre>
-
-
-<p>
-The Brute-Force Changer fixes our double-dimes case, and has a constant runtime of:
-</p>
-
-<p>
-\[
-T(n) = \sum_{i = 1}^{n} = \frac{n(n + 1)}{2}
-\]
-</p>
-
-<p>
-Where \(n\) is the number of denominations, not the input amount. 
-</p>
-
-
-<p>
-Let's make sure our functions all agree.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+<p>The Brute-Force Changer fixes our double-dimes case, and has a constant runtime of:</p>
+<p>\[ T(n) = \sum_{i = 1}^{n} = \frac{n(n + 1)}{2} \]</p>
+<p>Where \(n\) is the number of denominations, not the input amount.</p>
+<p>Let's make sure our functions all agree.</p>
+<div class="highlight">
+<pre><span></span><span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
     <span class="n">cashiers_change</span> <span class="o">=</span> <span class="n">cashier_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">coin_counts</span>
     <span class="n">greedy_change</span> <span class="o">=</span> <span class="n">greedy_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">coin_counts</span>
     <span class="n">brute_change</span> <span class="o">=</span> <span class="n">brute_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">coin_counts</span>
 
     <span class="n">check_coins</span><span class="p">(</span><span class="n">answer</span><span class="o">=</span><span class="n">cashiers_change</span><span class="p">,</span> <span class="n">denominations</span><span class="o">=</span><span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">,</span>
-		<span class="n">expected_coins</span><span class="o">=</span><span class="n">greedy_change</span><span class="p">,</span> <span class="n">expected_total</span><span class="o">=</span><span class="n">amount</span><span class="p">)</span>
+                <span class="n">expected_coins</span><span class="o">=</span><span class="n">greedy_change</span><span class="p">,</span> <span class="n">expected_total</span><span class="o">=</span><span class="n">amount</span><span class="p">)</span>
     <span class="n">check_coins</span><span class="p">(</span><span class="n">answer</span><span class="o">=</span><span class="n">brute_change</span><span class="p">,</span> <span class="n">denominations</span><span class="o">=</span><span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">,</span>
-		<span class="n">expected_coins</span><span class="o">=</span><span class="n">greedy_change</span><span class="p">,</span> <span class="n">expected_total</span><span class="o">=</span><span class="n">amount</span><span class="p">)</span>
+                <span class="n">expected_coins</span><span class="o">=</span><span class="n">greedy_change</span><span class="p">,</span> <span class="n">expected_total</span><span class="o">=</span><span class="n">amount</span><span class="p">)</span>
 </pre></div>
 </div>
-
-<div id="outline-container-org3d41db1" class="outline-3">
-<h3 id="org3d41db1">Plotting</h3>
-<div class="outline-text-3" id="text-org3d41db1">
-<p>
-Let's compare the three methods we've created so far using the typical U.S. Coins.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">brute_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">brute_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
-		<span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+<div class="outline-3" id="outline-container-org29c6d70">
+<h3 id="org29c6d70">Plotting</h3>
+<div class="outline-text-3" id="text-org29c6d70">
+<p>Let's compare the three methods we've created so far using the typical U.S. Coins.</p>
+<div class="highlight">
+<pre><span></span><span class="n">brute_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">brute_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
+                <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 <span class="n">GREEDY_FRAME</span><span class="p">[</span><span class="s2">"Brute-Force"</span><span class="p">]</span> <span class="o">=</span> <span class="n">brute_counts</span>
 <span class="n">melted</span> <span class="o">=</span> <span class="n">GREEDY_FRAME</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">],</span>
-			   <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">,</span> <span class="s2">"Cashier"</span><span class="p">,</span> <span class="s2">"Brute-Force"</span><span class="p">],</span>
-			   <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
-			   <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
+                           <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">,</span> <span class="s2">"Cashier"</span><span class="p">,</span> <span class="s2">"Brute-Force"</span><span class="p">],</span>
+                           <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
+                           <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Amount to Change"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Loop Count"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="s2">"Loop Count"</span><span class="p">,</span> <span class="s2">"Change Method"</span><span class="p">],</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="s2">"Greedy Change &amp; Brute-Force Coin Counts (Common U.S. Coins)"</span><span class="p">,</span>
-	<span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-	<span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Greedy Change & Brute-Force Coin Counts (Common U.S. Coins)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"brute-force-change-us-coins"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="brute-force-change-us-coins.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="brute-force-change-us-coins.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-The Greedy and Brute-Force methods both have a loop-count based on the number of coin denominations we have. Since we have four denominations (25, 10, 5, and 1) the Greedy method has four loops and the Brute-Force method has ten loops \(\left(^{4(4 + 1)}/_{2} = 10\right)\), so it does a little more calculating but not much, although in this case the benefit it has is wasted since we shouldn't find sub-optimal solutions with the greedy approach and using the coins that we did.
-</p>
+<p>The Greedy and Brute-Force methods both have a loop-count based on the number of coin denominations we have. Since we have four denominations (25, 10, 5, and 1) the Greedy method has four loops and the Brute-Force method has ten loops \(\left(^{4(4 + 1)}/_{2} = 10\right)\), so it does a little more calculating but not much, although in this case the benefit it has is wasted since we shouldn't find sub-optimal solutions with the greedy approach and using the coins that we did.</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgbc3485d" class="outline-2">
-<h2 id="orgbc3485d">Memoized Changer</h2>
-<div class="outline-text-2" id="text-orgbc3485d">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">memoized_changer</span><span class="p">(</span><span class="n">money</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-		     <span class="n">counter</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCounts</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-orgeff0268">
+<h2 id="orgeff0268">Memoized Changer</h2>
+<div class="outline-text-2" id="text-orgeff0268">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">memoized_changer</span><span class="p">(</span><span class="n">money</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">counter</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCounts</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make change using the fewest coins</span>
 
 <span class="sd">    Args:</span>
@@ -801,43 +647,43 @@ The Greedy and Brute-Force methods both have a loop-count based on the number of
     <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="n">money</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-	<span class="k">return</span> <span class="n">ChangeCounts</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">denominations</span><span class="p">),</span> <span class="n">counter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ChangeCounts</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">denominations</span><span class="p">),</span> <span class="n">counter</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">denominations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">money</span><span class="p">)</span> <span class="ow">in</span> <span class="n">table</span><span class="p">:</span>
-	<span class="k">return</span> <span class="n">ChangeCounts</span><span class="p">(</span><span class="n">table</span><span class="p">[(</span><span class="n">denominations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">money</span><span class="p">)],</span> <span class="n">counter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ChangeCounts</span><span class="p">(</span><span class="n">table</span><span class="p">[(</span><span class="n">denominations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">money</span><span class="p">)],</span> <span class="n">counter</span><span class="p">)</span>
 
     <span class="n">last_denomination</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">denominations</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="n">best</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
     <span class="n">best_counts</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">for</span> <span class="n">current</span><span class="p">,</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">denominations</span><span class="p">):</span>
-	<span class="n">count</span> <span class="o">=</span> <span class="n">money</span><span class="o">//</span><span class="n">denomination</span>
-	<span class="n">remaining</span> <span class="o">=</span> <span class="n">money</span> <span class="o">-</span> <span class="n">count</span> <span class="o">*</span> <span class="n">denomination</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">money</span><span class="o">//</span><span class="n">denomination</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">money</span> <span class="o">-</span> <span class="n">count</span> <span class="o">*</span> <span class="n">denomination</span>
 
-	<span class="k">if</span> <span class="n">current</span> <span class="o">==</span> <span class="n">last_denomination</span><span class="p">:</span>
-	    <span class="k">if</span> <span class="n">remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-		<span class="n">count</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
-	    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span>
-	    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-	<span class="k">else</span><span class="p">:</span>
-	    <span class="n">counts</span><span class="p">,</span> <span class="n">counter</span> <span class="o">=</span> <span class="n">memoized_changer</span><span class="p">(</span>
-		<span class="n">remaining</span><span class="p">,</span> <span class="n">denominations</span><span class="p">[</span><span class="n">current</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">table</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>
-	    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">+</span> <span class="n">counts</span>
+        <span class="k">if</span> <span class="n">current</span> <span class="o">==</span> <span class="n">last_denomination</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">counts</span><span class="p">,</span> <span class="n">counter</span> <span class="o">=</span> <span class="n">memoized_changer</span><span class="p">(</span>
+                <span class="n">remaining</span><span class="p">,</span> <span class="n">denominations</span><span class="p">[</span><span class="n">current</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">table</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">+</span> <span class="n">counts</span>
 
-	<span class="n">total_counts</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+        <span class="n">total_counts</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
 
-	<span class="k">if</span> <span class="n">total_counts</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">:</span>
-	    <span class="n">best</span> <span class="o">=</span> <span class="n">total_counts</span>
-	    <span class="n">best_counts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">current</span> <span class="o">+</span> <span class="n">counts</span>
-	<span class="n">table</span><span class="p">[(</span><span class="n">denomination</span><span class="p">,</span> <span class="n">money</span><span class="p">)]</span> <span class="o">=</span> <span class="n">counts</span>
+        <span class="k">if</span> <span class="n">total_counts</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">:</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="n">total_counts</span>
+            <span class="n">best_counts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">current</span> <span class="o">+</span> <span class="n">counts</span>
+        <span class="n">table</span><span class="p">[(</span><span class="n">denomination</span><span class="p">,</span> <span class="n">money</span><span class="p">)]</span> <span class="o">=</span> <span class="n">counts</span>
     <span class="k">return</span> <span class="n">ChangeCounts</span><span class="p">(</span><span class="n">best_counts</span><span class="p">,</span> <span class="n">counter</span><span class="p">)</span>
 </pre></div>
 </div>
-
-<div id="outline-container-orgf9a2462" class="outline-3">
-<h3 id="orgf9a2462">Checking the Memoized Changer</h3>
-<div class="outline-text-3" id="text-orgf9a2462">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_changers</span><span class="p">(</span><span class="n">changer</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<div class="outline-3" id="outline-container-org37359c0">
+<h3 id="org37359c0">Checking the Memoized Changer</h3>
+<div class="outline-text-3" id="text-org37359c0">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">check_changers</span><span class="p">(</span><span class="n">changer</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> <span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check that the changer matches the brute-force solution</span>
 
 <span class="sd">    Arguments:</span>
@@ -853,8 +699,8 @@ The Greedy and Brute-Force methods both have a loop-count based on the number of
     <span class="n">check_coins</span><span class="p">(</span><span class="n">check_counts</span><span class="o">.</span><span class="n">coin_counts</span><span class="p">,</span> <span class="n">denominations</span><span class="p">,</span> <span class="n">brute_counts</span><span class="o">.</span><span class="n">coin_counts</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span>
     <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_cases</span><span class="p">(</span><span class="n">changer</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">check_cases</span><span class="p">(</span><span class="n">changer</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check the pre-picked cases are okay</span>
 
 <span class="sd">    Arguments:</span>
@@ -864,219 +710,186 @@ The Greedy and Brute-Force methods both have a loop-count based on the number of
 <span class="sd">     AssertionError if something doesn't check out</span>
 <span class="sd">    """</span>
     <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-	<span class="n">check_changers</span><span class="p">(</span><span class="n">changer</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span>
-	<span class="n">check_changers</span><span class="p">(</span><span class="n">changer</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">double_dime</span><span class="p">)</span>
-	<span class="n">check_changers</span><span class="p">(</span><span class="n">changer</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">)</span>
+        <span class="n">check_changers</span><span class="p">(</span><span class="n">changer</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span>
+        <span class="n">check_changers</span><span class="p">(</span><span class="n">changer</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">double_dime</span><span class="p">)</span>
+        <span class="n">check_changers</span><span class="p">(</span><span class="n">changer</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">)</span>
 
-	<span class="n">money</span> <span class="o">=</span> <span class="mi">2</span>
-	<span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-	<span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
+        <span class="n">money</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
 
-	<span class="n">money</span> <span class="o">=</span> <span class="mi">28</span>
-	<span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
+        <span class="n">money</span> <span class="o">=</span> <span class="mi">28</span>
+        <span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
 
-	<span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-	<span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
+        <span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
 
-	<span class="n">money</span> <span class="o">=</span> <span class="mi">14</span>
-	<span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
+        <span class="n">money</span> <span class="o">=</span> <span class="mi">14</span>
+        <span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
 
-	<span class="c1"># the double-dimes</span>
-	<span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-	<span class="n">money</span> <span class="o">=</span> <span class="mi">40</span>
-	<span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
-	<span class="k">return</span>
+        <span class="c1"># the double-dimes</span>
+        <span class="n">coins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">money</span> <span class="o">=</span> <span class="mi">40</span>
+        <span class="n">check_changers</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">,</span> <span class="n">money</span><span class="p">,</span>  <span class="n">coins</span><span class="p">)</span>
+        <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">check_cases</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">check_cases</span><span class="p">(</span><span class="n">memoized_changer</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org1a69abe" class="outline-3">
-<h3 id="org1a69abe">Plotting</h3>
-<div class="outline-text-3" id="text-org1a69abe">
-</div>
-<div id="outline-container-org3ffcb3d" class="outline-4">
-<h4 id="org3ffcb3d">All the Methods So Far</h4>
-<div class="outline-text-4" id="text-org3ffcb3d">
-<div class="highlight"><pre><span></span><span class="n">memoized_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">memoized_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">run_count</span>
-		   <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+<div class="outline-3" id="outline-container-orgec61090">
+<h3 id="orgec61090">Plotting</h3>
+<div class="outline-text-3" id="text-orgec61090"></div>
+<div class="outline-4" id="outline-container-orgc0073d5">
+<h4 id="orgc0073d5">All the Methods So Far</h4>
+<div class="outline-text-4" id="text-orgc0073d5">
+<div class="highlight">
+<pre><span></span><span class="n">memoized_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">memoized_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">run_count</span>
+                   <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 <span class="n">GREEDY_FRAME</span><span class="p">[</span><span class="s2">"Memoized"</span><span class="p">]</span> <span class="o">=</span> <span class="n">memoized_counts</span>
 <span class="n">melted</span> <span class="o">=</span> <span class="n">GREEDY_FRAME</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">],</span>
-			   <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">,</span> <span class="s2">"Cashier"</span><span class="p">,</span> <span class="s2">"Brute-Force"</span><span class="p">,</span>
-				       <span class="s2">"Memoized"</span><span class="p">],</span>
-			   <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
-			   <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
+                           <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">,</span> <span class="s2">"Cashier"</span><span class="p">,</span> <span class="s2">"Brute-Force"</span><span class="p">,</span>
+                                       <span class="s2">"Memoized"</span><span class="p">],</span>
+                           <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
+                           <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Amount to Change"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Loop Count"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="s2">"Loop Count"</span><span class="p">,</span> <span class="s2">"Change Method"</span><span class="p">],</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="s2">"Greedy, Brute-Force &amp; Memoized Change Counts (Common U.S. Coins)"</span><span class="p">,</span>
-	<span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-	<span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Greedy, Brute-Force & Memoized Change Counts (Common U.S. Coins)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"memoized-change-us-coins"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="memoized-change-us-coins.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="memoized-change-us-coins.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-With a Brute-Force ceiling of 10 loops it's hard to see a marked improvement, given how much easier it is to write the Brute-Force method rather than the memoized one, but let's get rid of the two greedy methods and compare the brute force and memoized with more obsolete coins added in.
-</p>
+<p>With a Brute-Force ceiling of 10 loops it's hard to see a marked improvement, given how much easier it is to write the Brute-Force method rather than the memoized one, but let's get rid of the two greedy methods and compare the brute force and memoized with more obsolete coins added in.</p>
 </div>
 </div>
-
-<div id="outline-container-org25b5fac" class="outline-4">
-<h4 id="org25b5fac">Obsolete Coins</h4>
-<div class="outline-text-4" id="text-org25b5fac">
-<p>
-First, we'll check to make sure that the brute-force and memoized methods agree on the best coins for making change with our new denominations, which include some that were once used in the United States but aren't any more.
-</p>
-
-<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">)</span>
+<div class="outline-4" id="outline-container-orgc14e917">
+<h4 id="orgc14e917">Obsolete Coins</h4>
+<div class="outline-text-4" id="text-orgc14e917">
+<p>First, we'll check to make sure that the brute-force and memoized methods agree on the best coins for making change with our new denominations, which include some that were once used in the United States but aren't any more.</p>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 [25, 20, 10, 5, 3, 2, 1]
 </pre>
-
-
-
-<p>
-Now let's see how the run-times compare.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">BRUTE_OBSOLETE</span> <span class="o">=</span> <span class="p">[</span><span class="n">brute_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
-		  <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+<p>Now let's see how the run-times compare.</p>
+<div class="highlight">
+<pre><span></span><span class="n">BRUTE_OBSOLETE</span> <span class="o">=</span> <span class="p">[</span><span class="n">brute_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
+                  <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 <span class="n">MEMOIZED_OBSOLETE</span> <span class="o">=</span> <span class="p">[</span><span class="n">memoized_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">run_count</span>
-		     <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+                     <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 
 <span class="n">OBSOLETE_FRAME</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Amount to Change"</span><span class="p">:</span> <span class="n">PLOT_AMOUNTS</span><span class="p">,</span>
-				   <span class="s2">"Brute-Force"</span><span class="p">:</span> <span class="n">BRUTE_OBSOLETE</span><span class="p">,</span>
-				   <span class="s2">"Memoized"</span><span class="p">:</span> <span class="n">MEMOIZED_OBSOLETE</span><span class="p">})</span>
+                                   <span class="s2">"Brute-Force"</span><span class="p">:</span> <span class="n">BRUTE_OBSOLETE</span><span class="p">,</span>
+                                   <span class="s2">"Memoized"</span><span class="p">:</span> <span class="n">MEMOIZED_OBSOLETE</span><span class="p">})</span>
 
 <span class="n">melted</span> <span class="o">=</span> <span class="n">OBSOLETE_FRAME</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">],</span>
-			   <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Brute-Force"</span><span class="p">,</span>
-				       <span class="s2">"Memoized"</span><span class="p">],</span>
-			   <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
-			   <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
+                           <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Brute-Force"</span><span class="p">,</span>
+                                       <span class="s2">"Memoized"</span><span class="p">],</span>
+                           <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
+                           <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Amount to Change"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Loop Count"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="s2">"Loop Count"</span><span class="p">,</span> <span class="s2">"Change Method"</span><span class="p">],</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="s2">"Brute-Force &amp; Memoized Change Counts (Including Obsolete Coins)"</span><span class="p">,</span>
-	<span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-	<span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Brute-Force & Memoized Change Counts (Including Obsolete Coins)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"memoized-change-obsolete"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="memoized-change-obsolete.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="memoized-change-obsolete.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-This time we have seven coin denominations so the brute-force method takes \(^7(8)/_2 = 28\) loops. Now that we have more coins the memoized does slightly (very slightly) worse than the brute-force for larger amounts, but in the examples so far I've been creating a new memo-table for every amount - what happens if we build one table and re-use it as we find the change for new amounts?
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">OBSOLETE_TABLE</span> <span class="o">=</span> <span class="p">{}</span>
+<p>This time we have seven coin denominations so the brute-force method takes \(^7(8)/_2 = 28\) loops. Now that we have more coins the memoized does slightly (very slightly) worse than the brute-force for larger amounts, but in the examples so far I've been creating a new memo-table for every amount - what happens if we build one table and re-use it as we find the change for new amounts?</p>
+<div class="highlight">
+<pre><span></span><span class="n">OBSOLETE_TABLE</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="n">MEMOIZED_OBSOLETE_2</span> <span class="o">=</span> <span class="p">[</span><span class="n">memoized_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span>
-					<span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">,</span>
-					<span class="n">OBSOLETE_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
-		       <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+                                        <span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">,</span>
+                                        <span class="n">OBSOLETE_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
+                       <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 
 <span class="n">OBSOLETE_FRAME_2</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Amount to Change"</span><span class="p">:</span> <span class="n">PLOT_AMOUNTS</span><span class="p">,</span>
-			  <span class="s2">"Brute-Force"</span><span class="p">:</span> <span class="n">BRUTE_OBSOLETE</span><span class="p">,</span>
-			  <span class="s2">"Memoized"</span><span class="p">:</span> <span class="n">MEMOIZED_OBSOLETE_2</span><span class="p">})</span>
+                          <span class="s2">"Brute-Force"</span><span class="p">:</span> <span class="n">BRUTE_OBSOLETE</span><span class="p">,</span>
+                          <span class="s2">"Memoized"</span><span class="p">:</span> <span class="n">MEMOIZED_OBSOLETE_2</span><span class="p">})</span>
 
 <span class="n">melted</span> <span class="o">=</span> <span class="n">OBSOLETE_FRAME_2</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">],</span>
-			       <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Brute-Force"</span><span class="p">,</span>
-					   <span class="s2">"Memoized"</span><span class="p">],</span>
-			       <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
-			       <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
+                               <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Brute-Force"</span><span class="p">,</span>
+                                           <span class="s2">"Memoized"</span><span class="p">],</span>
+                               <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
+                               <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Amount to Change"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Loop Count"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="s2">"Loop Count"</span><span class="p">,</span> <span class="s2">"Change Method"</span><span class="p">],</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="s2">"Brute-Force &amp; Memoized Change Counts (Obsolete Coins, Re-Used Table)"</span><span class="p">,</span>
-	<span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-	<span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Brute-Force & Memoized Change Counts (Obsolete Coins, Re-Used Table)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"memoized-change-obsolete-keep-table"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="memoized-change-obsolete-keep-table.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="memoized-change-obsolete-keep-table.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-Re-using the table allows us to avoid some re-calculating and the number of calls eventually drops down to the number of coins we have, the same as the number of loops for the greedy method, although in this case we can handle cases where the greedy method fails.
-</p>
-
-<p>
-Even better, now that we have the table built with all our allowed values, we can just look things up and don't need to run the function (although I will here just to make sure nothing funky is going on), so it has a cost of one.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">MEMOIZED_OBSOLETE_3</span> <span class="o">=</span> <span class="p">[</span><span class="n">memoized_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span>
-					<span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">,</span>
-					<span class="n">OBSOLETE_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
-		       <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+<p>Re-using the table allows us to avoid some re-calculating and the number of calls eventually drops down to the number of coins we have, the same as the number of loops for the greedy method, although in this case we can handle cases where the greedy method fails.</p>
+<p>Even better, now that we have the table built with all our allowed values, we can just look things up and don't need to run the function (although I will here just to make sure nothing funky is going on), so it has a cost of one.</p>
+<div class="highlight">
+<pre><span></span><span class="n">MEMOIZED_OBSOLETE_3</span> <span class="o">=</span> <span class="p">[</span><span class="n">memoized_changer</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span>
+                                        <span class="n">Denominations</span><span class="o">.</span><span class="n">obsolete</span><span class="p">,</span>
+                                        <span class="n">OBSOLETE_TABLE</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
+                       <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 
 <span class="n">OBSOLETE_FRAME_3</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Amount to Change"</span><span class="p">:</span> <span class="n">PLOT_AMOUNTS</span><span class="p">,</span>
-			  <span class="s2">"Brute-Force"</span><span class="p">:</span> <span class="n">BRUTE_OBSOLETE</span><span class="p">,</span>
-			  <span class="s2">"Memoized"</span><span class="p">:</span> <span class="n">MEMOIZED_OBSOLETE_3</span><span class="p">})</span>
+                          <span class="s2">"Brute-Force"</span><span class="p">:</span> <span class="n">BRUTE_OBSOLETE</span><span class="p">,</span>
+                          <span class="s2">"Memoized"</span><span class="p">:</span> <span class="n">MEMOIZED_OBSOLETE_3</span><span class="p">})</span>
 
 <span class="n">melted</span> <span class="o">=</span> <span class="n">OBSOLETE_FRAME_3</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">],</span>
-			       <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Brute-Force"</span><span class="p">,</span>
-					   <span class="s2">"Memoized"</span><span class="p">],</span>
-			       <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
-			       <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
+                               <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Brute-Force"</span><span class="p">,</span>
+                                           <span class="s2">"Memoized"</span><span class="p">],</span>
+                               <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
+                               <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Amount to Change"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Loop Count"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="s2">"Loop Count"</span><span class="p">,</span> <span class="s2">"Change Method"</span><span class="p">],</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="s2">"Brute-Force &amp; Memoized Change Counts (Obsolete Coins, Pre-Filled Table)"</span><span class="p">,</span>
-	<span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-	<span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Brute-Force & Memoized Change Counts (Obsolete Coins, Pre-Filled Table)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"memoized-change-obsolete-pre-filled-table"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="memoized-change-obsolete-pre-filled-table.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
-</object>
+<object data="memoized-change-obsolete-pre-filled-table.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
+</object></div>
 </div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-org19cd147" class="outline-2">
-<h2 id="org19cd147">Iterative Dynamic Programming</h2>
-<div class="outline-text-2" id="text-org19cd147">
-<p>
-The idea behind this problem (making change) is to show how Dynamic Programming can eleminate redundant calculations, so this is the point where I'll switch to an iterative approach that uses Dynamic Programming. The iterative, top-down approach works in the opposite direction of the memoized approach, starting with the smallest values and then moving to ever increasing values, storing the outcomes as we go so that we can re-use the lower solutions as the values increase. This is where I was stumped for a while - since the memoized function I used is based on the remainders left over after subtracting a coin's value from it (e.g. 26 cents minus a quarter has a remainder of 1 cent so we use the stored 1-cent solution from the memo-table rather than re-calculating it) in order to create an iterative version we somehow have to store the values in the table before they are needed, but the scheme I used where we iterate over the coin-denominations doesn't work (or it makes it really convoluted to force it to work). From what I can tell this is because I didn't really make a dynamic programming solution with the memoized version. With Dynamic Programming our memo-table should be built around the change we need to give out, so you would have a table with all the possible amounts, not just the ones needed as remainders. This works with our depth-first version because we're starting at the leaf nodes and working back up the tree, but it doesn't work with the iterative version because we don't know ahead of time which remainders we need later on in the table. For example, if we can only use 1-cent and 10-cent coins and we need to make change for 11 cents, then we have to have an entry for 1-cent in the table before we get to figuring out the solution that includes the 10-cent piece. If we need to break 12 cents, though, we need to have an entry for 2 cents before we get to calculating the entry for 10 cents. But how do we know which values we need to enter into the table for the 1-cent piece before we get to the 10 cent piece? 
-</p>
-
-<p>
-The solution is to fill out the table completely from 1 to the amount to make change for each coin before moving on to the next larger denomination. So, for our 12-cent example we need entries for \(1 \ldots 12\) cents for the 1 cent piece filled out before we move on to calculating the entries for the 10 cent piece so that no matter what remainder we have when we reach the 10-cent piece we can look it up in the table (we actually only need up to 9 cents, but since the denominations aren't fixed doing the trimming once again adds to the complexity more than I'd like). So, I'll just fill out the table and we can see how it goes.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">centaur</span><span class="p">(</span><span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCountsTable</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-org99586a1">
+<h2 id="org99586a1">Iterative Dynamic Programming</h2>
+<div class="outline-text-2" id="text-org99586a1">
+<p>The idea behind this problem (making change) is to show how Dynamic Programming can eleminate redundant calculations, so this is the point where I'll switch to an iterative approach that uses Dynamic Programming. The iterative, top-down approach works in the opposite direction of the memoized approach, starting with the smallest values and then moving to ever increasing values, storing the outcomes as we go so that we can re-use the lower solutions as the values increase. This is where I was stumped for a while - since the memoized function I used is based on the remainders left over after subtracting a coin's value from it (e.g. 26 cents minus a quarter has a remainder of 1 cent so we use the stored 1-cent solution from the memo-table rather than re-calculating it) in order to create an iterative version we somehow have to store the values in the table before they are needed, but the scheme I used where we iterate over the coin-denominations doesn't work (or it makes it really convoluted to force it to work). From what I can tell this is because I didn't really make a dynamic programming solution with the memoized version. With Dynamic Programming our memo-table should be built around the change we need to give out, so you would have a table with all the possible amounts, not just the ones needed as remainders. This works with our depth-first version because we're starting at the leaf nodes and working back up the tree, but it doesn't work with the iterative version because we don't know ahead of time which remainders we need later on in the table. For example, if we can only use 1-cent and 10-cent coins and we need to make change for 11 cents, then we have to have an entry for 1-cent in the table before we get to figuring out the solution that includes the 10-cent piece. If we need to break 12 cents, though, we need to have an entry for 2 cents before we get to calculating the entry for 10 cents. But how do we know which values we need to enter into the table for the 1-cent piece before we get to the 10 cent piece?</p>
+<p>The solution is to fill out the table completely from 1 to the amount to make change for each coin before moving on to the next larger denomination. So, for our 12-cent example we need entries for \(1 \ldots 12\) cents for the 1 cent piece filled out before we move on to calculating the entries for the 10 cent piece so that no matter what remainder we have when we reach the 10-cent piece we can look it up in the table (we actually only need up to 9 cents, but since the denominations aren't fixed doing the trimming once again adds to the complexity more than I'd like). So, I'll just fill out the table and we can see how it goes.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">centaur</span><span class="p">(</span><span class="n">amount</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">denominations</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">table</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChangeCountsTable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Make change using the fewest coins</span>
 
 <span class="sd">    Warning:</span>
@@ -1095,140 +908,112 @@ The solution is to fill out the table completely from 1 to the amount to make ch
     <span class="n">denominations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">denominations</span><span class="p">))</span>
     <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">table</span><span class="p">:</span>
-	<span class="n">table</span> <span class="o">=</span> <span class="p">{</span><span class="n">denomination</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">amount</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="n">denominations</span><span class="p">}</span>
-	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">denominations</span><span class="p">):</span>
-	    <span class="n">table</span><span class="p">[</span><span class="n">denomination</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="p">{</span><span class="n">denomination</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">amount</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="n">denominations</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">denominations</span><span class="p">):</span>
+            <span class="n">table</span><span class="p">[</span><span class="n">denomination</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">best</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
     <span class="n">best_counts</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">for</span> <span class="n">owed</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">amount</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">denominations</span><span class="p">):</span>
-	    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-	    <span class="n">count</span> <span class="o">=</span> <span class="n">owed</span><span class="o">//</span><span class="n">denomination</span>
-	    <span class="n">remainder</span> <span class="o">=</span> <span class="n">owed</span> <span class="o">-</span> <span class="n">count</span> <span class="o">*</span> <span class="n">denomination</span>
-	    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">denomination</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">denominations</span><span class="p">):</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">owed</span><span class="o">//</span><span class="n">denomination</span>
+            <span class="n">remainder</span> <span class="o">=</span> <span class="n">owed</span> <span class="o">-</span> <span class="n">count</span> <span class="o">*</span> <span class="n">denomination</span>
+            <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">count</span><span class="p">]</span>
 
-	    <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-		<span class="n">counts</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">denominations</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]][</span><span class="n">remainder</span><span class="p">]</span> <span class="o">+</span> <span class="n">counts</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">counts</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">denominations</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]][</span><span class="n">remainder</span><span class="p">]</span> <span class="o">+</span> <span class="n">counts</span>
 
-	    <span class="n">table</span><span class="p">[</span><span class="n">denomination</span><span class="p">][</span><span class="n">owed</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span>
+            <span class="n">table</span><span class="p">[</span><span class="n">denomination</span><span class="p">][</span><span class="n">owed</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span>
 
-	    <span class="k">if</span> <span class="n">amount</span> <span class="o">==</span> <span class="n">owed</span> <span class="ow">and</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">:</span>
-		<span class="n">best</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
-		<span class="n">best_counts</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">denominations</span><span class="p">)</span> <span class="o">-</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">amount</span> <span class="o">==</span> <span class="n">owed</span> <span class="ow">and</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">:</span>
+                <span class="n">best</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+                <span class="n">best_counts</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">denominations</span><span class="p">)</span> <span class="o">-</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="c1"># put solution in descending order to match other functions</span>
     <span class="n">best_counts</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">ChangeCountsTable</span><span class="p">(</span><span class="n">best_counts</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">check_cases</span><span class="p">(</span><span class="n">centaur</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">check_cases</span><span class="p">(</span><span class="n">centaur</span><span class="p">)</span>
 </pre></div>
 </div>
-
-<div id="outline-container-org324956a" class="outline-3">
-<h3 id="org324956a">Plotting</h3>
-<div class="outline-text-3" id="text-org324956a">
-<p>
-Since the iterative version works differently from the others the loop-counts aren't really easy to compare.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">centaur_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">centaur</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
-		   <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
+<div class="outline-3" id="outline-container-orgf2cc28e">
+<h3 id="orgf2cc28e">Plotting</h3>
+<div class="outline-text-3" id="text-orgf2cc28e">
+<p>Since the iterative version works differently from the others the loop-counts aren't really easy to compare.</p>
+<div class="highlight">
+<pre><span></span><span class="n">centaur_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">centaur</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">Denominations</span><span class="o">.</span><span class="n">US</span><span class="p">)</span><span class="o">.</span><span class="n">run_count</span>
+                   <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">PLOT_AMOUNTS</span><span class="p">]</span>
 <span class="n">GREEDY_FRAME</span><span class="p">[</span><span class="s2">"Iterative"</span><span class="p">]</span> <span class="o">=</span> <span class="n">centaur_counts</span>
 <span class="n">melted</span> <span class="o">=</span> <span class="n">GREEDY_FRAME</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">],</span>
-			   <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">,</span> <span class="s2">"Cashier"</span><span class="p">,</span> <span class="s2">"Brute-Force"</span><span class="p">,</span>
-				       <span class="s2">"Memoized"</span><span class="p">,</span> <span class="s2">"Iterative"</span><span class="p">],</span>
-			   <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
-			   <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
+                           <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Greedy"</span><span class="p">,</span> <span class="s2">"Cashier"</span><span class="p">,</span> <span class="s2">"Brute-Force"</span><span class="p">,</span>
+                                       <span class="s2">"Memoized"</span><span class="p">,</span> <span class="s2">"Iterative"</span><span class="p">],</span>
+                           <span class="n">var_name</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">,</span>
+                           <span class="n">value_name</span><span class="o">=</span><span class="s2">"Loop Count"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Amount to Change"</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s2">"Loop Count"</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="n">tickMinStep</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Amount to Change"</span><span class="p">,</span> <span class="s2">"Loop Count"</span><span class="p">,</span> <span class="s2">"Change Method"</span><span class="p">],</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Change Method"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-	<span class="n">title</span><span class="o">=</span><span class="s2">"Coin Change Counts (Common U.S. Coins)"</span><span class="p">,</span>
-	<span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-	<span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">"Coin Change Counts (Common U.S. Coins)"</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">PlotParameters</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"all-change-us-coins"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="all-change-us-coins.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="all-change-us-coins.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-Since I'm filling out the whole table for the iterative function the loop is dependent on the amount of change owed, not the number of coin-denominations as with the other functions so it increases linearly. There's something I'm missing here as to why either the memoized-version is incorrect or there is an advantage to using the iterative version, but I haven't figured it out yet. The solutions seem to be the same in either case, though, and the linear growth for the number of loops is still tractable so I'll move on for now.
-</p>
+<p>Since I'm filling out the whole table for the iterative function the loop is dependent on the amount of change owed, not the number of coin-denominations as with the other functions so it increases linearly. There's something I'm missing here as to why either the memoized-version is incorrect or there is an advantage to using the iterative version, but I haven't figured it out yet. The solutions seem to be the same in either case, though, and the linear growth for the number of loops is still tractable so I'll move on for now.</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org4eabbd7" class="outline-2">
-<h2 id="org4eabbd7">Sources</h2>
-<div class="outline-text-2" id="text-org4eabbd7">
+<div class="outline-2" id="outline-container-org7ced12a">
+<h2 id="org7ced12a">Sources</h2>
+<div class="outline-text-2" id="text-org7ced12a">
 <ul class="org-ul">
-<li>[LATPAPS] <a href="../latpaps/">Learning Algorithms Through Programming and Problem Solving</a>
-</li>
+<li>[LATPAPS] <a href="../latpaps/index.html">Learning Algorithms Through Programming and Problem Solving</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("cashiers-algorithm"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("greedy-algorithm"));
 });
-</script>
+</script></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/dynamic-programming/index.html" rel="tag">dynamic programming</a></li>
-            <li><a class="tag p-category" href="../../categories/greedy/index.html" rel="tag">greedy</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/dynamic-programming/index.html" rel="tag">dynamic programming</a></li>
+<li><a class="tag p-category" href="../../categories/greedy/index.html" rel="tag">greedy</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../course-global-warming/index.html" rel="prev" title="Global Warming I: The Science and Modeling of Climate Change">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../latpaps/index.html" rel="next" title="Learning Algorithms Through Programming and Problem Solving">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../course-global-warming/index.html" rel="prev" title="Global Warming I: The Science and Modeling of Climate Change">Previous post</a></li>
+<li class="next"><a href="../latpaps/index.html" rel="next" title="Learning Algorithms Through Programming and Problem Solving">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

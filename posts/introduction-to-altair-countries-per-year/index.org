@@ -1,0 +1,620 @@
+#+BEGIN_COMMENT
+.. title: Introduction To Altair: Countries Per Year
+.. slug: introduction-to-altair-countries-per-year
+.. date: 2024-03-06 16:57:41 UTC-08:00
+.. tags: altair,bowling,visualization
+.. category: Visualization
+.. link: 
+.. description: Continuing the Altair Introduction with a plot of the countries per year.
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-8eee42ba-b056-4500-aa70-5bbe84db530c-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+* Setup
+** Imports
+
+These initial imports are supports to make creating this post easier and aren't necessarily needed for the altair plots.
+
+#+begin_src python :results none
+# python
+from functools import partial
+from pathlib import Path
+from pprint import pprint
+
+import json
+import os
+import re
+
+# pypi
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+from expects import be, be_true, equal, expect
+from tabulate import tabulate
+
+# monkey
+from graeae.visualization.altair_helpers import output_path, save_chart
+#+end_src
+
+These are the ones that are really needed for the plotting. I installed both of them through pypi.
+
+#+begin_src python :results none
+import altair
+import pandas
+#+end_src
+
+** Some Setting Up
+
+These are some convenience objects to save a little bit of coding when saving the chart.
+
+#+begin_src python :results none
+SLUG = "introduction-to-altair-countries-per-year"
+OUTPUT_PATH = output_path(SLUG)
+
+HEIGHT, WIDTH = 600, 800
+SAVE_IT = partial(save_chart, output_path=OUTPUT_PATH, height=HEIGHT + 100)
+
+SOUPER = partial(BeautifulSoup, features="lxml")
+#+end_src
+
+This is to make printing out a pandas dataframe as a table a little nicer.
+
+#+begin_src python :results none
+TABLE = partial(tabulate,
+                headers="keys",
+                tablefmt="orgtbl",
+                showindex=False)
+#+end_src
+
+* The Data
+
+#+begin_src python :results output :exports both
+load_dotenv(override=True)
+table_path = Path(os.getenv("WORLD_HAPPINESS_TABLE"))
+
+expect(table_path.is_file()).to(be_true)
+
+table = pandas.read_csv(table_path)
+print(table.shape)
+#+end_src
+
+#+RESULTS:
+: (2199, 11)
+
+** The Data Columns
+
+#+begin_src python :results none
+def column_printer(table, headers=("Column", "Type")):
+    print(TABLE(
+        ((column, str(table[column].dtype))
+         for column in table.columns),
+        headers=headers))
+    return
+#+end_src
+
+#+begin_src python :results output :exports both
+column_printer(table)
+#+end_src
+
+| Column                           | Type    |
+|----------------------------------+---------|
+| Country name                     | object  |
+| year                             | int64   |
+| Life Ladder                      | float64 |
+| Log GDP per capita               | float64 |
+| Social support                   | float64 |
+| Healthy life expectancy at birth | float64 |
+| Freedom to make life choices     | float64 |
+| Generosity                       | float64 |
+| Perceptions of corruption        | float64 |
+| Positive affect                  | float64 |
+| Negative affect                  | float64 |
+
+For this initial post I'll only use the year, but 
+
+#+begin_src python :results none
+class Column:
+    year = "year"
+#+end_src
+
+* Counting the Years
+** Using Pandas' ~value_counts~ Method
+
+#+begin_src python :results none
+year_counts = table.year.value_counts().reset_index().sort_values("year")
+#+end_src
+
+#+begin_src python :results output :exports both
+table_counts = year_counts.T
+table_counts.columns = table_counts.iloc[0]
+table_counts = table_counts.drop(table_counts.index[0])
+print(TABLE(table_counts, showindex=True))
+#+end_src
+
+|       |   2005 |   2006 |   2007 |   2008 |   2009 |   2010 |   2011 |   2012 |   2013 |   2014 |   2015 |   2016 |   2017 |   2018 |   2019 |   2020 |   2021 |   2022 |
+|-------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------|
+| count |     27 |     89 |    102 |    110 |    114 |    124 |    146 |    141 |    136 |    144 |    142 |    141 |    147 |    141 |    143 |    116 |    122 |    114 |
+
+
+Now as a bar-chart.
+
+#+begin_src python :results output :exports both
+value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
+    x="{}:N".format(Column.year),
+    y="count").properties(height=HEIGHT, width=WIDTH)
+
+VALUE_COUNTS_NAME = "value-counts-bar-chart"
+VALUE_COUNTS_HTML = VALUE_COUNTS_NAME + ".html"
+SAVE_IT(value_counts_chart, VALUE_COUNTS_NAME)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="value-counts-bar-chart.html" style="width:100%" height=700>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+** Using Altair's "count"
+
+#+begin_src python :results output :exports both
+altair_counts_chart = altair.Chart(table).mark_bar().encode(
+    x="{}:N".format(Column.year),
+    y="count()").properties(height=HEIGHT, width=WIDTH)
+
+ALTAIR_COUNTS_NAME = "altair-counts-bar-chart"
+ALTAIR_COUNTS_HTML = ALTAIR_COUNTS_NAME + ".html"
+SAVE_IT(altair_counts_chart, ALTAIR_COUNTS_NAME)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="altair-counts-bar-chart.html" style="width:100%" height=700>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+** Comparing the File Sizes
+
+*** The Files In Bytes
+
+#+begin_src python :results output :exports both
+
+altair_counts_html = OUTPUT_PATH/(ALTAIR_COUNTS_HTML)
+pandas_counts_html = OUTPUT_PATH/(VALUE_COUNTS_HTML)
+print("Altair counts(): {:,} bytes".format(altair_counts_html.stat().st_size))
+print("Pandas value_counts: {:,} bytes".format(pandas_counts_html.stat().st_size))
+#+end_src
+
+#+RESULTS:
+: Altair counts(): 685,111 bytes
+: Pandas value_counts: 2,067 bytes
+
+Here's one of the problems with ~altair~ - it passes along the entire dataset and then tells ~vega~ to work with it in the browser. So, in this case it's passing all our happiness data, even though the chart doesn't use any of the columns.
+
+#+begin_src python :results none
+with altair_counts_html.open() as reader:
+    altair_soup = SOUPER(reader)
+
+with pandas_counts_html.open() as reader:
+    pandas_soup = SOUPER(reader)
+#+end_src
+
+#+begin_src python :results none
+def data_printer(soup: BeautifulSoup, index:int=0) -> None:
+    """Gets the data from the soup and prints the entry
+
+    Params:
+
+     - soup: BeautifulSoup with the HTML for the chart
+     - index: which data row to show
+    """
+    EVERYTHING = ".*"
+    EXTRA_BRACE = "(?=})"
+    
+    DATASETS_EXPRESSION = "datasets" + EVERYTHING + "}}"
+    DATASET_EXPRESSION = "{" + EVERYTHING + "}" + EXTRA_BRACE
+
+    script = soup.find_all("script")[-1].string
+    dataset = re.search(DATASETS_EXPRESSION, script).group()
+    dataset = re.search(DATASET_EXPRESSION, dataset).group()
+    json_dataset = json.loads(dataset)
+    data_key = list(json_dataset.keys())[0]
+    data = json_dataset[data_key]
+    
+    print("'dataset' has {:,} data entries\n".format(len(data)))
+    print("Entry {}:\n".format(index))
+    pprint(data[index])
+    return
+#+end_src
+
+#+begin_src python :results output :exports both
+data_printer(pandas_soup)
+#+end_src
+
+#+RESULTS:
+: 'dataset' has 18 data entries
+: 
+: Entry 0:
+: 
+: {'count': 27, 'year': 2005}
+
+#+begin_src python :results none
+def frame_print(frame: pandas.DataFrame, index: int=0) -> None:
+    """print length and one row of frame
+
+    Params:
+
+     - frame: data-frame to query
+     - index: index of row to print
+    """
+    print("Frame has {:,} rows.".format(len(frame)))
+    print("\nRow {}:\n".format(index))
+    print(frame.iloc[0])
+    return
+#+end_src
+
+#+begin_src python :results output :exports both
+frame_print(year_counts)
+#+end_src
+
+#+RESULTS:
+: Frame has 18 rows.
+: 
+: Row 0:
+: 
+: year     2005
+: count      27
+: Name: 17, dtype: int64
+
+#+begin_src python :results output :exports both
+data_printer(altair_soup)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+'dataset' has 2,199 data entries
+
+Entry 0:
+
+{'Country name': 'Afghanistan',
+ 'Freedom to make life choices': 0.718,
+ 'Generosity': 0.168,
+ 'Healthy life expectancy at birth': 50.5,
+ 'Life Ladder': 3.724,
+ 'Log GDP per capita': 7.35,
+ 'Negative affect': 0.258,
+ 'Perceptions of corruption': 0.882,
+ 'Positive affect': 0.414,
+ 'Social support': 0.451,
+ 'year': 2008}
+#+end_example
+
+#+begin_src python :results output :exports both
+frame_print(table)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Frame has 2,199 rows.
+
+Row 0:
+
+Country name                        Afghanistan
+year                                       2008
+Life Ladder                               3.724
+Log GDP per capita                         7.35
+Social support                            0.451
+Healthy life expectancy at birth           50.5
+Freedom to make life choices              0.718
+Generosity                                0.168
+Perceptions of corruption                 0.882
+Positive affect                           0.414
+Negative affect                           0.258
+Name: 0, dtype: object
+#+end_example
+
+There's a project called [[https://vegafusion.io/][vegafusion]] that is supposed to help with reducing the size but it requires that you use a jupyter notebook for interactivity (it uses python to make a jupyter widget or some such) so it won't work for a static site like this one. So when using altair we have to think about what we're doing if the size of the files is going to be a problem. In most cases it probably makes sense to do the transformations in pandas first and then only pass the data to plot to altair.
+
+See the [[https://altair-viz.github.io/user_guide/large_datasets.html][altair documentation on Large Datasets]] for more information.
+* A Chart, Part By Part
+
+** Altair's Chart
+
+#+begin_src python :results output :exports both
+chart = altair.Chart(year_counts)
+print(type(chart))
+expect(chart.data).to(be(year_counts))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+The ~Chart~ class is defined in ~altair.vegalite.v5.api~. This is its docstring description:
+
+#+begin_quote
+Create a basic Altair/Vega-Lite chart.
+
+
+Although it is possible to set all Chart properties as constructor attributes,
+it is more idiomatic to use methods such as ~mark_point()~, ~encode()~,
+~transform_filter()~, ~properties()~, etc. See Altair's documentation
+for details and examples: http://altair-viz.github.io/.
+#+end_quote
+
+The attributes set by the ~Chart~ class' constructor (it also accepets other keyword parameters that are passed to its parent classes) are:
+
+ - data
+ - encoding
+ - mark
+ - width
+ - height
+
+By default they're set to ~Undefined~ which is an altair-defined object (see ~altair.utils.schemapi~), and as noted, you don't normally set the attributes using the constructor (other than ~data~ which isn't mentioned in the docstring but appears to be passed to the ~Chart~ constructor by convention).
+
+Here's a diagram of the ~Chart~ (defined in ~altair.vegalite.v5.api~).
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/chart.png :exports none
+!theme mars
+
+class Chart {
+ + data: DataFrameLike
+ + encoding: core.FacetedEncoding
+ + mark: str
+ + width: int
+ + height: int
+
+ + from_dict():  core.SchemaBase
+ + to_dict(): dict
+ + transformed_data(): DataFrameLike
+ + add_params(): Chart
+ + interactive(): Chart
+}
+
+TopLevelMixin <|-- Chart
+_EncodingMixin <|-- Chart
+mixin.MarkMethodMixin <|-- Chart
+core.TopLevelUnitSpec <|-- Chart
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/chart.png]]
+
+[[img-url:chart.png]]
+
+** A Bar Chart
+
+Once we have a chart object we tell altair that we want it to be a bar chart using the ~mark_bar~ method.
+
+#+begin_src python :results output :exports both
+bar_chart = chart.mark_bar()
+print(type(bar_chart))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+
+The ~mark_~ methods are defined in the ~MarkMethodMixin~ class (a parent of ~Chart~) which is defined in ~altair.vegalite.v5.schema.mixins~ module.
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/mark-mixin.png :exports none
+!theme mars
+
+class MarkMethodMixin {
+
+mark_arc(): Self
+mark_area(): Self
+mark_bar(): Self
+mark_boxplot(): Self
+mark_circle(): Self
+mark_errorband(): Self
+mark_errorbar(): Self
+mark_geoshape(): Self
+mark_image(): Self
+mark_line(): Self
+mark_point(): Self
+mark_rect(): Self
+mark_rule(): Self
+mark_square(): Self
+mark_text(): Self
+mark_tick(): Self
+mark_trail(): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/mark-mixin.png]]
+
+[[img-url:mark-mixin.png][MarkMixin Class]]
+
+Looking in the ~mark_bar~ method, there's a lot of arguments you could pass to it, but fundamentally all it's really doing is making a copy of itself, setting the ~mark~ attribute to ~bar~ and then retu+rning the copy.
+
+
+#+begin_src python :results output :exports both
+print("Original Chart mark: '{}'".format(chart.mark))
+print("Bar Chart mark: '{}'".format(bar_chart.mark))
+
+expect(bar_chart).to_not(be(chart))
+#+end_src
+
+#+RESULTS:
+: Original Chart mark: 'Undefined'
+: Bar Chart mark: 'bar'
+
+** SchemaBase
+
+~altair.utils.schemapi~.
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/schema-base.png :exports none
+!theme mars
+
+class SchemaBase {
+
++ copy(): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/schema-base.png]]
+
+[[img-url:schema-base.png]]
+
+There are many more methods in ~altair.utils.schemapi.SchemaBase~ but I'm highlighting ~copy~ here because it gets used quite a bit by the other classes but is defined in this somewhat obscure place. The behavior is what you'd expect so I don't see a need to go over it, but it's one of those mystery methods that just pops up when you use deep inheritance like this that makes you wonder what's going on so I'll document it here, for now.
+
+*** TopLevelUnitSpec
+
+If you look at the parents of the ~Chart~ you might notice that it doesn't have the ~SchemaBase~ as one of its parents. So how does it end up with the ~copy~ method? Well, it does have the ~core.TopLevelUnitSpec~ as one of its parents and that in turn (eventually) inherits from the ~SchemaBase~.
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/top-level-unit-spec.png :exports none
+!theme mars
+
+altair.utils.schemapi.SchemaBase <|-- core.VegaLiteSchema
+VegaLiteSchema <|-- core.TopLevelSpec
+TopLevelSpec <|--core.TopLevelUnitSpec
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/top-level-unit-spec.png]]
+
+[[img-url:top-level-unit-spec.png]]
+
+I didn't put in the modules for the ~core~ classes since they are fairly deep.
+
+** Encoded
+
+The ~encode~ method is where we tell ~altair~ which columns match which parts of the chart. In this case we're only setting the /x/ and /y/ axes.
+
+#+begin_src python :results output :exports both
+encoded = bar_chart.encode(
+    x="{}:N".format(Column.year),
+    y="count")
+
+print(type(encoded))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+*** _EncodingMixin
+
+The ~encode~ method is defined in the ~_EncodingMixin~ class, one of the ~Chart~'s parents.
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/encoding-mixin.png :exports none
+!theme mars
+
+class _EncodingMixin {
+  encode(*args, **kwargs): Self
+}
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/encoding-mixin.png]]
+
+[[img-url:encoding-mixin.png]]
+
+The ~encoding~ method takes in whatever combination of positional and keyword arguments you pass into it and then:
+
+ - copies the Chart
+ - updates the chart's ~encoding~ attribute
+ - sets the copy's ~encoding~ attribute to an instance of the ~altair.vegalite.v5.schema.FacetedEncoding~ class.
+ - returns the copy
+
+#+begin_src python :results output :exports both
+print(encoded.encoding)
+#+end_src
+
+#+RESULTS:
+: FacetedEncoding({
+:   x: X({
+:     shorthand: 'year:N'
+:   }),
+:   y: Y({
+:     shorthand: 'count'
+:   })
+: })
+
+
+** Properties
+
+#+begin_src python :results output :exports both
+propertied = encoded.properties(height=HEIGHT, width=WIDTH)
+print(type(propertied))
+#+end_src
+
+#+RESULTS:
+: <class 'altair.vegalite.v5.api.Chart'>
+
+#+begin_src plantuml :file ../files/posts/introduction-to-altair-countries-per-year/top-level-mixin.png :exports none
+!theme mars
+
+class TopLevelMixin {
+  to_dict(validate, *, format, ignore, context): dict
+  to_json(validate, indent, sort_keys, *, format, ignore, context, **kwargs) : str
+  to_html(base_url, output_div, embed_options, json_kwds, fullhtml, requirejs, inline, **kwargs): str
+  to_url(*, fullscreen): str
+
+  properties(**kwargs) : Self
+  save(fp, format, override_data_transformer, scale_factor, mode, vegalite_version, vega_version, vegaembed_version, embed_options, json_kwds, webdriver, engine, inline, **kwargs): None
+}
+
+mixins.ConfigMethodMixin <|-- TopLevelMixin
+#+end_src
+
+#+RESULTS:
+[[file:../files/posts/introduction-to-altair-countries-per-year/top-level-mixin.png]]
+
+[[img-url:top-level-mixin.png]]
+
+#+begin_quote
+**Note:** This is a huge class with more methods than I'm showing here. The only ones we've encountered so far are ~to_dict~, ~save~ and ~properties~. I used ~to_dict~ to show that the chart has all the data from the pandas DataFrame and ~save~ is buried in the code that saves the chart to display it in this post - ~properties~ is the only one we're really interested in here.
+#+end_quote
+
+The first thing to note about the ~properties~ method is that it doesn't define any arguments, it takes in any keyword arguments (and only keyword arguments, no positional arguments) and values for the arguments. Then:
+
+ - it makes a copy of the chart
+ - validates the arguments (unless the argument is the ~data~)
+ - sets the arguments as attributes of the copy.
+ - returns the copy
+
+Since we passed in ~height~ and ~width~ to the ~properties~ method, we get back a copy of our bar chart with the ~height~ and ~width~ set on the copy (as well as the "mark" which we set earlier with ~mark_bar~).
+
+#+begin_src python :results output :exports both
+print(propertied.mark)
+print(propertied.width)
+print(propertied.height)
+expect(propertied.mark).to(equal("bar"))
+expect(propertied.width).to(equal(WIDTH))
+expect(propertied.height).to(equal(HEIGHT))
+#+end_src
+
+#+RESULTS:
+: bar
+: 800
+: 600
+
+* HVPlot
+* Links
+** The Posts In This Series
+
+- {{% lancelot "Starting Post" %}}introduction-to-altair{{% /lancelot %}}
+
+** Tutorial Sources
+- [[https://www.coursera.org/learn/fundamentals-of-data-visualization/home/week/1][/Fundamentals of Visualization with Dr. Danielle Albers Szafir/]]: Coursera course where the original tutorial came from.
+- [[https://infovis.fh-potsdam.de/tutorials/][InfoVis Course from Marian Dork]]: Iniversity of Applied Sciences Potsdam that the Coursera course cites as the source for their tutorial.
+** The Data
+- World Happiness Report Dataset [Internet]. [cited 2023 Dec 11]. Available from: https://www.kaggle.com/datasets/unsdsn/world-happiness
+- Inc G. Gallup.com. 2009 [cited 2023 Dec 11]. Understanding How Gallup Uses the Cantril Scale. Available from: https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx
+- World Happiness Report [Internet]. 2023 [cited 2023 Dec 11]. Available from: https://worldhappiness.report/
+
+** Altair
+- Layered and Multi-View Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2023 Dec 12]. Available from: https://altair-viz.github.io/user_guide/compound_charts.html
+- Large Datasets — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 8]. Available from: https://altair-viz.github.io/user_guide/large_datasets.html
+
+  

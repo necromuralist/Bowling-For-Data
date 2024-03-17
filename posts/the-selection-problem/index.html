@@ -1,174 +1,120 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="A description of the Selection Problem.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="A description of the Selection Problem." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>The Selection Problem | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/the-selection-problem/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../max-heap/index.html" title="Heap!" type="text/html">
-<link rel="next" href="../the-partition/index.html" title="The Road To Partition" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="The Selection Problem">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/the-selection-problem/index.html">
-<meta property="og:description" content="A description of the Selection Problem.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-02-20T12:23:40-08:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="problems">
-<meta property="article:tag" content="selection">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/the-selection-problem/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../max-heap/index.html" rel="prev" title="Heap!" type="text/html">
+<link href="../the-partition/index.html" rel="next" title="The Road To Partition" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="The Selection Problem" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/the-selection-problem/index.html" property="og:url">
+<meta content="A description of the Selection Problem." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-02-20T12:23:40-08:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="problems" property="article:tag">
+<meta content="selection" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">The Selection Problem</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-02-20T12:23:40-08:00" itemprop="datePublished" title="2022-02-20 12:23">2022-02-20 12:23</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">The Selection Problem</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-02-20T12:23:40-08:00" itemprop="datePublished" title="2022-02-20 12:23">2022-02-20 12:23</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="index.html#org920f1c9">What is the Selection Problem?</a></li>
-<li><a href="index.html#org9e441b5">Selection Vs Sorting</a></li>
-<li>
-<a href="index.html#org9e3f18b">Familiar Cases</a>
+<li><a href="index.html#org40ed4a0">What is the Selection Problem?</a></li>
+<li><a href="index.html#org987d012">Selection Vs Sorting</a></li>
+<li><a href="index.html#orgf930f31">Familiar Cases</a>
 <ul>
-<li><a href="index.html#org0d1f168">Minimum and Maximum</a></li>
-<li><a href="index.html#org2249028">The Median</a></li>
+<li><a href="index.html#orgb7226eb">Minimum and Maximum</a></li>
+<li><a href="index.html#org087f5c2">The Median</a></li>
 </ul>
 </li>
-<li><a href="index.html#org5911ad1">Sources</a></li>
+<li><a href="index.html#org22b2515">Sources</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org920f1c9" class="outline-2">
-<h2 id="org920f1c9">What is the Selection Problem?</h2>
-<div class="outline-text-2" id="text-org920f1c9">
-<p>
-The <i>Selection Problem</i> involves finding the <i>kth</i> smallest item in a collection of <i>n</i> items. This item is called an <b><b>Order Statistic</b></b>.
-</p>
+<div class="outline-2" id="outline-container-org40ed4a0">
+<h2 id="org40ed4a0">What is the Selection Problem?</h2>
+<div class="outline-text-2" id="text-org40ed4a0">
+<p>The <i>Selection Problem</i> involves finding the <i>kth</i> smallest item in a collection of <i>n</i> items. This item is called an <b>Order Statistic</b>.</p>
 </div>
 </div>
-<div id="outline-container-org9e441b5" class="outline-2">
-<h2 id="org9e441b5">Selection Vs Sorting</h2>
-<div class="outline-text-2" id="text-org9e441b5">
-<p>
-If the collection is already sorted then you can just pull the order statistic out directly (assuming it's accessible by its index) and if it isn't you could sort it first and then retrieve the order statistic. Since Mergesort and Heapsort have a runtime of \(\Theta(n \log n)\) we know that this would be the runtime using this method, but since we are only choosing one item we don't need to sort the collection, so we can find the item with less computation, and thus selection is its own problem.
-</p>
+<div class="outline-2" id="outline-container-org987d012">
+<h2 id="org987d012">Selection Vs Sorting</h2>
+<div class="outline-text-2" id="text-org987d012">
+<p>If the collection is already sorted then you can just pull the order statistic out directly (assuming it's accessible by its index) and if it isn't you could sort it first and then retrieve the order statistic. Since Mergesort and Heapsort have a runtime of \(\Theta(n \log n)\) we know that this would be the runtime using this method, but since we are only choosing one item we don't need to sort the collection, so we can find the item with less computation, and thus selection is its own problem.</p>
 </div>
 </div>
-<div id="outline-container-org9e3f18b" class="outline-2">
-<h2 id="org9e3f18b">Familiar Cases</h2>
-<div class="outline-text-2" id="text-org9e3f18b">
-<p>
-While you might search for any ranked item (the third item, say), there are three special cases that are common enough to have been given names.
-</p>
-
+<div class="outline-2" id="outline-container-orgf930f31">
+<h2 id="orgf930f31">Familiar Cases</h2>
+<div class="outline-text-2" id="text-orgf930f31">
+<p>While you might search for any ranked item (the third item, say), there are three special cases that are common enough to have been given names.</p>
 <ul class="org-ul">
-<li>the <i>Minimum</i>
-</li>
-<li>the <i>Maximum</i>
-</li>
-<li>the <i>Median</i>
-</li>
+<li>the <i>Minimum</i></li>
+<li>the <i>Maximum</i></li>
+<li>the <i>Median</i></li>
 </ul>
 </div>
-
-<div id="outline-container-org0d1f168" class="outline-3">
-<h3 id="org0d1f168">Minimum and Maximum</h3>
-<div class="outline-text-3" id="text-org0d1f168">
-<p>
-The <i>Minimum</i> and <i>Maximum</i> are probably self-explanatory, but to be complete: the <i>Minimum</i> is the order statistic when \(k = 1\) and the <i>Maximum</i> is the order statistic when \(k=n\). As an example of the <i>Selection Problem</i> requiring fewer comparisons than the <i>Sorting Problem</i> we can look at finding the <i>Minimum</i> by traversing the array.
-</p>
-
+<div class="outline-3" id="outline-container-orgb7226eb">
+<h3 id="orgb7226eb">Minimum and Maximum</h3>
+<div class="outline-text-3" id="text-orgb7226eb">
+<p>The <i>Minimum</i> and <i>Maximum</i> are probably self-explanatory, but to be complete: the <i>Minimum</i> is the order statistic when \(k = 1\) and the <i>Maximum</i> is the order statistic when \(k=n\). As an example of the <i>Selection Problem</i> requiring fewer comparisons than the <i>Sorting Problem</i> we can look at finding the <i>Minimum</i> by traversing the array.</p>
 <pre id="minimum" style="display:hidden;">
 \begin{algorithm}
 \caption{Minimum}
@@ -186,141 +132,81 @@ The <i>Minimum</i> and <i>Maximum</i> are probably self-explanatory, but to be c
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<p>
-Since we're traversing the collection once it will always have a runtime of \(\Theta(n)\). The <i>Maximum</i> can be found the same way but with the greater than sign in the if-statement.
-</p>
+<p>Since we're traversing the collection once it will always have a runtime of \(\Theta(n)\). The <i>Maximum</i> can be found the same way but with the greater than sign in the if-statement.</p>
 </div>
 </div>
-<div id="outline-container-org2249028" class="outline-3">
-<h3 id="org2249028">The Median</h3>
-<div class="outline-text-3" id="text-org2249028">
-<p>
-While most people know what the median is (I once worked with an engineer who thought it was the middle item of the unsorted items, not the item whose value was in the middle, so it might not be true that <i>all</i> people know what it is) but since we're talking about Order Statistics and not <i>Statistics</i> like in <a href="https://en.wikipedia.org/wiki/How_to_Lie_with_Statistics">"How to Lie With Statistics"</a> we'll make it a little more confusing by using a similar but not exactly the same definition.
-</p>
-
-<p>
-\[
-k = \left \lceil \frac{n}{2} \right \rceil
-\]
-</p>
-
-<p>
-This definition comes from <a href="../itdaa/">Levitin</a>. In his description he defines the median as the value with half the remaining values less than it and half the remaining values above it, which suggests that he's defining the case where there are an odd number of items only.
-</p>
-
-<p>
-<a href="../clrs/">CLRS</a> gives a two-part definition with the odd case:
-</p>
-
-<p>
-\[
-k = \frac{n + 1}{2}
-\]
-</p>
-
-<p>
-and the case where there are an even number of items broken up into two:
-</p>
-
-<p>
-\[
-\textbf{Lower Median} = \left \lfloor \frac{n + 1}{2} \right \rfloor \\
-\textbf{Upper Median} = \left \lceil \frac{n + 1}{2} \right \rceil \\
-\]
-</p>
-
-<p>
-With their median being the <b><b>Lower Median</b></b>. Despite the differences if you run through some numbers you can see that they're basically the same (adding 1 and then taking the floor after dividing by 2 is the same as the ceiling of dividing by 2 without adding 1).
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ceiling</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-org087f5c2">
+<h3 id="org087f5c2">The Median</h3>
+<div class="outline-text-3" id="text-org087f5c2">
+<p>While most people know what the median is (I once worked with an engineer who thought it was the middle item of the unsorted items, not the item whose value was in the middle, so it might not be true that <i>all</i> people know what it is) but since we're talking about Order Statistics and not <i>Statistics</i> like in <a href="https://en.wikipedia.org/wiki/How_to_Lie_with_Statistics">"How to Lie With Statistics"</a> we'll make it a little more confusing by using a similar but not exactly the same definition.</p>
+<p>\[ k = \left \lceil \frac{n}{2} \right \rceil \]</p>
+<p>This definition comes from <a href="../itdaa/index.html">Levitin</a>. In his description he defines the median as the value with half the remaining values less than it and half the remaining values above it, which suggests that he's defining the case where there are an odd number of items only.</p>
+<p><a href="../clrs/index.html">CLRS</a> gives a two-part definition with the odd case:</p>
+<p>\[ k = \frac{n + 1}{2} \]</p>
+<p>and the case where there are an even number of items broken up into two:</p>
+<p>\[ \textbf{Lower Median} = \left \lfloor \frac{n + 1}{2} \right \rfloor \\ \textbf{Upper Median} = \left \lceil \frac{n + 1}{2} \right \rceil \\ \]</p>
+<p>With their median being the <b>Lower Median</b>. Despite the differences if you run through some numbers you can see that they're basically the same (adding 1 and then taking the floor after dividing by 2 is the same as the ceiling of dividing by 2 without adding 1).</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">ceiling</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">a</span><span class="o">//-</span><span class="n">b</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n=</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">: </span><span class="se">\t</span><span class="s2">Levitin: </span><span class="si">{</span><span class="n">ceiling</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="se">\t</span><span class="s2">Lower Median: </span><span class="si">{</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
-n=1: 	Levitin: 1	Lower Median: 1
-n=2: 	Levitin: 1	Lower Median: 1
-n=3: 	Levitin: 2	Lower Median: 2
-n=4: 	Levitin: 2	Lower Median: 2
-n=5: 	Levitin: 3	Lower Median: 3
-n=6: 	Levitin: 3	Lower Median: 3
-n=7: 	Levitin: 4	Lower Median: 4
-n=8: 	Levitin: 4	Lower Median: 4
-n=9: 	Levitin: 5	Lower Median: 5
+n=1:    Levitin: 1      Lower Median: 1
+n=2:    Levitin: 1      Lower Median: 1
+n=3:    Levitin: 2      Lower Median: 2
+n=4:    Levitin: 2      Lower Median: 2
+n=5:    Levitin: 3      Lower Median: 3
+n=6:    Levitin: 3      Lower Median: 3
+n=7:    Levitin: 4      Lower Median: 4
+n=8:    Levitin: 4      Lower Median: 4
+n=9:    Levitin: 5      Lower Median: 5
 </pre>
-
-
-<p>
-So we've defined the median but actually finding the median is a little more complicated than finding the minimum or maximum so I'll save that for later.
-</p>
+<p>So we've defined the median but actually finding the median is a little more complicated than finding the minimum or maximum so I'll save that for later.</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org5911ad1" class="outline-2">
-<h2 id="org5911ad1">Sources</h2>
-<div class="outline-text-2" id="text-org5911ad1">
+<div class="outline-2" id="outline-container-org22b2515">
+<h2 id="org22b2515">Sources</h2>
+<div class="outline-text-2" id="text-org22b2515">
 <ul class="org-ul">
-<li><a href="../itdaa/">Introduction to the Design &amp; Analysis of Algorithms (Levitin)</a></li>
-<li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
+<li><a href="../itdaa/index.html">Introduction to the Design & Analysis of Algorithms (Levitin)</a></li>
+<li><a href="../clrs/index.html">Introduction To Algorithms (CLRS)</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("minimum"));
 });
-</script>
+</script></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/problems/index.html" rel="tag">problems</a></li>
-            <li><a class="tag p-category" href="../../categories/selection/index.html" rel="tag">selection</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/problems/index.html" rel="tag">problems</a></li>
+<li><a class="tag p-category" href="../../categories/selection/index.html" rel="tag">selection</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../max-heap/index.html" rel="prev" title="Heap!">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../the-partition/index.html" rel="next" title="The Road To Partition">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../max-heap/index.html" rel="prev" title="Heap!">Previous post</a></li>
+<li class="next"><a href="../the-partition/index.html" rel="next" title="The Road To Partition">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

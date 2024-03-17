@@ -1,243 +1,149 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>The Red-Black Tree | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/the-red-black-tree/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../red-black-trees/index.html" title="Red-Black Trees" type="text/html">
-<link rel="next" href="../red-black-trees-rotation/index.html" title="Red-Black Trees: Rotation" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="The Red-Black Tree">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/the-red-black-tree/index.html">
-<meta property="og:description" content="Table of Contents
-
-
-Beginning
-
-Imports
-Set Up
-
-
-Middle
-
-Imports
-The Nil Node and Colors
-
-Color
-The Nil Node
-
-
-
-
-The Node
-
-Properties
-
-Parent
-Left
-Right
-
-
-Comparisons
-
-Equal
-Less Than
-Less Than or Equa">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-03-19T15:58:42-07:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="binary search trees">
-<meta property="article:tag" content="data structures">
-<meta property="article:tag" content="red-black trees">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/the-red-black-tree/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../red-black-trees/index.html" rel="prev" title="Red-Black Trees" type="text/html">
+<link href="../red-black-trees-rotation/index.html" rel="next" title="Red-Black Trees: Rotation" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="The Red-Black Tree" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/the-red-black-tree/index.html" property="og:url">
+<meta content="Table of Contents Beginning Imports Set Up Middle Imports The Nil Node and Colors Color The Nil Node The Node Properties Parent Left Right Comparisons Equal Less Than Less Than or Equa" property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-03-19T15:58:42-07:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="binary search trees" property="article:tag">
+<meta content="data structures" property="article:tag">
+<meta content="red-black trees" property="article:tag">
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">The Red-Black Tree</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-03-19T15:58:42-07:00" itemprop="datePublished" title="2022-03-19 15:58">2022-03-19 15:58</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">The Red-Black Tree</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-03-19T15:58:42-07:00" itemprop="datePublished" title="2022-03-19 15:58">2022-03-19 15:58</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li>
-<a href="index.html#org301c490">Beginning</a>
+<li><a href="index.html#org8265c32">Beginning</a>
 <ul>
-<li><a href="index.html#org1b886a7">Imports</a></li>
-<li><a href="index.html#orgd13e9b0">Set Up</a></li>
+<li><a href="index.html#org39b2167">Imports</a></li>
+<li><a href="index.html#org6f11fbf">Set Up</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org4158065">Middle</a>
+<li><a href="index.html#org0098489">Middle</a>
 <ul>
-<li><a href="index.html#org7690bdb">Imports</a></li>
-<li>
-<a href="index.html#orgd4420eb">The Nil Node and Colors</a>
+<li><a href="index.html#orgefb9f1f">Imports</a></li>
+<li><a href="index.html#org7607003">The Nil Node and Colors</a>
 <ul>
-<li><a href="index.html#orgbca330e">Color</a></li>
-<li><a href="index.html#org6feeee8">The Nil Node</a></li>
+<li><a href="index.html#org19fa602">Color</a></li>
+<li><a href="index.html#orgfe4f615">The Nil Node</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>
-<a href="index.html#orgeeec268">The Node</a>
+<li><a href="index.html#orge32b909">The Node</a>
 <ul>
-<li>
-<a href="index.html#org4eff990">Properties</a>
+<li><a href="index.html#org869d390">Properties</a>
 <ul>
-<li><a href="index.html#orgadf8462">Parent</a></li>
-<li><a href="index.html#org6c6b6ee">Left</a></li>
-<li><a href="index.html#orgd920823">Right</a></li>
+<li><a href="index.html#orgf373989">Parent</a></li>
+<li><a href="index.html#org5f4f010">Left</a></li>
+<li><a href="index.html#orgc5d3907">Right</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#orgd4ba744">Comparisons</a>
+<li><a href="index.html#org3904e1d">Comparisons</a>
 <ul>
-<li><a href="index.html#orgca26cd2">Equal</a></li>
-<li><a href="index.html#orgec44e5f">Less Than</a></li>
-<li><a href="index.html#org8bc531f">Less Than or Equal</a></li>
+<li><a href="index.html#orge1234cb">Equal</a></li>
+<li><a href="index.html#orge19955a">Less Than</a></li>
+<li><a href="index.html#orgb8b4ef5">Less Than or Equal</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#orgf8f47af">State Properties</a>
+<li><a href="index.html#org10fa427">State Properties</a>
 <ul>
-<li><a href="index.html#org95aa77e">Is Left</a></li>
-<li><a href="index.html#org0a31772">Is Right</a></li>
-<li><a href="index.html#orgc062e30">Is Red</a></li>
-<li><a href="index.html#org7de5504">Is Black</a></li>
-<li><a href="index.html#org1fc8f13">Is Root</a></li>
+<li><a href="index.html#org00b7cba">Is Left</a></li>
+<li><a href="index.html#orge99b30f">Is Right</a></li>
+<li><a href="index.html#org8b2f2ad">Is Red</a></li>
+<li><a href="index.html#orge8843c5">Is Black</a></li>
+<li><a href="index.html#orgcd3e1a8">Is Root</a></li>
 </ul>
 </li>
-<li><a href="index.html#orgeff8a12">Check Nodes</a></li>
-<li><a href="index.html#orgc179125">String Output</a></li>
-<li>
-<a href="index.html#org6021623">Testing</a>
+<li><a href="index.html#orgf275e9e">Check Nodes</a></li>
+<li><a href="index.html#org5fc78c9">String Output</a></li>
+<li><a href="index.html#orgeb00712">Testing</a>
 <ul>
-<li><a href="index.html#org6407880">Imports</a></li>
-<li><a href="index.html#org9941f71">One Node</a></li>
-<li><a href="index.html#orgb677d1a">Check the Comparisons</a></li>
-<li><a href="index.html#org363ba0e">Check the Two-Way Updates.</a></li>
-<li><a href="index.html#org6bec0e9">The Check Node Method</a></li>
-<li><a href="index.html#org1678039">Check the Red-Black Properties</a></li>
+<li><a href="index.html#org91d6912">Imports</a></li>
+<li><a href="index.html#org60ff0cf">One Node</a></li>
+<li><a href="index.html#org7b69ba9">Check the Comparisons</a></li>
+<li><a href="index.html#orgeb79bdc">Check the Two-Way Updates.</a></li>
+<li><a href="index.html#org424d2c4">The Check Node Method</a></li>
+<li><a href="index.html#org3ac6db3">Check the Red-Black Properties</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="index.html#org413b417">The Red-Black Tree</a></li>
+<li><a href="index.html#orgbe757ef">The Red-Black Tree</a></li>
 </ul>
 </div>
 </div>
-<p>
-This is a post that implements the Node for a Red-Black Tree. It is a continuation of <a href="../red-black-trees/">this post</a>.
-</p>
-<div id="outline-container-org301c490" class="outline-2">
-<h2 id="org301c490">Beginning</h2>
-<div class="outline-text-2" id="text-org301c490">
-<p>
-I'm going to implement a Node and Red-Black Tree so that I can explore it further in other posts. 
-</p>
+<p>This is a post that implements the Node for a Red-Black Tree. It is a continuation of <a href="../red-black-trees/index.html">this post</a>.</p>
+<div class="outline-2" id="outline-container-org8265c32">
+<h2 id="org8265c32">Beginning</h2>
+<div class="outline-text-2" id="text-org8265c32">
+<p>I'm going to implement a Node and Red-Black Tree so that I can explore it further in other posts.</p>
 </div>
-<div id="outline-container-org1b886a7" class="outline-3">
-<h3 id="org1b886a7">Imports</h3>
-<div class="outline-text-3" id="text-org1b886a7">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<div class="outline-3" id="outline-container-org39b2167">
+<h3 id="org39b2167">Imports</h3>
+<div class="outline-text-3" id="text-org39b2167">
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgd13e9b0" class="outline-3">
-<h3 id="orgd13e9b0">Set Up</h3>
-<div class="outline-text-3" id="text-orgd13e9b0">
-<div class="highlight"><pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"the-red-black-tree"</span>
+<div class="outline-3" id="outline-container-org6f11fbf">
+<h3 id="org6f11fbf">Set Up</h3>
+<div class="outline-text-3" id="text-org6f11fbf">
+<div class="highlight">
+<pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"the-red-black-tree"</span>
 <span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">"files/posts/"</span><span class="p">)</span><span class="o">/</span><span class="n">SLUG</span>
 <span class="k">if</span> <span class="ow">not</span> <span class="n">OUTPUT_PATH</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
     <span class="n">OUTPUT_PATH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
@@ -245,21 +151,17 @@ I'm going to implement a Node and Red-Black Tree so that I can explore it furthe
 </div>
 </div>
 </div>
-<div id="outline-container-org4158065" class="outline-2">
-<h2 id="org4158065">Middle</h2>
-<div class="outline-text-2" id="text-org4158065">
-<p>
-This is the basic structure of our tree.
-</p>
-
-<p>
-<img src="rb-tree.png" alt="nil"></p>
+<div class="outline-2" id="outline-container-org0098489">
+<h2 id="org0098489">Middle</h2>
+<div class="outline-text-2" id="text-org0098489">
+<p>This is the basic structure of our tree.</p>
+<p><img alt="nil" src="rb-tree.png"></p>
 </div>
-
-<div id="outline-container-org7690bdb" class="outline-3">
-<h3 id="org7690bdb">Imports</h3>
-<div class="outline-text-3" id="text-org7690bdb">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<div class="outline-3" id="outline-container-orgefb9f1f">
+<h3 id="orgefb9f1f">Imports</h3>
+<div class="outline-text-3" id="text-orgefb9f1f">
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
@@ -269,31 +171,26 @@ This is the basic structure of our tree.
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgd4420eb" class="outline-3">
-<h3 id="orgd4420eb">The Nil Node and Colors</h3>
-<div class="outline-text-3" id="text-orgd4420eb">
-<p>
-I'm going to set up an Enum for the Colors and a Node instance for the NIL object. I originally made the NIL from a namedtuple, but as I've been adding features to the Node class it's become harder to work with.
-</p>
-
-<p>
-<b><b>Note:</b></b> The <a href="https://docs.python.org/3/library/enum.html">python Enum</a> uses object ID as the way to see if two things are equal, not their values. You can get around it, but since both the colors and the Nil are meant only to be used internally by the tree, not by the end user, I'm going to leave it as is. This means that to do things like check the color outside of the <code>tree</code> module that I'm creating, you have to import the module and refer to the Color or NIL using the module (e.g. <code>tree.Color</code>), otherwise you might end up with some funky problems where things that look equal aren't because they are actually different objects.
-</p>
+<div class="outline-3" id="outline-container-org7607003">
+<h3 id="org7607003">The Nil Node and Colors</h3>
+<div class="outline-text-3" id="text-org7607003">
+<p>I'm going to set up an Enum for the Colors and a Node instance for the NIL object. I originally made the NIL from a namedtuple, but as I've been adding features to the Node class it's become harder to work with.</p>
+<p><b>Note:</b> The <a href="https://docs.python.org/3/library/enum.html">python Enum</a> uses object ID as the way to see if two things are equal, not their values. You can get around it, but since both the colors and the Nil are meant only to be used internally by the tree, not by the end user, I'm going to leave it as is. This means that to do things like check the color outside of the <code>tree</code> module that I'm creating, you have to import the module and refer to the Color or NIL using the module (e.g. <code>tree.Color</code>), otherwise you might end up with some funky problems where things that look equal aren't because they are actually different objects.</p>
 </div>
-
-<div id="outline-container-orgbca330e" class="outline-4">
-<h4 id="orgbca330e">Color</h4>
-<div class="outline-text-4" id="text-orgbca330e">
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<div class="outline-4" id="outline-container-org19fa602">
+<h4 id="org19fa602">Color</h4>
+<div class="outline-text-4" id="text-org19fa602">
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""red or black"""</span>
     <span class="n">RED</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">BLACK</span> <span class="o">=</span> <span class="mi">2</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree</span> <span class="kn">import</span> <span class="n">tree</span>
+<div class="highlight">
+<pre><span></span><span class="kn">from</span> <span class="nn">bowling.data_structures.red_black_tree</span> <span class="kn">import</span> <span class="n">tree</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 
 <span class="n">red</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
@@ -301,7 +198,6 @@ I'm going to set up an Enum for the Colors and a Node instance for the NIL objec
 <span class="nb">print</span><span class="p">(</span><span class="n">red</span> <span class="o">==</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">red</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Color.RED
 Color.BLACK
@@ -309,53 +205,38 @@ True
 True
 False
 </pre>
-
-
-<p>
-Note that last case (<code>print(red==1)</code>). It's <code>False</code> because I'm using an Enum. We could switch it to an <a href="https://docs.python.org/3/library/enum.html#intenum">IntEnum</a> and allow integers but for now I'm sticking to the Enum to see how well it works.
-</p>
+<p>Note that last case (<code>print(red==1)</code>). It's <code>False</code> because I'm using an Enum. We could switch it to an <a href="https://docs.python.org/3/library/enum.html#intenum">IntEnum</a> and allow integers but for now I'm sticking to the Enum to see how well it works.</p>
 </div>
 </div>
-
-<div id="outline-container-org6feeee8" class="outline-4">
-<h4 id="org6feeee8">The Nil Node</h4>
-<div class="outline-text-4" id="text-org6feeee8">
-<p>
-<b><b>Note:</b></b> We have a little bit of a chicken or the egg problem here - I want to check for NILs in the Node Class methods which requires me to define it before defining the Node, so even though the NIL is a special case of the Node, we can't actually use the Node class to create it. It just has to be duck typed enough to be used in the methods.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">NIL_KEY</span> <span class="o">=</span> <span class="s2">"NIL"</span>
+<div class="outline-4" id="outline-container-orgfe4f615">
+<h4 id="orgfe4f615">The Nil Node</h4>
+<div class="outline-text-4" id="text-orgfe4f615">
+<p><b>Note:</b> We have a little bit of a chicken or the egg problem here - I want to check for NILs in the Node Class methods which requires me to define it before defining the Node, so even though the NIL is a special case of the Node, we can't actually use the Node class to create it. It just has to be duck typed enough to be used in the methods.</p>
+<div class="highlight">
+<pre><span></span><span class="n">NIL_KEY</span> <span class="o">=</span> <span class="s2">"NIL"</span>
 <span class="n">NIL</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
     <span class="s2">"NIL"</span><span class="p">,</span> <span class="s2">"key color parent left right is_red is_black"</span><span class="p">,</span>
     <span class="n">defaults</span><span class="o">=</span><span class="p">[</span><span class="n">NIL_KEY</span><span class="p">,</span> <span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])()</span>
 <span class="n">LEAF</span> <span class="o">=</span> <span class="n">NIL</span>
 <span class="n">ROOT_PARENT</span> <span class="o">=</span> <span class="n">NIL</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">NIL</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">))</span>
 </pre></div>
-
 <pre class="example">
 NIL(key='NIL', color=&lt;Color.BLACK: 2&gt;, parent=None, left=None, right=None, is_red=False, is_black=True)
-</pre>
+</pre></div>
 </div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-orgeeec268" class="outline-2">
-<h2 id="orgeeec268">The Node</h2>
-<div class="outline-text-2" id="text-orgeeec268">
-<p>
-The Node for a red-black tree is the same as the <a href="../binary-search-tree-node/">Binary Search Tree Node</a> except that it has the <code>color</code> attribute. But, since I'm doing integrity checks in the object that also means that the checks have to be updated to take into consideration the Red-Black Tree Properties.
-</p>
-
-<p>
-As part of the Insert Node method the new node gets set to RED, so I'm not going to require passing the color in.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-orge32b909">
+<h2 id="orge32b909">The Node</h2>
+<div class="outline-text-2" id="text-orge32b909">
+<p>The Node for a red-black tree is the same as the <a href="../binary-search-tree-node/index.html">Binary Search Tree Node</a> except that it has the <code>color</code> attribute. But, since I'm doing integrity checks in the object that also means that the checks have to be updated to take into consideration the Red-Black Tree Properties.</p>
+<p>As part of the Insert Node method the new node gets set to RED, so I'm not going to require passing the color in.</p>
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A Node in a Binary Search Tree</span>
 
 <span class="sd">    Args:</span>
@@ -366,36 +247,35 @@ As part of the Insert Node method the new node gets set to RED, so I'm not going
 <span class="sd">     right: right child</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Orderable</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">Color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-		 <span class="n">parent</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="n">NIL</span><span class="p">,</span>
-		 <span class="n">left</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="n">NIL</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="n">NIL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
-	<span class="k">return</span>
+                 <span class="n">parent</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="n">NIL</span><span class="p">,</span>
+                 <span class="n">left</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="n">NIL</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="n">NIL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">left</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">right</span>
+        <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">color</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">))</span>
 </pre></div>
 </div>
-
-<div id="outline-container-org4eff990" class="outline-3">
-<h3 id="org4eff990">Properties</h3>
-<div class="outline-text-3" id="text-org4eff990">
-</div>
-<div id="outline-container-orgadf8462" class="outline-4">
-<h4 id="orgadf8462">Parent</h4>
-<div class="outline-text-4" id="text-orgadf8462">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-3" id="outline-container-org869d390">
+<h3 id="org869d390">Properties</h3>
+<div class="outline-text-3" id="text-org869d390"></div>
+<div class="outline-4" id="outline-container-orgf373989">
+<h4 id="orgf373989">Parent</h4>
+<div class="outline-text-4" id="text-orgf373989">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The parent of this node"""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">NIL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">NIL</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
 
 <span class="nd">@parent</span><span class="o">.</span><span class="n">setter</span>
@@ -413,33 +293,34 @@ As part of the Insert Node method the new node gets set to RED, so I'm not going
 <span class="sd">     AssertionError if parent and self have same key</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">parent_</span> <span class="ow">is</span> <span class="n">NIL</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent_</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent_</span>
+        <span class="k">return</span>
 
     <span class="k">if</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">parent_</span><span class="p">:</span>
-	<span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Self (</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">) cannot equal parent (</span><span class="si">{</span><span class="n">parent_</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Self (</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">) cannot equal parent (</span><span class="si">{</span><span class="n">parent_</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
     <span class="c1"># since the left and right assignments update the parent</span>
     <span class="c1"># we need a hack to get around the setters or you end up</span>
     <span class="c1"># with an infinite loop - we set left, they set parent, we set left,...</span>
     <span class="k">if</span> <span class="bp">self</span> <span class="o">&lt;</span> <span class="n">parent_</span><span class="p">:</span>
-	<span class="n">parent_</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">parent_</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="bp">self</span>
     <span class="k">else</span><span class="p">:</span>
-	<span class="n">parent_</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">parent_</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="bp">self</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent_</span>        
     <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org6c6b6ee" class="outline-4">
-<h4 id="org6c6b6ee">Left</h4>
-<div class="outline-text-4" id="text-org6c6b6ee">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-org5f4f010">
+<h4 id="org5f4f010">Left</h4>
+<div class="outline-text-4" id="text-org5f4f010">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The left child"""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">NIL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">NIL</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span>
 
 <span class="nd">@left</span><span class="o">.</span><span class="n">setter</span>
@@ -453,8 +334,8 @@ As part of the Insert Node method the new node gets set to RED, so I'm not going
 <span class="sd">     new_left: a node to be the left child or None</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">new_left</span> <span class="ow">is</span> <span class="n">NIL</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">new_left</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">new_left</span>
+        <span class="k">return</span>
 
     <span class="k">assert</span> <span class="n">new_left</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left (</span><span class="si">{</span><span class="n">new_left</span><span class="si">}</span><span class="s2"> not &lt; self </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">)"</span>
     <span class="n">new_left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
@@ -463,14 +344,15 @@ As part of the Insert Node method the new node gets set to RED, so I'm not going
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgd920823" class="outline-4">
-<h4 id="orgd920823">Right</h4>
-<div class="outline-text-4" id="text-orgd920823">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-orgc5d3907">
+<h4 id="orgc5d3907">Right</h4>
+<div class="outline-text-4" id="text-orgc5d3907">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">right</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The right child"""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">NIL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">NIL</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right</span>
 
 <span class="nd">@right</span><span class="o">.</span><span class="n">setter</span>
@@ -484,8 +366,8 @@ As part of the Insert Node method the new node gets set to RED, so I'm not going
 <span class="sd">     new_right: a node to be the right child or None</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">new_right</span> <span class="ow">is</span> <span class="n">NIL</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">new_right</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">new_right</span>
+        <span class="k">return</span>
 
     <span class="k">assert</span> <span class="n">new_right</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"right (</span><span class="si">{</span><span class="n">new_right</span><span class="si">}</span><span class="s2"> not &gt; self (</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">)"</span>
     <span class="n">new_right</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
@@ -495,18 +377,16 @@ As part of the Insert Node method the new node gets set to RED, so I'm not going
 </div>
 </div>
 </div>
-<div id="outline-container-orgd4ba744" class="outline-3">
-<h3 id="orgd4ba744">Comparisons</h3>
-<div class="outline-text-3" id="text-orgd4ba744">
-<p>
-These are convenience methods to make it so that you can compare the node-objects without referring to the key (see the <a href="https://docs.python.org/3/reference/datamodel.html#object.__lt__">python Data Model documentation</a>). In reading the documentation I thought that you had to implement everything, but after implementing <i>less than</i> and <i>less than or equal to</i> the <i>greater than</i> and <i>greater than or equal to</i> comparisons started to work. I guess if you don't implement them they just take the negative of the less than cases.
-</p>
+<div class="outline-3" id="outline-container-org3904e1d">
+<h3 id="org3904e1d">Comparisons</h3>
+<div class="outline-text-3" id="text-org3904e1d">
+<p>These are convenience methods to make it so that you can compare the node-objects without referring to the key (see the <a href="https://docs.python.org/3/reference/datamodel.html#object.__lt__">python Data Model documentation</a>). In reading the documentation I thought that you had to implement everything, but after implementing <i>less than</i> and <i>less than or equal to</i> the <i>greater than</i> and <i>greater than or equal to</i> comparisons started to work. I guess if you don't implement them they just take the negative of the less than cases.</p>
 </div>
-
-<div id="outline-container-orgca26cd2" class="outline-4">
-<h4 id="orgca26cd2">Equal</h4>
-<div class="outline-text-4" id="text-orgca26cd2">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-orge1234cb">
+<h4 id="orge1234cb">Equal</h4>
+<div class="outline-text-4" id="text-orge1234cb">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check if the other node has an equal key</span>
 
 <span class="sd">    """</span>
@@ -514,11 +394,11 @@ These are convenience methods to make it so that you can compare the node-object
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgec44e5f" class="outline-4">
-<h4 id="orgec44e5f">Less Than</h4>
-<div class="outline-text-4" id="text-orgec44e5f">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-orge19955a">
+<h4 id="orge19955a">Less Than</h4>
+<div class="outline-text-4" id="text-orge19955a">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""See if this key is less than the other's</span>
 
 <span class="sd">    Raises:</span>
@@ -528,16 +408,17 @@ These are convenience methods to make it so that you can compare the node-object
 <span class="sd">     self &lt; other</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"key"</span><span class="p">):</span>
-	<span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'&lt;' not supported between '</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">' "</span>
-			     <span class="sa">f</span><span class="s2">"and '(</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'&lt;' not supported between '</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">' "</span>
+                             <span class="sa">f</span><span class="s2">"and '(</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org8bc531f" class="outline-4">
-<h4 id="org8bc531f">Less Than or Equal</h4>
-<div class="outline-text-4" id="text-org8bc531f">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="outline-4" id="outline-container-orgb8b4ef5">
+<h4 id="orgb8b4ef5">Less Than or Equal</h4>
+<div class="outline-text-4" id="text-orgb8b4ef5">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="fm">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""See if this key is less than or equal to other's</span>
 
 <span class="sd">    Raises:</span>
@@ -547,30 +428,28 @@ These are convenience methods to make it so that you can compare the node-object
 <span class="sd">     self &lt;= other</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">"key"</span><span class="p">):</span>
-	<span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'&lt;' not supported between '</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">' "</span>
-			<span class="s2">"and '{type(other)}'"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"'&lt;' not supported between '</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">' "</span>
+                        <span class="s2">"and '{type(other)}'"</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">key</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div id="outline-container-orgf8f47af" class="outline-3">
-<h3 id="orgf8f47af">State Properties</h3>
-<div class="outline-text-3" id="text-orgf8f47af">
-</div>
-<div id="outline-container-org95aa77e" class="outline-4">
-<h4 id="org95aa77e">Is Left</h4>
-<div class="outline-text-4" id="text-org95aa77e">
-<p>
-Is this a left-child node?
-</p>
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-3" id="outline-container-org10fa427">
+<h3 id="org10fa427">State Properties</h3>
+<div class="outline-text-3" id="text-org10fa427"></div>
+<div class="outline-4" id="outline-container-org00b7cba">
+<h4 id="org00b7cba">Is Left</h4>
+<div class="outline-text-4" id="text-org00b7cba">
+<p>Is this a left-child node?</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">is_left</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""True if this node is a left child"""</span>
     <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">expect</span><span class="p">,</span> <span class="n">be_true</span>
+<div class="highlight">
+<pre><span></span><span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">expect</span><span class="p">,</span> <span class="n">be_true</span>
 
 <span class="n">child</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -581,20 +460,18 @@ Is this a left-child node?
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org0a31772" class="outline-4">
-<h4 id="org0a31772">Is Right</h4>
-<div class="outline-text-4" id="text-org0a31772">
-<p>
-Is the node a right child?
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-orge99b30f">
+<h4 id="orge99b30f">Is Right</h4>
+<div class="outline-text-4" id="text-orge99b30f">
+<p>Is the node a right child?</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">is_right</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""True if this node is a right child"""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="bp">self</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">child</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
 <span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">child</span>
 
@@ -604,50 +481,51 @@ Is the node a right child?
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgc062e30" class="outline-4">
-<h4 id="orgc062e30">Is Red</h4>
-<div class="outline-text-4" id="text-orgc062e30">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-org8b2f2ad">
+<h4 id="org8b2f2ad">Is Red</h4>
+<div class="outline-text-4" id="text-org8b2f2ad">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">is_red</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""True if the node is colored red"""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">is_red</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
 <span class="n">node</span><span class="o">.</span><span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">is_red</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org7de5504" class="outline-4">
-<h4 id="org7de5504">Is Black</h4>
-<div class="outline-text-4" id="text-org7de5504">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-orge8843c5">
+<h4 id="orge8843c5">Is Black</h4>
+<div class="outline-text-4" id="text-orge8843c5">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">is_black</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""True if the node is colored black"""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">is_black</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
 <span class="n">node</span><span class="o">.</span><span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">is_black</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org1fc8f13" class="outline-4">
-<h4 id="org1fc8f13">Is Root</h4>
-<div class="outline-text-4" id="text-org1fc8f13">
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-4" id="outline-container-orgcd3e1a8">
+<h4 id="orgcd3e1a8">Is Root</h4>
+<div class="outline-text-4" id="text-orgcd3e1a8">
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">is_root</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""True if the node is the root"""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="n">NIL</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">is_root</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
 <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
 <span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">node</span>
@@ -657,18 +535,13 @@ Is the node a right child?
 </div>
 </div>
 </div>
-<div id="outline-container-orgeff8a12" class="outline-3">
-<h3 id="orgeff8a12">Check Nodes</h3>
-<div class="outline-text-3" id="text-orgeff8a12">
-<p>
-This is a convenience method to check if a node and its sub-trees maintain the Binary Search Tree Property. It calls the children too so that the whole tree can be checked by calling this on the root. Now that there's checks when the attributes are set this isn't quite as necessary. The only time you might need it is if the attributes are set directly instead of using the setter.
-</p>
-
-<p>
-<b><b>Note:</b></b> Although the <i>Binary Search Tree Property</i> allows duplicate keys, once you start doing things with the tree like inserting and deleting nodes it causes problems. Also, it's not likely that the keys are what you would be most interested in when using a tree, it would be the data associated with the node, so what would it mean to have two different items associated with the same key? There are probably uses for this, but to make it simpler I'm going to treat the keys more like dictionary keys and say that it's a mistake to have duplicates.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">check_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-orgf275e9e">
+<h3 id="orgf275e9e">Check Nodes</h3>
+<div class="outline-text-3" id="text-orgf275e9e">
+<p>This is a convenience method to check if a node and its sub-trees maintain the Binary Search Tree Property. It calls the children too so that the whole tree can be checked by calling this on the root. Now that there's checks when the attributes are set this isn't quite as necessary. The only time you might need it is if the attributes are set directly instead of using the setter.</p>
+<p><b>Note:</b> Although the <i>Binary Search Tree Property</i> allows duplicate keys, once you start doing things with the tree like inserting and deleting nodes it causes problems. Also, it's not likely that the keys are what you would be most interested in when using a tree, it would be the data associated with the node, so what would it mean to have two different items associated with the same key? There are probably uses for this, but to make it simpler I'm going to treat the keys more like dictionary keys and say that it's a mistake to have duplicates.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">check_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Checks that the Binary Search Tree Property holds</span>
 
 <span class="sd">    Raises:</span>
@@ -679,47 +552,44 @@ This is a convenience method to check if a node and its sub-trees maintain the B
 
     <span class="c1"># red-black property 4: if a node is red, both children are black</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">:</span>
-	<span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span> <span class="ow">and</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">),</span>\
-	    <span class="p">(</span><span class="sa">f</span><span class="s2">"Parent: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2"> Left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2"> "</span>
-	     <span class="sa">f</span><span class="s2">"Right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2">. "</span>
-	     <span class="s2">"Both Children of a Red parent must be Black"</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">color</span> <span class="ow">is</span> <span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">),</span>\
+            <span class="p">(</span><span class="sa">f</span><span class="s2">"Parent: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2"> Left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2"> "</span>
+             <span class="sa">f</span><span class="s2">"Right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">color</span><span class="si">}</span><span class="s2">. "</span>
+             <span class="s2">"Both Children of a Red parent must be Black"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NIL</span><span class="p">:</span>
-	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2"> not &lt; Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Left: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2"> not &lt; Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NIL</span><span class="p">:</span>
-	<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2"> not &gt; Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Right: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2"> not &gt; Self: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">"</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span>
     <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgc179125" class="outline-3">
-<h3 id="orgc179125">String Output</h3>
-<div class="outline-text-3" id="text-orgc179125">
-<p>
-This is to make it a little easier to print.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-org5fc78c9">
+<h3 id="org5fc78c9">String Output</h3>
+<div class="outline-text-3" id="text-org5fc78c9">
+<p>This is to make it a little easier to print.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The key as a string"""</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org6021623" class="outline-3">
-<h3 id="org6021623">Testing</h3>
-<div class="outline-text-3" id="text-org6021623">
-<p>
-I'll have to break this up later.
-</p>
+<div class="outline-3" id="outline-container-orgeb00712">
+<h3 id="orgeb00712">Testing</h3>
+<div class="outline-text-3" id="text-orgeb00712">
+<p>I'll have to break this up later.</p>
 </div>
-<div id="outline-container-org6407880" class="outline-4">
-<h4 id="org6407880">Imports</h4>
-<div class="outline-text-4" id="text-org6407880">
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<div class="outline-4" id="outline-container-org91d6912">
+<h4 id="org91d6912">Imports</h4>
+<div class="outline-text-4" id="text-org91d6912">
+<div class="highlight">
+<pre><span></span><span class="c1"># pypi</span>
 <span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">be</span><span class="p">,</span>
     <span class="n">be_above</span><span class="p">,</span>
@@ -737,10 +607,11 @@ I'll have to break this up later.
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org9941f71" class="outline-4">
-<h4 id="org9941f71">One Node</h4>
-<div class="outline-text-4" id="text-org9941f71">
-<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<div class="outline-4" id="outline-container-org60ff0cf">
+<h4 id="org60ff0cf">One Node</h4>
+<div class="outline-text-4" id="text-org60ff0cf">
+<div class="highlight">
+<pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">parent</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
@@ -751,11 +622,11 @@ I'll have to break this up later.
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orgb677d1a" class="outline-4">
-<h4 id="orgb677d1a">Check the Comparisons</h4>
-<div class="outline-text-4" id="text-orgb677d1a">
-<div class="highlight"><pre><span></span><span class="n">uncle</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<div class="outline-4" id="outline-container-org7b69ba9">
+<h4 id="org7b69ba9">Check the Comparisons</h4>
+<div class="outline-text-4" id="text-org7b69ba9">
+<div class="highlight">
+<pre><span></span><span class="n">uncle</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">uncle</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_below</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
@@ -775,17 +646,15 @@ I'll have to break this up later.
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org363ba0e" class="outline-4">
-<h4 id="org363ba0e">Check the Two-Way Updates.</h4>
-<div class="outline-text-4" id="text-org363ba0e">
-</div>
+<div class="outline-4" id="outline-container-orgeb79bdc">
+<h4 id="orgeb79bdc">Check the Two-Way Updates.</h4>
+<div class="outline-text-4" id="text-orgeb79bdc"></div>
 <ul class="org-ul">
-<li>
-<a id="org8732fe7"></a>Set the Parent<br><div class="outline-text-5" id="text-org8732fe7">
-<p>
-In the constructor.
-</p>
-<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<li><a id="orge82ed54"></a>Set the Parent<br>
+<div class="outline-text-5" id="text-orge82ed54">
+<p>In the constructor.</p>
+<div class="highlight">
+<pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 
 <span class="n">left</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">left</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
@@ -797,14 +666,14 @@ In the constructor.
 
 <span class="k">def</span> <span class="nf">bad_parent</span><span class="p">():</span>
     <span class="n">left</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-		     <span class="n">parent</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">),</span>
-		     <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+                     <span class="n">parent</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">),</span>
+                     <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
     <span class="k">return</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">bad_parent</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 <span class="n">left</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">left</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
 
@@ -826,9 +695,10 @@ In the constructor.
 </pre></div>
 </div>
 </li>
-<li>
-<a id="orgb60d4d6"></a>Set The Left Child<br><div class="outline-text-5" id="text-orgb60d4d6">
-<div class="highlight"><pre><span></span><span class="n">left</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<li><a id="org56af91a"></a>Set The Left Child<br>
+<div class="outline-text-5" id="text-org56af91a">
+<div class="highlight">
+<pre><span></span><span class="n">left</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">left</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
@@ -841,9 +711,10 @@ In the constructor.
 </pre></div>
 </div>
 </li>
-<li>
-<a id="orgafa53f0"></a>Set The Right Child<br><div class="outline-text-5" id="text-orgafa53f0">
-<div class="highlight"><pre><span></span><span class="n">right</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<li><a id="org922b012"></a>Set The Right Child<br>
+<div class="outline-text-5" id="text-org922b012">
+<div class="highlight">
+<pre><span></span><span class="n">right</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">right</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">right</span><span class="p">))</span>
@@ -858,10 +729,11 @@ In the constructor.
 </li>
 </ul>
 </div>
-<div id="outline-container-org6bec0e9" class="outline-4">
-<h4 id="org6bec0e9">The Check Node Method</h4>
-<div class="outline-text-4" id="text-org6bec0e9">
-<div class="highlight"><pre><span></span><span class="n">uncle</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
+<div class="outline-4" id="outline-container-org424d2c4">
+<h4 id="org424d2c4">The Check Node Method</h4>
+<div class="outline-text-4" id="text-org424d2c4">
+<div class="highlight">
+<pre><span></span><span class="n">uncle</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 <span class="n">parent</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span>
 
@@ -907,8 +779,8 @@ In the constructor.
 <span class="n">parent</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">lefty</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_state</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">parent</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 <span class="n">parent</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="c1"># left children of parent's left child have to be less than parent</span>
 <span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
@@ -918,8 +790,8 @@ In the constructor.
 <span class="n">parent</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">check_state</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="c1"># right is greater than parent</span>
+<div class="highlight">
+<pre><span></span><span class="c1"># right is greater than parent</span>
 <span class="n">lefty</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">bad</span><span class="p">():</span>
     <span class="n">lefty</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">Color</span><span class="o">.</span><span class="n">BLACK</span><span class="p">)</span>
@@ -945,11 +817,11 @@ In the constructor.
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org1678039" class="outline-4">
-<h4 id="org1678039">Check the Red-Black Properties</h4>
-<div class="outline-text-4" id="text-org1678039">
-<div class="highlight"><pre><span></span><span class="c1"># colors have to use the Color Enum</span>
+<div class="outline-4" id="outline-container-org3ac6db3">
+<h4 id="org3ac6db3">Check the Red-Black Properties</h4>
+<div class="outline-text-4" id="text-org3ac6db3">
+<div class="highlight">
+<pre><span></span><span class="c1"># colors have to use the Color Enum</span>
 <span class="n">node</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">check_state</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">raise_error</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">))</span>
@@ -971,56 +843,49 @@ In the constructor.
 </div>
 </div>
 </div>
-
-<div id="outline-container-org413b417" class="outline-2">
-<h2 id="org413b417">The Red-Black Tree</h2>
-<div class="outline-text-2" id="text-org413b417">
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">RedBlackTree</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-orgbe757ef">
+<h2 id="orgbe757ef">The Red-Black Tree</h2>
+<div class="outline-text-2" id="text-orgbe757ef">
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">RedBlackTree</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The Holder of the Red-Black Tree</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     root: the root node of the tree</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="n">NIL</span><span class="p">):</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+</div>
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/binary-search-trees/index.html" rel="tag">binary search trees</a></li>
-            <li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
-            <li><a class="tag p-category" href="../../categories/red-black-trees/index.html" rel="tag">red-black trees</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/binary-search-trees/index.html" rel="tag">binary search trees</a></li>
+<li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
+<li><a class="tag p-category" href="../../categories/red-black-trees/index.html" rel="tag">red-black trees</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../red-black-trees/index.html" rel="prev" title="Red-Black Trees">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../red-black-trees-rotation/index.html" rel="next" title="Red-Black Trees: Rotation">Next post</a>
-            </li>
-        </ul></nav></aside></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../red-black-trees/index.html" rel="prev" title="Red-Black Trees">Previous post</a></li>
+<li class="next"><a href="../red-black-trees-rotation/index.html" rel="next" title="Red-Black Trees: Rotation">Next post</a></li>
+</ul>
+</nav>
+</aside>
+</article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

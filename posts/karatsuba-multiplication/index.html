@@ -1,179 +1,132 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="A look at the Karatsuba algorithm for multiplication.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="A look at the Karatsuba algorithm for multiplication." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>Karatsuba Multiplication | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/karatsuba-multiplication/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../the-maximum-subarray-problem/index.html" title="The Maximum-Subarray Problem" type="text/html">
-<link rel="next" href="../algorithms-illuminated-part-1/index.html" title="Algorithms Illuminated - Part 1: The Basics" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="Karatsuba Multiplication">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/karatsuba-multiplication/index.html">
-<meta property="og:description" content="A look at the Karatsuba algorithm for multiplication.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-05-10T14:53:24-07:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="divide-and-conquer">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/karatsuba-multiplication/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../the-maximum-subarray-problem/index.html" rel="prev" title="The Maximum-Subarray Problem" type="text/html">
+<link href="../algorithms-illuminated-part-1/index.html" rel="next" title="Algorithms Illuminated - Part 1: The Basics" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Karatsuba Multiplication" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/karatsuba-multiplication/index.html" property="og:url">
+<meta content="A look at the Karatsuba algorithm for multiplication." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-05-10T14:53:24-07:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="divide-and-conquer" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Karatsuba Multiplication</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-05-10T14:53:24-07:00" itemprop="datePublished" title="2022-05-10 14:53">2022-05-10 14:53</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Karatsuba Multiplication</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-05-10T14:53:24-07:00" itemprop="datePublished" title="2022-05-10 14:53">2022-05-10 14:53</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li>
-<a href="index.html#org8c7d53c">Imports and Setup</a>
+<li><a href="index.html#org3550574">Imports and Setup</a>
 <ul>
-<li><a href="index.html#orgf030b52">Imports</a></li>
-<li><a href="index.html#org737bd6f">Set Up</a></li>
+<li><a href="index.html#orgde42618">Imports</a></li>
+<li><a href="index.html#org1dbe820">Set Up</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org3b6ed1d">The Algorithms</a>
+<li><a href="index.html#org2ba2802">The Algorithms</a>
 <ul>
-<li><a href="index.html#org5f5952f">Grade School Multiplication</a></li>
-<li><a href="index.html#org298a893">Karatsuba Multiplication</a></li>
+<li><a href="index.html#orgd0f6567">Grade School Multiplication</a></li>
+<li><a href="index.html#orgea2c122">Karatsuba Multiplication</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org63ade62">An IntList</a>
+<li><a href="index.html#orgc24f361">An IntList</a>
 <ul>
-<li><a href="index.html#orgf3dccbf">Test it</a></li>
+<li><a href="index.html#org725accb">Test it</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org1f0ea2c">An Implementation</a>
+<li><a href="index.html#org7c9f81a">An Implementation</a>
 <ul>
-<li>
-<a href="index.html#org17919d3">Karatsuba Multiplication</a>
+<li><a href="index.html#orgca54838">Karatsuba Multiplication</a>
 <ul>
-<li><a href="index.html#org6cc82f7">Test</a></li>
+<li><a href="index.html#orga08bcaa">Test</a></li>
 </ul>
 </li>
-<li><a href="index.html#org4504726">Test</a></li>
+<li><a href="index.html#org8e2d48d">Test</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org195ca00">Run Time</a>
+<li><a href="index.html#org4c048bf">Run Time</a>
 <ul>
-<li><a href="index.html#orgdb3117c">Using the Master Method</a></li>
-<li><a href="index.html#org30b71d8">With Padding</a></li>
-<li><a href="index.html#org492fd87">Without Padding</a></li>
+<li><a href="index.html#orgb898a95">Using the Master Method</a></li>
+<li><a href="index.html#org941eb5d">With Padding</a></li>
+<li><a href="index.html#orgdb3ffe0">Without Padding</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org1495acf">Sources</a>
+<li><a href="index.html#orgaf627af">Sources</a>
 <ul>
-<li><a href="index.html#org774b9f1">Karatsuba Multiplicatio</a></li>
-<li><a href="index.html#orga4698d6">Grade-School Multiplication</a></li>
+<li><a href="index.html#orgd435d21">Karatsuba Multiplicatio</a></li>
+<li><a href="index.html#org8fd4298">Grade-School Multiplication</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-org8c7d53c" class="outline-2">
-<h2 id="org8c7d53c">Imports and Setup</h2>
-<div class="outline-text-2" id="text-org8c7d53c">
-</div>
-<div id="outline-container-orgf030b52" class="outline-3">
-<h3 id="orgf030b52">Imports</h3>
-<div class="outline-text-3" id="text-orgf030b52">
-<div class="highlight"><pre><span></span><span class="c1"># from python</span>
+<div class="outline-2" id="outline-container-org3550574">
+<h2 id="org3550574">Imports and Setup</h2>
+<div class="outline-text-2" id="text-org3550574"></div>
+<div class="outline-3" id="outline-container-orgde42618">
+<h3 id="orgde42618">Imports</h3>
+<div class="outline-text-3" id="text-orgde42618">
+<div class="highlight">
+<pre><span></span><span class="c1"># from python</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
@@ -201,10 +154,11 @@ bg-light
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org737bd6f" class="outline-3">
-<h3 id="org737bd6f">Set Up</h3>
-<div class="outline-text-3" id="text-org737bd6f">
-<div class="highlight"><pre><span></span><span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
+<div class="outline-3" id="outline-container-org1dbe820">
+<h3 id="org1dbe820">Set Up</h3>
+<div class="outline-text-3" id="text-org1dbe820">
+<div class="highlight">
+<pre><span></span><span class="n">TIMER</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">()</span>
 <span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"karatsuba-multiplication"</span>
 <span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
 <span class="n">save_it</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
@@ -217,17 +171,13 @@ bg-light
 </div>
 </div>
 </div>
-<div id="outline-container-org3b6ed1d" class="outline-2">
-<h2 id="org3b6ed1d">The Algorithms</h2>
-<div class="outline-text-2" id="text-org3b6ed1d">
-</div>
-<div id="outline-container-org5f5952f" class="outline-3">
-<h3 id="org5f5952f">Grade School Multiplication</h3>
-<div class="outline-text-3" id="text-org5f5952f">
-<p>
-Grade-School multiplication is how most of us are taught to multiply numbers with more than one digit each. Each digit in one number is multiplied by each digit in the other to create a partial product. Once we've gone through all the digits in the first number we sum up all the partial products we calculated to get our final answer.
-</p>
-
+<div class="outline-2" id="outline-container-org2ba2802">
+<h2 id="org2ba2802">The Algorithms</h2>
+<div class="outline-text-2" id="text-org2ba2802"></div>
+<div class="outline-3" id="outline-container-orgd0f6567">
+<h3 id="orgd0f6567">Grade School Multiplication</h3>
+<div class="outline-text-3" id="text-orgd0f6567">
+<p>Grade-School multiplication is how most of us are taught to multiply numbers with more than one digit each. Each digit in one number is multiplied by each digit in the other to create a partial product. Once we've gone through all the digits in the first number we sum up all the partial products we calculated to get our final answer.</p>
 <pre id="grade-school" style="display:hidden;">
 \begin{algorithm}
 \caption{Grade-School}
@@ -264,17 +214,12 @@ Grade-School multiplication is how most of us are taught to multiply numbers wit
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-
-<div id="outline-container-org298a893" class="outline-3">
-<h3 id="org298a893">Karatsuba Multiplication</h3>
-<div class="outline-text-3" id="text-org298a893">
-<p>
-Karatsuba Multiplication improves on the Grade-School algorithm using a trick from Frederick Gauss, which is a little too much of a diversion. With all these improvements in multiplication it seems like you need a background in number theory that not all Computer Scientist's have (or at least I don't). Maybe take it on faith for now.
-</p>
-
+<div class="outline-3" id="outline-container-orgea2c122">
+<h3 id="orgea2c122">Karatsuba Multiplication</h3>
+<div class="outline-text-3" id="text-orgea2c122">
+<p>Karatsuba Multiplication improves on the Grade-School algorithm using a trick from Frederick Gauss, which is a little too much of a diversion. With all these improvements in multiplication it seems like you need a background in number theory that not all Computer Scientist's have (or at least I don't). Maybe take it on faith for now.</p>
 <pre id="karatsuba" style="display:hidden;">
 \begin{algorithm}
 \caption{Karatsuba}
@@ -312,18 +257,15 @@ Karatsuba Multiplication improves on the Grade-School algorithm using a trick fr
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<p>
-This is a mashup of the Wikipedia version and the <a href="../algorithms-illuminated-part-1/">Algorithms Illuminated</a> version. It's a little tricky in that we're dealing with integers, in theory, but we have to know the number of digits and how to split it up so in code we're going to have to work with a collection instead, but hopefully this will be clearer in code.
-</p>
+<p>This is a mashup of the Wikipedia version and the <a href="../algorithms-illuminated-part-1/index.html">Algorithms Illuminated</a> version. It's a little tricky in that we're dealing with integers, in theory, but we have to know the number of digits and how to split it up so in code we're going to have to work with a collection instead, but hopefully this will be clearer in code.</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org63ade62" class="outline-2">
-<h2 id="org63ade62">An IntList</h2>
-<div class="outline-text-2" id="text-org63ade62">
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">IntegerDigits</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-orgc24f361">
+<h2 id="orgc24f361">An IntList</h2>
+<div class="outline-text-2" id="text-orgc24f361">
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">IntegerDigits</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A hybrid integer and digits list</span>
 
 <span class="sd">    Args:</span>
@@ -331,121 +273,121 @@ This is a mashup of the Wikipedia version and the <a href="../algorithms-illumin
 <span class="sd">     padding: number of 0's to add to the left of the digits</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">integer</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">=</span> <span class="n">integer</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">=</span> <span class="n">integer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">digits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""The digits for the given integer</span>
+<span class="w">        </span><span class="sd">"""The digits for the given integer</span>
 
-<span class="sd">	Raises:</span>
-<span class="sd">	 ValueError if the given integer isn't really an integer</span>
+<span class="sd">        Raises:</span>
+<span class="sd">         ValueError if the given integer isn't really an integer</span>
 
-<span class="sd">	Returns:</span>
-<span class="sd">	 zero-padded list of digits</span>
-<span class="sd">	"""</span>
-	<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	    <span class="n">digits</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">digit</span><span class="p">)</span> <span class="k">for</span> <span class="n">digit</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span><span class="p">)]</span>
-	    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">)</span>
-	    <span class="n">power_of_two</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
-	    <span class="n">padding</span> <span class="o">=</span> <span class="n">power_of_two</span> <span class="o">-</span> <span class="n">length</span>
-	    <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">padding</span> <span class="o">+</span> <span class="n">digits</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         zero-padded list of digits</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">digits</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">digit</span><span class="p">)</span> <span class="k">for</span> <span class="n">digit</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span><span class="p">)]</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">digits</span><span class="p">)</span>
+            <span class="n">power_of_two</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="n">power_of_two</span> <span class="o">-</span> <span class="n">length</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">padding</span> <span class="o">+</span> <span class="n">digits</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span>
 
     <span class="k">def</span> <span class="nf">add_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Add more zeros to the left of the digits</span>
+<span class="w">        </span><span class="sd">"""Add more zeros to the left of the digits</span>
 
-<span class="sd">	Args:</span>
-<span class="sd">	 padding: number of zeros to add to the left of the digits</span>
-<span class="sd">	"""</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">padding</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">digits</span>
-	<span class="k">return</span>
+<span class="sd">        Args:</span>
+<span class="sd">         padding: number of zeros to add to the left of the digits</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">padding</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">digits</span>
+        <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">set_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Set the total length of the digit list</span>
+<span class="w">        </span><span class="sd">"""Set the total length of the digit list</span>
 
-<span class="sd">	Args:</span>
-<span class="sd">	 target: total number of digits to have</span>
+<span class="sd">        Args:</span>
+<span class="sd">         target: total number of digits to have</span>
 
-<span class="sd">	Raises:</span>
-<span class="sd">	 RuntimeError: target is less than the current number of digits</span>
-<span class="sd">	"""</span>
-	<span class="k">if</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-	    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"target </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> is less than current </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span><span class="si">}</span><span class="s2"> digits"</span><span class="p">)</span>
+<span class="sd">        Raises:</span>
+<span class="sd">         RuntimeError: target is less than the current number of digits</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"target </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> is less than current </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span><span class="si">}</span><span class="s2"> digits"</span><span class="p">)</span>
 
-	<span class="n">padding</span> <span class="o">=</span> <span class="n">target</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">add_padding</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
-	<span class="k">return</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="n">target</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_padding</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
+        <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">set_equal_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">IntegerDigits</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Set both self and other to have the same number of digits"""</span>
-	<span class="n">target</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">set_length</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-	<span class="n">other</span><span class="o">.</span><span class="n">set_length</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-	<span class="k">return</span>
+<span class="w">        </span><span class="sd">"""Set both self and other to have the same number of digits"""</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_length</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">other</span><span class="o">.</span><span class="n">set_length</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Clean out any generated attributes"""</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="kc">None</span>
-	<span class="k">return</span>
+<span class="w">        </span><span class="sd">"""Clean out any generated attributes"""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span>
 
     <span class="c1"># collection methods</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""The number of digits"""</span>
-	<span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""The number of digits"""</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegerDigits</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Slice the digits"""</span>
-	<span class="n">sliced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">digits</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-	<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">sliced</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
-	    <span class="n">sliced</span> <span class="o">=</span> <span class="p">[</span><span class="n">sliced</span><span class="p">]</span>
-	<span class="n">gotten</span> <span class="o">=</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="n">value</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sliced</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">index</span><span class="p">)</span>
-				    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sliced</span><span class="p">))))</span>
-	<span class="c1"># preserve any padding</span>
-	<span class="n">gotten</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="n">sliced</span>
-	<span class="k">return</span> <span class="n">gotten</span>
+<span class="w">        </span><span class="sd">"""Slice the digits"""</span>
+        <span class="n">sliced</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">digits</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">sliced</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">sliced</span> <span class="o">=</span> <span class="p">[</span><span class="n">sliced</span><span class="p">]</span>
+        <span class="n">gotten</span> <span class="o">=</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="nb">sum</span><span class="p">((</span><span class="n">value</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sliced</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">index</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sliced</span><span class="p">))))</span>
+        <span class="c1"># preserve any padding</span>
+        <span class="n">gotten</span><span class="o">.</span><span class="n">_digits</span> <span class="o">=</span> <span class="n">sliced</span>
+        <span class="k">return</span> <span class="n">gotten</span>
     <span class="c1"># integer operations</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegerDigits</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Add an integer or IntegerDigits to this integer"""</span>
-	<span class="k">return</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">+</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
-			     <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">+</span> <span class="n">value</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Add an integer or IntegerDigits to this integer"""</span>
+        <span class="k">return</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">+</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
+                             <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">+</span> <span class="n">value</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegerDigits</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Subtract an integer or IntegerDigits from this integer"""</span>
-	<span class="k">return</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">-</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
-			     <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">-</span> <span class="n">value</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Subtract an integer or IntegerDigits from this integer"""</span>
+        <span class="k">return</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">-</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
+                             <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">-</span> <span class="n">value</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegerDigits</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""multiply integer by integer or IntegerDigits"""</span>
-	<span class="k">return</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">*</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
-			     <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">*</span> <span class="n">value</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""multiply integer by integer or IntegerDigits"""</span>
+        <span class="k">return</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">*</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
+                             <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">*</span> <span class="n">value</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
 
     <span class="c1"># comparisons</span>
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Compare to integer or IntegerDigits"""</span>
-	<span class="k">return</span> <span class="n">other</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span>
+<span class="w">        </span><span class="sd">"""Compare to integer or IntegerDigits"""</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span>
 
     <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">&lt;</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">&lt;</span> <span class="n">other</span>
 
     <span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">&gt;</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">&gt;</span> <span class="n">other</span>
 
     <span class="k">def</span> <span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">&gt;=</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integer</span> <span class="o">&gt;=</span> <span class="n">other</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-	<span class="k">return</span> <span class="sa">f</span><span class="s2">"&lt;IntegerDigits: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span><span class="si">}</span><span class="s2">&gt;"</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"&lt;IntegerDigits: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">integer</span><span class="si">}</span><span class="s2">&gt;"</span>
 </pre></div>
 </div>
-
-<div id="outline-container-orgf3dccbf" class="outline-3">
-<h3 id="orgf3dccbf">Test it</h3>
-<div class="outline-text-3" id="text-orgf3dccbf">
-<div class="highlight"><pre><span></span><span class="n">test</span> <span class="o">=</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="mi">567</span><span class="p">)</span>
+<div class="outline-3" id="outline-container-org725accb">
+<h3 id="org725accb">Test it</h3>
+<div class="outline-text-3" id="text-org725accb">
+<div class="highlight">
+<pre><span></span><span class="n">test</span> <span class="o">=</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="mi">567</span><span class="p">)</span>
 <span class="c1"># build the digits padded to power of 2</span>
 <span class="n">expect</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">digits</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 
@@ -482,15 +424,15 @@ This is a mashup of the Wikipedia version and the <a href="../algorithms-illumin
 </div>
 </div>
 </div>
-<div id="outline-container-org1f0ea2c" class="outline-2">
-<h2 id="org1f0ea2c">An Implementation</h2>
-<div class="outline-text-2" id="text-org1f0ea2c">
-</div>
-<div id="outline-container-org17919d3" class="outline-3">
-<h3 id="org17919d3">Karatsuba Multiplication</h3>
-<div class="outline-text-3" id="text-org17919d3">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">karatsuba</span><span class="p">(</span><span class="n">integer_1</span><span class="p">:</span> <span class="n">IntegerDigits</span><span class="p">,</span>
-	      <span class="n">integer_2</span><span class="p">:</span> <span class="n">IntegerDigits</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiplicationOutput</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-org7c9f81a">
+<h2 id="org7c9f81a">An Implementation</h2>
+<div class="outline-text-2" id="text-org7c9f81a"></div>
+<div class="outline-3" id="outline-container-orgca54838">
+<h3 id="orgca54838">Karatsuba Multiplication</h3>
+<div class="outline-text-3" id="text-orgca54838">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">karatsuba</span><span class="p">(</span><span class="n">integer_1</span><span class="p">:</span> <span class="n">IntegerDigits</span><span class="p">,</span>
+              <span class="n">integer_2</span><span class="p">:</span> <span class="n">IntegerDigits</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiplicationOutput</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Multiply integer_1 and integer_2</span>
 
 <span class="sd">    Args:</span>
@@ -501,7 +443,7 @@ This is a mashup of the Wikipedia version and the <a href="../algorithms-illumin
 <span class="sd">    """</span>
     <span class="n">digits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">integer_1</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">digits</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-	<span class="k">return</span> <span class="n">MultiplicationOutput</span><span class="p">(</span><span class="n">integer_1</span> <span class="o">*</span> <span class="n">integer_2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">MultiplicationOutput</span><span class="p">(</span><span class="n">integer_1</span> <span class="o">*</span> <span class="n">integer_2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">middle</span> <span class="o">=</span> <span class="n">digits</span><span class="o">//</span><span class="mi">2</span>
 
     <span class="n">most_significant_1</span><span class="p">,</span> <span class="n">least_significant_1</span> <span class="o">=</span> <span class="n">integer_1</span><span class="p">[:</span><span class="n">middle</span><span class="p">],</span> <span class="n">integer_1</span><span class="p">[</span><span class="n">middle</span><span class="p">:]</span>
@@ -522,14 +464,14 @@ This is a mashup of the Wikipedia version and the <a href="../algorithms-illumin
     <span class="n">output</span> <span class="o">=</span> <span class="n">left</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="n">digits</span> <span class="o">+</span> <span class="n">center</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="n">middle</span> <span class="o">+</span> <span class="n">right</span>
 
     <span class="k">if</span> <span class="n">output</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-	<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"left: </span><span class="si">{</span><span class="n">left</span><span class="si">}</span><span class="s2"> center: </span><span class="si">{</span><span class="n">center</span><span class="si">}</span><span class="s2"> right: </span><span class="si">{</span><span class="n">right</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"left: </span><span class="si">{</span><span class="n">left</span><span class="si">}</span><span class="s2"> center: </span><span class="si">{</span><span class="n">center</span><span class="si">}</span><span class="s2"> right: </span><span class="si">{</span><span class="n">right</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">MultiplicationOutput</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">count_left</span> <span class="o">+</span> <span class="n">count_summed</span> <span class="o">+</span> <span class="n">count_right</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">karatsuba_multiplication</span><span class="p">(</span><span class="n">integer_1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-			     <span class="n">integer_2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-			     <span class="n">count_padding</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlotMultiplicationOutput</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">karatsuba_multiplication</span><span class="p">(</span><span class="n">integer_1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                             <span class="n">integer_2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                             <span class="n">count_padding</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlotMultiplicationOutput</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Sets up and runs the Karatsuba Multiplication</span>
 
 <span class="sd">    Args:</span>
@@ -545,34 +487,34 @@ This is a mashup of the Wikipedia version and the <a href="../algorithms-illumin
     <span class="n">integer_1</span> <span class="o">=</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="n">integer_1</span><span class="p">)</span>
     <span class="n">integer_2</span> <span class="o">=</span> <span class="n">IntegerDigits</span><span class="p">(</span><span class="n">integer_2</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">count_padding</span><span class="p">:</span>
-	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">digit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">integer_1</span><span class="o">.</span><span class="n">digits</span><span class="p">):</span>
-	    <span class="k">if</span> <span class="n">digit</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-		<span class="n">original_1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">integer_1</span><span class="o">.</span><span class="n">digits</span><span class="p">[</span><span class="n">index</span><span class="p">:])</span>
-		<span class="k">break</span>
-	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">digit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">integer_2</span><span class="o">.</span><span class="n">digits</span><span class="p">):</span>
-	    <span class="k">if</span> <span class="n">digit</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-		<span class="n">original_2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">integer_2</span><span class="o">.</span><span class="n">digits</span><span class="p">[</span><span class="n">index</span><span class="p">:])</span>
-		<span class="k">break</span>
-	<span class="n">original_digits</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">original_1</span><span class="p">,</span> <span class="n">original_2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">digit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">integer_1</span><span class="o">.</span><span class="n">digits</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">digit</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">original_1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">integer_1</span><span class="o">.</span><span class="n">digits</span><span class="p">[</span><span class="n">index</span><span class="p">:])</span>
+                <span class="k">break</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">digit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">integer_2</span><span class="o">.</span><span class="n">digits</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">digit</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">original_2</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">integer_2</span><span class="o">.</span><span class="n">digits</span><span class="p">[</span><span class="n">index</span><span class="p">:])</span>
+                <span class="k">break</span>
+        <span class="n">original_digits</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">original_1</span><span class="p">,</span> <span class="n">original_2</span><span class="p">)</span>
 
     <span class="c1"># make them have the same number of digits</span>
     <span class="n">integer_1</span><span class="o">.</span><span class="n">set_equal_length</span><span class="p">(</span><span class="n">integer_2</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">count_padding</span><span class="p">:</span>
-	<span class="n">original_digits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">integer_1</span><span class="p">)</span>
+        <span class="n">original_digits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">integer_1</span><span class="p">)</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">karatsuba</span><span class="p">(</span><span class="n">integer_1</span><span class="p">,</span> <span class="n">integer_2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">PlotMultiplicationOutput</span><span class="p">(</span><span class="n">product</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">product</span><span class="p">,</span>
-				    <span class="n">count</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">count</span><span class="p">,</span>
-				    <span class="n">digits</span><span class="o">=</span><span class="n">original_digits</span><span class="p">,</span>
-				    <span class="n">factor_1</span><span class="o">=</span><span class="n">integer_1</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span>
-				    <span class="n">factor_2</span><span class="o">=</span><span class="n">integer_2</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
+                                    <span class="n">count</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">count</span><span class="p">,</span>
+                                    <span class="n">digits</span><span class="o">=</span><span class="n">original_digits</span><span class="p">,</span>
+                                    <span class="n">factor_1</span><span class="o">=</span><span class="n">integer_1</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span>
+                                    <span class="n">factor_2</span><span class="o">=</span><span class="n">integer_2</span><span class="o">.</span><span class="n">integer</span><span class="p">)</span>
 </pre></div>
 </div>
-
-<div id="outline-container-org6cc82f7" class="outline-4">
-<h4 id="org6cc82f7">Test</h4>
-<div class="outline-text-4" id="text-org6cc82f7">
-<div class="highlight"><pre><span></span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
+<div class="outline-4" id="outline-container-orga08bcaa">
+<h4 id="orga08bcaa">Test</h4>
+<div class="outline-text-4" id="text-orga08bcaa">
+<div class="highlight">
+<pre><span></span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
 <span class="n">output</span> <span class="o">=</span> <span class="n">karatsuba_multiplication</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">product</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
@@ -585,76 +527,61 @@ This is a mashup of the Wikipedia version and the <a href="../algorithms-illumin
 </div>
 </div>
 </div>
-
-<div id="outline-container-org4504726" class="outline-3">
-<h3 id="org4504726">Test</h3>
-<div class="outline-text-3" id="text-org4504726">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_karatsuba</span><span class="p">(</span><span class="n">first</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">second</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="outline-3" id="outline-container-org8e2d48d">
+<h3 id="org8e2d48d">Test</h3>
+<div class="outline-text-3" id="text-org8e2d48d">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">test_karatsuba</span><span class="p">(</span><span class="n">first</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">second</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
     <span class="n">expected</span> <span class="o">=</span> <span class="n">first</span> <span class="o">*</span> <span class="n">second</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">karatsuba_multiplication</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">)</span>
     <span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">product</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">expected</span><span class="p">))</span>
     <span class="k">return</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">digits</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">limit</span> <span class="o">-</span> <span class="mi">100</span><span class="p">,</span> <span class="n">limit</span><span class="p">):</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="n">digits</span> <span class="o">-</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">digits</span> <span class="o">+</span> <span class="mi">1000</span><span class="p">)</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="n">digits</span> <span class="o">-</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">digits</span> <span class="o">+</span> <span class="mi">1000</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
-	<span class="n">test_karatsuba</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">test_karatsuba</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"maxsize: </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a: </span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"b: </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a x b: </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"maxsize - a * b: </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-	<span class="k">raise</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"maxsize: </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a: </span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"b: </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a x b: </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"maxsize - a * b: </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">raise</span>
 </pre></div>
-
-<p>
-Example values from the Algorithms Illuminated website.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="mi">3141592653589793238462643383279502884197169399375105820974944592</span>
+<p>Example values from the Algorithms Illuminated website.</p>
+<div class="highlight">
+<pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="mi">3141592653589793238462643383279502884197169399375105820974944592</span>
 <span class="n">b</span> <span class="o">=</span> <span class="mi">2718281828459045235360287471352662497757247093699959574966967627</span>
 <span class="n">test_karatsuba</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org195ca00" class="outline-2">
-<h2 id="org195ca00">Run Time</h2>
-<div class="outline-text-2" id="text-org195ca00">
-</div>
-<div id="outline-container-orgdb3117c" class="outline-3">
-<h3 id="orgdb3117c">Using the Master Method</h3>
-<div class="outline-text-3" id="text-orgdb3117c">
-<p>
-Let's use the Master Method to find the theoretical upper bound for Karatsuba Multiplication.
-</p>
-
-<p>
-The basic form of the Master Method is this:
-</p>
-
-<p>
-\[
-T(n) = a T(\frac{n}{b}) + O(n^d)
-\]
-</p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<div class="outline-2" id="outline-container-org4c048bf">
+<h2 id="org4c048bf">Run Time</h2>
+<div class="outline-text-2" id="text-org4c048bf"></div>
+<div class="outline-3" id="outline-container-orgb898a95">
+<h3 id="orgb898a95">Using the Master Method</h3>
+<div class="outline-text-3" id="text-orgb898a95">
+<p>Let's use the Master Method to find the theoretical upper bound for Karatsuba Multiplication.</p>
+<p>The basic form of the Master Method is this:</p>
+<p>\[ T(n) = a T(\frac{n}{b}) + O(n^d) \]</p>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
 <colgroup>
 <col class="org-left">
 <col class="org-left">
-<col class="org-right">
-</colgroup>
-<thead><tr>
-<th scope="col" class="org-left">Variable</th>
-<th scope="col" class="org-left">Description</th>
-<th scope="col" class="org-right">Value</th>
-</tr></thead>
+<col class="org-right"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">Variable</th>
+<th class="org-left" scope="col">Description</th>
+<th class="org-right" scope="col">Value</th>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td class="org-left">\(a\)</td>
@@ -673,55 +600,35 @@ T(n) = a T(\frac{n}{b}) + O(n^d)
 </tr>
 </tbody>
 </table>
-<p>
-We make three recursive calls within the Karatsuba function and split the data in half within each call. The amount of work done outside the recursion is constant so \(O\left(n^d\right) = O\left(n^1\right)\). \(a &gt; b^d\) so we have the case where the sub-problems grow faster than the input is reduced, giving us:
-</p>
-
-\begin{align}
-T(n) &amp;= O\left(n^{\log_b a}\right) \\
-&amp;= O\left(n^{\log_2 3}\right)
-\end{align}
+<p>We make three recursive calls within the Karatsuba function and split the data in half within each call. The amount of work done outside the recursion is constant so \(O\left(n^d\right) = O\left(n^1\right)\). \(a &gt; b^d\) so we have the case where the sub-problems grow faster than the input is reduced, giving us:</p>
+\begin{align} T(n) &amp;= O\left(n^{\log_b a}\right) \\ &amp;= O\left(n^{\log_2 3}\right) \end{align}</div>
 </div>
-</div>
-<div id="outline-container-org30b71d8" class="outline-3">
-<h3 id="org30b71d8">With Padding</h3>
-<div class="outline-text-3" id="text-org30b71d8">
-<p>
-Let's plot the base-case counts alongside the theoretical bounds we found using the Master Method.
-</p>
-
-<p>
-First we'll create the numbers to multiply.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">digit_supply</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
+<div class="outline-3" id="outline-container-org941eb5d">
+<h3 id="org941eb5d">With Padding</h3>
+<div class="outline-text-3" id="text-org941eb5d">
+<p>Let's plot the base-case counts alongside the theoretical bounds we found using the Master Method.</p>
+<p>First we'll create the numbers to multiply.</p>
+<div class="highlight">
+<pre><span></span><span class="n">digit_supply</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
 <span class="n">things_to_multiply</span> <span class="o">=</span> <span class="p">[(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">digits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">10</span><span class="o">**</span><span class="n">digits</span><span class="p">),</span>
-			<span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">digits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">10</span><span class="o">**</span><span class="n">digits</span><span class="p">))</span>
-			<span class="k">for</span> <span class="n">digits</span> <span class="ow">in</span> <span class="n">digit_supply</span><span class="p">]</span>
+                        <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">digits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">10</span><span class="o">**</span><span class="n">digits</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">digits</span> <span class="ow">in</span> <span class="n">digit_supply</span><span class="p">]</span>
 </pre></div>
-
-<p>
-Now we'll do the math, running the cases in parallel using Joblib.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
+<p>Now we'll do the math, running the cases in parallel using Joblib.</p>
+<div class="highlight">
+<pre><span></span><span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
     <span class="n">karatsuba_outputs</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-	<span class="n">delayed</span><span class="p">(</span><span class="n">karatsuba_multiplication</span><span class="p">)(</span><span class="o">*</span><span class="n">thing_to_multiply</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">thing_to_multiply</span> <span class="ow">in</span> <span class="n">things_to_multiply</span><span class="p">)</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">karatsuba_multiplication</span><span class="p">)(</span><span class="o">*</span><span class="n">thing_to_multiply</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">thing_to_multiply</span> <span class="ow">in</span> <span class="n">things_to_multiply</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Started: 2022-05-13 23:52:06.399789
 Ended: 2022-05-13 23:52:09.347825
 Elapsed: 0:00:02.948036
 </pre>
-
-
-<p>
-Now a little plotting.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+<p>Now a little plotting.</p>
+<div class="highlight">
+<pre><span></span><span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
     <span class="p">{</span><span class="s2">"Karatsuba Count"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">count</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">karatsuba_outputs</span><span class="p">],</span>
      <span class="s2">"Digits"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">digits</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">karatsuba_outputs</span><span class="p">],</span>
      <span class="s2">"digits^log2(3)"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">digits</span><span class="o">**</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">karatsuba_outputs</span><span class="p">],</span>
@@ -729,191 +636,147 @@ Now a little plotting.
 <span class="p">})</span>
 
 <span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Digits"</span><span class="p">],</span>  <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Karatsuba Count"</span><span class="p">,</span>
-						     <span class="s2">"digits^log2(3)"</span><span class="p">,</span>
-						     <span class="s2">"6 x digits^log2(3)"</span><span class="p">],</span>
-		    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Multiplications"</span><span class="p">)</span>
+                                                     <span class="s2">"digits^log2(3)"</span><span class="p">,</span>
+                                                     <span class="s2">"6 x digits^log2(3)"</span><span class="p">],</span>
+                    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Multiplications"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="n">altair</span><span class="o">.</span><span class="n">OverlayMarkDef</span><span class="p">())</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Digits"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"Multiplications"</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="s2">"Digits"</span><span class="p">,</span>
-	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Multiplications"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">)])</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-		 <span class="n">title</span><span class="o">=</span><span class="s2">"Basic Multiplications vs Digits (with Padding)"</span><span class="p">,</span>
-		 <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
-		 <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">)</span>
+             <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Multiplications"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">)])</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+                 <span class="n">title</span><span class="o">=</span><span class="s2">"Basic Multiplications vs Digits (with Padding)"</span><span class="p">,</span>
+                 <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+                 <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"karatsuba-multiplications"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="karatsuba-multiplications.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="karatsuba-multiplications.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-Since when I added the padding I made sure that the number of digits was a power of two, the numbers are bunched up around those powers of two (so there's a lot of wasted computation, maybe) but the multiplication counts still fall within a constant multiple of our theoretical runtime.
-</p>
+<p>Since when I added the padding I made sure that the number of digits was a power of two, the numbers are bunched up around those powers of two (so there's a lot of wasted computation, maybe) but the multiplication counts still fall within a constant multiple of our theoretical runtime.</p>
 </div>
 </div>
-
-<div id="outline-container-org492fd87" class="outline-3">
-<h3 id="org492fd87">Without Padding</h3>
-<div class="outline-text-3" id="text-org492fd87">
-<p>
-Since I didn't make the karatsuba work without padding this will just show the points spaced out, but the counts will still be based on there being padding.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">unpadded</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">karatsuba_multiplication</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">count_padding</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="outline-3" id="outline-container-orgdb3ffe0">
+<h3 id="orgdb3ffe0">Without Padding</h3>
+<div class="outline-text-3" id="text-orgdb3ffe0">
+<p>Since I didn't make the karatsuba work without padding this will just show the points spaced out, but the counts will still be based on there being padding.</p>
+<div class="highlight">
+<pre><span></span><span class="n">unpadded</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">karatsuba_multiplication</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">count_padding</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">TIMER</span><span class="p">:</span>
     <span class="n">unpadded_outputs</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span>
-	<span class="n">delayed</span><span class="p">(</span><span class="n">unpadded</span><span class="p">)(</span><span class="o">*</span><span class="n">thing_to_multiply</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">thing_to_multiply</span> <span class="ow">in</span> <span class="n">things_to_multiply</span><span class="p">)</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">unpadded</span><span class="p">)(</span><span class="o">*</span><span class="n">thing_to_multiply</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">thing_to_multiply</span> <span class="ow">in</span> <span class="n">things_to_multiply</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Started: 2022-05-13 23:52:20.020179
 Ended: 2022-05-13 23:52:22.052011
 Elapsed: 0:00:02.031832
 </pre>
-
-
-<div class="highlight"><pre><span></span><span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+<div class="highlight">
+<pre><span></span><span class="n">frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
     <span class="p">{</span><span class="s2">"Karatsuba Count"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">count</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">unpadded_outputs</span><span class="p">],</span>
      <span class="s2">"Digits (pre-padding)"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">digits</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">unpadded_outputs</span><span class="p">],</span>
      <span class="s2">"digits^log2(3)"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">digits</span><span class="o">**</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">karatsuba_outputs</span><span class="p">],</span>
      <span class="s2">"6 x digits^log2(3)"</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span> <span class="o">*</span> <span class="n">output</span><span class="o">.</span><span class="n">digits</span><span class="o">**</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">karatsuba_outputs</span><span class="p">],</span>
      <span class="s2">"6 x digits^log2(3) (no padding)"</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span> <span class="o">*</span> <span class="n">output</span><span class="o">.</span><span class="n">digits</span><span class="o">**</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
-					 <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">unpadded_outputs</span><span class="p">],</span>
+                                         <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">unpadded_outputs</span><span class="p">],</span>
      <span class="s2">"n^2 (no padding)"</span><span class="p">:</span> <span class="p">[</span><span class="n">output</span><span class="o">.</span><span class="n">digits</span><span class="o">**</span><span class="mi">2</span>
-			  <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">unpadded_outputs</span><span class="p">],</span>
+                          <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">unpadded_outputs</span><span class="p">],</span>
 <span class="p">})</span>
 
 <span class="n">melted</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Digits (pre-padding)"</span><span class="p">],</span>  <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">"Karatsuba Count"</span><span class="p">,</span>
-								   <span class="s2">"digits^log2(3)"</span><span class="p">,</span>
-								   <span class="s2">"6 x digits^log2(3)"</span><span class="p">,</span>
-								   <span class="s2">"6 x digits^log2(3) (no padding)"</span><span class="p">,</span>
-								   <span class="s2">"n^2 (no padding)"</span><span class="p">],</span>
-		    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Multiplications"</span><span class="p">)</span>
+                                                                   <span class="s2">"digits^log2(3)"</span><span class="p">,</span>
+                                                                   <span class="s2">"6 x digits^log2(3)"</span><span class="p">,</span>
+                                                                   <span class="s2">"6 x digits^log2(3) (no padding)"</span><span class="p">,</span>
+                                                                   <span class="s2">"n^2 (no padding)"</span><span class="p">],</span>
+                    <span class="n">var_name</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">"Multiplications"</span><span class="p">)</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">melted</span><span class="p">)</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"Digits (pre-padding)"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"Multiplications"</span><span class="p">,</span>
     <span class="n">color</span><span class="o">=</span><span class="s2">"Source"</span><span class="p">,</span>
     <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Digits (pre-padding)"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"quantitative"</span><span class="p">),</span>
-	     <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Multiplications"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">)])</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
-		 <span class="n">title</span><span class="o">=</span><span class="s2">"Basic Multiplications vs Digits (without Padding)"</span><span class="p">,</span>
-		 <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
-		 <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">)</span>
+             <span class="n">altair</span><span class="o">.</span><span class="n">Tooltip</span><span class="p">(</span><span class="s2">"Multiplications"</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">","</span><span class="p">)])</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+                 <span class="n">title</span><span class="o">=</span><span class="s2">"Basic Multiplications vs Digits (without Padding)"</span><span class="p">,</span>
+                 <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+                 <span class="n">height</span><span class="o">=</span><span class="mi">525</span><span class="p">)</span>
 
 <span class="n">save_it</span><span class="p">(</span><span class="n">chart</span><span class="p">,</span> <span class="s2">"karatsuba-multiplications-unpadded"</span><span class="p">)</span>
 </pre></div>
-
-<object type="text/html" data="karatsuba-multiplications-unpadded.html" style="width:100%" height="600">
-  <p>Figure Missing</p>
+<object data="karatsuba-multiplications-unpadded.html" height="600" style="width:100%" type="text/html">
+<p>Figure Missing</p>
 </object>
-
-<p>
-Since I don't have an easy way to turn off using padding the Multiplication counts are still based on using padding, but this view spreads the digit-counts out so it's a little easier to see. The Multiplication counts are broken up into bands because the padding is based on keeping the number of digits a power of two.
-</p>
-
-<p>
-Just for reference, here's the last product we multiplied.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="n">karatsuba_outputs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<p>Since I don't have an easy way to turn off using padding the Multiplication counts are still based on using padding, but this view spreads the digit-counts out so it's a little easier to see. The Multiplication counts are broken up into bands because the padding is based on keeping the number of digits a power of two.</p>
+<p>Just for reference, here's the last product we multiplied.</p>
+<div class="highlight">
+<pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="n">karatsuba_outputs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">output</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">integer</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">product</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">factor_1</span> <span class="o">*</span> <span class="n">output</span><span class="o">.</span><span class="n">factor_2</span><span class="p">))</span>
 </pre></div>
-
 <pre class="example">
 56,913,917,723,202,495,576,238,408,244,650,506,926,406,731,625,206,370,840,517,493,281,396,538,892,710,818,017,869,257,379,987,881,688,195,601,612,438,838,803,669,047,089,313,679,236,814,971,999,554,405,895,121,583,263,228,500,933,878,783,310,375,258,385,063,631,332
-</pre>
+</pre></div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-org1495acf" class="outline-2">
-<h2 id="org1495acf">Sources</h2>
-<div class="outline-text-2" id="text-org1495acf">
-</div>
-<div id="outline-container-org774b9f1" class="outline-3">
-<h3 id="org774b9f1">Karatsuba Multiplicatio</h3>
-<div class="outline-text-3" id="text-org774b9f1">
+<div class="outline-2" id="outline-container-orgaf627af">
+<h2 id="orgaf627af">Sources</h2>
+<div class="outline-text-2" id="text-orgaf627af"></div>
+<div class="outline-3" id="outline-container-orgd435d21">
+<h3 id="orgd435d21">Karatsuba Multiplicatio</h3>
+<div class="outline-text-3" id="text-orgd435d21">
 <ul class="org-ul">
-<li><a href="../algorithms-illuminated-part-1/">Algorithms Illuminated - Part 1: The Basics</a></li>
+<li><a href="../algorithms-illuminated-part-1/index.html">Algorithms Illuminated - Part 1: The Basics</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Karatsuba_algorithm">Wikipedia: Karatsuba Algorithm</a></li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-orga4698d6" class="outline-3">
-<h3 id="orga4698d6">Grade-School Multiplication</h3>
-<div class="outline-text-3" id="text-orga4698d6">
-<p>
-I took the grade-school algorithm from the Lecture 2 Notes on this course-site.
-</p>
-
+<div class="outline-3" id="outline-container-org8fd4298">
+<h3 id="org8fd4298">Grade-School Multiplication</h3>
+<div class="outline-text-3" id="text-org8fd4298">
+<p>I took the grade-school algorithm from the Lecture 2 Notes on this course-site.</p>
 <ul class="org-ul">
-<li>McGill University School of Computer Science: COMP 250 (sec 1) [Internet]. [cited 2022 May 14]. Available from: <a href="http://crypto.cs.mcgill.ca/~crepeau/COMP250/">http://crypto.cs.mcgill.ca/~crepeau/COMP250/</a>
-</li>
+<li>McGill University School of Computer Science: COMP 250 (sec 1) [Internet]. [cited 2022 May 14]. Available from: <a href="http://crypto.cs.mcgill.ca/~crepeau/COMP250/">http://crypto.cs.mcgill.ca/~crepeau/COMP250/</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("karatsuba"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("grade-school"));
 });
-</script>
+</script></div>
 </div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/divide-and-conquer/index.html" rel="tag">divide-and-conquer</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/divide-and-conquer/index.html" rel="tag">divide-and-conquer</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../the-maximum-subarray-problem/index.html" rel="prev" title="The Maximum-Subarray Problem">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../algorithms-illuminated-part-1/index.html" rel="next" title="Algorithms Illuminated - Part 1: The Basics">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../the-maximum-subarray-problem/index.html" rel="prev" title="The Maximum-Subarray Problem">Previous post</a></li>
+<li class="next"><a href="../algorithms-illuminated-part-1/index.html" rel="next" title="Algorithms Illuminated - Part 1: The Basics">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

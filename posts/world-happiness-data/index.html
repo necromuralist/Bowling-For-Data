@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
+<head>
+<meta charset="utf-8">
+<meta content="A look at the World Happiness Data." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<title>World Happiness Data | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/world-happiness-data/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../bubba-sort-page-2/index.html" rel="prev" title="A Ray" type="text/html">
+<link href="../introduction-to-altair/index.html" rel="next" title="Introduction To Altair" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="World Happiness Data" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/world-happiness-data/index.html" property="og:url">
+<meta content="A look at the World Happiness Data." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2023-12-14T14:58:39-08:00" property="article:published_time">
+<meta content="data" property="article:tag">
+</head>
+<body>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
+</ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
+</div>
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">World Happiness Data</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2023-12-14T14:58:39-08:00" itemprop="datePublished" title="2023-12-14 14:58">2023-12-14 14:58</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="index.html#orgf3c1eb2">Imports</a></li>
+<li><a href="index.html#orgdb55277">Country</a>
+<ul>
+<li><a href="index.html#orgfe4bf63">The Table vs Kaggle</a></li>
+<li><a href="index.html#orgfbb045a">Figure Data</a></li>
+<li><a href="index.html#orgde0544e">The Figure Countries</a></li>
+</ul>
+</li>
+<li><a href="index.html#org968dcf0">Links</a></li>
+</ul>
+</div>
+</div>
+<div class="outline-2" id="outline-container-orgf3c1eb2">
+<h2 id="orgf3c1eb2">Imports</h2>
+<div class="outline-text-2" id="text-orgf3c1eb2">
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">expect</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="n">TABLE</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">tabulate</span><span class="p">,</span>
+                        <span class="n">headers</span><span class="o">=</span><span class="s2">"keys"</span><span class="p">,</span>
+                        <span class="n">tablefmt</span><span class="o">=</span><span class="s2">"orgtbl"</span><span class="p">,</span>
+                        <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">kaggle_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"KAGGLE_WORLD_HAPPINESS"</span><span class="p">))</span>
+<span class="n">figure_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"WORLD_HAPPINESS_FIGURE"</span><span class="p">))</span>
+<span class="n">table_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"WORLD_HAPPINESS_TABLE"</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">kaggle_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">figure_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">table_path</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">kaggle_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">table_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">figure_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+</pre></div>
+<pre class="example">
+/home/bravo/data/datasets/kaggle/world-happiness-report/WHR_2016.csv
+/home/bravo/data/datasets/world-happiness-data/world-happiness-report-2023-data-for-figure-2.1.csv
+/home/bravo/data/datasets/world-happiness-data/world-happiness-report-2023-data-for-table-2.1.csv
+</pre>
+<div class="highlight">
+<pre><span></span><span class="n">kaggle</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">kaggle_path</span><span class="p">)</span>
+<span class="n">figure</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">figure_path</span><span class="p">)</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">table_path</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">kaggle</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">figure</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+<pre class="example">
+(157, 13)
+(137, 19)
+(2199, 11)
+</pre>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">column_printer</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">(</span><span class="s2">"Column"</span><span class="p">,</span> <span class="s2">"Type"</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">column</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+         <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
+        <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="n">column_printer</span><span class="p">(</span><span class="n">kaggle</span><span class="p">)</span>
+</pre></div>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
+<colgroup>
+<col class="org-left">
+<col class="org-left"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">Column</th>
+<th class="org-left" scope="col">Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Country</td>
+<td class="org-left">object</td>
+</tr>
+<tr>
+<td class="org-left">Region</td>
+<td class="org-left">object</td>
+</tr>
+<tr>
+<td class="org-left">Happiness Rank</td>
+<td class="org-left">int64</td>
+</tr>
+<tr>
+<td class="org-left">Happiness Score</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Lower Confidence Interval</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Upper Confidence Interval</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Economy (GDP per Capita)</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Family</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Health (Life Expectancy)</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Freedom</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Trust (Government Corruption)</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Generosity</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Dystopia Residual</td>
+<td class="org-left">float64</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight">
+<pre><span></span><span class="n">column_printer</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span>
+</pre></div>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
+<colgroup>
+<col class="org-left">
+<col class="org-left"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">Column</th>
+<th class="org-left" scope="col">Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Country name</td>
+<td class="org-left">object</td>
+</tr>
+<tr>
+<td class="org-left">Ladder score</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Standard error of ladder score</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">upperwhisker</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">lowerwhisker</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Logged GDP per capita</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Social support</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Healthy life expectancy</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Freedom to make life choices</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Generosity</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Perceptions of corruption</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Ladder score in Dystopia</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Explained by: Log GDP per capita</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Explained by: Social support</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Explained by: Healthy life expectancy</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Explained by: Freedom to make life choices</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Explained by: Generosity</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Explained by: Perceptions of corruption</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Dystopia + residual</td>
+<td class="org-left">float64</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight">
+<pre><span></span><span class="n">column_printer</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+</pre></div>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
+<colgroup>
+<col class="org-left">
+<col class="org-left"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">Column</th>
+<th class="org-left" scope="col">Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Country name</td>
+<td class="org-left">object</td>
+</tr>
+<tr>
+<td class="org-left">year</td>
+<td class="org-left">int64</td>
+</tr>
+<tr>
+<td class="org-left">Life Ladder</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Log GDP per capita</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Social support</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Healthy life expectancy at birth</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Freedom to make life choices</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Generosity</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Perceptions of corruption</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Positive affect</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Negative affect</td>
+<td class="org-left">float64</td>
+</tr>
+</tbody>
+</table>
+<p>It's hard to say exactly but it looks like <i>Region</i> and <i>Happiness Rank</i> were added by whoever created the <code>kaggle</code> dataset and it isn't clear what the <i>Family</i> column ties into. The only column in the UN data not matched is <i>Social Support</i> but that doesn't seem to have the right value range:</p>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">kaggle</span><span class="o">.</span><span class="n">Family</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">figure</span><span class="p">[</span><span class="s2">"Social support"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+</pre></div>
+<pre class="example">
+1.18326
+0.983
+</pre>
+<p>We're not going to use <i>Family</i> anyway, so I'll just ignore it.</p>
+</div>
+</div>
+<div class="outline-2" id="outline-container-orgdb55277">
+<h2 id="orgdb55277">Country</h2>
+<div class="outline-text-2" id="text-orgdb55277">
+<div class="highlight">
+<pre><span></span><span class="n">COUNTRY</span> <span class="o">=</span> <span class="s2">"Country name"</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">kaggle</span><span class="o">.</span><span class="n">Country</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">figure</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+</pre></div>
+<pre class="example">
+Afghanistan
+Afghanistan
+Afghanistan
+</pre>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">kaggle</span><span class="o">.</span><span class="n">Country</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">figure</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+</pre></div>
+<pre class="example">
+157
+165
+137
+</pre>
+<p>The figure data has quite a bit fewer entries than the table data. I'll have to look into that as I was planning to merge them, but I'll have to figure out why those twenty-eight countries are missing.</p>
+</div>
+<div class="outline-3" id="outline-container-orgfe4bf63">
+<h3 id="orgfe4bf63">The Table vs Kaggle</h3>
+<div class="outline-text-3" id="text-orgfe4bf63">
+<div class="highlight">
+<pre><span></span><span class="n">k_countries</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">kaggle</span><span class="o">.</span><span class="n">Country</span><span class="p">)</span>
+<span class="n">t_countries</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">t_countries</span> <span class="o">-</span> <span class="n">k_countries</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">k_countries</span> <span class="o">-</span> <span class="n">t_countries</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+['Central African Republic', 'Cuba', 'Czechia', 'Djibouti', 'Eswatini', 'Gambia', 'Guyana', 'Hong Kong S.A.R. of China', 'Lesotho', 'Maldives', 'Mozambique', 'North Macedonia', 'Oman', 'Somaliland region', 'State of Palestine', 'Taiwan Province of China', 'Turkiye']
+
+['Czech Republic', 'Hong Kong', 'Macedonia', 'North Cyprus', 'Palestinian Territories', 'Puerto Rico', 'Somaliland Region', 'Taiwan', 'Turkey']
+</pre>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
+<colgroup>
+<col class="org-left">
+<col class="org-left">
+<col class="org-left"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">Kaggle</th>
+<th class="org-left" scope="col">World Happiness Report</th>
+<th class="org-left" scope="col">Wikipedia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Central African Republic</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Central_African_Republic?useskin=vector">Central African Republic</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Cuba</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Cuba?useskin=vector">Cuba</a></td>
+</tr>
+<tr>
+<td class="org-left">Czech Republic</td>
+<td class="org-left">Czechia</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Czech_Republic?useskin=vector">Czech Republic</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Djibouti</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Djibouti?useskin=vector">Djibouti</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Eswatini</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Eswatini?useskin=vector">Eswatini</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Gambia</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/The_Gambia?useskin=vector">The Gambia</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Guyana</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Guyana?useskin=vector">Guyana</a></td>
+</tr>
+<tr>
+<td class="org-left">Hong Kong</td>
+<td class="org-left">Hong Kong S.A.R. of China</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Hong_Kong?useskin=vector">Hong Kong</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Lesotho</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Lesotho?useskin=vector">Lesotho</a></td>
+</tr>
+<tr>
+<td class="org-left">Macedonia</td>
+<td class="org-left">North Macedonia</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/North_Macedonia?useskin=vector">North Macedonia</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Maldives</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Maldives?useskin=vector">Maldives</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Mozambique</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Mozambique?useskin=vector">Mozambique</a></td>
+</tr>
+<tr>
+<td class="org-left">North Cyprus</td>
+<td class="org-left">- Only recognized by Turkey -</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Northern_Cyprus?useskin=vector">Northern Cyprus</a></td>
+</tr>
+<tr>
+<td class="org-left">- Missing -</td>
+<td class="org-left">Oman</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Oman?useskin=vector">Oman</a></td>
+</tr>
+<tr>
+<td class="org-left">Palestinian Territories</td>
+<td class="org-left">State of Palestine</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/State_of_Palestine?useskin=vector">State of Palestine</a>, <a href="https://en.wikipedia.org/wiki/Palestinian_territories?useskin=vector">Palestinian Territories</a></td>
+</tr>
+<tr>
+<td class="org-left">Puerto Rico</td>
+<td class="org-left">- Territory of U.S. -</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Puerto_Rico?useskin=vector">Puerto Rico</a></td>
+</tr>
+<tr>
+<td class="org-left">Somaliland Region</td>
+<td class="org-left">Somaliland region</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+<tr>
+<td class="org-left">Taiwan</td>
+<td class="org-left">Taiwan Province of China</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Taiwan?useskin=vector">Taiwan</a></td>
+</tr>
+<tr>
+<td class="org-left">Turkey</td>
+<td class="org-left">Turkiye</td>
+<td class="org-left"><a href="https://en.wikipedia.org/wiki/Turkey?useskin=vector">Turkey</a></td>
+</tr>
+</tbody>
+</table>
+<p>I'm more interested in the World Happiness Report so I'll conform Kaggle's country names to match that and ignore the countries that it's missing.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">rename_country</span><span class="p">(</span><span class="n">names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                   <span class="n">country_column</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="n">COUNTRY</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rename the countries in the kaggle data</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">     - names: dict mapping kaggle names to names you want</span>
+<span class="sd">     - kaggle_data: the kaggle happiness data to rename countries</span>
+<span class="sd">     - country_column: name to use for the country column</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">     kaggle_data with countries renamed</span>
+<span class="sd">    """</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">kaggle_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">Country</span><span class="o">=</span><span class="n">country_column</span><span class="p">))</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">country_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">country_column</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="n">kaggle_to_world</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"Czech Republic"</span><span class="p">:</span> <span class="s2">"Czechia"</span><span class="p">,</span>
+    <span class="s2">"Macedonia"</span><span class="p">:</span> <span class="s2">"North Macedonia"</span><span class="p">,</span>
+    <span class="s2">"Palestinian Territories"</span><span class="p">:</span> <span class="s2">"State of Palestine"</span><span class="p">,</span>
+    <span class="s2">"Turkey"</span><span class="p">:</span> <span class="s2">"Turkiye"</span>
+<span class="p">}</span>
+
+<span class="n">kaggled</span> <span class="o">=</span> <span class="n">kaggle</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">kaggled</span><span class="p">[</span><span class="s2">"Country"</span><span class="p">]</span> <span class="o">=</span> <span class="n">kaggled</span><span class="o">.</span><span class="n">Country</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">kaggle_to_world</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">kaggled</span><span class="o">.</span><span class="n">Country</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">])</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">kaggled</span><span class="o">.</span><span class="n">Country</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+{'Somaliland Region', 'North Cyprus', 'Taiwan', 'Hong Kong', 'Puerto Rico'}
+{'Hong Kong S.A.R. of China', 'Central African Republic', 'Djibouti', 'Oman', 'Lesotho', 'Mozambique', 'Somaliland region', 'Gambia', 'Taiwan Province of China', 'Eswatini', 'Guyana', 'Cuba', 'Maldives'}
+</pre>
+<div class="highlight">
+<pre><span></span><span class="n">world_to_kaggle</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Hong Kong S.A.R. of China"</span><span class="p">:</span> <span class="s2">"Hong Kong"</span><span class="p">,</span>
+                   <span class="s2">"Somaliland region"</span><span class="p">:</span> <span class="s2">"Somaliland Region"</span><span class="p">,</span>
+                   <span class="s2">"Taiwan Province of China"</span><span class="p">:</span> <span class="s2">"Taiwan"</span><span class="p">}</span>
+
+<span class="n">tabled</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">COUNTRY</span><span class="p">:</span> <span class="s2">"Country"</span><span class="p">})</span>
+<span class="n">tabled</span><span class="p">[</span><span class="s2">"Country"</span><span class="p">]</span> <span class="o">=</span> <span class="n">tabled</span><span class="o">.</span><span class="n">Country</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">world_to_kaggle</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">kaggled</span><span class="o">.</span><span class="n">Country</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">tabled</span><span class="o">.</span><span class="n">Country</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tabled</span><span class="o">.</span><span class="n">Country</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">kaggled</span><span class="o">.</span><span class="n">Country</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+{'North Cyprus', 'Puerto Rico'}
+{'Central African Republic', 'Djibouti', 'Oman', 'Lesotho', 'Mozambique', 'Gambia', 'Eswatini', 'Guyana', 'Cuba', 'Maldives'}
+</pre></div>
+</div>
+<div class="outline-3" id="outline-container-orgfbb045a">
+<h3 id="orgfbb045a">Figure Data</h3>
+<div class="outline-text-3" id="text-orgfbb045a">
+<div class="highlight">
+<pre><span></span><span class="n">figured</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">COUNTRY</span><span class="p">:</span> <span class="s2">"Country"</span><span class="p">})</span>
+<span class="n">figured</span><span class="p">[</span><span class="s2">"Country"</span><span class="p">]</span> <span class="o">=</span> <span class="n">figured</span><span class="o">.</span><span class="n">Country</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">world_to_kaggle</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">figured</span><span class="o">.</span><span class="n">Country</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">kaggled</span><span class="o">.</span><span class="n">Country</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">figured</span><span class="o">.</span><span class="n">Country</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">tabled</span><span class="o">.</span><span class="n">Country</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+{'Mozambique', 'Gambia'}
+
+set()
+</pre></div>
+</div>
+<div class="outline-3" id="outline-container-orgde0544e">
+<h3 id="orgde0544e">The Figure Countries</h3>
+<div class="outline-text-3" id="text-orgde0544e">
+<div class="highlight">
+<pre><span></span><span class="n">f_countries</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">figure</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">])</span>
+<span class="n">f_only</span> <span class="o">=</span> <span class="n">f_countries</span> <span class="o">-</span> <span class="n">t_countries</span>
+<span class="n">kd_countries</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">kaggled</span><span class="p">[</span><span class="n">COUNTRY</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">f_only</span> <span class="o">-</span> <span class="n">kd_countries</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kd_countries</span> <span class="o">-</span> <span class="n">f_countries</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+[]
+
+['Angola', 'Azerbaijan', 'Belarus', 'Belize', 'Bhutan', 'Burundi', 'Haiti', 'Kuwait', 'Libya', 'North Cyprus', 'Puerto Rico', 'Qatar', 'Rwanda', 'Somalia', 'Somaliland region', 'South Sudan', 'Sudan', 'Suriname', 'Syria', 'Trinidad and Tobago', 'Turkmenistan', 'Yemen']
+</pre>
+<p>The figure data has twenty fewer countries than the Kaggle data so it's not surprising that there's a lot left over. It doesn't look like there's any in the figure data that Kaggle doesn't have, though, which is good.</p>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">t_countries</span> <span class="o">-</span> <span class="n">f_countries</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+['Angola', 'Azerbaijan', 'Belarus', 'Belize', 'Bhutan', 'Burundi', 'Central African Republic', 'Cuba', 'Djibouti', 'Eswatini', 'Guyana', 'Haiti', 'Kuwait', 'Lesotho', 'Libya', 'Maldives', 'Oman', 'Qatar', 'Rwanda', 'Somalia', 'Somaliland region', 'South Sudan', 'Sudan', 'Suriname', 'Syria', 'Trinidad and Tobago', 'Turkmenistan', 'Yemen']
+</pre></div>
+</div>
+</div>
+<div class="outline-2" id="outline-container-org968dcf0">
+<h2 id="org968dcf0">Links</h2>
+<div class="outline-text-2" id="text-org968dcf0">
+<ul class="org-ul">
+<li><a href="https://www.kaggle.com/datasets/unsdsn/world-happiness">Kaggle World Happiness Data</a>: The World Happiness Data. There are four separate CSV files available for 2015 through 2019.</li>
+<li><a href="https://worldhappiness.report/">World Happiness Report</a>: The website for the World Happiness Report.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
+<li><a class="tag p-category" href="../../categories/data/index.html" rel="tag">data</a></li>
+</ul>
+<ul class="pager hidden-print">
+<li class="previous"><a href="../bubba-sort-page-2/index.html" rel="prev" title="A Ray">Previous post</a></li>
+<li class="next"><a href="../introduction-to-altair/index.html" rel="next" title="Introduction To Altair">Next post</a></li>
+</ul>
+</nav>
+</aside>
+</article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
+</footer>
+</div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
+
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+</script></div>
+</body>
+</html>

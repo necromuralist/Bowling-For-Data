@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
+<head>
+<meta charset="utf-8">
+<meta content="Continuing the Altair Introduction with a plot of the countries per year." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<title>Introduction To Altair: Countries Per Year | Bowling For Data</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/introduction-to-altair-countries-per-year/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../introduction-to-altair/index.html" rel="prev" title="Introduction To Altair" type="text/html">
+<link href="../testing-the-altair-shortcode/index.html" rel="next" title="Testing the Altair Shortcode" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Introduction To Altair: Countries Per Year" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/introduction-to-altair-countries-per-year/index.html" property="og:url">
+<meta content="Continuing the Altair Introduction with a plot of the countries per year." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2024-03-06T16:57:41-08:00" property="article:published_time">
+<meta content="altair" property="article:tag">
+<meta content="bowling" property="article:tag">
+<meta content="visualization" property="article:tag">
+</head>
+<body>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
+</ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
+</div>
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Introduction To Altair: Countries Per Year</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2024-03-06T16:57:41-08:00" itemprop="datePublished" title="2024-03-06 16:57">2024-03-06 16:57</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="index.html#orge5cf3cf">Setup</a>
+<ul>
+<li><a href="index.html#orgace8832">Imports</a></li>
+<li><a href="index.html#org6701f53">Some Setting Up</a></li>
+</ul>
+</li>
+<li><a href="index.html#org4b6e0ba">The Data</a>
+<ul>
+<li><a href="index.html#orgef1c1f0">The Data Columns</a></li>
+</ul>
+</li>
+<li><a href="index.html#org315a1cd">Counting the Years</a>
+<ul>
+<li><a href="index.html#orgf238ffe">Using Pandas' <code>value_counts</code> Method</a></li>
+<li><a href="index.html#org9d20b74">Using Altair's "count"</a></li>
+<li><a href="index.html#org75d21f1">Comparing the File Sizes</a>
+<ul>
+<li><a href="index.html#orgc65bcc2">The Files In Bytes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="index.html#org536c940">A Chart, Part By Part</a>
+<ul>
+<li><a href="index.html#org7e74596">Altair's Chart</a></li>
+<li><a href="index.html#org8b0cc60">A Bar Chart</a></li>
+<li><a href="index.html#orge1b2303">SchemaBase</a>
+<ul>
+<li><a href="index.html#orgc65ce1e">TopLevelUnitSpec</a></li>
+</ul>
+</li>
+<li><a href="index.html#org1599340">Encoded</a>
+<ul>
+<li><a href="index.html#org9fccd14">_EncodingMixin</a></li>
+</ul>
+</li>
+<li><a href="index.html#orgaec6ecb">Properties</a></li>
+</ul>
+</li>
+<li><a href="index.html#orgb58ef49">HVPlot</a></li>
+<li><a href="index.html#org2c598f4">Links</a>
+<ul>
+<li><a href="index.html#org61fdbb5">The Posts In This Series</a></li>
+<li><a href="index.html#org0476e77">Tutorial Sources</a></li>
+<li><a href="index.html#org519e30c">The Data</a></li>
+<li><a href="index.html#orgc4233da">Altair</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="outline-2" id="outline-container-orge5cf3cf">
+<h2 id="orge5cf3cf">Setup</h2>
+<div class="outline-text-2" id="text-orge5cf3cf"></div>
+<div class="outline-3" id="outline-container-orgace8832">
+<h3 id="orgace8832">Imports</h3>
+<div class="outline-text-3" id="text-orgace8832">
+<p>These initial imports are supports to make creating this post easier and aren't necessarily needed for the altair plots.</p>
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1"># pypi</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+
+<span class="c1"># monkey</span>
+<span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_chart</span>
+</pre></div>
+<p>These are the ones that are really needed for the plotting. I installed both of them through pypi.</p>
+<div class="highlight">
+<pre><span></span><span class="kn">import</span> <span class="nn">altair</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+</pre></div>
+</div>
+</div>
+<div class="outline-3" id="outline-container-org6701f53">
+<h3 id="org6701f53">Some Setting Up</h3>
+<div class="outline-text-3" id="text-org6701f53">
+<p>These are some convenience objects to save a little bit of coding when saving the chart.</p>
+<div class="highlight">
+<pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"introduction-to-altair-countries-per-year"</span>
+<span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
+
+<span class="n">HEIGHT</span><span class="p">,</span> <span class="n">WIDTH</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">800</span>
+<span class="n">SAVE_IT</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">save_chart</span><span class="p">,</span> <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">HEIGHT</span> <span class="o">+</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="n">SOUPER</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">BeautifulSoup</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="s2">"lxml"</span><span class="p">)</span>
+</pre></div>
+<p>This is to make printing out a pandas dataframe as a table a little nicer.</p>
+<div class="highlight">
+<pre><span></span><span class="n">TABLE</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">tabulate</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="s2">"keys"</span><span class="p">,</span>
+                <span class="n">tablefmt</span><span class="o">=</span><span class="s2">"orgtbl"</span><span class="p">,</span>
+                <span class="n">showindex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="outline-2" id="outline-container-org4b6e0ba">
+<h2 id="org4b6e0ba">The Data</h2>
+<div class="outline-text-2" id="text-org4b6e0ba">
+<div class="highlight">
+<pre><span></span><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">table_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"WORLD_HAPPINESS_TABLE"</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">table_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">table_path</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+<pre class="example">
+(2199, 11)
+</pre></div>
+<div class="outline-3" id="outline-container-orgef1c1f0">
+<h3 id="orgef1c1f0">The Data Columns</h3>
+<div class="outline-text-3" id="text-orgef1c1f0">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">column_printer</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">(</span><span class="s2">"Column"</span><span class="p">,</span> <span class="s2">"Type"</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">column</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+         <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
+        <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="n">column_printer</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+</pre></div>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
+<colgroup>
+<col class="org-left">
+<col class="org-left"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">Column</th>
+<th class="org-left" scope="col">Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Country name</td>
+<td class="org-left">object</td>
+</tr>
+<tr>
+<td class="org-left">year</td>
+<td class="org-left">int64</td>
+</tr>
+<tr>
+<td class="org-left">Life Ladder</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Log GDP per capita</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Social support</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Healthy life expectancy at birth</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Freedom to make life choices</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Generosity</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Perceptions of corruption</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Positive affect</td>
+<td class="org-left">float64</td>
+</tr>
+<tr>
+<td class="org-left">Negative affect</td>
+<td class="org-left">float64</td>
+</tr>
+</tbody>
+</table>
+<p>For this initial post I'll only use the year, but</p>
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Column</span><span class="p">:</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="s2">"year"</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="outline-2" id="outline-container-org315a1cd">
+<h2 id="org315a1cd">Counting the Years</h2>
+<div class="outline-text-2" id="text-org315a1cd"></div>
+<div class="outline-3" id="outline-container-orgf238ffe">
+<h3 id="orgf238ffe">Using Pandas' <code>value_counts</code> Method</h3>
+<div class="outline-text-3" id="text-orgf238ffe">
+<div class="highlight">
+<pre><span></span><span class="n">year_counts</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"year"</span><span class="p">)</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="n">table_counts</span> <span class="o">=</span> <span class="n">year_counts</span><span class="o">.</span><span class="n">T</span>
+<span class="n">table_counts</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">table_counts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">table_counts</span> <span class="o">=</span> <span class="n">table_counts</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">table_counts</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span><span class="n">table_counts</span><span class="p">,</span> <span class="n">showindex</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</pre></div>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
+<colgroup>
+<col class="org-left">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right">
+<col class="org-right"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">&nbsp;</th>
+<th class="org-right" scope="col">2005</th>
+<th class="org-right" scope="col">2006</th>
+<th class="org-right" scope="col">2007</th>
+<th class="org-right" scope="col">2008</th>
+<th class="org-right" scope="col">2009</th>
+<th class="org-right" scope="col">2010</th>
+<th class="org-right" scope="col">2011</th>
+<th class="org-right" scope="col">2012</th>
+<th class="org-right" scope="col">2013</th>
+<th class="org-right" scope="col">2014</th>
+<th class="org-right" scope="col">2015</th>
+<th class="org-right" scope="col">2016</th>
+<th class="org-right" scope="col">2017</th>
+<th class="org-right" scope="col">2018</th>
+<th class="org-right" scope="col">2019</th>
+<th class="org-right" scope="col">2020</th>
+<th class="org-right" scope="col">2021</th>
+<th class="org-right" scope="col">2022</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">count</td>
+<td class="org-right">27</td>
+<td class="org-right">89</td>
+<td class="org-right">102</td>
+<td class="org-right">110</td>
+<td class="org-right">114</td>
+<td class="org-right">124</td>
+<td class="org-right">146</td>
+<td class="org-right">141</td>
+<td class="org-right">136</td>
+<td class="org-right">144</td>
+<td class="org-right">142</td>
+<td class="org-right">141</td>
+<td class="org-right">147</td>
+<td class="org-right">141</td>
+<td class="org-right">143</td>
+<td class="org-right">116</td>
+<td class="org-right">122</td>
+<td class="org-right">114</td>
+</tr>
+</tbody>
+</table>
+<p>Now as a bar-chart.</p>
+<div class="highlight">
+<pre><span></span><span class="n">value_counts_chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">year_counts</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:N"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">HEIGHT</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">WIDTH</span><span class="p">)</span>
+
+<span class="n">VALUE_COUNTS_NAME</span> <span class="o">=</span> <span class="s2">"value-counts-bar-chart"</span>
+<span class="n">VALUE_COUNTS_HTML</span> <span class="o">=</span> <span class="n">VALUE_COUNTS_NAME</span> <span class="o">+</span> <span class="s2">".html"</span>
+<span class="n">SAVE_IT</span><span class="p">(</span><span class="n">value_counts_chart</span><span class="p">,</span> <span class="n">VALUE_COUNTS_NAME</span><span class="p">)</span>
+</pre></div>
+<object data="value-counts-bar-chart.html" height="700" style="width:100%" type="text/html">
+<p>Figure Missing</p>
+</object></div>
+</div>
+<div class="outline-3" id="outline-container-org9d20b74">
+<h3 id="org9d20b74">Using Altair's "count"</h3>
+<div class="outline-text-3" id="text-org9d20b74">
+<div class="highlight">
+<pre><span></span><span class="n">altair_counts_chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:N"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"count()"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">HEIGHT</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">WIDTH</span><span class="p">)</span>
+
+<span class="n">ALTAIR_COUNTS_NAME</span> <span class="o">=</span> <span class="s2">"altair-counts-bar-chart"</span>
+<span class="n">ALTAIR_COUNTS_HTML</span> <span class="o">=</span> <span class="n">ALTAIR_COUNTS_NAME</span> <span class="o">+</span> <span class="s2">".html"</span>
+<span class="n">SAVE_IT</span><span class="p">(</span><span class="n">altair_counts_chart</span><span class="p">,</span> <span class="n">ALTAIR_COUNTS_NAME</span><span class="p">)</span>
+</pre></div>
+<object data="altair-counts-bar-chart.html" height="700" style="width:100%" type="text/html">
+<p>Figure Missing</p>
+</object></div>
+</div>
+<div class="outline-3" id="outline-container-org75d21f1">
+<h3 id="org75d21f1">Comparing the File Sizes</h3>
+<div class="outline-text-3" id="text-org75d21f1"></div>
+<div class="outline-4" id="outline-container-orgc65bcc2">
+<h4 id="orgc65bcc2">The Files In Bytes</h4>
+<div class="outline-text-4" id="text-orgc65bcc2">
+<div class="highlight">
+<pre><span></span><span class="n">altair_counts_html</span> <span class="o">=</span> <span class="n">OUTPUT_PATH</span><span class="o">/</span><span class="p">(</span><span class="n">ALTAIR_COUNTS_HTML</span><span class="p">)</span>
+<span class="n">pandas_counts_html</span> <span class="o">=</span> <span class="n">OUTPUT_PATH</span><span class="o">/</span><span class="p">(</span><span class="n">VALUE_COUNTS_HTML</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Altair counts(): </span><span class="si">{:,}</span><span class="s2"> bytes"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">altair_counts_html</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Pandas value_counts: </span><span class="si">{:,}</span><span class="s2"> bytes"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pandas_counts_html</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+Altair counts(): 685,111 bytes
+Pandas value_counts: 2,067 bytes
+</pre>
+<p>Here's one of the problems with <code>altair</code> - it passes along the entire dataset and then tells <code>vega</code> to work with it in the browser. So, in this case it's passing all our happiness data, even though the chart doesn't use any of the columns.</p>
+<div class="highlight">
+<pre><span></span><span class="k">with</span> <span class="n">altair_counts_html</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="n">altair_soup</span> <span class="o">=</span> <span class="n">SOUPER</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">pandas_counts_html</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="n">pandas_soup</span> <span class="o">=</span> <span class="n">SOUPER</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">data_printer</span><span class="p">(</span><span class="n">soup</span><span class="p">:</span> <span class="n">BeautifulSoup</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Gets the data from the soup and prints the entry</span>
+
+<span class="sd">    Params:</span>
+
+<span class="sd">     - soup: BeautifulSoup with the HTML for the chart</span>
+<span class="sd">     - index: which data row to show</span>
+<span class="sd">    """</span>
+    <span class="n">EVERYTHING</span> <span class="o">=</span> <span class="s2">".*"</span>
+    <span class="n">EXTRA_BRACE</span> <span class="o">=</span> <span class="s2">"(?=})"</span>
+
+    <span class="n">DATASETS_EXPRESSION</span> <span class="o">=</span> <span class="s2">"datasets"</span> <span class="o">+</span> <span class="n">EVERYTHING</span> <span class="o">+</span> <span class="s2">"}}"</span>
+    <span class="n">DATASET_EXPRESSION</span> <span class="o">=</span> <span class="s2">"{"</span> <span class="o">+</span> <span class="n">EVERYTHING</span> <span class="o">+</span> <span class="s2">"}"</span> <span class="o">+</span> <span class="n">EXTRA_BRACE</span>
+
+    <span class="n">script</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"script"</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">string</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">DATASETS_EXPRESSION</span><span class="p">,</span> <span class="n">script</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">DATASET_EXPRESSION</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+    <span class="n">json_dataset</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="n">data_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">json_dataset</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json_dataset</span><span class="p">[</span><span class="n">data_key</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"'dataset' has </span><span class="si">{:,}</span><span class="s2"> data entries</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Entry </span><span class="si">{}</span><span class="s2">:</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+    <span class="n">pprint</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+    <span class="k">return</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="n">data_printer</span><span class="p">(</span><span class="n">pandas_soup</span><span class="p">)</span>
+</pre></div>
+<pre class="example">
+'dataset' has 18 data entries
+
+Entry 0:
+
+{'count': 27, 'year': 2005}
+</pre>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">frame_print</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""print length and one row of frame</span>
+
+<span class="sd">    Params:</span>
+
+<span class="sd">     - frame: data-frame to query</span>
+<span class="sd">     - index: index of row to print</span>
+<span class="sd">    """</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Frame has </span><span class="si">{:,}</span><span class="s2"> rows."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Row </span><span class="si">{}</span><span class="s2">:</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span>
+</pre></div>
+<div class="highlight">
+<pre><span></span><span class="n">frame_print</span><span class="p">(</span><span class="n">year_counts</span><span class="p">)</span>
+</pre></div>
+<pre class="example">
+Frame has 18 rows.
+
+Row 0:
+
+year     2005
+count      27
+Name: 17, dtype: int64
+</pre>
+<div class="highlight">
+<pre><span></span><span class="n">data_printer</span><span class="p">(</span><span class="n">altair_soup</span><span class="p">)</span>
+</pre></div>
+<pre class="example" id="orgc0d404e">
+'dataset' has 2,199 data entries
+
+Entry 0:
+
+{'Country name': 'Afghanistan',
+ 'Freedom to make life choices': 0.718,
+ 'Generosity': 0.168,
+ 'Healthy life expectancy at birth': 50.5,
+ 'Life Ladder': 3.724,
+ 'Log GDP per capita': 7.35,
+ 'Negative affect': 0.258,
+ 'Perceptions of corruption': 0.882,
+ 'Positive affect': 0.414,
+ 'Social support': 0.451,
+ 'year': 2008}
+</pre>
+<div class="highlight">
+<pre><span></span><span class="n">frame_print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+</pre></div>
+<pre class="example" id="orge11c4b6">
+Frame has 2,199 rows.
+
+Row 0:
+
+Country name                        Afghanistan
+year                                       2008
+Life Ladder                               3.724
+Log GDP per capita                         7.35
+Social support                            0.451
+Healthy life expectancy at birth           50.5
+Freedom to make life choices              0.718
+Generosity                                0.168
+Perceptions of corruption                 0.882
+Positive affect                           0.414
+Negative affect                           0.258
+Name: 0, dtype: object
+</pre>
+<p>There's a project called <a href="https://vegafusion.io/">vegafusion</a> that is supposed to help with reducing the size but it requires that you use a jupyter notebook for interactivity (it uses python to make a jupyter widget or some such) so it won't work for a static site like this one. So when using altair we have to think about what we're doing if the size of the files is going to be a problem. In most cases it probably makes sense to do the transformations in pandas first and then only pass the data to plot to altair.</p>
+<p>See the <a href="https://altair-viz.github.io/user_guide/large_datasets.html">altair documentation on Large Datasets</a> for more information.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="outline-2" id="outline-container-org536c940">
+<h2 id="org536c940">A Chart, Part By Part</h2>
+<div class="outline-text-2" id="text-org536c940"></div>
+<div class="outline-3" id="outline-container-org7e74596">
+<h3 id="org7e74596">Altair's Chart</h3>
+<div class="outline-text-3" id="text-org7e74596">
+<div class="highlight">
+<pre><span></span><span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">year_counts</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">chart</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">chart</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">year_counts</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+&lt;class 'altair.vegalite.v5.api.Chart'&gt;
+</pre>
+<p>The <code>Chart</code> class is defined in <code>altair.vegalite.v5.api</code>. This is its docstring description:</p>
+<blockquote>
+<p>Create a basic Altair/Vega-Lite chart.</p>
+<p>Although it is possible to set all Chart properties as constructor attributes, it is more idiomatic to use methods such as <code>mark_point()</code>, <code>encode()</code>, <code>transform_filter()</code>, <code>properties()</code>, etc. See Altair's documentation for details and examples: <a href="http://altair-viz.github.io/">http://altair-viz.github.io/</a>.</p>
+</blockquote>
+<p>The attributes set by the <code>Chart</code> class' constructor (it also accepets other keyword parameters that are passed to its parent classes) are:</p>
+<ul class="org-ul">
+<li>data</li>
+<li>encoding</li>
+<li>mark</li>
+<li>width</li>
+<li>height</li>
+</ul>
+<p>By default they're set to <code>Undefined</code> which is an altair-defined object (see <code>altair.utils.schemapi</code>), and as noted, you don't normally set the attributes using the constructor (other than <code>data</code> which isn't mentioned in the docstring but appears to be passed to the <code>Chart</code> constructor by convention).</p>
+<p>Here's a diagram of the <code>Chart</code> (defined in <code>altair.vegalite.v5.api</code>).</p>
+<p><img alt="nil" src="chart.png"></p>
+</div>
+</div>
+<div class="outline-3" id="outline-container-org8b0cc60">
+<h3 id="org8b0cc60">A Bar Chart</h3>
+<div class="outline-text-3" id="text-org8b0cc60">
+<p>Once we have a chart object we tell altair that we want it to be a bar chart using the <code>mark_bar</code> method.</p>
+<div class="highlight">
+<pre><span></span><span class="n">bar_chart</span> <span class="o">=</span> <span class="n">chart</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bar_chart</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+&lt;class 'altair.vegalite.v5.api.Chart'&gt;
+</pre>
+<p>The <code>mark_</code> methods are defined in the <code>MarkMethodMixin</code> class (a parent of <code>Chart</code>) which is defined in <code>altair.vegalite.v5.schema.mixins</code> module.</p>
+<p><img alt="MarkMixin Class" src="mark-mixin.png"></p>
+<p>Looking in the <code>mark_bar</code> method, there's a lot of arguments you could pass to it, but fundamentally all it's really doing is making a copy of itself, setting the <code>mark</code> attribute to <code>bar</code> and then retu+rning the copy.</p>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Original Chart mark: '</span><span class="si">{}</span><span class="s2">'"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chart</span><span class="o">.</span><span class="n">mark</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Bar Chart mark: '</span><span class="si">{}</span><span class="s2">'"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bar_chart</span><span class="o">.</span><span class="n">mark</span><span class="p">))</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="n">bar_chart</span><span class="p">)</span><span class="o">.</span><span class="n">to_not</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">chart</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+Original Chart mark: 'Undefined'
+Bar Chart mark: 'bar'
+</pre></div>
+</div>
+<div class="outline-3" id="outline-container-orge1b2303">
+<h3 id="orge1b2303">SchemaBase</h3>
+<div class="outline-text-3" id="text-orge1b2303">
+<p><code>altair.utils.schemapi</code>.</p>
+<p><img alt="nil" src="schema-base.png"></p>
+<p>There are many more methods in <code>altair.utils.schemapi.SchemaBase</code> but I'm highlighting <code>copy</code> here because it gets used quite a bit by the other classes but is defined in this somewhat obscure place. The behavior is what you'd expect so I don't see a need to go over it, but it's one of those mystery methods that just pops up when you use deep inheritance like this that makes you wonder what's going on so I'll document it here, for now.</p>
+</div>
+<div class="outline-4" id="outline-container-orgc65ce1e">
+<h4 id="orgc65ce1e">TopLevelUnitSpec</h4>
+<div class="outline-text-4" id="text-orgc65ce1e">
+<p>If you look at the parents of the <code>Chart</code> you might notice that it doesn't have the <code>SchemaBase</code> as one of its parents. So how does it end up with the <code>copy</code> method? Well, it does have the <code>core.TopLevelUnitSpec</code> as one of its parents and that in turn (eventually) inherits from the <code>SchemaBase</code>.</p>
+<p><img alt="nil" src="top-level-unit-spec.png"></p>
+<p>I didn't put in the modules for the <code>core</code> classes since they are fairly deep.</p>
+</div>
+</div>
+</div>
+<div class="outline-3" id="outline-container-org1599340">
+<h3 id="org1599340">Encoded</h3>
+<div class="outline-text-3" id="text-org1599340">
+<p>The <code>encode</code> method is where we tell <code>altair</code> which columns match which parts of the chart. In this case we're only setting the <i>x</i> and <i>y</i> axes.</p>
+<div class="highlight">
+<pre><span></span><span class="n">encoded</span> <span class="o">=</span> <span class="n">bar_chart</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:N"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">encoded</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+&lt;class 'altair.vegalite.v5.api.Chart'&gt;
+</pre></div>
+<div class="outline-4" id="outline-container-org9fccd14">
+<h4 id="org9fccd14">_EncodingMixin</h4>
+<div class="outline-text-4" id="text-org9fccd14">
+<p>The <code>encode</code> method is defined in the <code>_EncodingMixin</code> class, one of the <code>Chart</code>'s parents.</p>
+<p><img alt="nil" src="encoding-mixin.png"></p>
+<p>The <code>encoding</code> method takes in whatever combination of positional and keyword arguments you pass into it and then:</p>
+<ul class="org-ul">
+<li>copies the Chart</li>
+<li>updates the chart's <code>encoding</code> attribute</li>
+<li>sets the copy's <code>encoding</code> attribute to an instance of the <code>altair.vegalite.v5.schema.FacetedEncoding</code> class.</li>
+<li>returns the copy</li>
+</ul>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">encoded</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+</pre></div>
+<pre class="example">
+FacetedEncoding({
+  x: X({
+    shorthand: 'year:N'
+  }),
+  y: Y({
+    shorthand: 'count'
+  })
+})
+</pre></div>
+</div>
+</div>
+<div class="outline-3" id="outline-container-orgaec6ecb">
+<h3 id="orgaec6ecb">Properties</h3>
+<div class="outline-text-3" id="text-orgaec6ecb">
+<div class="highlight">
+<pre><span></span><span class="n">propertied</span> <span class="o">=</span> <span class="n">encoded</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">HEIGHT</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">WIDTH</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">propertied</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+&lt;class 'altair.vegalite.v5.api.Chart'&gt;
+</pre>
+<p><img alt="nil" src="top-level-mixin.png"></p>
+<blockquote>
+<p><b>Note:</b> This is a huge class with more methods than I'm showing here. The only ones we've encountered so far are <code>to_dict</code>, <code>save</code> and <code>properties</code>. I used <code>to_dict</code> to show that the chart has all the data from the pandas DataFrame and <code>save</code> is buried in the code that saves the chart to display it in this post - <code>properties</code> is the only one we're really interested in here.</p>
+</blockquote>
+<p>The first thing to note about the <code>properties</code> method is that it doesn't define any arguments, it takes in any keyword arguments (and only keyword arguments, no positional arguments) and values for the arguments. Then:</p>
+<ul class="org-ul">
+<li>it makes a copy of the chart</li>
+<li>validates the arguments (unless the argument is the <code>data</code>)</li>
+<li>sets the arguments as attributes of the copy.</li>
+<li>returns the copy</li>
+</ul>
+<p>Since we passed in <code>height</code> and <code>width</code> to the <code>properties</code> method, we get back a copy of our bar chart with the <code>height</code> and <code>width</code> set on the copy (as well as the "mark" which we set earlier with <code>mark_bar</code>).</p>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">propertied</span><span class="o">.</span><span class="n">mark</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">propertied</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">propertied</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">propertied</span><span class="o">.</span><span class="n">mark</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="s2">"bar"</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">propertied</span><span class="o">.</span><span class="n">width</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">WIDTH</span><span class="p">))</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">propertied</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">HEIGHT</span><span class="p">))</span>
+</pre></div>
+<pre class="example">
+bar
+800
+600
+</pre></div>
+</div>
+</div>
+<div class="outline-2" id="outline-container-orgb58ef49">
+<h2 id="orgb58ef49">HVPlot</h2>
+</div>
+<div class="outline-2" id="outline-container-org2c598f4">
+<h2 id="org2c598f4">Links</h2>
+<div class="outline-text-2" id="text-org2c598f4"></div>
+<div class="outline-3" id="outline-container-org61fdbb5">
+<h3 id="org61fdbb5">The Posts In This Series</h3>
+<div class="outline-text-3" id="text-org61fdbb5">
+<ul class="org-ul">
+<li><a href="../introduction-to-altair/index.html">Starting Post</a></li>
+</ul>
+</div>
+</div>
+<div class="outline-3" id="outline-container-org0476e77">
+<h3 id="org0476e77">Tutorial Sources</h3>
+<div class="outline-text-3" id="text-org0476e77">
+<ul class="org-ul">
+<li><a href="https://www.coursera.org/learn/fundamentals-of-data-visualization/home/week/1"><i>Fundamentals of Visualization with Dr. Danielle Albers Szafir</i></a>: Coursera course where the original tutorial came from.</li>
+<li><a href="https://infovis.fh-potsdam.de/tutorials/">InfoVis Course from Marian Dork</a>: Iniversity of Applied Sciences Potsdam that the Coursera course cites as the source for their tutorial.</li>
+</ul>
+</div>
+</div>
+<div class="outline-3" id="outline-container-org519e30c">
+<h3 id="org519e30c">The Data</h3>
+<div class="outline-text-3" id="text-org519e30c">
+<ul class="org-ul">
+<li>World Happiness Report Dataset [Internet]. [cited 2023 Dec 11]. Available from: <a href="https://www.kaggle.com/datasets/unsdsn/world-happiness">https://www.kaggle.com/datasets/unsdsn/world-happiness</a></li>
+<li>Inc G. Gallup.com. 2009 [cited 2023 Dec 11]. Understanding How Gallup Uses the Cantril Scale. Available from: <a href="https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx">https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx</a></li>
+<li>World Happiness Report [Internet]. 2023 [cited 2023 Dec 11]. Available from: <a href="https://worldhappiness.report/">https://worldhappiness.report/</a></li>
+</ul>
+</div>
+</div>
+<div class="outline-3" id="outline-container-orgc4233da">
+<h3 id="orgc4233da">Altair</h3>
+<div class="outline-text-3" id="text-orgc4233da">
+<ul class="org-ul">
+<li>Layered and Multi-View Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2023 Dec 12]. Available from: <a href="https://altair-viz.github.io/user_guide/compound_charts.html">https://altair-viz.github.io/user_guide/compound_charts.html</a></li>
+<li>Large Datasets — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 8]. Available from: <a href="https://altair-viz.github.io/user_guide/large_datasets.html">https://altair-viz.github.io/user_guide/large_datasets.html</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
+<li><a class="tag p-category" href="../../categories/altair/index.html" rel="tag">altair</a></li>
+<li><a class="tag p-category" href="../../categories/bowling/index.html" rel="tag">bowling</a></li>
+<li><a class="tag p-category" href="../../categories/visualization/index.html" rel="tag">visualization</a></li>
+</ul>
+<ul class="pager hidden-print">
+<li class="previous"><a href="../introduction-to-altair/index.html" rel="prev" title="Introduction To Altair">Previous post</a></li>
+<li class="next"><a href="../testing-the-altair-shortcode/index.html" rel="next" title="Testing the Altair Shortcode">Next post</a></li>
+</ul>
+</nav>
+</aside>
+</article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
+</footer>
+</div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
+
+    baguetteBox.run('div#content', {
+        ignoreClass: 'islink',
+        captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
+</script></div>
+</body>
+</html>

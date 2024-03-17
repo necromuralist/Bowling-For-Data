@@ -1,136 +1,86 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="A look at Kruskal's Algorithm to find the Minimum Spanning Tree of a Graph.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="A look at Kruskal's Algorithm to find the Minimum Spanning Tree of a Graph." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>Minimum Spanning Trees: Kruskal's Algorithm | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/minimum-spanning-trees-kruskals-algorithm/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../graphs-strongly-connected-components/index.html" title="Graphs: Strongly Connected Components" type="text/html">
-<link rel="next" href="../shortest-paths-bellman-ford/index.html" title="Shortest Paths: Bellman-Ford" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="Minimum Spanning Trees: Kruskal's Algorithm">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/minimum-spanning-trees-kruskals-algorithm/index.html">
-<meta property="og:description" content="A look at Kruskal's Algorithm to find the Minimum Spanning Tree of a Graph.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-04-27T15:30:44-07:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="data structures">
-<meta property="article:tag" content="graphs">
-<meta property="article:tag" content="minimum spanning trees">
-<meta property="article:tag" content="trees">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/minimum-spanning-trees-kruskals-algorithm/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../graphs-strongly-connected-components/index.html" rel="prev" title="Graphs: Strongly Connected Components" type="text/html">
+<link href="../shortest-paths-bellman-ford/index.html" rel="next" title="Shortest Paths: Bellman-Ford" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Minimum Spanning Trees: Kruskal's Algorithm" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/minimum-spanning-trees-kruskals-algorithm/index.html" property="og:url">
+<meta content="A look at Kruskal's Algorithm to find the Minimum Spanning Tree of a Graph." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-04-27T15:30:44-07:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="data structures" property="article:tag">
+<meta content="graphs" property="article:tag">
+<meta content="minimum spanning trees" property="article:tag">
+<meta content="trees" property="article:tag">
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Minimum Spanning Trees: Kruskal's Algorithm</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-04-27T15:30:44-07:00" itemprop="datePublished" title="2022-04-27 15:30">2022-04-27 15:30</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Minimum Spanning Trees: Kruskal's Algorithm</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-04-27T15:30:44-07:00" itemprop="datePublished" title="2022-04-27 15:30">2022-04-27 15:30</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="index.html#org95ba534">Set Up</a></li>
-<li><a href="index.html#org959e609">A Vertex</a></li>
-<li><a href="index.html#org8bbdc9e">Edges</a></li>
-<li><a href="index.html#org5559715">A Graph</a></li>
-<li><a href="index.html#org3ab9b97">Disjoint Sets</a></li>
-<li><a href="index.html#org5485059">Kruskal's Algorithm</a></li>
-<li><a href="index.html#orge6a11c4">Try It Out</a></li>
+<li><a href="index.html#org0cca443">Set Up</a></li>
+<li><a href="index.html#org5374673">A Vertex</a></li>
+<li><a href="index.html#org98ce332">Edges</a></li>
+<li><a href="index.html#org7ea0101">A Graph</a></li>
+<li><a href="index.html#orgc264dd5">Disjoint Sets</a></li>
+<li><a href="index.html#org555f554">Kruskal's Algorithm</a></li>
+<li><a href="index.html#org4def539">Try It Out</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org95ba534" class="outline-2">
-<h2 id="org95ba534">Set Up</h2>
-<div class="outline-text-2" id="text-org95ba534">
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<div class="outline-2" id="outline-container-org0cca443">
+<h2 id="org0cca443">Set Up</h2>
+<div class="outline-text-2" id="text-org0cca443">
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
 
@@ -139,10 +89,11 @@ bg-light
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org959e609" class="outline-2">
-<h2 id="org959e609">A Vertex</h2>
-<div class="outline-text-2" id="text-org959e609">
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Vertex</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-org5374673">
+<h2 id="org5374673">A Vertex</h2>
+<div class="outline-text-2" id="text-org5374673">
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Vertex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A node in the graph</span>
 
 <span class="sd">    Args:</span>
@@ -151,29 +102,30 @@ bg-light
 <span class="sd">     rank: The height of the node</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Vertex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rank</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="n">rank</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="n">rank</span>
+        <span class="k">return</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_root</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Checks if this vertex is the root of a tree</span>
+<span class="w">        </span><span class="sd">"""Checks if this vertex is the root of a tree</span>
 
-<span class="sd">	Returns:</span>
-<span class="sd">	 true if this is a root</span>
-<span class="sd">	"""</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         true if this is a root</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-	<span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="si">}</span><span class="s2">"</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org8bbdc9e" class="outline-2">
-<h2 id="org8bbdc9e">Edges</h2>
-<div class="outline-text-2" id="text-org8bbdc9e">
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Edge</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-org98ce332">
+<h2 id="org98ce332">Edges</h2>
+<div class="outline-text-2" id="text-org98ce332">
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Edge</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A weighted edge between two nodes</span>
 
 <span class="sd">    Args:</span>
@@ -182,117 +134,119 @@ bg-light
 <span class="sd">     weight: weight of the edge</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_1</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">node_2</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">node_1</span> <span class="o">=</span> <span class="n">node_1</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">node_2</span> <span class="o">=</span> <span class="n">node_2</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_1</span> <span class="o">=</span> <span class="n">node_1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_2</span> <span class="o">=</span> <span class="n">node_2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span>
+        <span class="k">return</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-	<span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">node_1</span><span class="si">}</span><span class="s2"> --</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">-- </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">node_2</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">node_1</span><span class="si">}</span><span class="s2"> --</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">-- </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">node_2</span><span class="si">}</span><span class="s2">"</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org5559715" class="outline-2">
-<h2 id="org5559715">A Graph</h2>
-<div class="outline-text-2" id="text-org5559715">
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Graph</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-org7ea0101">
+<h2 id="org7ea0101">A Graph</h2>
+<div class="outline-text-2" id="text-org7ea0101">
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Graph</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""An Undirected Graph</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_1</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">node_2</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Add the nodes and an edge between them</span>
+<span class="w">        </span><span class="sd">"""Add the nodes and an edge between them</span>
 
-<span class="sd">	Note:</span>
-<span class="sd">	 although the graph is undirected, the (node_2, node_1) edge </span>
-<span class="sd">	 isn't added, it's assumed that the order of the arguments </span>
-<span class="sd">	 doesn't matter</span>
-<span class="sd">	"""</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_1</span><span class="p">)</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_2</span><span class="p">)</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Edge</span><span class="p">(</span><span class="n">node_1</span><span class="p">,</span> <span class="n">node_2</span><span class="p">,</span> <span class="n">weight</span><span class="p">))</span>
-	<span class="k">return</span>
+<span class="sd">        Note:</span>
+<span class="sd">         although the graph is undirected, the (node_2, node_1) edge </span>
+<span class="sd">         isn't added, it's assumed that the order of the arguments </span>
+<span class="sd">         doesn't matter</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Edge</span><span class="p">(</span><span class="n">node_1</span><span class="p">,</span> <span class="n">node_2</span><span class="p">,</span> <span class="n">weight</span><span class="p">))</span>
+        <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org3ab9b97" class="outline-2">
-<h2 id="org3ab9b97">Disjoint Sets</h2>
-<div class="outline-text-2" id="text-org3ab9b97">
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Disjoint</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-orgc264dd5">
+<h2 id="orgc264dd5">Disjoint Sets</h2>
+<div class="outline-text-2" id="text-orgc264dd5">
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Disjoint</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Methods to treat the tree as a set"""</span>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">make_sets</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Initializes the vertices as trees in a forest</span>
+<span class="w">        </span><span class="sd">"""Initializes the vertices as trees in a forest</span>
 
-<span class="sd">	Args:</span>
-<span class="sd">	 vertices: collection of nodes to set up</span>
-<span class="sd">	"""</span>
-	<span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
-	    <span class="bp">cls</span><span class="o">.</span><span class="n">make_set</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
-	<span class="k">return</span>
+<span class="sd">        Args:</span>
+<span class="sd">         vertices: collection of nodes to set up</span>
+<span class="sd">        """</span>
+        <span class="k">for</span> <span class="n">vertex</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">make_set</span><span class="p">(</span><span class="n">vertex</span><span class="p">)</span>
+        <span class="k">return</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">make_set</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Initialize the values</span>
+<span class="w">        </span><span class="sd">"""Initialize the values</span>
 
-<span class="sd">	Args:</span>
-<span class="sd">	 vertex: node to set up</span>
-<span class="sd">	"""</span>
-	<span class="n">vertex</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">vertex</span>
-	<span class="n">vertex</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
-	<span class="k">return</span>
+<span class="sd">        Args:</span>
+<span class="sd">         vertex: node to set up</span>
+<span class="sd">        """</span>
+        <span class="n">vertex</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">vertex</span>
+        <span class="n">vertex</span><span class="o">.</span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">find_set</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vertex</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""Find the root of the set that vertex belongs to</span>
+<span class="w">        </span><span class="sd">"""Find the root of the set that vertex belongs to</span>
 
-<span class="sd">	Args:</span>
-<span class="sd">	 vertex: member of set to find</span>
+<span class="sd">        Args:</span>
+<span class="sd">         vertex: member of set to find</span>
 
-<span class="sd">	Returns:</span>
-<span class="sd">	 root of set that vertex belongs to</span>
-<span class="sd">	"""</span>
-	<span class="k">if</span> <span class="ow">not</span> <span class="n">vertex</span><span class="o">.</span><span class="n">is_root</span><span class="p">:</span>
-	    <span class="n">vertex</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>            
-	<span class="k">return</span> <span class="n">vertex</span><span class="o">.</span><span class="n">parent</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         root of set that vertex belongs to</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">vertex</span><span class="o">.</span><span class="n">is_root</span><span class="p">:</span>
+            <span class="n">vertex</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">vertex</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>            
+        <span class="k">return</span> <span class="n">vertex</span><span class="o">.</span><span class="n">parent</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vertex_1</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">vertex_2</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""merge the trees that the vertices belong to</span>
+<span class="w">        </span><span class="sd">"""merge the trees that the vertices belong to</span>
 
-<span class="sd">	Args:</span>
-<span class="sd">	 vertex_1: member of first tree</span>
-<span class="sd">	 vertex_2: member of second tree</span>
-<span class="sd">	"""</span>
-	<span class="bp">cls</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">vertex_1</span><span class="p">),</span> <span class="bp">cls</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">vertex_2</span><span class="p">))</span>
-	<span class="k">return</span>
+<span class="sd">        Args:</span>
+<span class="sd">         vertex_1: member of first tree</span>
+<span class="sd">         vertex_2: member of second tree</span>
+<span class="sd">        """</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">vertex_1</span><span class="p">),</span> <span class="bp">cls</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">vertex_2</span><span class="p">))</span>
+        <span class="k">return</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">link</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">root_1</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">root_2</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">	</span><span class="sd">"""make lower-ranked tree root a child of higher-ranked</span>
+<span class="w">        </span><span class="sd">"""make lower-ranked tree root a child of higher-ranked</span>
 
-<span class="sd">	Args:</span>
-<span class="sd">	 root_1: root of a tree</span>
-<span class="sd">	 root_2: root of a different tree</span>
-<span class="sd">	"""</span>
-	<span class="k">if</span> <span class="n">root_1</span><span class="o">.</span><span class="n">rank</span> <span class="o">&gt;</span> <span class="n">root_2</span><span class="o">.</span><span class="n">rank</span><span class="p">:</span>
-	    <span class="n">root_2</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root_1</span>
-	<span class="k">else</span><span class="p">:</span>
-	    <span class="n">root_1</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root_2</span>
-	    <span class="k">if</span> <span class="n">root_1</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="n">root_2</span><span class="o">.</span><span class="n">rank</span><span class="p">:</span>
-		<span class="n">root_2</span><span class="o">.</span><span class="n">rank</span> <span class="o">+=</span> <span class="mi">1</span>
-	<span class="k">return</span>
+<span class="sd">        Args:</span>
+<span class="sd">         root_1: root of a tree</span>
+<span class="sd">         root_2: root of a different tree</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">root_1</span><span class="o">.</span><span class="n">rank</span> <span class="o">&gt;</span> <span class="n">root_2</span><span class="o">.</span><span class="n">rank</span><span class="p">:</span>
+            <span class="n">root_2</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root_1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">root_1</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">root_2</span>
+            <span class="k">if</span> <span class="n">root_1</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="n">root_2</span><span class="o">.</span><span class="n">rank</span><span class="p">:</span>
+                <span class="n">root_2</span><span class="o">.</span><span class="n">rank</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org5485059" class="outline-2">
-<h2 id="org5485059">Kruskal's Algorithm</h2>
-<div class="outline-text-2" id="text-org5485059">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">kruskal</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
+<div class="outline-2" id="outline-container-org555f554">
+<h2 id="org555f554">Kruskal's Algorithm</h2>
+<div class="outline-text-2" id="text-org555f554">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">kruskal</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Create a Minimum Spanning Tree out of Vertices</span>
 
 <span class="sd">    Args:</span>
@@ -305,20 +259,20 @@ bg-light
     <span class="n">Disjoint</span><span class="o">.</span><span class="n">make_sets</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">vertices</span><span class="p">)</span>
     <span class="n">edges</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">edge</span><span class="p">:</span> <span class="n">edge</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
-	<span class="n">tree_1</span> <span class="o">=</span> <span class="n">Disjoint</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">node_1</span><span class="p">)</span>
-	<span class="n">tree_2</span> <span class="o">=</span> <span class="n">Disjoint</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">node_2</span><span class="p">)</span>
-	<span class="k">if</span> <span class="p">(</span><span class="n">tree_1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">tree_2</span><span class="p">):</span>
-	    <span class="n">spanning_tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
-	    <span class="n">Disjoint</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">node_1</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">node_2</span><span class="p">)</span>
+        <span class="n">tree_1</span> <span class="o">=</span> <span class="n">Disjoint</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">node_1</span><span class="p">)</span>
+        <span class="n">tree_2</span> <span class="o">=</span> <span class="n">Disjoint</span><span class="o">.</span><span class="n">find_set</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">node_2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tree_1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">tree_2</span><span class="p">):</span>
+            <span class="n">spanning_tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+            <span class="n">Disjoint</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">node_1</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">node_2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">spanning_tree</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orge6a11c4" class="outline-2">
-<h2 id="orge6a11c4">Try It Out</h2>
-<div class="outline-text-2" id="text-orge6a11c4">
-<div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<div class="outline-2" id="outline-container-org4def539">
+<h2 id="org4def539">Try It Out</h2>
+<div class="outline-text-2" id="text-org4def539">
+<div class="highlight">
+<pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
 <span class="k">for</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="s2">"abcdefghi"</span><span class="p">:</span>
     <span class="n">nodes</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
@@ -349,7 +303,6 @@ bg-light
 <span class="n">tree</span> <span class="o">=</span> <span class="n">kruskal</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
 <span class="n">pprint</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 {a --4-- b,
  a --8-- h,
@@ -360,48 +313,37 @@ bg-light
  f --2-- g,
  g --1-- h}
 </pre>
-
-
-<p>
-<b><b>Note:</b></b> I originally thought I could check the tree structure, but the disjoint-set methods use Path Compression, so all the nodes end up having the same parent (in this case node "h").
-</p>
+<p><b>Note:</b> I originally thought I could check the tree structure, but the disjoint-set methods use Path Compression, so all the nodes end up having the same parent (in this case node "h").</p>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+</div>
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
-            <li><a class="tag p-category" href="../../categories/graphs/index.html" rel="tag">graphs</a></li>
-            <li><a class="tag p-category" href="../../categories/minimum-spanning-trees/index.html" rel="tag">minimum spanning trees</a></li>
-            <li><a class="tag p-category" href="../../categories/trees/index.html" rel="tag">trees</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
+<li><a class="tag p-category" href="../../categories/graphs/index.html" rel="tag">graphs</a></li>
+<li><a class="tag p-category" href="../../categories/minimum-spanning-trees/index.html" rel="tag">minimum spanning trees</a></li>
+<li><a class="tag p-category" href="../../categories/trees/index.html" rel="tag">trees</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../graphs-strongly-connected-components/index.html" rel="prev" title="Graphs: Strongly Connected Components">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../shortest-paths-bellman-ford/index.html" rel="next" title="Shortest Paths: Bellman-Ford">Next post</a>
-            </li>
-        </ul></nav></aside></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../graphs-strongly-connected-components/index.html" rel="prev" title="Graphs: Strongly Connected Components">Previous post</a></li>
+<li class="next"><a href="../shortest-paths-bellman-ford/index.html" rel="next" title="Shortest Paths: Bellman-Ford">Next post</a></li>
+</ul>
+</nav>
+</aside>
+</article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

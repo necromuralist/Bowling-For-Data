@@ -1,0 +1,335 @@
+#+BEGIN_COMMENT
+.. title: World Happiness Data
+.. slug: world-happiness-data
+.. date: 2023-12-14 14:58:39 UTC-08:00
+.. tags: data
+.. category: Data
+.. link: 
+.. description: A look at the World Happiness Data.
+.. type: text
+
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 3
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f41f6b4c-0aa3-4eb5-bacd-2f4f6383895d-ssh.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+* Imports
+
+#+begin_src python :results none
+# python
+from functools import partial
+from pathlib import Path
+import os
+
+# pypi
+from dotenv import load_dotenv
+from expects import be_true, expect
+from tabulate import tabulate
+
+import pandas
+#+end_src
+
+#+begin_src python :results none
+TABLE = partial(partial(tabulate,
+                        headers="keys",
+                        tablefmt="orgtbl",
+                        showindex=False))
+#+end_src
+
+#+begin_src python :results output :exports both
+load_dotenv(override=True)
+kaggle_path = Path(os.getenv("KAGGLE_WORLD_HAPPINESS"))
+figure_path = Path(os.getenv("WORLD_HAPPINESS_FIGURE"))
+table_path = Path(os.getenv("WORLD_HAPPINESS_TABLE"))
+print(kaggle_path)
+print(figure_path)
+print(table_path)
+expect(kaggle_path.is_file()).to(be_true)
+expect(table_path.is_file()).to(be_true)
+expect(figure_path.is_file()).to(be_true)
+#+end_src
+
+#+RESULTS:
+: /home/bravo/data/datasets/kaggle/world-happiness-report/WHR_2016.csv
+: /home/bravo/data/datasets/world-happiness-data/world-happiness-report-2023-data-for-figure-2.1.csv
+: /home/bravo/data/datasets/world-happiness-data/world-happiness-report-2023-data-for-table-2.1.csv
+
+#+begin_src python :results output :exports both
+kaggle = pandas.read_csv(kaggle_path)
+figure = pandas.read_csv(figure_path)
+table = pandas.read_csv(table_path)
+
+print(kaggle.shape)
+print(figure.shape)
+print(table.shape)
+#+end_src
+
+#+RESULTS:
+: (157, 13)
+: (137, 19)
+: (2199, 11)
+
+#+begin_src python :results none
+def column_printer(table, headers=("Column", "Type")):
+    print(TABLE(
+        ((column, str(table[column].dtype))
+         for column in table.columns),
+        headers=headers))
+    return
+#+end_src
+
+#+begin_src python :results output :exports both
+column_printer(kaggle)
+#+end_src
+
+#+RESULTS:
+| Column                        | Type    |
+|-------------------------------+---------|
+| Country                       | object  |
+| Region                        | object  |
+| Happiness Rank                | int64   |
+| Happiness Score               | float64 |
+| Lower Confidence Interval     | float64 |
+| Upper Confidence Interval     | float64 |
+| Economy (GDP per Capita)      | float64 |
+| Family                        | float64 |
+| Health (Life Expectancy)      | float64 |
+| Freedom                       | float64 |
+| Trust (Government Corruption) | float64 |
+| Generosity                    | float64 |
+| Dystopia Residual             | float64 |
+
+#+begin_src python :results output :exports both
+column_printer(figure)
+#+end_src
+
+#+RESULTS:
+| Column                                     | Type    |
+|--------------------------------------------+---------|
+| Country name                               | object  |
+| Ladder score                               | float64 |
+| Standard error of ladder score             | float64 |
+| upperwhisker                               | float64 |
+| lowerwhisker                               | float64 |
+| Logged GDP per capita                      | float64 |
+| Social support                             | float64 |
+| Healthy life expectancy                    | float64 |
+| Freedom to make life choices               | float64 |
+| Generosity                                 | float64 |
+| Perceptions of corruption                  | float64 |
+| Ladder score in Dystopia                   | float64 |
+| Explained by: Log GDP per capita           | float64 |
+| Explained by: Social support               | float64 |
+| Explained by: Healthy life expectancy      | float64 |
+| Explained by: Freedom to make life choices | float64 |
+| Explained by: Generosity                   | float64 |
+| Explained by: Perceptions of corruption    | float64 |
+| Dystopia + residual                        | float64 |
+
+#+begin_src python :results output :exports both
+column_printer(table)
+#+end_src
+
+#+RESULTS:
+| Column                           | Type    |
+|----------------------------------+---------|
+| Country name                     | object  |
+| year                             | int64   |
+| Life Ladder                      | float64 |
+| Log GDP per capita               | float64 |
+| Social support                   | float64 |
+| Healthy life expectancy at birth | float64 |
+| Freedom to make life choices     | float64 |
+| Generosity                       | float64 |
+| Perceptions of corruption        | float64 |
+| Positive affect                  | float64 |
+| Negative affect                  | float64 |
+
+It's hard to say exactly but it looks like /Region/ and /Happiness Rank/ were added by whoever created the ~kaggle~ dataset and it isn't clear what the /Family/ column ties into. The only column in the UN data not matched is /Social Support/ but that doesn't seem to have the right value range:
+
+#+begin_src python :results output :exports both
+print(kaggle.Family.max())
+print(figure["Social support"].max())
+#+end_src
+
+#+RESULTS:
+: 1.18326
+: 0.983
+
+We're not going to use /Family/ anyway, so I'll just ignore it.
+
+* Country
+
+#+begin_src python :results none
+COUNTRY = "Country name"
+#+end_src
+
+#+begin_src python :results output :exports both
+print(kaggle.Country.min())
+print(table[COUNTRY].min())
+print(figure[COUNTRY].min())
+#+end_src
+
+#+RESULTS:
+: Afghanistan
+: Afghanistan
+: Afghanistan
+
+#+begin_src python :results output :exports both
+print(len(kaggle.Country.unique()))
+print(len(table[COUNTRY].unique()))
+print(len(figure[COUNTRY].unique()))
+#+end_src
+
+#+RESULTS:
+: 157
+: 165
+: 137
+
+The figure data has quite a bit fewer entries than the table data. I'll have to look into that as I was planning to merge them, but I'll have to figure out why those twenty-eight countries are missing.
+
+** The Table vs Kaggle
+
+#+begin_src python :results output :exports both
+k_countries = set(kaggle.Country)
+t_countries = set(table[COUNTRY])
+
+print(sorted(t_countries - k_countries))
+print()
+print(sorted(k_countries - t_countries))
+#+end_src
+
+#+RESULTS:
+: ['Central African Republic', 'Cuba', 'Czechia', 'Djibouti', 'Eswatini', 'Gambia', 'Guyana', 'Hong Kong S.A.R. of China', 'Lesotho', 'Maldives', 'Mozambique', 'North Macedonia', 'Oman', 'Somaliland region', 'State of Palestine', 'Taiwan Province of China', 'Turkiye']
+: 
+: ['Czech Republic', 'Hong Kong', 'Macedonia', 'North Cyprus', 'Palestinian Territories', 'Puerto Rico', 'Somaliland Region', 'Taiwan', 'Turkey']
+
+| Kaggle                  | World Happiness Report        | Wikipedia                                   |
+|-------------------------+-------------------------------+---------------------------------------------|
+| - Missing -             | Central African Republic      | [[https://en.wikipedia.org/wiki/Central_African_Republic?useskin=vector][Central African Republic]]                    |
+| - Missing -             | Cuba                          | [[https://en.wikipedia.org/wiki/Cuba?useskin=vector][Cuba]]                                        |
+| Czech Republic          | Czechia                       | [[https://en.wikipedia.org/wiki/Czech_Republic?useskin=vector][Czech Republic]]                              |
+| - Missing -             | Djibouti                      | [[https://en.wikipedia.org/wiki/Djibouti?useskin=vector][Djibouti]]                                    |
+| - Missing -             | Eswatini                      | [[https://en.wikipedia.org/wiki/Eswatini?useskin=vector][Eswatini]]                                    |
+| - Missing -             | Gambia                        | [[https://en.wikipedia.org/wiki/The_Gambia?useskin=vector][The Gambia]]                                  |
+| - Missing -             | Guyana                        | [[https://en.wikipedia.org/wiki/Guyana?useskin=vector][Guyana]]                                      |
+| Hong Kong               | Hong Kong S.A.R. of China     | [[https://en.wikipedia.org/wiki/Hong_Kong?useskin=vector][Hong Kong]]                                   |
+| - Missing -             | Lesotho                       | [[https://en.wikipedia.org/wiki/Lesotho?useskin=vector][Lesotho]]                                     |
+| Macedonia               | North Macedonia               | [[https://en.wikipedia.org/wiki/North_Macedonia?useskin=vector][North Macedonia]]                             |
+| - Missing -             | Maldives                      | [[https://en.wikipedia.org/wiki/Maldives?useskin=vector][Maldives]]                                    |
+| - Missing -             | Mozambique                    | [[https://en.wikipedia.org/wiki/Mozambique?useskin=vector][Mozambique]]                                  |
+| North Cyprus            | - Only recognized by Turkey - | [[https://en.wikipedia.org/wiki/Northern_Cyprus?useskin=vector][Northern Cyprus]]                             |
+| - Missing -             | Oman                          | [[https://en.wikipedia.org/wiki/Oman?useskin=vector][Oman]]                                        |
+| Palestinian Territories | State of Palestine            | [[https://en.wikipedia.org/wiki/State_of_Palestine?useskin=vector][State of Palestine]], [[https://en.wikipedia.org/wiki/Palestinian_territories?useskin=vector][Palestinian Territories]] |
+| Puerto Rico             | - Territory of U.S. -         | [[https://en.wikipedia.org/wiki/Puerto_Rico?useskin=vector][Puerto Rico]]                                 |
+| Somaliland Region       | Somaliland region             |                                             |
+| Taiwan                  | Taiwan Province of China      | [[https://en.wikipedia.org/wiki/Taiwan?useskin=vector][Taiwan]]                                      |
+| Turkey                  | Turkiye                       | [[https://en.wikipedia.org/wiki/Turkey?useskin=vector][Turkey]]                                      |
+
+I'm more interested in the World Happiness Report so I'll conform Kaggle's country names to match that and ignore the countries that it's missing.
+
+#+begin_src python :results none
+def rename_country(names: dict, data: pandas.DataFrame,
+                   country_column: str=COUNTRY) -> pandas.DataFrame:
+    """Rename the countries in the kaggle data
+
+    Args:
+
+     - names: dict mapping kaggle names to names you want
+     - kaggle_data: the kaggle happiness data to rename countries
+     - country_column: name to use for the country column
+
+    Returns:
+     kaggle_data with countries renamed
+    """
+    data = kaggle_data.rename(columns=dict(Country=country_column))
+    data[country_column] = data[country_column].replace(names)
+    return data
+#+end_src
+
+#+begin_src python :results output :exports both
+kaggle_to_world = {
+    "Czech Republic": "Czechia",
+    "Macedonia": "North Macedonia",
+    "Palestinian Territories": "State of Palestine",
+    "Turkey": "Turkiye"
+}
+
+kaggled = kaggle.copy()
+kaggled["Country"] = kaggled.Country.replace(kaggle_to_world)
+print(set(kaggled.Country) - set(table[COUNTRY]))
+print(set(table[COUNTRY]) - set(kaggled.Country))
+#+end_src
+
+#+RESULTS:
+: {'Somaliland Region', 'North Cyprus', 'Taiwan', 'Hong Kong', 'Puerto Rico'}
+: {'Hong Kong S.A.R. of China', 'Central African Republic', 'Djibouti', 'Oman', 'Lesotho', 'Mozambique', 'Somaliland region', 'Gambia', 'Taiwan Province of China', 'Eswatini', 'Guyana', 'Cuba', 'Maldives'}
+
+#+begin_src python :results output :exports both
+world_to_kaggle = {"Hong Kong S.A.R. of China": "Hong Kong",
+                   "Somaliland region": "Somaliland Region",
+                   "Taiwan Province of China": "Taiwan"}
+
+tabled = table.rename(columns={COUNTRY: "Country"})
+tabled["Country"] = tabled.Country.replace(world_to_kaggle)
+
+print(set(kaggled.Country) - set(tabled.Country))
+print(set(tabled.Country) - set(kaggled.Country))
+#+end_src
+
+#+RESULTS:
+: {'North Cyprus', 'Puerto Rico'}
+: {'Central African Republic', 'Djibouti', 'Oman', 'Lesotho', 'Mozambique', 'Gambia', 'Eswatini', 'Guyana', 'Cuba', 'Maldives'}
+
+** Figure Data
+
+#+begin_src python :results output :exports both
+figured = figure.rename(columns={COUNTRY: "Country"})
+figured["Country"] = figured.Country.replace(world_to_kaggle)
+
+print(set(figured.Country) - set(kaggled.Country))
+print()
+print(set(figured.Country) - set(tabled.Country))
+#+end_src
+
+#+RESULTS:
+: {'Mozambique', 'Gambia'}
+: 
+: set()
+
+** The Figure Countries
+
+#+begin_src python :results output :exports both
+f_countries = set(figure[COUNTRY])
+f_only = f_countries - t_countries
+kd_countries = set(kaggled[COUNTRY])
+
+print(sorted(f_only - kd_countries))
+print()
+print(sorted(kd_countries - f_countries))
+#+end_src
+
+#+RESULTS:
+: []
+: 
+: ['Angola', 'Azerbaijan', 'Belarus', 'Belize', 'Bhutan', 'Burundi', 'Haiti', 'Kuwait', 'Libya', 'North Cyprus', 'Puerto Rico', 'Qatar', 'Rwanda', 'Somalia', 'Somaliland region', 'South Sudan', 'Sudan', 'Suriname', 'Syria', 'Trinidad and Tobago', 'Turkmenistan', 'Yemen']
+
+The figure data has twenty fewer countries than the Kaggle data so it's not surprising that there's a lot left over. It doesn't look like there's any in the figure data that Kaggle doesn't have, though, which is good.
+
+#+begin_src python :results output :exports both
+print(sorted(t_countries - f_countries))
+#+end_src
+
+#+RESULTS:
+: ['Angola', 'Azerbaijan', 'Belarus', 'Belize', 'Bhutan', 'Burundi', 'Central African Republic', 'Cuba', 'Djibouti', 'Eswatini', 'Guyana', 'Haiti', 'Kuwait', 'Lesotho', 'Libya', 'Maldives', 'Oman', 'Qatar', 'Rwanda', 'Somalia', 'Somaliland region', 'South Sudan', 'Sudan', 'Suriname', 'Syria', 'Trinidad and Tobago', 'Turkmenistan', 'Yemen']
+
+* Links
+
+- [[https://www.kaggle.com/datasets/unsdsn/world-happiness][Kaggle World Happiness Data]]: The World Happiness Data. There are four separate CSV files available for 2015 through 2019.
+
+- [[https://worldhappiness.report/][World Happiness Report]]: The website for the World Happiness Report.

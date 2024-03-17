@@ -1,197 +1,139 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="A look at the Rod-Cutting Problem.">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="A look at the Rod-Cutting Problem." name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>The Rod Cutting Problem | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../algorithms-illuminated-part-1/index.html" title="Algorithms Illuminated - Part 1: The Basics" type="text/html">
-<link rel="next" href="../how-much-coal-to-power-a-light-bulb/index.html" title="How much coal does it take to power a light bulb?" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="The Rod Cutting Problem">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/index.html">
-<meta property="og:description" content="A look at the Rod-Cutting Problem.">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-05-29T15:21:31-07:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="dynamic programming">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../algorithms-illuminated-part-1/index.html" rel="prev" title="Algorithms Illuminated - Part 1: The Basics" type="text/html">
+<link href="../how-much-coal-to-power-a-light-bulb/index.html" rel="next" title="How much coal does it take to power a light bulb?" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="The Rod Cutting Problem" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/the-rod-cutting-problem/index.html" property="og:url">
+<meta content="A look at the Rod-Cutting Problem." property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-05-29T15:21:31-07:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="dynamic programming" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">The Rod Cutting Problem</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-05-29T15:21:31-07:00" itemprop="datePublished" title="2022-05-29 15:21">2022-05-29 15:21</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">The Rod Cutting Problem</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-05-29T15:21:31-07:00" itemprop="datePublished" title="2022-05-29 15:21">2022-05-29 15:21</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li>
-<a href="index.html#orgd7c59b0">The Rod Cutting Problem</a>
+<li><a href="index.html#orga3a1caa">The Rod Cutting Problem</a>
 <ul>
-<li><a href="index.html#org9876d49">An Example</a></li>
-<li><a href="index.html#org5729156">Imports</a></li>
+<li><a href="index.html#orgce7e1f7">An Example</a></li>
+<li><a href="index.html#org1b54b72">Imports</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#orgcc041bb">Brute Force</a>
+<li><a href="index.html#org411f196">Brute Force</a>
 <ul>
-<li>
-<a href="index.html#org782931f">The CLRS Brute-Force Solution</a>
+<li><a href="index.html#orgeb3da3f">The CLRS Brute-Force Solution</a>
 <ul>
-<li><a href="index.html#org6013174">In Python</a></li>
-<li><a href="index.html#org9e83fd1">The First Example</a></li>
+<li><a href="index.html#org9147d96">In Python</a></li>
+<li><a href="index.html#orge7cea4f">The First Example</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>
-<a href="index.html#org598f1e5">Memoized Cut Rod</a>
+<li><a href="index.html#org52a3ca3">Memoized Cut Rod</a>
 <ul>
-<li><a href="index.html#org81ae656">Cut Rod Memoized</a></li>
-<li><a href="index.html#orge6fad96">Cut Rod Memoized Auxiliary</a></li>
-<li><a href="index.html#org1fa0ffe">Python Version</a></li>
-<li><a href="index.html#org76274e9">Example</a></li>
+<li><a href="index.html#orgfeb733f">Cut Rod Memoized</a></li>
+<li><a href="index.html#orge74233e">Cut Rod Memoized Auxiliary</a></li>
+<li><a href="index.html#org92180c7">Python Version</a></li>
+<li><a href="index.html#org41c1372">Example</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org6c9eb59">Non-Recursive Solution</a>
+<li><a href="index.html#org8e7adea">Non-Recursive Solution</a>
 <ul>
-<li><a href="index.html#org2ba85d4">Python Version</a></li>
-<li><a href="index.html#org0f6686d">The Example Again</a></li>
+<li><a href="index.html#orgcc1be3f">Python Version</a></li>
+<li><a href="index.html#org4a8dee1">The Example Again</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org26c8df2">Recovering the Cuts</a>
+<li><a href="index.html#orgfec46be">Recovering the Cuts</a>
 <ul>
-<li>
-<a href="index.html#orgda72064">Pseudocode</a>
+<li><a href="index.html#org8790e80">Pseudocode</a>
 <ul>
-<li><a href="index.html#orge746091">Extended Bottoms-Up</a></li>
-<li><a href="index.html#org7d91744">Printing the Solution</a></li>
+<li><a href="index.html#org750aea7">Extended Bottoms-Up</a></li>
+<li><a href="index.html#orgc0bccb8">Printing the Solution</a></li>
 </ul>
 </li>
-<li><a href="index.html#orgf5722c3">In Python</a></li>
-<li><a href="index.html#orgc6f183c">CLRS Example</a></li>
+<li><a href="index.html#org58ec438">In Python</a></li>
+<li><a href="index.html#org51101ed">CLRS Example</a></li>
 </ul>
 </li>
-<li><a href="index.html#orgf18cabd">Sources</a></li>
+<li><a href="index.html#orgf98db49">Sources</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd7c59b0" class="outline-2">
-<h2 id="orgd7c59b0">The Rod Cutting Problem</h2>
-<div class="outline-text-2" id="text-orgd7c59b0">
-<p>
-The Rod Cutting Problem begins with the premise that we have a metal rod (or some other kind of rod that's sellable) of a given length (<i>n</i>) and the price of a rod depends on the length so cutting the rod into shorter pieces will yield different total values - sometimes cutting a rod up make it more valuable than keeping it whole.
-</p>
-
-<p>
-<b><b>Goal:</b></b> Cut the rod in such a way that you maximize the total value of the pieces.
-</p>
-
-<p>
-To make this simpler we'll assume that lengths are always whole numbers (non-negative integers).
-</p>
+<div class="outline-2" id="outline-container-orga3a1caa">
+<h2 id="orga3a1caa">The Rod Cutting Problem</h2>
+<div class="outline-text-2" id="text-orga3a1caa">
+<p>The Rod Cutting Problem begins with the premise that we have a metal rod (or some other kind of rod that's sellable) of a given length (<i>n</i>) and the price of a rod depends on the length so cutting the rod into shorter pieces will yield different total values - sometimes cutting a rod up make it more valuable than keeping it whole.</p>
+<p><b>Goal:</b> Cut the rod in such a way that you maximize the total value of the pieces.</p>
+<p>To make this simpler we'll assume that lengths are always whole numbers (non-negative integers).</p>
 </div>
-
-<div id="outline-container-org9876d49" class="outline-3">
-<h3 id="org9876d49">An Example</h3>
-<div class="outline-text-3" id="text-org9876d49">
-<p>
-Say we have the following prices for different rod lengths.
-</p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<div class="outline-3" id="outline-container-orgce7e1f7">
+<h3 id="orgce7e1f7">An Example</h3>
+<div class="outline-text-3" id="text-orgce7e1f7">
+<p>Say we have the following prices for different rod lengths.</p>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
 <colgroup>
 <col class="org-left">
 <col class="org-right">
@@ -201,8 +143,7 @@ Say we have the following prices for different rod lengths.
 <col class="org-right">
 <col class="org-right">
 <col class="org-right">
-<col class="org-right">
-</colgroup>
+<col class="org-right"></colgroup>
 <tbody>
 <tr>
 <td class="org-left">Length</td>
@@ -228,21 +169,19 @@ Say we have the following prices for different rod lengths.
 </tr>
 </tbody>
 </table>
-<p>
-Now suppose we have a rod that's 10 units in length. what combination of cuts will give us the best outcome?
-</p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<p>Now suppose we have a rod that's 10 units in length. what combination of cuts will give us the best outcome?</p>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
 <colgroup>
 <col class="org-left">
 <col class="org-left">
-<col class="org-right">
-</colgroup>
-<thead><tr>
-<th scope="col" class="org-left">cuts</th>
-<th scope="col" class="org-left">values by piece</th>
-<th scope="col" class="org-right">total value</th>
-</tr></thead>
+<col class="org-right"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">cuts</th>
+<th class="org-left" scope="col">values by piece</th>
+<th class="org-right" scope="col">total value</th>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td class="org-left">10 pieces of length 1</td>
@@ -266,76 +205,52 @@ Now suppose we have a rod that's 10 units in length. what combination of cuts wi
 </tr>
 </tbody>
 </table>
-<p>
-Out of these four possible combinations, 26 is the most we could get.
-</p>
+<p>Out of these four possible combinations, 26 is the most we could get.</p>
 </div>
 </div>
-
-<div id="outline-container-org5729156" class="outline-3">
-<h3 id="org5729156">Imports</h3>
-<div class="outline-text-3" id="text-org5729156">
-<div class="highlight"><pre><span></span><span class="c1"># from pypi</span>
+<div class="outline-3" id="outline-container-org1b54b72">
+<h3 id="org1b54b72">Imports</h3>
+<div class="outline-text-3" id="text-org1b54b72">
+<div class="highlight">
+<pre><span></span><span class="c1"># from pypi</span>
 <span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">contain_exactly</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div id="outline-container-orgcc041bb" class="outline-2">
-<h2 id="orgcc041bb">Brute Force</h2>
-<div class="outline-text-2" id="text-orgcc041bb">
-<p>
-In the previous example we could choose to make one cut, splitting our rod into 6 units and 4 units, and it would give us the highest value of the four combinations that we looked at. but what if we want to know the highest value out of <i>all</i> the combinations? Let's start by looking at a Brute-force approach to solving the problem.
-</p>
-
-<p>
-A Brute Force approach to finding the maximal cuts might do the following:
-</p>
-
+<div class="outline-2" id="outline-container-org411f196">
+<h2 id="org411f196">Brute Force</h2>
+<div class="outline-text-2" id="text-org411f196">
+<p>In the previous example we could choose to make one cut, splitting our rod into 6 units and 4 units, and it would give us the highest value of the four combinations that we looked at. but what if we want to know the highest value out of <i>all</i> the combinations? Let's start by looking at a Brute-force approach to solving the problem.</p>
+<p>A Brute Force approach to finding the maximal cuts might do the following:</p>
 <ul class="org-ul">
 <li>Try every possible combination of cuts</li>
 <li>Evaluate the total values for each of the combinations</li>
 <li>Pick the combination with the highest total value</li>
 </ul>
-<p>
-What will the runtime for this approach be? Let's start with two ideas:
-</p>
-
+<p>What will the runtime for this approach be? Let's start with two ideas:</p>
 <ul class="org-ul">
 <li>Each cut location can have two values (cut, don't cut) so it is a binary value</li>
 <li>Given a rod of length <i>n</i>, there are <i>n - 1</i> possible cuts you can make (e.g. if your rod has length three, you can make two cuts (at length 1 and length 2) to give you three pieces)</li>
 </ul>
-<p>
-Although we are concerned with cuts, to get the total number of combinations you can think of each cut as a binary digit - (e.g. cut at length 1, don't cut at length 2 could be written as two digits: <code>10</code>) and since the number of combinations of binary digits is \(2^{\textit{number of digits}}\), this means that if we do an exhaustive exploration of the combinations we need to check
-</p>
-
-\begin{align}
-2^{n - 1} &amp;= \left(2^{-1}\right)\left(2^n\right) \\
-&amp;= \frac{1}{2}2^n\\
-
-T(n) &amp;= \Theta\left(2^n\right)
-\end{align}
-
-<p>
-So we have a problem with exponential growth.
-</p>
+<p>Although we are concerned with cuts, to get the total number of combinations you can think of each cut as a binary digit - (e.g. cut at length 1, don't cut at length 2 could be written as two digits: <code>10</code>) and since the number of combinations of binary digits is \(2^{\textit{number of digits}}\), this means that if we do an exhaustive exploration of the combinations we need to check</p>
+\begin{align} 2^{n - 1} &amp;= \left(2^{-1}\right)\left(2^n\right) \\ &amp;= \frac{1}{2}2^n\\ T(n) &amp;= \Theta\left(2^n\right) \end{align}
+<p>So we have a problem with exponential growth.</p>
 </div>
-<div id="outline-container-org782931f" class="outline-3">
-<h3 id="org782931f">The CLRS Brute-Force Solution</h3>
-<div class="outline-text-3" id="text-org782931f">
-<p>
-First, let's define some variables.
-</p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<div class="outline-3" id="outline-container-orgeb3da3f">
+<h3 id="orgeb3da3f">The CLRS Brute-Force Solution</h3>
+<div class="outline-text-3" id="text-orgeb3da3f">
+<p>First, let's define some variables.</p>
+<table border="2" cellpadding="6" cellspacing="0" frame="hsides" rules="groups">
 <colgroup>
 <col class="org-left">
-<col class="org-left">
-</colgroup>
-<thead><tr>
-<th scope="col" class="org-left">Variable</th>
-<th scope="col" class="org-left">Representing</th>
-</tr></thead>
+<col class="org-left"></colgroup>
+<thead>
+<tr>
+<th class="org-left" scope="col">Variable</th>
+<th class="org-left" scope="col">Representing</th>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td class="org-left">\(i\)</td>
@@ -355,10 +270,7 @@ First, let's define some variables.
 </tr>
 </tbody>
 </table>
-<p>
-And now a little pseudocode.
-</p>
-
+<p>And now a little pseudocode.</p>
 <pre id="cut-rod-brute-force" style="display:hidden;">
 \begin{algorithm}
 \caption{Brute-Force Rod-Cutting}
@@ -380,13 +292,12 @@ And now a little pseudocode.
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
-</div>
-
-<div id="outline-container-org6013174" class="outline-4">
-<h4 id="org6013174">In Python</h4>
-<div class="outline-text-4" id="text-org6013174">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_brute_force</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</pre></div>
+<div class="outline-4" id="outline-container-org9147d96">
+<h4 id="org9147d96">In Python</h4>
+<div class="outline-text-4" id="text-org9147d96">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">cut_rod_brute_force</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Finds the maximum value you can extract from the rod</span>
 
 <span class="sd">    Args:</span>
@@ -399,32 +310,26 @@ And now a little pseudocode.
 <span class="sd">    """</span>
     <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-	<span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="n">count</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="n">count</span>
 
     <span class="n">best_total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">next_cut</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-	<span class="n">next_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_brute_force</span><span class="p">(</span>
-	    <span class="n">prices</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">next_cut</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
-	<span class="n">best_total</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">best_total</span><span class="p">,</span>
-			 <span class="n">prices</span><span class="p">[</span><span class="n">next_cut</span><span class="p">]</span> <span class="o">+</span> <span class="n">next_total</span><span class="p">)</span>
+        <span class="n">next_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_brute_force</span><span class="p">(</span>
+            <span class="n">prices</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">next_cut</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">)</span>
+        <span class="n">best_total</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">best_total</span><span class="p">,</span>
+                         <span class="n">prices</span><span class="p">[</span><span class="n">next_cut</span><span class="p">]</span> <span class="o">+</span> <span class="n">next_total</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">best_total</span><span class="p">,</span> <span class="n">count</span>
 </pre></div>
-
-<p>
-This naively assumes that there's an entry in <code>prices</code> for every length from 1 to the total length so price-lists need to be padded if there's missing lengths, as in the next example.
-</p>
+<p>This naively assumes that there's an entry in <code>prices</code> for every length from 1 to the total length so price-lists need to be padded if there's missing lengths, as in the next example.</p>
 </div>
 </div>
-
-<div id="outline-container-org9e83fd1" class="outline-4">
-<h4 id="org9e83fd1">The First Example</h4>
-<div class="outline-text-4" id="text-org9e83fd1">
-<p>
-The first thing we're going to do is to check the example given earlier, padding the price-list to make it have 10 entries. I originally had it just short-circuit if the list was shorter but then the counts were off by a little bit so I decided to get rid of that. It might make it slightly more efficient in certain cases, but brute-force isn't really what we're going for anyway.
-</p>
-
-<div class="highlight"><pre><span></span><span class="n">PRICES</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<div class="outline-4" id="outline-container-orge7cea4f">
+<h4 id="orge7cea4f">The First Example</h4>
+<div class="outline-text-4" id="text-orge7cea4f">
+<p>The first thing we're going to do is to check the example given earlier, padding the price-list to make it have 10 entries. I originally had it just short-circuit if the list was shorter but then the counts were off by a little bit so I decided to get rid of that. It might make it slightly more efficient in certain cases, but brute-force isn't really what we're going for anyway.</p>
+<div class="highlight">
+<pre><span></span><span class="n">PRICES</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 <span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_brute_force</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">best_total</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">27</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">10</span><span class="p">))</span>
@@ -432,40 +337,26 @@ The first thing we're going to do is to check the example given earlier, padding
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Count: </span><span class="si">{</span><span class="n">count</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Combinations: </span><span class="si">{</span><span class="mi">2</span><span class="o">**</span><span class="mi">10</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Best Total Value: 27
 Count: 1,024
 Combinations: 1,024
 </pre>
-
-
-<p>
-So our actual best value is 27, not the 26 from the sub-set of combinations I used in the earlier example.
-</p>
+<p>So our actual best value is 27, not the 26 from the sub-set of combinations I used in the earlier example.</p>
 </div>
 </div>
 </div>
 </div>
-<div id="outline-container-org598f1e5" class="outline-2">
-<h2 id="org598f1e5">Memoized Cut Rod</h2>
-<div class="outline-text-2" id="text-org598f1e5">
-<p>
-The main reason why our brute-force version is so expensive is that it does all the calculations for every length over and over again when we test the different combinations. One way to get around this is by storing the values as they're calculated so that we can just look them up instead of repeating the calculations.
-</p>
-
-<p>
-This first version is very similar to the brute-force version except that the brute-force version makes a recursive call for every length we check, while for this memoized version we maintain an array to store previously calculated values and if the next one we want is in it we pull it from the array instead of making another recursive call.
-</p>
+<div class="outline-2" id="outline-container-org52a3ca3">
+<h2 id="org52a3ca3">Memoized Cut Rod</h2>
+<div class="outline-text-2" id="text-org52a3ca3">
+<p>The main reason why our brute-force version is so expensive is that it does all the calculations for every length over and over again when we test the different combinations. One way to get around this is by storing the values as they're calculated so that we can just look them up instead of repeating the calculations.</p>
+<p>This first version is very similar to the brute-force version except that the brute-force version makes a recursive call for every length we check, while for this memoized version we maintain an array to store previously calculated values and if the next one we want is in it we pull it from the array instead of making another recursive call.</p>
 </div>
-
-<div id="outline-container-org81ae656" class="outline-3">
-<h3 id="org81ae656">Cut Rod Memoized</h3>
-<div class="outline-text-3" id="text-org81ae656">
-<p>
-This first function is sort of a mask to make it look like the brute-force version. It sets up an empty memo table (as an array) and then passes it to the <code>CutRodMemoizedAuxiliary</code> function to do the actual calculations.
-</p>
-
+<div class="outline-3" id="outline-container-orgfeb733f">
+<h3 id="orgfeb733f">Cut Rod Memoized</h3>
+<div class="outline-text-3" id="text-orgfeb733f">
+<p>This first function is sort of a mask to make it look like the brute-force version. It sets up an empty memo table (as an array) and then passes it to the <code>CutRodMemoizedAuxiliary</code> function to do the actual calculations.</p>
 <pre id="cut-rod-memoized" style="display:hidden;">
 \begin{algorithm}
 \caption{Memoized Rod-Cutting}
@@ -483,12 +374,11 @@ This first function is sort of a mask to make it look like the brute-force versi
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-<div id="outline-container-orge6fad96" class="outline-3">
-<h3 id="orge6fad96">Cut Rod Memoized Auxiliary</h3>
-<div class="outline-text-3" id="text-orge6fad96">
+<div class="outline-3" id="outline-container-orge74233e">
+<h3 id="orge74233e">Cut Rod Memoized Auxiliary</h3>
+<div class="outline-text-3" id="text-orge74233e">
 <pre id="cut-rod-memoized-auxiliary" style="display:hidden;">
 \begin{algorithm}
 \caption{Memoized Rod-Cutting Auxiliary}
@@ -520,16 +410,14 @@ This first function is sort of a mask to make it look like the brute-force versi
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<p>
-If you squint at <code>CutRodMemoizedAuxiliary</code> you might notice that it looks similar to the brute-force version except that there's an initial check to see if the value we want is already in our lookup-table and only makes the recursive call if it isn't.
-</p>
+<p>If you squint at <code>CutRodMemoizedAuxiliary</code> you might notice that it looks similar to the brute-force version except that there's an initial check to see if the value we want is already in our lookup-table and only makes the recursive call if it isn't.</p>
 </div>
 </div>
-<div id="outline-container-org1fa0ffe" class="outline-3">
-<h3 id="org1fa0ffe">Python Version</h3>
-<div class="outline-text-3" id="text-org1fa0ffe">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_memoized</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-org92180c7">
+<h3 id="org92180c7">Python Version</h3>
+<div class="outline-text-3" id="text-org92180c7">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">cut_rod_memoized</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Finds the maximum value for a rod after it has been cut up</span>
 
 <span class="sd">    Args:</span>
@@ -542,8 +430,8 @@ If you squint at <code>CutRodMemoizedAuxiliary</code> you might notice that it l
     <span class="n">table</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)]</span> <span class="o">*</span> <span class="p">(</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cut_rod_memoized_auxiliary</span><span class="p">(</span><span class="n">prices</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_memoized_auxiliary</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">best_values</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">cut_rod_memoized_auxiliary</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">best_values</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the maximum value from cutting up and selling rod</span>
 
 <span class="sd">    Args:</span>
@@ -556,93 +444,66 @@ If you squint at <code>CutRodMemoizedAuxiliary</code> you might notice that it l
 <span class="sd">    """</span>
     <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">best_values</span><span class="p">[</span><span class="n">length</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-	<span class="k">return</span> <span class="n">best_values</span><span class="p">[</span><span class="n">length</span><span class="p">],</span> <span class="n">count</span>
+        <span class="k">return</span> <span class="n">best_values</span><span class="p">[</span><span class="n">length</span><span class="p">],</span> <span class="n">count</span>
 
     <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-	<span class="n">best_total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">best_total</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
-	<span class="n">best_total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">next_cut</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-	    <span class="n">leftover</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="n">next_cut</span>
-	    <span class="n">next_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized_auxiliary</span><span class="p">(</span><span class="n">prices</span><span class="p">,</span>
-							   <span class="n">leftover</span><span class="p">,</span>
-							   <span class="n">best_values</span><span class="p">,</span>
-							   <span class="n">count</span><span class="p">)</span>
-	    <span class="n">best_total</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">best_total</span><span class="p">,</span>
-			     <span class="n">prices</span><span class="p">[</span><span class="n">next_cut</span><span class="p">]</span> <span class="o">+</span> <span class="n">next_total</span><span class="p">)</span>
+        <span class="n">best_total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">next_cut</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">leftover</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="n">next_cut</span>
+            <span class="n">next_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized_auxiliary</span><span class="p">(</span><span class="n">prices</span><span class="p">,</span>
+                                                           <span class="n">leftover</span><span class="p">,</span>
+                                                           <span class="n">best_values</span><span class="p">,</span>
+                                                           <span class="n">count</span><span class="p">)</span>
+            <span class="n">best_total</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">best_total</span><span class="p">,</span>
+                             <span class="n">prices</span><span class="p">[</span><span class="n">next_cut</span><span class="p">]</span> <span class="o">+</span> <span class="n">next_total</span><span class="p">)</span>
     <span class="n">best_values</span><span class="p">[</span><span class="n">length</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_total</span>
     <span class="k">return</span> <span class="n">best_total</span><span class="p">,</span> <span class="n">count</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best Total Value: </span><span class="si">{</span><span class="n">best_total</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Count: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Best Total Value: 10
 Count: 11
 </pre>
-
-
-<div class="highlight"><pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best Total Value: </span><span class="si">{</span><span class="n">best_total</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Count: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Best Total Value: 13
 Count: 16
-</pre>
+</pre></div>
 </div>
-</div>
-
-
-<div id="outline-container-org76274e9" class="outline-3">
-<h3 id="org76274e9">Example</h3>
-<div class="outline-text-3" id="text-org76274e9">
-<div class="highlight"><pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<div class="outline-3" id="outline-container-org41c1372">
+<h3 id="org41c1372">Example</h3>
+<div class="outline-text-3" id="text-org41c1372">
+<div class="highlight">
+<pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_memoized</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">best_total</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">27</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="mi">11</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best Total Value: </span><span class="si">{</span><span class="n">best_total</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Count: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Best Total Value: 27
 Count: 56
 </pre>
-
-
-<p>
-We've gone from 1,024 calls to 56 calls, a pretty good improvement. The number of calls comes from the for loop plus one for the initial call. The for loop goes from 1 through the length of the rod, but passes in the difference between the starting length and the loop value. So if we start with a length of 4, the for-loop makes recursive calls using lengths of 4-1=3, 4-2=2, 4-3=1, 4-4=0. But then each of the calls goes through the for-loop as well (except for the base-case of 0). Since the first call of the for-loop is always one less than the starting length, we end up memoizing the values for all the starting lengths as we go so the subsequent calls don't need to go into the for-loop. So the number of calls we make equals \(1 + 2 + \cdots + n\) plus one for the first call before the recursion starts. This means the runtime is
-</p>
-
-<p>
-\[
-1 + \sum_{i=1}^n i = 1 + \frac{n(n+1)}{2} \Rightarrow O(n^2)
-\]
-</p>
-
-<p>
-So for our case with length 10, we have
-</p>
-
-\begin{align}
-T(10) &amp;= \frac{10(10 + 1)}{2} + 1\\
-      &amp;= 56
-\end{align}
+<p>We've gone from 1,024 calls to 56 calls, a pretty good improvement. The number of calls comes from the for loop plus one for the initial call. The for loop goes from 1 through the length of the rod, but passes in the difference between the starting length and the loop value. So if we start with a length of 4, the for-loop makes recursive calls using lengths of 4-1=3, 4-2=2, 4-3=1, 4-4=0. But then each of the calls goes through the for-loop as well (except for the base-case of 0). Since the first call of the for-loop is always one less than the starting length, we end up memoizing the values for all the starting lengths as we go so the subsequent calls don't need to go into the for-loop. So the number of calls we make equals \(1 + 2 + \cdots + n\) plus one for the first call before the recursion starts. This means the runtime is</p>
+<p>\[ 1 + \sum_{i=1}^n i = 1 + \frac{n(n+1)}{2} \Rightarrow O(n^2) \]</p>
+<p>So for our case with length 10, we have</p>
+\begin{align} T(10) &amp;= \frac{10(10 + 1)}{2} + 1\\ &amp;= 56 \end{align}</div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-org6c9eb59" class="outline-2">
-<h2 id="org6c9eb59">Non-Recursive Solution</h2>
-<div class="outline-text-2" id="text-org6c9eb59">
-<p>
-The memoized cut-rod solution is a top-down, depth-first search solution that uses recursion. We can eliminate the recursion altogether using a for-loop along with our look-up array. The trick is to make it a bottoms-up approach - that is to say that we start with the solutions for the smaller lengths and work up to the longer ones so that the look-up array always has the sub-problem values that we need to look up.
-</p>
-
+<div class="outline-2" id="outline-container-org8e7adea">
+<h2 id="org8e7adea">Non-Recursive Solution</h2>
+<div class="outline-text-2" id="text-org8e7adea">
+<p>The memoized cut-rod solution is a top-down, depth-first search solution that uses recursion. We can eliminate the recursion altogether using a for-loop along with our look-up array. The trick is to make it a bottoms-up approach - that is to say that we start with the solutions for the smaller lengths and work up to the longer ones so that the look-up array always has the sub-problem values that we need to look up.</p>
 <pre id="cut-rod-bottoms-up" style="display:hidden;">
 \begin{algorithm}
 \caption{Bottoms-Up Rod-Cutting}
@@ -666,13 +527,12 @@ The memoized cut-rod solution is a top-down, depth-first search solution that us
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
-</div>
-
-<div id="outline-container-org2ba85d4" class="outline-3">
-<h3 id="org2ba85d4">Python Version</h3>
-<div class="outline-text-3" id="text-org2ba85d4">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_bottom_up</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+</pre></div>
+<div class="outline-3" id="outline-container-orgcc1be3f">
+<h3 id="orgcc1be3f">Python Version</h3>
+<div class="outline-text-3" id="text-orgcc1be3f">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">cut_rod_bottom_up</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the maximum value for a rod after cutting</span>
 
 <span class="sd">    Args:</span>
@@ -685,63 +545,48 @@ The memoized cut-rod solution is a top-down, depth-first search solution that us
     <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">best_values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">rod_length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-	<span class="n">best_value_this_length</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">cut_length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rod_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-	    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-	    <span class="n">leftover</span> <span class="o">=</span> <span class="n">rod_length</span> <span class="o">-</span> <span class="n">cut_length</span>
-	    <span class="n">best_value_this_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
-		<span class="n">best_value_this_length</span><span class="p">,</span>
-		<span class="n">prices</span><span class="p">[</span><span class="n">cut_length</span><span class="p">]</span> <span class="o">+</span> <span class="n">best_values</span><span class="p">[</span><span class="n">leftover</span><span class="p">])</span>
-	<span class="n">best_values</span><span class="p">[</span><span class="n">rod_length</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_value_this_length</span>
+        <span class="n">best_value_this_length</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cut_length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rod_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">leftover</span> <span class="o">=</span> <span class="n">rod_length</span> <span class="o">-</span> <span class="n">cut_length</span>
+            <span class="n">best_value_this_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="n">best_value_this_length</span><span class="p">,</span>
+                <span class="n">prices</span><span class="p">[</span><span class="n">cut_length</span><span class="p">]</span> <span class="o">+</span> <span class="n">best_values</span><span class="p">[</span><span class="n">leftover</span><span class="p">])</span>
+        <span class="n">best_values</span><span class="p">[</span><span class="n">rod_length</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_value_this_length</span>
     <span class="k">return</span> <span class="n">best_values</span><span class="p">[</span><span class="n">length</span><span class="p">],</span> <span class="n">count</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-org0f6686d" class="outline-3">
-<h3 id="org0f6686d">The Example Again</h3>
-<div class="outline-text-3" id="text-org0f6686d">
-<div class="highlight"><pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_bottom_up</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<div class="outline-3" id="outline-container-org4a8dee1">
+<h3 id="org4a8dee1">The Example Again</h3>
+<div class="outline-text-3" id="text-org4a8dee1">
+<div class="highlight">
+<pre><span></span><span class="n">best_total</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">cut_rod_bottom_up</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">best_total</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">27</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">110</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best Total Value: </span><span class="si">{</span><span class="n">best_total</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Count: </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Best Total Value: 27
 Count: 56
 </pre>
-
-
-<p>
-The runtime for this version is the same as the memoized version. It's sort of the backwards case - the inner for-loop runs 1 then 1, 2, then 1, 2, 3 up to the length of the rod, so the number of times it runs is \(1 + 2 + 3 + \cdots + n\) while the memoized count goes \(n + \cdots + 3 + 2 + 1\). In any case, the count ends up the same.
-</p>
-
-<p>
-\[
-1 + \sum_{i=1}^n i = 1 + \frac{n(n+1)}{2} \Rightarrow O(n^2)
-\]
-</p>
+<p>The runtime for this version is the same as the memoized version. It's sort of the backwards case - the inner for-loop runs 1 then 1, 2, then 1, 2, 3 up to the length of the rod, so the number of times it runs is \(1 + 2 + 3 + \cdots + n\) while the memoized count goes \(n + \cdots + 3 + 2 + 1\). In any case, the count ends up the same.</p>
+<p>\[ 1 + \sum_{i=1}^n i = 1 + \frac{n(n+1)}{2} \Rightarrow O(n^2) \]</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org26c8df2" class="outline-2">
-<h2 id="org26c8df2">Recovering the Cuts</h2>
-<div class="outline-text-2" id="text-org26c8df2">
-<p>
-The previous functions all return the best value for a length but don't tell you the actual cuts that you need in order to get it. We can alter the function slightly to get both the best-revenue table and the cuts you need to use to get the best value.
-</p>
+<div class="outline-2" id="outline-container-orgfec46be">
+<h2 id="orgfec46be">Recovering the Cuts</h2>
+<div class="outline-text-2" id="text-orgfec46be">
+<p>The previous functions all return the best value for a length but don't tell you the actual cuts that you need in order to get it. We can alter the function slightly to get both the best-revenue table and the cuts you need to use to get the best value.</p>
 </div>
-
-<div id="outline-container-orgda72064" class="outline-3">
-<h3 id="orgda72064">Pseudocode</h3>
-<div class="outline-text-3" id="text-orgda72064">
-</div>
-<div id="outline-container-orge746091" class="outline-4">
-<h4 id="orge746091">Extended Bottoms-Up</h4>
-<div class="outline-text-4" id="text-orge746091">
+<div class="outline-3" id="outline-container-org8790e80">
+<h3 id="org8790e80">Pseudocode</h3>
+<div class="outline-text-3" id="text-org8790e80"></div>
+<div class="outline-4" id="outline-container-org750aea7">
+<h4 id="org750aea7">Extended Bottoms-Up</h4>
+<div class="outline-text-4" id="text-org750aea7">
 <pre id="cut-rod-extended" style="display:hidden;">
 \begin{algorithm}
 \caption{Extended Bottoms-Up Rod-Cutting}
@@ -769,17 +614,12 @@ The previous functions all return the best value for a length but don't tell you
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-
-<div id="outline-container-org7d91744" class="outline-4">
-<h4 id="org7d91744">Printing the Solution</h4>
-<div class="outline-text-4" id="text-org7d91744">
-<p>
-To actually see the cuts we just need to retrieve the next cuts from <code>s</code> and calculate the remaining length after each cut.
-</p>
-
+<div class="outline-4" id="outline-container-orgc0bccb8">
+<h4 id="orgc0bccb8">Printing the Solution</h4>
+<div class="outline-text-4" id="text-orgc0bccb8">
+<p>To actually see the cuts we just need to retrieve the next cuts from <code>s</code> and calculate the remaining length after each cut.</p>
 <pre id="cut-rod-printer" style="display:hidden;">
 \begin{algorithm}
 \caption{Print Rod-Cutting Solution}
@@ -796,15 +636,14 @@ To actually see the cuts we just need to retrieve the next cuts from <code>s</co
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-orgf5722c3" class="outline-3">
-<h3 id="orgf5722c3">In Python</h3>
-<div class="outline-text-3" id="text-orgf5722c3">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut_rod_extended</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-org58ec438">
+<h3 id="org58ec438">In Python</h3>
+<div class="outline-text-3" id="text-org58ec438">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">cut_rod_extended</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Find the maximum values for a cut rod</span>
 
 <span class="sd">    Args:</span>
@@ -818,18 +657,18 @@ To actually see the cuts we just need to retrieve the next cuts from <code>s</co
     <span class="n">best_cuts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">next_length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-	<span class="n">best_revenue</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
-	<span class="k">for</span> <span class="n">next_cut</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">next_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-	    <span class="n">remaining_length</span> <span class="o">=</span> <span class="n">next_length</span> <span class="o">-</span> <span class="n">next_cut</span>
-	    <span class="n">next_revenue</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">next_cut</span><span class="p">]</span> <span class="o">+</span> <span class="n">best_revenues</span><span class="p">[</span><span class="n">next_length</span> <span class="o">-</span> <span class="n">next_cut</span><span class="p">]</span>
-	    <span class="k">if</span> <span class="n">best_revenue</span> <span class="o">&lt;</span> <span class="n">next_revenue</span><span class="p">:</span>
-		<span class="n">best_revenue</span> <span class="o">=</span> <span class="n">next_revenue</span>
-		<span class="n">best_cuts</span><span class="p">[</span><span class="n">next_length</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_cut</span>
-	<span class="n">best_revenues</span><span class="p">[</span><span class="n">next_length</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_revenue</span>
+        <span class="n">best_revenue</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">next_cut</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">next_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">remaining_length</span> <span class="o">=</span> <span class="n">next_length</span> <span class="o">-</span> <span class="n">next_cut</span>
+            <span class="n">next_revenue</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">next_cut</span><span class="p">]</span> <span class="o">+</span> <span class="n">best_revenues</span><span class="p">[</span><span class="n">next_length</span> <span class="o">-</span> <span class="n">next_cut</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">best_revenue</span> <span class="o">&lt;</span> <span class="n">next_revenue</span><span class="p">:</span>
+                <span class="n">best_revenue</span> <span class="o">=</span> <span class="n">next_revenue</span>
+                <span class="n">best_cuts</span><span class="p">[</span><span class="n">next_length</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_cut</span>
+        <span class="n">best_revenues</span><span class="p">[</span><span class="n">next_length</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_revenue</span>
     <span class="k">return</span> <span class="n">best_revenues</span><span class="p">,</span> <span class="n">best_cuts</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">print_solution</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">print_solution</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Solve and print the best cuts to maximize revenue</span>
 
 <span class="sd">    Args:</span>
@@ -843,47 +682,42 @@ To actually see the cuts we just need to retrieve the next cuts from <code>s</co
     <span class="n">check</span><span class="p">,</span> <span class="n">remaining_length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">length</span>
     <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">while</span> <span class="n">remaining_length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-	<span class="n">next_cut</span> <span class="o">=</span> <span class="n">cuts</span><span class="p">[</span><span class="n">remaining_length</span><span class="p">]</span>
-	<span class="n">check</span> <span class="o">+=</span> <span class="n">next_cut</span>
-	<span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">next_cut</span><span class="p">))</span>
-	<span class="n">remaining_length</span> <span class="o">-=</span> <span class="n">next_cut</span>
+        <span class="n">next_cut</span> <span class="o">=</span> <span class="n">cuts</span><span class="p">[</span><span class="n">remaining_length</span><span class="p">]</span>
+        <span class="n">check</span> <span class="o">+=</span> <span class="n">next_cut</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">next_cut</span><span class="p">))</span>
+        <span class="n">remaining_length</span> <span class="o">-=</span> <span class="n">next_cut</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Best Revenue for rod of length </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">revenues</span><span class="p">[</span><span class="n">length</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cuts: (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
     <span class="n">expect</span><span class="p">(</span><span class="n">check</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">revenues</span><span class="p">,</span> <span class="n">cuts</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">print_solution</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<div class="highlight">
+<pre><span></span><span class="n">print_solution</span><span class="p">(</span><span class="n">PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 </pre></div>
-
 <pre class="example">
 Best Revenue for rod of length 10: 27
 Cuts: (2, 2, 6)
-</pre>
+</pre></div>
 </div>
-</div>
-
-<div id="outline-container-orgc6f183c" class="outline-3">
-<h3 id="orgc6f183c">CLRS Example</h3>
-<div class="outline-text-3" id="text-orgc6f183c">
-<div class="highlight"><pre><span></span><span class="n">CLRS_PRICES</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+<div class="outline-3" id="outline-container-org51101ed">
+<h3 id="org51101ed">CLRS Example</h3>
+<div class="outline-text-3" id="text-org51101ed">
+<div class="highlight">
+<pre><span></span><span class="n">CLRS_PRICES</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
 <span class="n">revenues</span><span class="p">,</span> <span class="n">cuts</span> <span class="o">=</span> <span class="n">print_solution</span><span class="p">(</span><span class="n">CLRS_PRICES</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">revenues</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">cuts</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">contain_exactly</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
 </pre></div>
-
 <pre class="example">
 Best Revenue for rod of length 10: 30
 Cuts: (10)
 </pre>
-
-
-<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
+<div class="highlight">
+<pre><span></span><span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
     <span class="n">print_solution</span><span class="p">(</span><span class="n">CLRS_PRICES</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">()</span>
 </pre></div>
-
-<pre class="example" id="orgaa69f95">
+<pre class="example" id="org0d11351">
 Best Revenue for rod of length 1: 1
 Cuts: (1)
 
@@ -913,90 +747,77 @@ Cuts: (3, 6)
 
 Best Revenue for rod of length 10: 30
 Cuts: (10)
-</pre>
+</pre></div>
 </div>
 </div>
-</div>
-
-<div id="outline-container-orgf18cabd" class="outline-2">
-<h2 id="orgf18cabd">Sources</h2>
-<div class="outline-text-2" id="text-orgf18cabd">
+<div class="outline-2" id="outline-container-orgf98db49">
+<h2 id="orgf98db49">Sources</h2>
+<div class="outline-text-2" id="text-orgf98db49">
 <ul class="org-ul">
-<li><a href="../essential-algorithms/">Essential Algorithms</a></li>
-<li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
+<li><a href="../essential-algorithms/index.html">Essential Algorithms</a></li>
+<li><a href="../clrs/index.html">Introduction To Algorithms (CLRS)</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("cut-rod-brute-force"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("cut-rod-memoized"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("cut-rod-memoized-auxiliary"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("cut-rod-bottoms-up"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("cut-rod-extended"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("cut-rod-printer"));
 });
-</script>
+</script></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/dynamic-programming/index.html" rel="tag">dynamic programming</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/dynamic-programming/index.html" rel="tag">dynamic programming</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../algorithms-illuminated-part-1/index.html" rel="prev" title="Algorithms Illuminated - Part 1: The Basics">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../how-much-coal-to-power-a-light-bulb/index.html" rel="next" title="How much coal does it take to power a light bulb?">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../algorithms-illuminated-part-1/index.html" rel="prev" title="Algorithms Illuminated - Part 1: The Basics">Previous post</a></li>
+<li class="next"><a href="../how-much-coal-to-power-a-light-bulb/index.html" rel="next" title="How much coal does it take to power a light bulb?">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>

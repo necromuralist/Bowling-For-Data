@@ -1,173 +1,124 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#
-" lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="Querying the Search Tree">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="Querying the Search Tree" name="description">
+<meta content="width=device-width, initial-scale=1" name="viewport">
 <title>Binary Search Tree Queries | Bowling For Data</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
-<meta name="theme-color" content="#5670d4">
-<meta name="generator" content="Nikola (getnikola.com)">
-<link rel="alternate" type="application/rss+xml" title="RSS" hreflang="en" href="../../rss.xml">
-<link rel="canonical" href="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search-tree-queries/index.html">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="The Cloistered Monkey">
-<link rel="prev" href="../binary-search-tree-node-insertion/index.html" title="Binary Search Tree Node Insertion" type="text/html">
-<link rel="next" href="../binary-search-tree-randomized/index.html" title="Binary Search Tree: Randomized" type="text/html">
-<meta property="og:site_name" content="Bowling For Data">
-<meta property="og:title" content="Binary Search Tree Queries">
-<meta property="og:url" content="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search-tree-queries/index.html">
-<meta property="og:description" content="Querying the Search Tree">
-<meta property="og:type" content="article">
-<meta property="article:published_time" content="2022-03-14T14:47:08-07:00">
-<meta property="article:tag" content="algorithms">
-<meta property="article:tag" content="binary search trees">
-<meta property="article:tag" content="data structures">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+<meta content="#5670d4" name="theme-color">
+<meta content="Nikola (getnikola.com)" name="generator">
+<link href="../../rss.xml" hreflang="en" rel="alternate" title="RSS" type="application/rss+xml">
+<link href="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search-tree-queries/index.html" rel="canonical"><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]-->
+<meta content="The Cloistered Monkey" name="author">
+<link href="../binary-search-tree-node-insertion/index.html" rel="prev" title="Binary Search Tree Node Insertion" type="text/html">
+<link href="../binary-search-tree-randomized/index.html" rel="next" title="Binary Search Tree: Randomized" type="text/html">
+<meta content="Bowling For Data" property="og:site_name">
+<meta content="Binary Search Tree Queries" property="og:title">
+<meta content="https://necromuralist.github.io/Bowling-For-Data/posts/binary-search-tree-queries/index.html" property="og:url">
+<meta content="Querying the Search Tree" property="og:description">
+<meta content="article" property="og:type">
+<meta content="2022-03-14T14:47:08-07:00" property="article:published_time">
+<meta content="algorithms" property="article:tag">
+<meta content="binary search trees" property="article:tag">
+<meta content="data structures" property="article:tag">
+<script crossorigin="anonymous" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+
+            displayMath: [['$$','$$'], ['\\[','\\]']],
+            processEscapes: true,
+            processEnvironments: true,
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
 </head>
 <body>
-<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
-
-<!-- Menubar -->
-
-<nav class="navbar navbar-expand-md static-top mb-4
-navbar-light
-bg-light
-"><div class="container">
-<!-- This keeps the margins nice -->
-        <a class="navbar-brand" href="../../">
-
-            <span id="blog-title">Bowling For Data</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="bs-navbar">
-            <ul class="navbar-nav mr-auto">
-<li class="nav-item">
-<a href="../../pages/" class="nav-link">Pages</a>
-                </li>
-<li class="nav-item">
-<a href="../../archive.html" class="nav-link">Archive</a>
-                </li>
-<li class="nav-item">
-<a href="../../categories/" class="nav-link">Tags</a>
-                </li>
-<li class="nav-item">
-<a href="../../rss.xml" class="nav-link">RSS feed</a>
-            </li>
-<li class="nav-item dropdown">
-<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Monkey Pages</a>
-            <div class="dropdown-menu">
-                    <a href="https://necromuralist.github.io/" class="dropdown-item">The Cloistered Monkey</a>
-                    <a href="https://necromuralist.github.io/Ape-Iron/" class="dropdown-item">Ape Iron</a>
-                    <a href="https://necromuralist.github.io/Beach-Pig-Thigh/" class="dropdown-item">Beach-Pig Rump &amp; Thigh</a>
-                    <a href="https://necromuralist.github.io/Neurotic-Networking/" class="dropdown-item">Neurotic Networking</a>
-                    <a href="https://necromuralist.github.io/Terribilis-Ludum/" class="dropdown-item">Terribilis Ludum</a>
-                    <a href="https://necromuralist.github.io/Visions-Voices-Data/" class="dropdown-item">Visions, Voices, Data</a>
-            </div>
-
-                
-            </li>
+<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
+<nav class="navbar navbar-expand-md static-top mb-4 navbar-light bg-light">
+<div class="container"><!-- This keeps the margins nice -->
+ <a class="navbar-brand" href="../../"><span id="blog-title">Bowling For Data</span></a> <button aria-controls="bs-navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#bs-navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+<div class="collapse navbar-collapse" id="bs-navbar">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="../../pages/">Pages</a></li>
+<li class="nav-item"><a class="nav-link" href="../../archive.html">Archive</a></li>
+<li class="nav-item"><a class="nav-link" href="../../categories/">Tags</a></li>
+<li class="nav-item"><a class="nav-link" href="../../rss.xml">RSS feed</a></li>
+<li class="nav-item dropdown"><a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">Monkey Pages</a>
+<div class="dropdown-menu"><a class="dropdown-item" href="https://necromuralist.github.io/">The Cloistered Monkey</a> <a class="dropdown-item" href="https://necromuralist.github.io/Ape-Iron/">Ape Iron</a> <a class="dropdown-item" href="https://necromuralist.github.io/Beach-Pig-Thigh/">Beach-Pig Rump & Thigh</a> <a class="dropdown-item" href="https://necromuralist.github.io/Neurotic-Networking/">Neurotic Networking</a> <a class="dropdown-item" href="https://necromuralist.github.io/Terribilis-Ludum/">Terribilis Ludum</a> <a class="dropdown-item" href="https://necromuralist.github.io/Visions-Voices-Data/">Visions, Voices, Data</a></div>
+</li>
 </ul>
-<!-- DuckDuckGo custom search --><form method="get" id="search" action="https://duckduckgo.com/" class="navbar-form pull-left">
- <input type="hidden" name="sites" value="https://necromuralist.github.io/Bowling-For-Data/"><input type="hidden" name="k8" value="#444444"><input type="hidden" name="k9" value="#D51920"><input type="hidden" name="kt" value="h"><input type="text" name="q" maxlength="255" placeholder="Search…" class="span2" style="margin-top: 4px;"><input type="submit" value="DuckDuckGo Search" style="visibility: hidden;">
-</form>
- <!-- End of custom search -->
- 
-
-            <ul class="navbar-nav navbar-right">
-<li class="nav-item">
-    <a href="index.org" id="sourcelink" class="nav-link">Source</a>
-    </li>
-
-
-                
-            </ul>
+<!-- DuckDuckGo custom search -->
+<form action="https://duckduckgo.com/" class="navbar-form pull-left" id="search" method="get" name="search"><input name="sites" type="hidden" value="https://necromuralist.github.io/Bowling-For-Data/"><input name="k8" type="hidden" value="#444444"><input name="k9" type="hidden" value="#D51920"><input name="kt" type="hidden" value="h"><input class="span2" maxlength="255" name="q" placeholder="Search…" style="margin-top: 4px;" type="text"><input style="visibility: hidden;" type="submit" value="DuckDuckGo Search"></form>
+<!-- End of custom search -->
+<ul class="navbar-nav navbar-right">
+<li class="nav-item"><a class="nav-link" href="index.org" id="sourcelink">Source</a></li>
+</ul>
 </div>
-<!-- /.navbar-collapse -->
-    </div>
-<!-- /.container -->
-</nav><!-- End of Menubar --><div class="container" id="content" role="main">
-    <div class="body-content">
-        <!--Body content-->
-        
-        
-        
-<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="#" class="u-url">Binary Search Tree Queries</a></h1>
-
-        <div class="metadata">
-            <p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">
-                    The Cloistered Monkey
-            </span></p>
-            <p class="dateline">
-            <a href="#" rel="bookmark">
-            <time class="published dt-published" datetime="2022-03-14T14:47:08-07:00" itemprop="datePublished" title="2022-03-14 14:47">2022-03-14 14:47</time></a>
-            </p>
-            
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
-
-        </div>
-        
-
-    </header><div class="e-content entry-content" itemprop="articleBody text">
-    <div id="table-of-contents" role="doc-toc">
+<!-- /.navbar-collapse --></div>
+<!-- /.container --></nav>
+<!-- End of Menubar -->
+<div class="container" id="content" role="main">
+<div class="body-content"><!--Body content-->
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article">
+<header>
+<h1 class="p-name entry-title" itemprop="headline name"><a class="u-url" href="#">Binary Search Tree Queries</a></h1>
+<div class="metadata">
+<p class="byline author vcard p-author h-card"><span class="byline-name fn p-name" itemprop="author">The Cloistered Monkey</span></p>
+<p class="dateline"><a href="#" rel="bookmark"><time class="published dt-published" datetime="2022-03-14T14:47:08-07:00" itemprop="datePublished" title="2022-03-14 14:47">2022-03-14 14:47</time></a></p>
+<p class="sourceline"><a class="sourcelink" href="index.org">Source</a></p>
+</div>
+</header>
+<div class="e-content entry-content" itemprop="articleBody text">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="index.html#org9816cb8">A Query Class</a></li>
-<li>
-<a href="index.html#orgbf2fcba">Search</a>
+<li><a href="index.html#org2ce26a4">A Query Class</a></li>
+<li><a href="index.html#org545af41">Search</a>
 <ul>
-<li><a href="index.html#org72d502e">The Algorithm</a></li>
-<li><a href="index.html#org7279e9b">The Iterative Version</a></li>
-<li>
-<a href="index.html#orga391d56">The Implementation</a>
+<li><a href="index.html#org5565f03">The Algorithm</a></li>
+<li><a href="index.html#orgd63fead">The Iterative Version</a></li>
+<li><a href="index.html#org33bb9fc">The Implementation</a>
 <ul>
-<li><a href="index.html#org695ec5e">Testing</a></li>
+<li><a href="index.html#orgbcfa209">Testing</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li>
-<a href="index.html#org19b05f7">Miminum and Maximum</a>
+<li><a href="index.html#orgef10dd2">Miminum and Maximum</a>
 <ul>
-<li>
-<a href="index.html#org07a9834">Mimimum</a>
+<li><a href="index.html#org7c097f0">Mimimum</a>
 <ul>
-<li><a href="index.html#orgbf6f2bd">The Implementation</a></li>
-<li><a href="index.html#orge01c870">Testing</a></li>
+<li><a href="index.html#orga63e637">The Implementation</a></li>
+<li><a href="index.html#org61e8e99">Testing</a></li>
 </ul>
 </li>
-<li>
-<a href="index.html#org1008305">Maximum</a>
+<li><a href="index.html#org4f628c2">Maximum</a>
 <ul>
-<li><a href="index.html#org142f8aa">The Implementation</a></li>
-<li><a href="index.html#org6c60dfb">Testing</a></li>
+<li><a href="index.html#orgce1a508">The Implementation</a></li>
+<li><a href="index.html#orgb1a2821">Testing</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="index.html#orgcabe8f6">Tree Successor</a></li>
-<li><a href="index.html#org291cfd7">Tree Predecessor</a></li>
-<li><a href="index.html#orgf713766">Height</a></li>
-<li><a href="index.html#org803964f">Sources</a></li>
+<li><a href="index.html#org285f811">Tree Successor</a></li>
+<li><a href="index.html#org609576b">Tree Predecessor</a></li>
+<li><a href="index.html#orga1e4cfb">Height</a></li>
+<li><a href="index.html#orgf290856">Sources</a></li>
 </ul>
 </div>
 </div>
-<p>
-This is the next post in a series on Binary Search Trees that start with <a href="../binary-search-trees/">this post</a>. In this post we'll look at some basic queries we can make using the tree.
-</p>
-
-<div id="outline-container-org9816cb8" class="outline-2">
-<h2 id="org9816cb8">A Query Class</h2>
-<div class="outline-text-2" id="text-org9816cb8">
-<p>
-The textbook(s) treat these as functions, but they seem to suggest to me methods of a class, so I'll make one. The <code>TYPE_CHECKING</code> and <code>annotations</code> imports are to prevent circular imports as noted on <a href="https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/">Adam Johnson's blog</a>.
-</p>
-
-<div class="highlight"><pre><span></span><span class="c1"># python</span>
+<p>This is the next post in a series on Binary Search Trees that start with <a href="../binary-search-trees/index.html">this post</a>. In this post we'll look at some basic queries we can make using the tree.</p>
+<div class="outline-2" id="outline-container-org2ce26a4">
+<h2 id="org2ce26a4">A Query Class</h2>
+<div class="outline-text-2" id="text-org2ce26a4">
+<p>The textbook(s) treat these as functions, but they seem to suggest to me methods of a class, so I'll make one. The <code>TYPE_CHECKING</code> and <code>annotations</code> imports are to prevent circular imports as noted on <a href="https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/">Adam Johnson's blog</a>.</p>
+<div class="highlight">
+<pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -176,30 +127,27 @@ The textbook(s) treat these as functions, but they seem to suggest to me methods
     <span class="kn">from</span> <span class="nn">.node</span> <span class="kn">import</span> <span class="n">Node</span>
     <span class="kn">from</span> <span class="nn">.tree</span> <span class="kn">import</span> <span class="n">Tree</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Query</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Query</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Holds a tree and performs queries on it</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     tree: A Binary Search Tree</span>
 <span class="sd">    """</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">Tree</span><span class="p">):</span>
-	<span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
-	<span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">return</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgbf2fcba" class="outline-2">
-<h2 id="orgbf2fcba">Search</h2>
-<div class="outline-text-2" id="text-orgbf2fcba">
-<p>
-The first thing we'll look at is searching for a Node in a Binary Search Tree. Because of the way the tree is structured the search looks a lot like a <a href="../binary-search/">Binary Search</a> where we start at the root of the tree and then work our way downwards, picking the next child to follow based on whether the key we're searching for is greater than the right child's key or less than the left child's key. If it's equal then we've found the node we want.
-</p>
+<div class="outline-2" id="outline-container-org545af41">
+<h2 id="org545af41">Search</h2>
+<div class="outline-text-2" id="text-org545af41">
+<p>The first thing we'll look at is searching for a Node in a Binary Search Tree. Because of the way the tree is structured the search looks a lot like a <a href="../binary-search/index.html">Binary Search</a> where we start at the root of the tree and then work our way downwards, picking the next child to follow based on whether the key we're searching for is greater than the right child's key or less than the left child's key. If it's equal then we've found the node we want.</p>
 </div>
-
-<div id="outline-container-org72d502e" class="outline-3">
-<h3 id="org72d502e">The Algorithm</h3>
-<div class="outline-text-3" id="text-org72d502e">
+<div class="outline-3" id="outline-container-org5565f03">
+<h3 id="org5565f03">The Algorithm</h3>
+<div class="outline-text-3" id="text-org5565f03">
 <pre id="tree-search" style="display:hidden;">
 \begin{algorithm}
 \caption{TreeSearch}
@@ -219,16 +167,12 @@ The first thing we'll look at is searching for a Node in a Binary Search Tree. B
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-<div id="outline-container-org7279e9b" class="outline-3">
-<h3 id="org7279e9b">The Iterative Version</h3>
-<div class="outline-text-3" id="text-org7279e9b">
-<p>
-The recursive version of <code>TreeSearch</code> is quite nice, but it also translates easily to an iterative version if for some reason performance or size becomes a problem.
-</p>
-
+<div class="outline-3" id="outline-container-orgd63fead">
+<h3 id="orgd63fead">The Iterative Version</h3>
+<div class="outline-text-3" id="text-orgd63fead">
+<p>The recursive version of <code>TreeSearch</code> is quite nice, but it also translates easily to an iterative version if for some reason performance or size becomes a problem.</p>
 <pre id="iterative-tree-search" style="display:hidden;">
 \begin{algorithm}
 \caption{IterativeTreeSearch}
@@ -247,17 +191,14 @@ The recursive version of <code>TreeSearch</code> is quite nice, but it also tran
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
+</pre></div>
 </div>
-</div>
-<div id="outline-container-orga391d56" class="outline-3">
-<h3 id="orga391d56">The Implementation</h3>
-<div class="outline-text-3" id="text-orga391d56">
-<p>
-I'll add the iterative version of the Tree Search as a method for our Query class.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+<div class="outline-3" id="outline-container-org33bb9fc">
+<h3 id="org33bb9fc">The Implementation</h3>
+<div class="outline-text-3" id="text-org33bb9fc">
+<p>I'll add the iterative version of the Tree Search as a method for our Query class.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Searches the tree for the node with the matching key</span>
 
 <span class="sd">    Args:</span>
@@ -268,17 +209,18 @@ I'll add the iterative version of the Tree Search as a method for our Query clas
 <span class="sd">    """</span>
     <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
     <span class="k">while</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
-	<span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
-	    <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
-	<span class="k">else</span><span class="p">:</span>
-	   <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="n">node</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
+        <span class="k">else</span><span class="p">:</span>
+           <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span>
     <span class="k">return</span> <span class="n">node</span>
 </pre></div>
 </div>
-<div id="outline-container-org695ec5e" class="outline-4">
-<h4 id="org695ec5e">Testing</h4>
-<div class="outline-text-4" id="text-org695ec5e">
-<div class="highlight"><pre><span></span><span class="c1"># pypi</span>
+<div class="outline-4" id="outline-container-orgbcfa209">
+<h4 id="orgbcfa209">Testing</h4>
+<div class="outline-text-4" id="text-orgbcfa209">
+<div class="highlight">
+<pre><span></span><span class="c1"># pypi</span>
 <span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be</span><span class="p">,</span><span class="n">be_none</span><span class="p">,</span> <span class="n">equal</span><span class="p">,</span> <span class="n">expect</span>
 <span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree</span> <span class="kn">import</span> <span class="n">Node</span><span class="p">,</span> <span class="n">Tree</span>
 <span class="kn">from</span> <span class="nn">bowling.data_structures.binary_search_tree</span> <span class="kn">import</span> <span class="n">Query</span>
@@ -298,21 +240,17 @@ I'll add the iterative version of the Tree Search as a method for our Query clas
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">fifteen</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be</span><span class="p">(</span><span class="n">fifteen</span><span class="p">))</span>
 </pre></div>
-
-<p>
-I'll have to think of something more interesting to show for this…
-</p>
+<p>I'll have to think of something more interesting to show for this…</p>
 </div>
 </div>
 </div>
 </div>
-<div id="outline-container-org19b05f7" class="outline-2">
-<h2 id="org19b05f7">Miminum and Maximum</h2>
-<div class="outline-text-2" id="text-org19b05f7">
-</div>
-<div id="outline-container-org07a9834" class="outline-3">
-<h3 id="org07a9834">Mimimum</h3>
-<div class="outline-text-3" id="text-org07a9834">
+<div class="outline-2" id="outline-container-orgef10dd2">
+<h2 id="orgef10dd2">Miminum and Maximum</h2>
+<div class="outline-text-2" id="text-orgef10dd2"></div>
+<div class="outline-3" id="outline-container-org7c097f0">
+<h3 id="org7c097f0">Mimimum</h3>
+<div class="outline-text-3" id="text-org7c097f0">
 <pre id="tree-minimum" style="display:hidden;">
 \begin{algorithm}
 \caption{TreeMinimum}
@@ -327,36 +265,32 @@ I'll have to think of something more interesting to show for this…
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
-</div>
-
-<div id="outline-container-orgbf6f2bd" class="outline-4">
-<h4 id="orgbf6f2bd">The Implementation</h4>
-<div class="outline-text-4" id="text-orgbf6f2bd">
-<p>
-I originally didn't take the root node as an argument, since I thought the minimum of the tree is always the smallest item. But this method gets used later on in the <code>successor</code> method where we want to find the smallest item in the right-subtree of a particular node, so the outcome won't necessarily be the smallest item in the tree.
-</p>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+</pre></div>
+<div class="outline-4" id="outline-container-orga63e637">
+<h4 id="orga63e637">The Implementation</h4>
+<div class="outline-text-4" id="text-orga63e637">
+<p>I originally didn't take the root node as an argument, since I thought the minimum of the tree is always the smallest item. But this method gets used later on in the <code>successor</code> method where we want to find the smallest item in the right-subtree of a particular node, so the outcome won't necessarily be the smallest item in the tree.</p>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Returns the node with the smallest key</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">     node: a node to use as the starting root</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
 
     <span class="k">while</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span>
     <span class="k">return</span> <span class="n">node</span>
 </pre></div>
 </div>
 </div>
-
-<div id="outline-container-orge01c870" class="outline-4">
-<h4 id="orge01c870">Testing</h4>
-<div class="outline-text-4" id="text-orge01c870">
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<div class="outline-4" id="outline-container-org61e8e99">
+<h4 id="org61e8e99">Testing</h4>
+<div class="outline-text-4" id="text-org61e8e99">
+<div class="highlight">
+<pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
@@ -373,10 +307,9 @@ I originally didn't take the root node as an argument, since I thought the minim
 </div>
 </div>
 </div>
-
-<div id="outline-container-org1008305" class="outline-3">
-<h3 id="org1008305">Maximum</h3>
-<div class="outline-text-3" id="text-org1008305">
+<div class="outline-3" id="outline-container-org4f628c2">
+<h3 id="org4f628c2">Maximum</h3>
+<div class="outline-text-3" id="text-org4f628c2">
 <pre id="tree-maximum" style="display:hidden;">
 \begin{algorithm}
 \caption{TreeMaximum}
@@ -391,13 +324,12 @@ I originally didn't take the root node as an argument, since I thought the minim
 \ENDPROCEDURE
 \end{algorithmic}
 \end{algorithm}
-</pre>
-</div>
-
-<div id="outline-container-org142f8aa" class="outline-4">
-<h4 id="org142f8aa">The Implementation</h4>
-<div class="outline-text-4" id="text-org142f8aa">
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+</pre></div>
+<div class="outline-4" id="outline-container-orgce1a508">
+<h4 id="orgce1a508">The Implementation</h4>
+<div class="outline-text-4" id="text-orgce1a508">
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Returns the node with the largest key</span>
 
 <span class="sd">    Args:</span>
@@ -407,17 +339,18 @@ I originally didn't take the root node as an argument, since I thought the minim
 <span class="sd">     node with the largest key in tree/subtree</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span>
     <span class="k">while</span> <span class="n">root</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">right</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">right</span>
     <span class="k">return</span> <span class="n">root</span>
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org6c60dfb" class="outline-4">
-<h4 id="org6c60dfb">Testing</h4>
-<div class="outline-text-4" id="text-org6c60dfb">
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<div class="outline-4" id="outline-container-orgb1a2821">
+<h4 id="orgb1a2821">Testing</h4>
+<div class="outline-text-4" id="text-orgb1a2821">
+<div class="highlight">
+<pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
@@ -435,13 +368,10 @@ I originally didn't take the root node as an argument, since I thought the minim
 </div>
 </div>
 </div>
-<div id="outline-container-orgcabe8f6" class="outline-2">
-<h2 id="orgcabe8f6">Tree Successor</h2>
-<div class="outline-text-2" id="text-orgcabe8f6">
-<p>
-A "Successor" node is the next largest node after a given node. Since all the nodes in a right subtree are greater than the node, it's the smallest node in the right (if it exists). If the right subtree is empty then we traverse up the ancestors of the node until we find the first one that is greater than our node.
-</p>
-
+<div class="outline-2" id="outline-container-org285f811">
+<h2 id="org285f811">Tree Successor</h2>
+<div class="outline-text-2" id="text-org285f811">
+<p>A "Successor" node is the next largest node after a given node. Since all the nodes in a right subtree are greater than the node, it's the smallest node in the right (if it exists). If the right subtree is empty then we traverse up the ancestors of the node until we find the first one that is greater than our node.</p>
 <pre id="tree-successor" style="display:hidden;">
 \begin{algorithm}
 \caption{TreeSuccessor}
@@ -464,8 +394,8 @@ A "Successor" node is the next largest node after a given node. Since all the no
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">successor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">successor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Returns the next largest node</span>
 
 <span class="sd">    Args:</span>
@@ -475,16 +405,16 @@ A "Successor" node is the next largest node after a given node. Since all the no
 <span class="sd">     successor node to the input node</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
 
     <span class="n">successor</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
     <span class="k">while</span> <span class="n">successor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span> <span class="o">==</span> <span class="n">successor</span><span class="o">.</span><span class="n">right</span><span class="p">:</span>
-	<span class="n">node</span> <span class="o">=</span> <span class="n">successor</span>
-	<span class="n">successor</span> <span class="o">=</span> <span class="n">successor</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">successor</span>
+        <span class="n">successor</span> <span class="o">=</span> <span class="n">successor</span><span class="o">.</span><span class="n">parent</span>
     <span class="k">return</span> <span class="n">successor</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<div class="highlight">
+<pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
@@ -497,13 +427,10 @@ A "Successor" node is the next largest node after a given node. Since all the no
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org291cfd7" class="outline-2">
-<h2 id="org291cfd7">Tree Predecessor</h2>
-<div class="outline-text-2" id="text-org291cfd7">
-<p>
-Similar in concept to a node successor, a node <i>predecessor</i> is the largest node less than the given node.
-</p>
-
+<div class="outline-2" id="outline-container-org609576b">
+<h2 id="org609576b">Tree Predecessor</h2>
+<div class="outline-text-2" id="text-org609576b">
+<p>Similar in concept to a node successor, a node <i>predecessor</i> is the largest node less than the given node.</p>
 <pre id="tree-predecessor" style="display:hidden;">
 \begin{algorithm}
 \caption{TreePredecessor}
@@ -526,8 +453,8 @@ Similar in concept to a node successor, a node <i>predecessor</i> is the largest
 \end{algorithmic}
 \end{algorithm}
 </pre>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">predecessor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">predecessor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Returns the predecessor node</span>
 
 <span class="sd">    Args:</span>
@@ -537,14 +464,14 @@ Similar in concept to a node successor, a node <i>predecessor</i> is the largest
 <span class="sd">     largest node smaller than given node</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
     <span class="n">predecessor</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
     <span class="k">while</span> <span class="n">predecessor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span> <span class="o">==</span> <span class="n">predecessor</span><span class="o">.</span><span class="n">left</span><span class="p">:</span>
-	<span class="n">node</span><span class="p">,</span> <span class="n">predecessor</span> <span class="o">=</span> <span class="n">predecessor</span><span class="p">,</span> <span class="n">predecessor</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">node</span><span class="p">,</span> <span class="n">predecessor</span> <span class="o">=</span> <span class="n">predecessor</span><span class="p">,</span> <span class="n">predecessor</span><span class="o">.</span><span class="n">parent</span>
     <span class="k">return</span> <span class="n">predecessor</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<div class="highlight">
+<pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
 <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">predecessor</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
 <span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">predecessor</span><span class="p">(</span><span class="n">Node</span><span class="p">(</span><span class="mi">5</span><span class="p">)))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_none</span><span class="p">)</span>
@@ -558,14 +485,12 @@ Similar in concept to a node successor, a node <i>predecessor</i> is the largest
 </pre></div>
 </div>
 </div>
-<div id="outline-container-orgf713766" class="outline-2">
-<h2 id="orgf713766">Height</h2>
-<div class="outline-text-2" id="text-orgf713766">
-<p>
-The height of the Binary Search Tree is the number of edges from the root of the tree to the furthest node. The algorithms we're looking at here don't use them but I'm going to use height to look at how the order you insert nodes in the tree affects the height. 
-</p>
-
-<div class="highlight"><pre><span></span><span class="nd">@property</span>
+<div class="outline-2" id="outline-container-orga1e4cfb">
+<h2 id="orga1e4cfb">Height</h2>
+<div class="outline-text-2" id="text-orga1e4cfb">
+<p>The height of the Binary Search Tree is the number of edges from the root of the tree to the furthest node. The algorithms we're looking at here don't use them but I'm going to use height to look at how the order you insert nodes in the tree affects the height.</p>
+<div class="highlight">
+<pre><span></span><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The length of the longest path starting at the root</span>
 
@@ -574,8 +499,8 @@ The height of the Binary Search Tree is the number of edges from the root of the
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree_height</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">tree_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="highlight">
+<pre><span></span><span class="k">def</span> <span class="nf">tree_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">Node</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The length of the longest path starting at the node</span>
 
 <span class="sd">    Args:</span>
@@ -585,14 +510,14 @@ The height of the Binary Search Tree is the number of edges from the root of the
 <span class="sd">     number of edges from root to furthest leaf</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-	<span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
     <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree_height</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree_height</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
 </pre></div>
-
-<div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">()</span>
+<div class="highlight">
+<pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">()</span>
 <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 
 <span class="n">expect</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">height</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
@@ -618,85 +543,74 @@ The height of the Binary Search Tree is the number of edges from the root of the
 </pre></div>
 </div>
 </div>
-<div id="outline-container-org803964f" class="outline-2">
-<h2 id="org803964f">Sources</h2>
-<div class="outline-text-2" id="text-org803964f">
+<div class="outline-2" id="outline-container-orgf290856">
+<h2 id="orgf290856">Sources</h2>
+<div class="outline-text-2" id="text-orgf290856">
 <ul class="org-ul">
-<li><a href="../clrs/">Introduction To Algorithms (CLRS)</a></li>
+<li><a href="../clrs/index.html">Introduction To Algorithms (CLRS)</a></li>
 </ul>
 <script>
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("tree-search"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("iterative-tree-search"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("tree-minimum"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("tree-maximum"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("tree-successor"));
 });
-</script><script>
+</script>
+<script>
+
 window.addEventListener('load', function () {
     pseudocode.renderElement(document.getElementById("tree-predecessor"));
 });
-</script>
+</script></div>
 </div>
 </div>
-    </div>
-    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<aside class="postpromonav">
+<nav>
+<ul class="tags" itemprop="keywords">
 <li><a class="tag p-category" href="../../categories/algorithms/index.html" rel="tag">algorithms</a></li>
-            <li><a class="tag p-category" href="../../categories/binary-search-trees/index.html" rel="tag">binary search trees</a></li>
-            <li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
-        </ul>
+<li><a class="tag p-category" href="../../categories/binary-search-trees/index.html" rel="tag">binary search trees</a></li>
+<li><a class="tag p-category" href="../../categories/data-structures/index.html" rel="tag">data structures</a></li>
+</ul>
 <ul class="pager hidden-print">
-<li class="previous">
-                <a href="../binary-search-tree-node-insertion/index.html" rel="prev" title="Binary Search Tree Node Insertion">Previous post</a>
-            </li>
-            <li class="next">
-                <a href="../binary-search-tree-randomized/index.html" rel="next" title="Binary Search Tree: Randomized">Next post</a>
-            </li>
-        </ul></nav></aside><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" integrity="sha384-3lJUsx1TJHt7BA4udB5KPnDrlkO8T6J6v/op7ui0BbCjvZ9WqV4Xm6DTP6kQ/iBH" crossorigin="anonymous"></script><script type="text/x-mathjax-config">
-             MathJax.Hub.Config({
-               tex2jax: {
-                 inlineMath: [['$','$'], ['\\(','\\)']],
-                 displayMath: [['$$','$$'], ['\\[','\\]']],
-                 processEscapes: true,
-                 processEnvironments: true,
-               },
-               displayAlign: 'center',
-               "HTML-CSS": {
-                 styles: {'.MathJax_Display': {"margin": 0}}
-               }
-             });
-            </script><script src="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.js"></script></article><!--End of body content--><footer id="footer">
-            Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2023 - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
-<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
-<span property="dct:title">Ape-Iron</span> is licensed under
-<a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a> 
-
-            
-            
-        
-    </div>
+<li class="previous"><a href="../binary-search-tree-node-insertion/index.html" rel="prev" title="Binary Search Tree Node Insertion">Previous post</a></li>
+<li class="next"><a href="../binary-search-tree-randomized/index.html" rel="next" title="Binary Search Tree: Randomized">Next post</a></li>
+</ul>
+</nav>
+</aside>
+<link href="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.css" rel="stylesheet"></article>
+<!--End of body content-->
+<footer id="footer">Scribbles by <a href="mailto:cloisteredmonkey.jmark@slmail.me">The Cloistered Monkey</a> © 2024 - Powered by <a href="https://getnikola.com" rel="nofollow">Nikola</a>
+<div id="license" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><span property="dct:title">Ape-Iron</span> is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;" target="_blank">CC BY-SA 4.0 <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></div>
 </footer>
 </div>
+<script src="../../assets/js/all-nocdn.js"></script>
+<script>
 
-
-        <script src="../../assets/js/all-nocdn.js"></script><script>
     baguetteBox.run('div#content', {
         ignoreClass: 'islink',
         captions: function(element){var i=element.getElementsByTagName('img')[0];return i===undefined?'':i.alt;}});
-    </script>
-</div>
+</script></div>
 </body>
 </html>
