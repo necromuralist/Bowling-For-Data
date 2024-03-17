@@ -1,0 +1,39 @@
+{#  -*- coding: utf-8 -*- #}
+
+{# macro to add the altair-vega.js code tag #}
+{% macro altair_scripts() %}
+    <style>
+    .error {
+        color: red;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.6.1"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+{% endmacro %}
+
+{# macro for a single post #}
+{# `post`: a Post object #}
+{% macro altair_scripts_ifpost(post) %}
+    {% if post.meta("has_altair") %}
+        {{ altair_scripts() }}
+    {% endif %}
+{% endmacro %}
+
+{# macro used by feed page with multiple posts (e.g. index.tmpl) #}
+{# 'posts': list of Post objects #}
+{# jinja doesn't support comprehensions so we have to use a for-loop #}
+{# the ~post.meta~ object is a Functionary object #}
+{# the metadata is in a dictionary that's in a dictionary #}
+{# if you try ~post.meta.has_altair~ it will fail because you need the language you're using as a key #}
+{# e.g. ~post.meta.en.has_altair~ #}
+{# to not refer to the langugage you need to call it like a function, passing in the "has_altair" key as an argument #}
+{% macro altair_scripts_ifposts(posts) %}
+  {% set altair_added = False %}
+  {% for post in posts %}
+    {% if (post.meta("has_altair") or post.meta("template") == "altair.tmpl") and not altair_added %}
+      {% set altair_added = True %}
+      {{ altair_scripts() }}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}
