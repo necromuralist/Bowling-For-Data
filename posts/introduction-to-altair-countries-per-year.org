@@ -7,11 +7,11 @@
 .. link: 
 .. description: Continuing the Altair Introduction with a plot of the countries per year.
 .. type: text
-
+.. template: altair.tmpl
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-8eee42ba-b056-4500-aa70-5bbe84db530c-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f3d5e8a0-fd79-44a4-9a3c-f61352f1234b-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -34,13 +34,12 @@ import os
 import re
 
 # pypi
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from expects import be, be_true, equal, expect
 from tabulate import tabulate
 
 # monkey
-from graeae.visualization.altair_helpers import output_path, save_chart
+from graeae.visualization.altair_helpers import output_path, save_vega_embed
 #+end_src
 
 These are the ones that are really needed for the plotting. I installed both of them through pypi.
@@ -59,9 +58,7 @@ SLUG = "introduction-to-altair-countries-per-year"
 OUTPUT_PATH = output_path(SLUG)
 
 HEIGHT, WIDTH = 600, 800
-SAVE_IT = partial(save_chart, output_path=OUTPUT_PATH, height=HEIGHT + 100)
-
-SOUPER = partial(BeautifulSoup, features="lxml")
+SAVE_IT = partial(save_vega_embed, output_path=OUTPUT_PATH)
 #+end_src
 
 This is to make printing out a pandas dataframe as a table a little nicer.
@@ -117,7 +114,7 @@ column_printer(table)
 | Positive affect                  | float64 |
 | Negative affect                  | float64 |
 
-For this initial post I'll only use the year, but 
+For this initial post I'll only use the year.
 
 #+begin_src python :results none
 class Column:
@@ -125,11 +122,17 @@ class Column:
 #+end_src
 
 * Counting the Years
+The dataset has entries for multiple years, each year having entries for different countries. They apparently weren't able to collect data from all countries for all years so the number of countries included changes with the year. As the first chart I'll plot counts for the number of rows in the data for each year.
+
 ** Using Pandas' ~value_counts~ Method
 
+The first way I'll make the counts for each year is to use pandas' built in ~value_counts~ method, which creates a Series with the counts for each unique item in the column with the name given to it.
+
 #+begin_src python :results none
-year_counts = table.year.value_counts().reset_index().sort_values("year")
+year_counts = table.year.value_counts().reset_index().sort_values(Column.year)
 #+end_src
+
+By default it puts the "year" label into the index so I used ~reset_index~ to convert it to a column and then sorted it by year so we can get the data in chronological order. First, a table to get a sense of the values we're looking at.
 
 #+begin_src python :results output :exports both
 table_counts = year_counts.T
@@ -145,144 +148,147 @@ print(TABLE(table_counts, showindex=True))
 
 Now as a bar-chart.
 
+Since the years look like integers altair (well, vega) will assume that they're numbers but we want to think of them as labels instead so I'll tell it that it's a nominative column using their simplified string-based syntax.
+
 #+begin_src python :results output :exports both
-value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
-    x="{}:N".format(Column.year),
-    y="count").properties(height=HEIGHT, width=WIDTH)
+RANDOM_HEX = "a897e2c7"
+YEAR_AS_NOMINATIVE = "{}:N".format(Column.year)
 
 VALUE_COUNTS_NAME = "value-counts-bar-chart"
-VALUE_COUNTS_HTML = VALUE_COUNTS_NAME + ".html"
-SAVE_IT(value_counts_chart, VALUE_COUNTS_NAME)
+DIV_ID = VALUE_COUNTS_NAME + "-" + RANDOM_HEX
+
+value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
+    x=YEAR_AS_NOMINATIVE,
+    y="count").properties(height=HEIGHT, width=WIDTH)
+
+VALUE_COUNTS_JS = VALUE_COUNTS_NAME + ".js"
+SAVE_IT(value_counts_chart, name=VALUE_COUNTS_NAME, div_id=DIV_ID)
 #+end_src
 
-#+RESULTS:
-#+begin_export html
-<object type="text/html" data="value-counts-bar-chart.html" style="width:100%" height=700>
-  <p>Figure Missing</p>
-</object>
-#+end_export
+{{% altairdiv source="value-counts-bar-chart.js" divid="value-counts-bar-chart-a897e2c7" %}}
+
+I saved the name of the javascript file that altair creates for a later section where I'll look at the file size.
 
 ** Using Altair's "count"
 
+Although I normally use pandas to do value counts vega allows you to tell it to do different transformations of the data before plotting, including counting the values. This next plot will pass altair the original data and let it figure out the value counts.
+
 #+begin_src python :results output :exports both
+ALTAIR_COUNTS_NAME = "altair-counts-bar-chart"
+DIV_ID = ALTAIR_COUNTS_NAME + "-" + RANDOM_HEX
+
 altair_counts_chart = altair.Chart(table).mark_bar().encode(
-    x="{}:N".format(Column.year),
+    x=YEAR_AS_NOMINATIVE,
     y="count()").properties(height=HEIGHT, width=WIDTH)
 
-ALTAIR_COUNTS_NAME = "altair-counts-bar-chart"
-ALTAIR_COUNTS_HTML = ALTAIR_COUNTS_NAME + ".html"
-SAVE_IT(altair_counts_chart, ALTAIR_COUNTS_NAME)
+
+ALTAIR_COUNTS_JS = ALTAIR_COUNTS_NAME + ".js"
+
+SAVE_IT(altair_counts_chart, name=ALTAIR_COUNTS_NAME, div_id=DIV_ID)
 #+end_src
 
-#+RESULTS:
-#+begin_export html
-<object type="text/html" data="altair-counts-bar-chart.html" style="width:100%" height=700>
-  <p>Figure Missing</p>
-</object>
-#+end_export
+{{% altairdiv source="altair-counts-bar-chart.js" divid="altair-counts-bar-chart-a897e2c7" %}}
+
+#+begin_notecard
+In case it isn't obvious, the difference between this plot and the prior one is I passed ~table~ to the ~Chart~ constructor and then told altair that the y-axis is ~"count()"~, meaning it should count the values for each unique entry in "x".
+#+end_notecard
 
 ** Comparing the File Sizes
 
+So, we have two ways to make the same plot - is there a reason to prefer one over the other? Well, given title of this section, you might guess that there's a difference in the size of the files created for the charts for each method which might make influence which one you choose.
+
 *** The Files In Bytes
 
-#+begin_src python :results output :exports both
+The charts shown above are created by having altair create a JSON object (the chart specification) which is passed to a (javascript) function created by [[https://github.com/vega/vega-embed][~vega-embed~]] in the browser. So if we look at the file-sizes for the charts, the difference will be in the size of the JSON created for each chart.
 
-altair_counts_html = OUTPUT_PATH/(ALTAIR_COUNTS_HTML)
-pandas_counts_html = OUTPUT_PATH/(VALUE_COUNTS_HTML)
+#+begin_src python :results output :exports both
+altair_counts_html = OUTPUT_PATH/(ALTAIR_COUNTS_JS)
+pandas_counts_html = OUTPUT_PATH/(VALUE_COUNTS_JS)
 print("Altair counts(): {:,} bytes".format(altair_counts_html.stat().st_size))
 print("Pandas value_counts: {:,} bytes".format(pandas_counts_html.stat().st_size))
 #+end_src
 
 #+RESULTS:
-: Altair counts(): 685,111 bytes
-: Pandas value_counts: 2,067 bytes
+: Altair counts(): 684,749 bytes
+: Pandas value_counts: 1,703 bytes
 
-Here's one of the problems with ~altair~ - it passes along the entire dataset and then tells ~vega~ to work with it in the browser. So, in this case it's passing all our happiness data, even though the chart doesn't use any of the columns.
+As you can see, letting altair count the data created a huge JSON object (compared to the pandas version). Altair acts as a translation layer between our python objects and vega. In the case where we tell altair that the y-axis uses ~"count()"~,  it means that altair converts our entire pandas DataFrame into JSON then passes it to the browser where vega does the counting. Even though our final chart only uses the "year" column and has one row per year, the javascript has all the original columns and rows.
 
-#+begin_src python :results none
-with altair_counts_html.open() as reader:
-    altair_soup = SOUPER(reader)
+To get a better idea of what this means let's look at one entry from each of the charts' data. The ~Chart.to_dict~ method gives us the same key-value pairs as the JSON object that's passed to vega, but, more conveniently since I'm using python here, as a python dictionary.
 
-with pandas_counts_html.open() as reader:
-    pandas_soup = SOUPER(reader)
+#+begin_src python :results output :exports both
+value_counts_dict = value_counts_chart.to_dict()
+print(value_counts_dict.keys())
 #+end_src
 
+#+RESULTS:
+: dict_keys(['config', 'data', 'mark', 'encoding', 'height', 'width', '$schema', 'datasets'])
+
+You might think that the "data" key holds our data, but it actually holds the key for our data which is in the dictionary matched to the "datasets" key.
+
+#+begin_src python :results output :exports both
+print(value_counts_dict["data"])
+print(value_counts_dict["datasets"].keys())
+#+end_src
+
+#+RESULTS:
+: {'name': 'data-774be733c0ac4b1e0a7bf95a840a22e6'}
+: dict_keys(['data-774be733c0ac4b1e0a7bf95a840a22e6'])
+
+The pandas data is represented as a row of dictionaries in the "datasets" dictionary.
+
+#+begin_src python :results output :exports both
+name = value_counts_dict["data"]["name"]
+frame = value_counts_dict["datasets"][name]
+print(frame)
+#+end_src
+
+#+RESULTS:
+: [{'year': 2005, 'count': 27}, {'year': 2006, 'count': 89}, {'year': 2007, 'count': 102}, {'year': 2008, 'count': 110}, {'year': 2009, 'count': 114}, {'year': 2010, 'count': 124}, {'year': 2011, 'count': 146}, {'year': 2012, 'count': 141}, {'year': 2013, 'count': 136}, {'year': 2014, 'count': 144}, {'year': 2015, 'count': 142}, {'year': 2016, 'count': 141}, {'year': 2017, 'count': 147}, {'year': 2018, 'count': 141}, {'year': 2019, 'count': 143}, {'year': 2020, 'count': 116}, {'year': 2021, 'count': 122}, {'year': 2022, 'count': 114}]
+
+Since the altair ~counts()~ version is so large let's make a function to pull out one entry from each of the datasets just to show how the data is passed to vega.
+
 #+begin_src python :results none
-def data_printer(soup: BeautifulSoup, index:int=0) -> None:
-    """Gets the data from the soup and prints the entry
+def data_print(chart, index: int=0) -> None:
+    """Print an entry in the data
 
-    Params:
-
-     - soup: BeautifulSoup with the HTML for the chart
-     - index: which data row to show
+    Params
+     - `chart`: chart with data to print
+     - `index`: index of data item to print
     """
-    EVERYTHING = ".*"
-    EXTRA_BRACE = "(?=})"
-    
-    DATASETS_EXPRESSION = "datasets" + EVERYTHING + "}}"
-    DATASET_EXPRESSION = "{" + EVERYTHING + "}" + EXTRA_BRACE
+    KEY = "datasets"
 
-    script = soup.find_all("script")[-1].string
-    dataset = re.search(DATASETS_EXPRESSION, script).group()
-    dataset = re.search(DATASET_EXPRESSION, dataset).group()
-    json_dataset = json.loads(dataset)
-    data_key = list(json_dataset.keys())[0]
-    data = json_dataset[data_key]
-    
-    print("'dataset' has {:,} data entries\n".format(len(data)))
-    print("Entry {}:\n".format(index))
+    chart_data = chart.to_dict()[KEY]
+    data_key = list(chart_data.keys())[0]
+    data = chart_data[data_key]
+    print("Number of Entries in the Data: {:,}".format(len(data)))
+    print("Item {}: \n".format(index))
     pprint(data[index])
     return
 #+end_src
 
+I already showed the ~value_counts_chart~ data above, but, let's do it again so we can compare it directly to the ~altair_counts_chart~ data.
+
 #+begin_src python :results output :exports both
-data_printer(pandas_soup)
+data_print(value_counts_chart)
 #+end_src
 
 #+RESULTS:
-: 'dataset' has 18 data entries
-: 
-: Entry 0:
+: Number of Entries in the Data: 18
+: Item 0: 
 : 
 : {'count': 27, 'year': 2005}
 
-#+begin_src python :results none
-def frame_print(frame: pandas.DataFrame, index: int=0) -> None:
-    """print length and one row of frame
-
-    Params:
-
-     - frame: data-frame to query
-     - index: index of row to print
-    """
-    print("Frame has {:,} rows.".format(len(frame)))
-    print("\nRow {}:\n".format(index))
-    print(frame.iloc[0])
-    return
-#+end_src
+So the "dataset" passed to vega has 18 entries (one per year in our ~year_counts~ DataFrame) and the first entry matches the first row in that DataFrame. Now let's look at the dictionary for the JSON passed to vega to create the counts.
 
 #+begin_src python :results output :exports both
-frame_print(year_counts)
-#+end_src
-
-#+RESULTS:
-: Frame has 18 rows.
-: 
-: Row 0:
-: 
-: year     2005
-: count      27
-: Name: 17, dtype: int64
-
-#+begin_src python :results output :exports both
-data_printer(altair_soup)
+data_print(altair_counts_chart)
 #+end_src
 
 #+RESULTS:
 #+begin_example
-'dataset' has 2,199 data entries
-
-Entry 0:
+Number of Entries in the Data: 2,199
+Item 0: 
 
 {'Country name': 'Afghanistan',
  'Freedom to make life choices': 0.718,
@@ -298,30 +304,13 @@ Entry 0:
 #+end_example
 
 #+begin_src python :results output :exports both
-frame_print(table)
+print("{:,}".format(len(table)))
 #+end_src
 
 #+RESULTS:
-#+begin_example
-Frame has 2,199 rows.
+: 2,199
 
-Row 0:
-
-Country name                        Afghanistan
-year                                       2008
-Life Ladder                               3.724
-Log GDP per capita                         7.35
-Social support                            0.451
-Healthy life expectancy at birth           50.5
-Freedom to make life choices              0.718
-Generosity                                0.168
-Perceptions of corruption                 0.882
-Positive affect                           0.414
-Negative affect                           0.258
-Name: 0, dtype: object
-#+end_example
-
-There's a project called [[https://vegafusion.io/][vegafusion]] that is supposed to help with reducing the size but it requires that you use a jupyter notebook for interactivity (it uses python to make a jupyter widget or some such) so it won't work for a static site like this one. So when using altair we have to think about what we're doing if the size of the files is going to be a problem. In most cases it probably makes sense to do the transformations in pandas first and then only pass the data to plot to altair.
+As expected, altair converted our entire ~table~ DataFrame to JSON and passed it to vega for the second chart, inflating the amount of text sent to the browser a bit. It might or might not make a difference in this broadband world, but it's something to be aware of if you put multiple charts into one page or have a really large data set.
 
 See the [[https://altair-viz.github.io/user_guide/large_datasets.html][altair documentation on Large Datasets]] for more information.
 * A Chart, Part By Part
@@ -434,7 +423,7 @@ mark_trail(): Self
 
 [[img-url:mark-mixin.png][MarkMixin Class]]
 
-Looking in the ~mark_bar~ method, there's a lot of arguments you could pass to it, but fundamentally all it's really doing is making a copy of itself, setting the ~mark~ attribute to ~bar~ and then retu+rning the copy.
+Looking in the ~mark_bar~ method, there's a lot of arguments you could pass to it, but fundamentally all it's really doing is making a copy of itself, setting the ~mark~ attribute to ~bar~ and then returning the copy.
 
 
 #+begin_src python :results output :exports both
@@ -616,5 +605,5 @@ expect(propertied.height).to(equal(HEIGHT))
 ** Altair
 - Layered and Multi-View Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2023 Dec 12]. Available from: https://altair-viz.github.io/user_guide/compound_charts.html
 - Large Datasets — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 8]. Available from: https://altair-viz.github.io/user_guide/large_datasets.html
-
+- vega/vega-embed [Internet]. Vega; 2024 [cited 2024 Mar 16]. Available from: https://github.com/vega/vega-embed
   
