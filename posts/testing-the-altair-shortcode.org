@@ -11,12 +11,16 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-775cd3d0-abdd-45c6-90a5-35ac49bfade2-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-de30d1ed-1b63-4af6-a234-75042c2de839-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
 %autoreload 2
 #+END_SRC
+
+#+begin_notecard
+**Note:** This is an example to myself of a post that uses my nikola/altair setup. It isn't something generally relevant to altair itself.
+#+end_notecard
 
 * Introduction
 
@@ -35,6 +39,7 @@ import os
 
 # pypi
 from dotenv import load_dotenv
+from expects import be_true, expect
 from tabulate import tabulate
 
 import altair
@@ -48,7 +53,7 @@ from graeae.visualization.altair_helpers import output_path, save_vega_embed
 #+end_src
 
 #+begin_notecard
-**Note to self:** Since I usually run the code to create the plot on a different machine from the one where the nikola code is being run to create this site, the ~graeae~ function has to be installed on the remote machine where the plots are created.
+**Note to self:** Since I usually run the code to create the plot on a different machine from the one where the nikola code is being run to create this site, the ~graeae~ function has to be installed on the remote machine where the plots are created, then the file(s) created need to be synced back to the nikola machine to compile the site.
 #+end_notecard
 
 ** The Output Path
@@ -58,6 +63,7 @@ The ~output_path~ function takes the slug and checks if there's a folder matchin
 #+begin_src python :results none
 SLUG = "testing-the-altair-shortcode"
 OUTPUT_PATH = output_path(SLUG)
+expect(OUTPUT_PATH.is_dir()).to(be_true)
 #+end_src
 
 * The Data
@@ -131,21 +137,27 @@ value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
     y="count").properties(height=600, width=800)
 #+end_src
 
-Now to save it. Previously I was using Altair's ~save~ method to save it as an HTML document and embedding the entire document within the post using an ~<object>~ tag, which seems to work kind of like a frame. I think. Anyway, this version saves the chart as a JavaScript function instead (using the name we pass in for the file-name) which then gets called by [[https://github.com/vega/vega-embed][vega-embed]] to create the chart. The ~graeae.visualization.altair_helpers.save_vega_embed~ function is extracting the JSON schema from the chart (using Altair's ~Chart.to_json()~) and adding it to a JavaScript function that I copied from the file created by Altair's ~Chart.save~. The output of the ~graeae~ function is the shortcode to tell nikola to embed the chart here.
+Now to save it. Previously I was using Altair's ~save~ method to save it as an HTML document and embedding the entire document within the post using an ~<object>~ tag, which seems to work kind of like a frame. I think. Anyway, this version saves the chart as a JavaScript function instead (using the name we pass in for the file-name) which then gets called by [[https://github.com/vega/vega-embed][vega-embed]] to create the chart. The ~graeae.visualization.altair_helpers.save_vega_embed~ function is extracting the JSON schema from the chart (using Altair's ~Chart.to_json()~) and adding it to a JavaScript function that I copied from the file created by Altair's ~Chart.save~. The ~graeae~ function prints the shortcode to tell nikola to embed the chart here and then returns a Path object pointing to the saved file.
 
 #+begin_notecard
 **Note:** I haven't figured out how to get ~jupyter-emacs~ to dump python output without formatting it as a ~#+RESULTS~ block so it will need a little clean up after the function is called. If not, the shortcode will work, but it will also create an empty box underneath it.
 #+end_notecard
 
 #+begin_src python :results output :exports both
-print(save_vega_embed(chart=value_counts_chart,
-                      name="value-counts-bar-chart",
-                      div_id=DIV_ID,
-                      output_path=OUTPUT_PATH))
+chart_path = save_vega_embed(chart=value_counts_chart,
+                             name="value-counts-bar-chart",
+                             div_id=DIV_ID,
+                             output_path=OUTPUT_PATH)
 #+end_src
 
 {{% altairdiv source="value-counts-bar-chart.js" divid="value-counts-0d454587" %}}
 
+#+begin_src python :results output :exports both
+print(chart_path.name)
+#+end_src
+
+#+RESULTS:
+: value-counts-bar-chart.js
 
 * And a Line Plot
 
@@ -169,6 +181,18 @@ print(save_vega_embed(line_chart,
 * The End
 
 Well, that seems to work. I was originally going to throw this away once things seemed to be all right, but I'll keep it as a future reference in case I forget how to use this stuff later.
+
+Here's the files that were updated to make this work.
+
+- shortcodes/altairdiv.tmpl
+- themes/custom-jinja/templates/
+  + altair.tmpl
+  + altair_helper.tmpl
+  + index.tmpl
+
+As well as ~graeae.visualization.altair_helpers.save_vega_embed~.
+
+To get the post working it needs ~.. template: altair.tmpl~ in the meta-data and the output of the ~save_vega_embed~ function cleaned up (to get the shortcode to include the chart).
 
 * Links
 
