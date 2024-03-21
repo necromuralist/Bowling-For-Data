@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-de30d1ed-1b63-4af6-a234-75042c2de839-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-fcd26c55-aa96-4045-8769-0e61f40ba5c5-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -66,6 +66,23 @@ OUTPUT_PATH = output_path(SLUG)
 expect(OUTPUT_PATH.is_dir()).to(be_true)
 #+end_src
 
+** Constants
+
+These are some constants so I don't have to remember them later on.
+
+#+begin_src python :results none
+class Chart:
+    year = "year"
+    height = 600
+    width = "container"
+#+end_src
+
+#+begin_notecard
+**Note:** The ~width = "container"~ attribute will tell the chart to use the entire width of the container that the chart is in. In this case it's being put into a ~<div>~ tag. To make the div fill the column the CSS is giving its HTML class (~altair-vega~) a width of 100%. By default the chart will sit flush left but this way it's centered (and big).  I'll have to figure out some other solution to get smaller charts centered.
+
+See the [[https://vega.github.io/vega-lite/docs/size.html#specifying-responsive-width-and-height][vega-lite "Responsive Width and Height"]] documentation
+#+end_notecard
+
 * The Data
 
 To have something to plot I'll use the United Nation's World Happiness data, which I downloaded (as excel spreadsheets) and converted to a CSV.
@@ -90,14 +107,9 @@ This is overkill, but I had the idea to do this while in the middle of another p
 The test-plot will be a bar-graph showing the number of entries (countries) for each year in the dataset. The data uses "year" as the name of the column with the years so I'll make a little name holder and then create a data-frame with the counts.
 
 #+begin_src python :results none
-class Column:
-    year = "year"
-#+end_src
-
-#+begin_src python :results none
 year_counts = (table.year.value_counts()
                .reset_index()
-               .sort_values(Column.year))
+               .sort_values(Chart.year))
 #+end_src
 
 The ~value_counts~ output has the years as the index of the Series so I'm calling ~reset_index~ to move it into a column, giving us a two-column data-frame (with "year" and "counts" as columns).
@@ -121,7 +133,7 @@ print(tabulate(table_counts, headers="keys", tablefmt="orgtbl"))
 
 ** Now the Bar-Chart
 
-So, here's what we're testing.
+So, here's the section where we get to what we're testing.
 
 First, we need an identifier for the HTML ~div~ tag so that we can tell Vega where to stick the chart.
 
@@ -133,8 +145,8 @@ Now we'll create the altair Chart.
 
 #+begin_src python :results none
 value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
-    x="{}:N".format(Column.year),
-    y="count").properties(height=600, width=800)
+    x="{}:N".format(Chart.year),
+    y="count").properties(height=Chart.height, width=Chart.width)
 #+end_src
 
 Now to save it. Previously I was using Altair's ~save~ method to save it as an HTML document and embedding the entire document within the post using an ~<object>~ tag, which seems to work kind of like a frame. I think. Anyway, this version saves the chart as a JavaScript function instead (using the name we pass in for the file-name) which then gets called by [[https://github.com/vega/vega-embed][vega-embed]] to create the chart. The ~graeae.visualization.altair_helpers.save_vega_embed~ function is extracting the JSON schema from the chart (using Altair's ~Chart.to_json()~) and adding it to a JavaScript function that I copied from the file created by Altair's ~Chart.save~. The ~graeae~ function prints the shortcode to tell nikola to embed the chart here and then returns a Path object pointing to the saved file.
@@ -166,10 +178,10 @@ I'm going to re-plot the data as a line chart to make sure there's nothing I cre
 #+begin_src python :results output :exports both
 line_chart = value_counts_chart.mark_line()
 
-print(save_vega_embed(line_chart,
-                      name="value-counts-line-chart",
-                      div_id="line-chart-0d454587",
-                      output_path=OUTPUT_PATH))
+save_vega_embed(line_chart,
+                name="value-counts-line-chart",
+                div_id="line-chart-0d454587",
+                output_path=OUTPUT_PATH)
 #+end_src
 
 {{% altairdiv source="value-counts-line-chart.js" divid="line-chart-0d454587" %}}
@@ -198,4 +210,5 @@ To get the post working it needs ~.. template: altair.tmpl~ in the meta-data and
 
 - Saving Altair Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 16]. Available from: https://altair-viz.github.io/user_guide/saving_charts.html
 - vega/vega-embed [Internet]. Vega; 2024 [cited 2024 Mar 16]. Available from: https://github.com/vega/vega-embed
+- Vega-Lite [Internet]. [cited 2024 Mar 20]. Customizing Size. Available from: https://vega.github.io/vega-lite/docs/size.html
 - World Happiness Report [Internet]. 2023 [cited 2023 Dec 11]. Available from: https://worldhappiness.report/
