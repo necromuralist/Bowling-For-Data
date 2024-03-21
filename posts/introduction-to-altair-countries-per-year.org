@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-f3d5e8a0-fd79-44a4-9a3c-f61352f1234b-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-470e6ac6-16c0-4782-8853-e512588ce54c-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -57,8 +57,14 @@ These are some convenience objects to save a little bit of coding when saving th
 SLUG = "introduction-to-altair-bar-plot"
 OUTPUT_PATH = output_path(SLUG)
 
-HEIGHT, WIDTH = 600, 800
 SAVE_IT = partial(save_vega_embed, output_path=OUTPUT_PATH)
+
+class Chart:
+    year = "year"
+    path = OUTPUT_PATH
+    save = SAVE_IT
+    height = 600
+    width = "container"
 #+end_src
 
 This is to make printing out a pandas dataframe as a table a little nicer.
@@ -114,12 +120,7 @@ column_printer(table)
 | Positive affect                  | float64 |
 | Negative affect                  | float64 |
 
-For this initial post I'll only use the year.
-
-#+begin_src python :results none
-class Column:
-    year = "year"
-#+end_src
+For this initial post I'll only use be using the year.
 
 * Counting the Years
 The dataset has entries for multiple years, each year having entries for different countries. They apparently weren't able to collect data from all countries for all years so the number of countries included changes with the year. As the first chart I'll plot counts for the number of rows in the data for each year.
@@ -129,7 +130,9 @@ The dataset has entries for multiple years, each year having entries for differe
 The first way I'll make the counts for each year is to use pandas' built in ~value_counts~ method, which creates a Series with the counts for each unique item in the column with the name given to it.
 
 #+begin_src python :results none
-year_counts = table.year.value_counts().reset_index().sort_values(Column.year)
+year_counts = (table.year.value_counts()
+               .reset_index()
+               .sort_values(Chart.year))
 #+end_src
 
 By default it puts the "year" label into the index so I used ~reset_index~ to convert it to a column and then sorted it by year so we can get the data in chronological order. First, a table to get a sense of the values we're looking at.
@@ -152,17 +155,17 @@ Since the years look like integers altair (well, vega) will assume that they're 
 
 #+begin_src python :results output :exports both
 RANDOM_HEX = "a897e2c7"
-YEAR_AS_NOMINATIVE = "{}:N".format(Column.year)
+YEAR_AS_NOMINATIVE = "{}:N".format(Chart.year)
 
 VALUE_COUNTS_NAME = "value-counts-bar-chart"
 DIV_ID = VALUE_COUNTS_NAME + "-" + RANDOM_HEX
 
 value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
     x=YEAR_AS_NOMINATIVE,
-    y="count").properties(height=HEIGHT, width=WIDTH)
+    y="count").properties(height=Chart.height, width=Chart.width)
 
 VALUE_COUNTS_JS = VALUE_COUNTS_NAME + ".js"
-SAVE_IT(value_counts_chart, name=VALUE_COUNTS_NAME, div_id=DIV_ID)
+Chart.save(value_counts_chart, name=VALUE_COUNTS_NAME, div_id=DIV_ID)
 #+end_src
 
 {{% altairdiv source="value-counts-bar-chart.js" divid="value-counts-bar-chart-a897e2c7" %}}
