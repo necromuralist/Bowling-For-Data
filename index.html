@@ -25,6 +25,15 @@
     });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/pseudocode@2.4.1/build/pseudocode.min.js"></script>
+<style>
+    .error {
+        color: red;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/vega@5" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5.6.1" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6" type="text/javascript"></script>
 </head>
 <body>
 <a class="sr-only sr-only-focusable" href="#content">Skip to main content</a> <!-- Menubar -->
@@ -65,38 +74,42 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="posts/testing-the-altair-shortcode/index.html#orgf7d9a54">Introduction</a></li>
-<li><a href="posts/testing-the-altair-shortcode/index.html#org41ac705">Setup</a>
+<li><a href="posts/testing-the-altair-shortcode/index.html#org6644e31">Introduction</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#org5a88597">Setup</a>
 <ul>
-<li><a href="posts/testing-the-altair-shortcode/index.html#orge614ece">Imports</a></li>
-<li><a href="posts/testing-the-altair-shortcode/index.html#orgc56c4e0">The Output Path</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#org9a02ffc">Imports</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#org6f66d3c">The Output Path</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#org91e8f59">Constants</a></li>
 </ul>
 </li>
-<li><a href="posts/testing-the-altair-shortcode/index.html#org0bff84a">The Data</a></li>
-<li><a href="posts/testing-the-altair-shortcode/index.html#orgb7eed76">Counting the Years</a>
+<li><a href="posts/testing-the-altair-shortcode/index.html#orgecfc18d">The Data</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#orgbd29a50">Counting the Years</a>
 <ul>
-<li><a href="posts/testing-the-altair-shortcode/index.html#orge6dbf36">A Table To Show the Counts</a></li>
-<li><a href="posts/testing-the-altair-shortcode/index.html#org77e4b27">Now the Bar-Chart</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#orgd5a86d3">A Table To Show the Counts</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#orgf94dc83">Now the Bar-Chart</a></li>
 </ul>
 </li>
-<li><a href="posts/testing-the-altair-shortcode/index.html#org9a99521">And a Line Plot</a></li>
-<li><a href="posts/testing-the-altair-shortcode/index.html#org84ac4bc">The End</a></li>
-<li><a href="posts/testing-the-altair-shortcode/index.html#org99211c6">Links</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#org665fb0f">And a Line Plot</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#org4851192">The End</a></li>
+<li><a href="posts/testing-the-altair-shortcode/index.html#org816f8f0">Links</a></li>
 </ul>
 </div>
 </div>
-<div class="outline-2" id="outline-container-orgf7d9a54">
-<h2 id="orgf7d9a54">Introduction</h2>
-<div class="outline-text-2" id="text-orgf7d9a54">
+<div class="notecard" id="orgddb3b85">
+<p><b>Note:</b> This is an example to myself of a post that uses my nikola/altair setup. It isn't something generally relevant to altair itself.</p>
+</div>
+<div class="outline-2" id="outline-container-org6644e31">
+<h2 id="org6644e31">Introduction</h2>
+<div class="outline-text-2" id="text-org6644e31">
 <p>The way I've been using <a href="https://altair-viz.github.io/index.html">altair</a> is by saving the charts as HTML documents and then embedding them into the posts as pages within the page. This works, so I don't know if this is a good idea or not, but I'm going to try embedding them as HTML elements only, the way I do with p5.js. This is a check to make sure I've got the parts working so nikola will compile everything the way I'm expecting it to.</p>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org41ac705">
-<h2 id="org41ac705">Setup</h2>
-<div class="outline-text-2" id="text-org41ac705"></div>
-<div class="outline-3" id="outline-container-orge614ece">
-<h3 id="orge614ece">Imports</h3>
-<div class="outline-text-3" id="text-orge614ece">
+<div class="outline-2" id="outline-container-org5a88597">
+<h2 id="org5a88597">Setup</h2>
+<div class="outline-text-2" id="text-org5a88597"></div>
+<div class="outline-3" id="outline-container-org9a02ffc">
+<h3 id="org9a02ffc">Imports</h3>
+<div class="outline-text-3" id="text-org9a02ffc">
 <p>These initial imports are for the plotting and not really what this post is testing.</p>
 <div class="highlight">
 <pre><span></span><span class="c1"># python</span>
@@ -106,6 +119,7 @@
 
 <span class="c1"># pypi</span>
 <span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">expect</span>
 <span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
 
 <span class="kn">import</span> <span class="nn">altair</span>
@@ -115,25 +129,42 @@
 <div class="highlight">
 <pre><span></span><span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_vega_embed</span>
 </pre></div>
-<div class="notecard" id="org30affd2">
-<p><b>Note to self:</b> Since I usually run the code to create the plot on a different machine from the one where the nikola code is being run to create this site, the <code>graeae</code> function has to be installed on the remote machine where the plots are created.</p>
+<div class="notecard" id="orgf94524f">
+<p><b>Note to self:</b> Since I usually run the code to create the plot on a different machine from the one where the nikola code is being run to create this site, the <code>graeae</code> function has to be installed on the remote machine where the plots are created, then the file(s) created need to be synced back to the nikola machine to compile the site.</p>
 </div>
 </div>
 </div>
-<div class="outline-3" id="outline-container-orgc56c4e0">
-<h3 id="orgc56c4e0">The Output Path</h3>
-<div class="outline-text-3" id="text-orgc56c4e0">
+<div class="outline-3" id="outline-container-org6f66d3c">
+<h3 id="org6f66d3c">The Output Path</h3>
+<div class="outline-text-3" id="text-org6f66d3c">
 <p>The <code>output_path</code> function takes the slug and checks if there's a folder matching it in the <code>files/posts</code> folder and creates it if it doesn't exist. Its output is a Path to that folder which we can use to tell the code where to save files for the chart.</p>
 <div class="highlight">
 <pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"testing-the-altair-shortcode"</span>
 <span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">OUTPUT_PATH</span><span class="o">.</span><span class="n">is_dir</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="outline-3" id="outline-container-org91e8f59">
+<h3 id="org91e8f59">Constants</h3>
+<div class="outline-text-3" id="text-org91e8f59">
+<p>These are some constants so I don't have to remember them later on.</p>
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Chart</span><span class="p">:</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="s2">"year"</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mi">600</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="s2">"container"</span>
+</pre></div>
+<div class="notecard" id="org8b0b88d">
+<p><b>Note:</b> The <code>width = "container"</code> attribute will tell the chart to use the entire width of the container that the chart is in. In this case it's being put into a <code>&lt;div&gt;</code> tag. To make the div fill the column the CSS is giving its HTML class (<code>altair-vega</code>) a width of 100%. By default the chart will sit flush left but this way it's centered (and big). I'll have to figure out some other solution to get smaller charts centered.</p>
+<p>See the <a href="https://vega.github.io/vega-lite/docs/size.html#specifying-responsive-width-and-height">vega-lite "Responsive Width and Height"</a> documentation</p>
 </div>
-<div class="outline-2" id="outline-container-org0bff84a">
-<h2 id="org0bff84a">The Data</h2>
-<div class="outline-text-2" id="text-org0bff84a">
+</div>
+</div>
+</div>
+<div class="outline-2" id="outline-container-orgecfc18d">
+<h2 id="orgecfc18d">The Data</h2>
+<div class="outline-text-2" id="text-orgecfc18d">
 <p>To have something to plot I'll use the United Nation's World Happiness data, which I downloaded (as excel spreadsheets) and converted to a CSV.</p>
 <div class="highlight">
 <pre><span></span><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -150,24 +181,20 @@
 <p>This is overkill, but I had the idea to do this while in the middle of another post that uses this dataset so it was convenient to cut-and-paste the block here.</p>
 </div>
 </div>
-<div class="outline-2" id="outline-container-orgb7eed76">
-<h2 id="orgb7eed76">Counting the Years</h2>
-<div class="outline-text-2" id="text-orgb7eed76">
+<div class="outline-2" id="outline-container-orgbd29a50">
+<h2 id="orgbd29a50">Counting the Years</h2>
+<div class="outline-text-2" id="text-orgbd29a50">
 <p>The test-plot will be a bar-graph showing the number of entries (countries) for each year in the dataset. The data uses "year" as the name of the column with the years so I'll make a little name holder and then create a data-frame with the counts.</p>
-<div class="highlight">
-<pre><span></span><span class="k">class</span> <span class="nc">Column</span><span class="p">:</span>
-    <span class="n">year</span> <span class="o">=</span> <span class="s2">"year"</span>
-</pre></div>
 <div class="highlight">
 <pre><span></span><span class="n">year_counts</span> <span class="o">=</span> <span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
                <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-               <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">))</span>
+               <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">Chart</span><span class="o">.</span><span class="n">year</span><span class="p">))</span>
 </pre></div>
 <p>The <code>value_counts</code> output has the years as the index of the Series so I'm calling <code>reset_index</code> to move it into a column, giving us a two-column data-frame (with "year" and "counts" as columns).</p>
 </div>
-<div class="outline-3" id="outline-container-orge6dbf36">
-<h3 id="orge6dbf36">A Table To Show the Counts</h3>
-<div class="outline-text-3" id="text-orge6dbf36">
+<div class="outline-3" id="outline-container-orgd5a86d3">
+<h3 id="orgd5a86d3">A Table To Show the Counts</h3>
+<div class="outline-text-3" id="text-orgd5a86d3">
 <p>This is to show the values that we're going to plot.</p>
 <div class="highlight">
 <pre><span></span><span class="n">table_counts</span> <span class="o">=</span> <span class="n">year_counts</span><span class="o">.</span><span class="n">T</span>
@@ -246,10 +273,10 @@
 </table>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org77e4b27">
-<h3 id="org77e4b27">Now the Bar-Chart</h3>
-<div class="outline-text-3" id="text-org77e4b27">
-<p>So, here's what we're testing.</p>
+<div class="outline-3" id="outline-container-orgf94dc83">
+<h3 id="orgf94dc83">Now the Bar-Chart</h3>
+<div class="outline-text-3" id="text-orgf94dc83">
+<p>So, here's the section where we get to what we're testing.</p>
 <p>First, we need an identifier for the HTML <code>div</code> tag so that we can tell Vega where to stick the chart.</p>
 <div class="highlight">
 <pre><span></span><span class="n">DIV_ID</span> <span class="o">=</span> <span class="s2">"value-counts-0d454587"</span>
@@ -257,56 +284,76 @@
 <p>Now we'll create the altair Chart.</p>
 <div class="highlight">
 <pre><span></span><span class="n">value_counts_chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">year_counts</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:N"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
-    <span class="n">y</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:N"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Chart</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">Chart</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">Chart</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
 </pre></div>
-<p>Now to save it. Previously I was using Altair's <code>save</code> method to save it as an HTML document and embedding the entire document within the post using an <code>&lt;object&gt;</code> tag, which seems to work kind of like a frame. I think. Anyway, this version saves the chart as a JavaScript function instead (using the name we pass in for the file-name) which then gets called by <a href="https://github.com/vega/vega-embed">vega-embed</a> to create the chart. The <code>graeae.visualization.altair_helpers.save_vega_embed</code> function is extracting the JSON schema from the chart (using Altair's <code>Chart.to_json()</code>) and adding it to a JavaScript function that I copied from the file created by Altair's <code>Chart.save</code>. The output of the <code>graeae</code> function is the shortcode to tell nikola to embed the chart here.</p>
-<div class="notecard" id="org2231a24">
+<p>Now to save it. Previously I was using Altair's <code>save</code> method to save it as an HTML document and embedding the entire document within the post using an <code>&lt;object&gt;</code> tag, which seems to work kind of like a frame. I think. Anyway, this version saves the chart as a JavaScript function instead (using the name we pass in for the file-name) which then gets called by <a href="https://github.com/vega/vega-embed">vega-embed</a> to create the chart. The <code>graeae.visualization.altair_helpers.save_vega_embed</code> function is extracting the JSON schema from the chart (using Altair's <code>Chart.to_json()</code>) and adding it to a JavaScript function that I copied from the file created by Altair's <code>Chart.save</code>. The <code>graeae</code> function prints the shortcode to tell nikola to embed the chart here and then returns a Path object pointing to the saved file.</p>
+<div class="notecard" id="orgc8f6258">
 <p><b>Note:</b> I haven't figured out how to get <code>jupyter-emacs</code> to dump python output without formatting it as a <code>#+RESULTS</code> block so it will need a little clean up after the function is called. If not, the shortcode will work, but it will also create an empty box underneath it.</p>
 </div>
 <div class="highlight">
-<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">save_vega_embed</span><span class="p">(</span><span class="n">chart</span><span class="o">=</span><span class="n">value_counts_chart</span><span class="p">,</span>
-                      <span class="n">name</span><span class="o">=</span><span class="s2">"value-counts-bar-chart"</span><span class="p">,</span>
-                      <span class="n">div_id</span><span class="o">=</span><span class="n">DIV_ID</span><span class="p">,</span>
-                      <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">))</span>
+<pre><span></span><span class="n">chart_path</span> <span class="o">=</span> <span class="n">save_vega_embed</span><span class="p">(</span><span class="n">chart</span><span class="o">=</span><span class="n">value_counts_chart</span><span class="p">,</span>
+                             <span class="n">name</span><span class="o">=</span><span class="s2">"value-counts-bar-chart"</span><span class="p">,</span>
+                             <span class="n">div_id</span><span class="o">=</span><span class="n">DIV_ID</span><span class="p">,</span>
+                             <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
 </pre></div>
 <p></p>
 <div class="altair-vega" id="value-counts-0d454587"></div>
-<script src="posts/testing-the-altair-shortcode/value-counts-bar-chart.js"></script></div>
+<script src="posts/testing-the-altair-shortcode/value-counts-bar-chart.js"></script>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">chart_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+<pre class="example">
+value-counts-bar-chart.js
+</pre></div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org9a99521">
-<h2 id="org9a99521">And a Line Plot</h2>
-<div class="outline-text-2" id="text-org9a99521">
+<div class="outline-2" id="outline-container-org665fb0f">
+<h2 id="org665fb0f">And a Line Plot</h2>
+<div class="outline-text-2" id="text-org665fb0f">
 <p>I'm going to re-plot the data as a line chart to make sure there's nothing I created that causes them to mess each other up.</p>
 <div class="highlight">
 <pre><span></span><span class="n">line_chart</span> <span class="o">=</span> <span class="n">value_counts_chart</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">save_vega_embed</span><span class="p">(</span><span class="n">line_chart</span><span class="p">,</span>
-                      <span class="n">name</span><span class="o">=</span><span class="s2">"value-counts-line-chart"</span><span class="p">,</span>
-                      <span class="n">div_id</span><span class="o">=</span><span class="s2">"line-chart-0d454587"</span><span class="p">,</span>
-                      <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">))</span>
+<span class="n">save_vega_embed</span><span class="p">(</span><span class="n">line_chart</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">"value-counts-line-chart"</span><span class="p">,</span>
+                <span class="n">div_id</span><span class="o">=</span><span class="s2">"line-chart-0d454587"</span><span class="p">,</span>
+                <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
 </pre></div>
 <p></p>
 <div class="altair-vega" id="line-chart-0d454587"></div>
 <script src="posts/testing-the-altair-shortcode/value-counts-line-chart.js"></script>
-<div class="notecard" id="org1b0367b">
+<div class="notecard" id="orgdfe140c">
 <p><b>Note:</b> The <code>altairdiv</code> shortcode sets the HTML class for the chart's div to "altair-vega" in case it needs styling later.</p>
 </div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org84ac4bc">
-<h2 id="org84ac4bc">The End</h2>
-<div class="outline-text-2" id="text-org84ac4bc">
+<div class="outline-2" id="outline-container-org4851192">
+<h2 id="org4851192">The End</h2>
+<div class="outline-text-2" id="text-org4851192">
 <p>Well, that seems to work. I was originally going to throw this away once things seemed to be all right, but I'll keep it as a future reference in case I forget how to use this stuff later.</p>
+<p>Here's the files that were updated to make this work.</p>
+<ul class="org-ul">
+<li>shortcodes/altairdiv.tmpl</li>
+<li>themes/custom-jinja/templates/
+<ul class="org-ul">
+<li>altair.tmpl</li>
+<li>altair_helper.tmpl</li>
+<li>index.tmpl</li>
+</ul>
+</li>
+</ul>
+<p>As well as <code>graeae.visualization.altair_helpers.save_vega_embed</code>.</p>
+<p>To get the post working it needs <code>.. template: altair.tmpl</code> in the meta-data and the output of the <code>save_vega_embed</code> function cleaned up (to get the shortcode to include the chart).</p>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org99211c6">
-<h2 id="org99211c6">Links</h2>
-<div class="outline-text-2" id="text-org99211c6">
+<div class="outline-2" id="outline-container-org816f8f0">
+<h2 id="org816f8f0">Links</h2>
+<div class="outline-text-2" id="text-org816f8f0">
 <ul class="org-ul">
 <li>Saving Altair Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 16]. Available from: <a href="https://altair-viz.github.io/user_guide/saving_charts.html">https://altair-viz.github.io/user_guide/saving_charts.html</a></li>
 <li>vega/vega-embed [Internet]. Vega; 2024 [cited 2024 Mar 16]. Available from: <a href="https://github.com/vega/vega-embed">https://github.com/vega/vega-embed</a></li>
+<li>Vega-Lite [Internet]. [cited 2024 Mar 20]. Customizing Size. Available from: <a href="https://vega.github.io/vega-lite/docs/size.html">https://vega.github.io/vega-lite/docs/size.html</a></li>
 <li>World Happiness Report [Internet]. 2023 [cited 2023 Dec 11]. Available from: <a href="https://worldhappiness.report/">https://worldhappiness.report/</a></li>
 </ul>
 </div>
@@ -326,63 +373,63 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orge5cf3cf">Setup</a>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgf9ebed1">Setup</a>
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgace8832">Imports</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org6701f53">Some Setting Up</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org5d4e957">Imports</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgfa28ee7">Some Setting Up</a></li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org4b6e0ba">The Data</a>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orga3f0eee">The Data</a>
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgef1c1f0">The Data Columns</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgda61385">The Data Columns</a></li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org315a1cd">Counting the Years</a>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgb3ea7cd">Counting the Years</a>
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgf238ffe">Using Pandas' <code>value_counts</code> Method</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org9d20b74">Using Altair's "count"</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org75d21f1">Comparing the File Sizes</a>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org4d5c0a5">Using Pandas' <code>value_counts</code> Method</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org340eb54">Using Altair's "count"</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org19c3e52">Comparing the File Sizes</a>
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgc65bcc2">The Files In Bytes</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgc280740">The Files In Bytes</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org536c940">A Chart, Part By Part</a>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org7a3c5cc">A Chart, Part By Part</a>
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org7e74596">Altair's Chart</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org8b0cc60">A Bar Chart</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orge1b2303">SchemaBase</a>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org2596e33">Altair's Chart</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org4e7a852">A Bar Chart</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org2f6a6bf">SchemaBase</a>
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgc65ce1e">TopLevelUnitSpec</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgf8ee9d4">TopLevelUnitSpec</a></li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org1599340">Encoded</a>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org5978740">Encoded</a>
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org9fccd14">_EncodingMixin</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgc6e1b96">_EncodingMixin</a></li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgaec6ecb">Properties</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org388da3e">Properties</a></li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgb58ef49">HVPlot</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org2c598f4">Links</a>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org0c3c3d9">HVPlot</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orge9730d3">Links</a>
 <ul>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org61fdbb5">The Posts In This Series</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org0476e77">Tutorial Sources</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org519e30c">The Data</a></li>
-<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orgc4233da">Altair</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org659172d">The Posts In This Series</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org7773b8f">Tutorial Sources</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#org2f3a44f">The Data</a></li>
+<li><a href="posts/introduction-to-altair-countries-per-year/index.html#orga0cfeda">Altair</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div class="outline-2" id="outline-container-orge5cf3cf">
-<h2 id="orge5cf3cf">Setup</h2>
-<div class="outline-text-2" id="text-orge5cf3cf"></div>
-<div class="outline-3" id="outline-container-orgace8832">
-<h3 id="orgace8832">Imports</h3>
-<div class="outline-text-3" id="text-orgace8832">
+<div class="outline-2" id="outline-container-orgf9ebed1">
+<h2 id="orgf9ebed1">Setup</h2>
+<div class="outline-text-2" id="text-orgf9ebed1"></div>
+<div class="outline-3" id="outline-container-org5d4e957">
+<h3 id="org5d4e957">Imports</h3>
+<div class="outline-text-3" id="text-org5d4e957">
 <p>These initial imports are supports to make creating this post easier and aren't necessarily needed for the altair plots.</p>
 <div class="highlight">
 <pre><span></span><span class="c1"># python</span>
@@ -410,9 +457,9 @@
 </pre></div>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org6701f53">
-<h3 id="org6701f53">Some Setting Up</h3>
-<div class="outline-text-3" id="text-org6701f53">
+<div class="outline-3" id="outline-container-orgfa28ee7">
+<h3 id="orgfa28ee7">Some Setting Up</h3>
+<div class="outline-text-3" id="text-orgfa28ee7">
 <p>These are some convenience objects to save a little bit of coding when saving the chart.</p>
 <div class="highlight">
 <pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"introduction-to-altair-countries-per-year"</span>
@@ -433,9 +480,9 @@
 </div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org4b6e0ba">
-<h2 id="org4b6e0ba">The Data</h2>
-<div class="outline-text-2" id="text-org4b6e0ba">
+<div class="outline-2" id="outline-container-orga3f0eee">
+<h2 id="orga3f0eee">The Data</h2>
+<div class="outline-text-2" id="text-orga3f0eee">
 <div class="highlight">
 <pre><span></span><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">table_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"WORLD_HAPPINESS_TABLE"</span><span class="p">))</span>
@@ -448,9 +495,9 @@
 <pre class="example">
 (2199, 11)
 </pre></div>
-<div class="outline-3" id="outline-container-orgef1c1f0">
-<h3 id="orgef1c1f0">The Data Columns</h3>
-<div class="outline-text-3" id="text-orgef1c1f0">
+<div class="outline-3" id="outline-container-orgda61385">
+<h3 id="orgda61385">The Data Columns</h3>
+<div class="outline-text-3" id="text-orgda61385">
 <div class="highlight">
 <pre><span></span><span class="k">def</span> <span class="nf">column_printer</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">(</span><span class="s2">"Column"</span><span class="p">,</span> <span class="s2">"Type"</span><span class="p">)):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">TABLE</span><span class="p">(</span>
@@ -527,12 +574,12 @@
 </div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org315a1cd">
-<h2 id="org315a1cd">Counting the Years</h2>
-<div class="outline-text-2" id="text-org315a1cd"></div>
-<div class="outline-3" id="outline-container-orgf238ffe">
-<h3 id="orgf238ffe">Using Pandas' <code>value_counts</code> Method</h3>
-<div class="outline-text-3" id="text-orgf238ffe">
+<div class="outline-2" id="outline-container-orgb3ea7cd">
+<h2 id="orgb3ea7cd">Counting the Years</h2>
+<div class="outline-text-2" id="text-orgb3ea7cd"></div>
+<div class="outline-3" id="outline-container-org4d5c0a5">
+<h3 id="org4d5c0a5">Using Pandas' <code>value_counts</code> Method</h3>
+<div class="outline-text-3" id="text-org4d5c0a5">
 <div class="highlight">
 <pre><span></span><span class="n">year_counts</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"year"</span><span class="p">)</span>
 </pre></div>
@@ -624,9 +671,9 @@
 <p>Figure Missing</p>
 </object></div>
 </div>
-<div class="outline-3" id="outline-container-org9d20b74">
-<h3 id="org9d20b74">Using Altair's "count"</h3>
-<div class="outline-text-3" id="text-org9d20b74">
+<div class="outline-3" id="outline-container-org340eb54">
+<h3 id="org340eb54">Using Altair's "count"</h3>
+<div class="outline-text-3" id="text-org340eb54">
 <div class="highlight">
 <pre><span></span><span class="n">altair_counts_chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:N"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
@@ -640,12 +687,12 @@
 <p>Figure Missing</p>
 </object></div>
 </div>
-<div class="outline-3" id="outline-container-org75d21f1">
-<h3 id="org75d21f1">Comparing the File Sizes</h3>
-<div class="outline-text-3" id="text-org75d21f1"></div>
-<div class="outline-4" id="outline-container-orgc65bcc2">
-<h4 id="orgc65bcc2">The Files In Bytes</h4>
-<div class="outline-text-4" id="text-orgc65bcc2">
+<div class="outline-3" id="outline-container-org19c3e52">
+<h3 id="org19c3e52">Comparing the File Sizes</h3>
+<div class="outline-text-3" id="text-org19c3e52"></div>
+<div class="outline-4" id="outline-container-orgc280740">
+<h4 id="orgc280740">The Files In Bytes</h4>
+<div class="outline-text-4" id="text-orgc280740">
 <div class="highlight">
 <pre><span></span><span class="n">altair_counts_html</span> <span class="o">=</span> <span class="n">OUTPUT_PATH</span><span class="o">/</span><span class="p">(</span><span class="n">ALTAIR_COUNTS_HTML</span><span class="p">)</span>
 <span class="n">pandas_counts_html</span> <span class="o">=</span> <span class="n">OUTPUT_PATH</span><span class="o">/</span><span class="p">(</span><span class="n">VALUE_COUNTS_HTML</span><span class="p">)</span>
@@ -730,7 +777,7 @@ Name: 17, dtype: int64
 <div class="highlight">
 <pre><span></span><span class="n">data_printer</span><span class="p">(</span><span class="n">altair_soup</span><span class="p">)</span>
 </pre></div>
-<pre class="example" id="orgc0d404e">
+<pre class="example" id="org70ad717">
 'dataset' has 2,199 data entries
 
 Entry 0:
@@ -750,7 +797,7 @@ Entry 0:
 <div class="highlight">
 <pre><span></span><span class="n">frame_print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 </pre></div>
-<pre class="example" id="orge11c4b6">
+<pre class="example" id="orga7e9157">
 Frame has 2,199 rows.
 
 Row 0:
@@ -774,12 +821,12 @@ Name: 0, dtype: object
 </div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org536c940">
-<h2 id="org536c940">A Chart, Part By Part</h2>
-<div class="outline-text-2" id="text-org536c940"></div>
-<div class="outline-3" id="outline-container-org7e74596">
-<h3 id="org7e74596">Altair's Chart</h3>
-<div class="outline-text-3" id="text-org7e74596">
+<div class="outline-2" id="outline-container-org7a3c5cc">
+<h2 id="org7a3c5cc">A Chart, Part By Part</h2>
+<div class="outline-text-2" id="text-org7a3c5cc"></div>
+<div class="outline-3" id="outline-container-org2596e33">
+<h3 id="org2596e33">Altair's Chart</h3>
+<div class="outline-text-3" id="text-org2596e33">
 <div class="highlight">
 <pre><span></span><span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">year_counts</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">chart</span><span class="p">))</span>
@@ -806,9 +853,9 @@ Name: 0, dtype: object
 <p><img alt="nil" src="posts/introduction-to-altair-countries-per-year/chart.png"></p>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org8b0cc60">
-<h3 id="org8b0cc60">A Bar Chart</h3>
-<div class="outline-text-3" id="text-org8b0cc60">
+<div class="outline-3" id="outline-container-org4e7a852">
+<h3 id="org4e7a852">A Bar Chart</h3>
+<div class="outline-text-3" id="text-org4e7a852">
 <p>Once we have a chart object we tell altair that we want it to be a bar chart using the <code>mark_bar</code> method.</p>
 <div class="highlight">
 <pre><span></span><span class="n">bar_chart</span> <span class="o">=</span> <span class="n">chart</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span>
@@ -831,25 +878,25 @@ Original Chart mark: 'Undefined'
 Bar Chart mark: 'bar'
 </pre></div>
 </div>
-<div class="outline-3" id="outline-container-orge1b2303">
-<h3 id="orge1b2303">SchemaBase</h3>
-<div class="outline-text-3" id="text-orge1b2303">
+<div class="outline-3" id="outline-container-org2f6a6bf">
+<h3 id="org2f6a6bf">SchemaBase</h3>
+<div class="outline-text-3" id="text-org2f6a6bf">
 <p><code>altair.utils.schemapi</code>.</p>
 <p><img alt="nil" src="posts/introduction-to-altair-countries-per-year/schema-base.png"></p>
 <p>There are many more methods in <code>altair.utils.schemapi.SchemaBase</code> but I'm highlighting <code>copy</code> here because it gets used quite a bit by the other classes but is defined in this somewhat obscure place. The behavior is what you'd expect so I don't see a need to go over it, but it's one of those mystery methods that just pops up when you use deep inheritance like this that makes you wonder what's going on so I'll document it here, for now.</p>
 </div>
-<div class="outline-4" id="outline-container-orgc65ce1e">
-<h4 id="orgc65ce1e">TopLevelUnitSpec</h4>
-<div class="outline-text-4" id="text-orgc65ce1e">
+<div class="outline-4" id="outline-container-orgf8ee9d4">
+<h4 id="orgf8ee9d4">TopLevelUnitSpec</h4>
+<div class="outline-text-4" id="text-orgf8ee9d4">
 <p>If you look at the parents of the <code>Chart</code> you might notice that it doesn't have the <code>SchemaBase</code> as one of its parents. So how does it end up with the <code>copy</code> method? Well, it does have the <code>core.TopLevelUnitSpec</code> as one of its parents and that in turn (eventually) inherits from the <code>SchemaBase</code>.</p>
 <p><img alt="nil" src="posts/introduction-to-altair-countries-per-year/top-level-unit-spec.png"></p>
 <p>I didn't put in the modules for the <code>core</code> classes since they are fairly deep.</p>
 </div>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org1599340">
-<h3 id="org1599340">Encoded</h3>
-<div class="outline-text-3" id="text-org1599340">
+<div class="outline-3" id="outline-container-org5978740">
+<h3 id="org5978740">Encoded</h3>
+<div class="outline-text-3" id="text-org5978740">
 <p>The <code>encode</code> method is where we tell <code>altair</code> which columns match which parts of the chart. In this case we're only setting the <i>x</i> and <i>y</i> axes.</p>
 <div class="highlight">
 <pre><span></span><span class="n">encoded</span> <span class="o">=</span> <span class="n">bar_chart</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
@@ -861,9 +908,9 @@ Bar Chart mark: 'bar'
 <pre class="example">
 &lt;class 'altair.vegalite.v5.api.Chart'&gt;
 </pre></div>
-<div class="outline-4" id="outline-container-org9fccd14">
-<h4 id="org9fccd14">_EncodingMixin</h4>
-<div class="outline-text-4" id="text-org9fccd14">
+<div class="outline-4" id="outline-container-orgc6e1b96">
+<h4 id="orgc6e1b96">_EncodingMixin</h4>
+<div class="outline-text-4" id="text-orgc6e1b96">
 <p>The <code>encode</code> method is defined in the <code>_EncodingMixin</code> class, one of the <code>Chart</code>'s parents.</p>
 <p><img alt="nil" src="posts/introduction-to-altair-countries-per-year/encoding-mixin.png"></p>
 <p>The <code>encoding</code> method takes in whatever combination of positional and keyword arguments you pass into it and then:</p>
@@ -888,9 +935,9 @@ FacetedEncoding({
 </pre></div>
 </div>
 </div>
-<div class="outline-3" id="outline-container-orgaec6ecb">
-<h3 id="orgaec6ecb">Properties</h3>
-<div class="outline-text-3" id="text-orgaec6ecb">
+<div class="outline-3" id="outline-container-org388da3e">
+<h3 id="org388da3e">Properties</h3>
+<div class="outline-text-3" id="text-org388da3e">
 <div class="highlight">
 <pre><span></span><span class="n">propertied</span> <span class="o">=</span> <span class="n">encoded</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">HEIGHT</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">WIDTH</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">propertied</span><span class="p">))</span>
@@ -925,32 +972,32 @@ bar
 </pre></div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-orgb58ef49">
-<h2 id="orgb58ef49">HVPlot</h2>
+<div class="outline-2" id="outline-container-org0c3c3d9">
+<h2 id="org0c3c3d9">HVPlot</h2>
 </div>
-<div class="outline-2" id="outline-container-org2c598f4">
-<h2 id="org2c598f4">Links</h2>
-<div class="outline-text-2" id="text-org2c598f4"></div>
-<div class="outline-3" id="outline-container-org61fdbb5">
-<h3 id="org61fdbb5">The Posts In This Series</h3>
-<div class="outline-text-3" id="text-org61fdbb5">
+<div class="outline-2" id="outline-container-orge9730d3">
+<h2 id="orge9730d3">Links</h2>
+<div class="outline-text-2" id="text-orge9730d3"></div>
+<div class="outline-3" id="outline-container-org659172d">
+<h3 id="org659172d">The Posts In This Series</h3>
+<div class="outline-text-3" id="text-org659172d">
 <ul class="org-ul">
 <li><a href="posts/introduction-to-altair/index.html">Starting Post</a></li>
 </ul>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org0476e77">
-<h3 id="org0476e77">Tutorial Sources</h3>
-<div class="outline-text-3" id="text-org0476e77">
+<div class="outline-3" id="outline-container-org7773b8f">
+<h3 id="org7773b8f">Tutorial Sources</h3>
+<div class="outline-text-3" id="text-org7773b8f">
 <ul class="org-ul">
 <li><a href="https://www.coursera.org/learn/fundamentals-of-data-visualization/home/week/1"><i>Fundamentals of Visualization with Dr. Danielle Albers Szafir</i></a>: Coursera course where the original tutorial came from.</li>
 <li><a href="https://infovis.fh-potsdam.de/tutorials/">InfoVis Course from Marian Dork</a>: Iniversity of Applied Sciences Potsdam that the Coursera course cites as the source for their tutorial.</li>
 </ul>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org519e30c">
-<h3 id="org519e30c">The Data</h3>
-<div class="outline-text-3" id="text-org519e30c">
+<div class="outline-3" id="outline-container-org2f3a44f">
+<h3 id="org2f3a44f">The Data</h3>
+<div class="outline-text-3" id="text-org2f3a44f">
 <ul class="org-ul">
 <li>World Happiness Report Dataset [Internet]. [cited 2023 Dec 11]. Available from: <a href="https://www.kaggle.com/datasets/unsdsn/world-happiness">https://www.kaggle.com/datasets/unsdsn/world-happiness</a></li>
 <li>Inc G. Gallup.com. 2009 [cited 2023 Dec 11]. Understanding How Gallup Uses the Cantril Scale. Available from: <a href="https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx">https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx</a></li>
@@ -958,9 +1005,9 @@ bar
 </ul>
 </div>
 </div>
-<div class="outline-3" id="outline-container-orgc4233da">
-<h3 id="orgc4233da">Altair</h3>
-<div class="outline-text-3" id="text-orgc4233da">
+<div class="outline-3" id="outline-container-orga0cfeda">
+<h3 id="orga0cfeda">Altair</h3>
+<div class="outline-text-3" id="text-orga0cfeda">
 <ul class="org-ul">
 <li>Layered and Multi-View Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2023 Dec 12]. Available from: <a href="https://altair-viz.github.io/user_guide/compound_charts.html">https://altair-viz.github.io/user_guide/compound_charts.html</a></li>
 <li>Large Datasets — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 8]. Available from: <a href="https://altair-viz.github.io/user_guide/large_datasets.html">https://altair-viz.github.io/user_guide/large_datasets.html</a></li>
@@ -983,50 +1030,50 @@ bar
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="posts/introduction-to-altair/index.html#orga5f1238">Posts</a></li>
-<li><a href="posts/introduction-to-altair/index.html#orgd3ca120">Setup</a></li>
-<li><a href="posts/introduction-to-altair/index.html#org375ca3b">The Data</a>
+<li><a href="posts/introduction-to-altair/index.html#org6594ee8">Posts</a></li>
+<li><a href="posts/introduction-to-altair/index.html#orgc2408c1">Setup</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org29eaff9">The Data</a>
 <ul>
-<li><a href="posts/introduction-to-altair/index.html#orgf65cda5">Creating a Chart</a>
+<li><a href="posts/introduction-to-altair/index.html#orgecec026">Creating a Chart</a>
 <ul>
-<li><a href="posts/introduction-to-altair/index.html#orgeadfeac">TopLevelUnitSpec</a></li>
-<li><a href="posts/introduction-to-altair/index.html#org094d23b">SchemaBase</a></li>
-<li><a href="posts/introduction-to-altair/index.html#orgd252d48">_EncodingMixin</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org0ab5a08">TopLevelUnitSpec</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org14d9206">SchemaBase</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org7fbcd77">_EncodingMixin</a></li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair/index.html#org9523f3e">Making It a Bar Chart</a></li>
-<li><a href="posts/introduction-to-altair/index.html#org03939ca">Year</a></li>
-<li><a href="posts/introduction-to-altair/index.html#org4ec804a">Life Ladder</a>
+<li><a href="posts/introduction-to-altair/index.html#org9329961">Making It a Bar Chart</a></li>
+<li><a href="posts/introduction-to-altair/index.html#orgb6bc893">Year</a></li>
+<li><a href="posts/introduction-to-altair/index.html#orgcfa641d">Life Ladder</a>
 <ul>
-<li><a href="posts/introduction-to-altair/index.html#orgd80cca0">By Year</a></li>
-<li><a href="posts/introduction-to-altair/index.html#org3d6161a">The Most Recent Year (2022)</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org3256ec2">By Year</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org1dda8fb">The Most Recent Year (2022)</a></li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair/index.html#org19df080">GDP</a></li>
-<li><a href="posts/introduction-to-altair/index.html#org7123d88">With Generosity</a></li>
+<li><a href="posts/introduction-to-altair/index.html#orgf050026">GDP</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org6ad2b1e">With Generosity</a></li>
 </ul>
 </li>
-<li><a href="posts/introduction-to-altair/index.html#org457b02b">Links</a>
+<li><a href="posts/introduction-to-altair/index.html#org55ad1f5">Links</a>
 <ul>
-<li><a href="posts/introduction-to-altair/index.html#org4700c4e">Tutorial Sources</a></li>
-<li><a href="posts/introduction-to-altair/index.html#org8bf0722">The Data</a></li>
-<li><a href="posts/introduction-to-altair/index.html#org9608b67">Altair</a></li>
+<li><a href="posts/introduction-to-altair/index.html#orgf9a4b79">Tutorial Sources</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org4df18e6">The Data</a></li>
+<li><a href="posts/introduction-to-altair/index.html#org3cf6f26">Altair</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div class="outline-2" id="outline-container-orga5f1238">
-<h2 id="orga5f1238">Posts</h2>
-<div class="outline-text-2" id="text-orga5f1238">
+<div class="outline-2" id="outline-container-org6594ee8">
+<h2 id="org6594ee8">Posts</h2>
+<div class="outline-text-2" id="text-org6594ee8">
 <ul class="org-ul">
 <li><a href="posts/introduction-to-altair-countries-per-year/index.html">Countries Per Year</a></li>
 </ul>
 </div>
 </div>
-<div class="outline-2" id="outline-container-orgd3ca120">
-<h2 id="orgd3ca120">Setup</h2>
-<div class="outline-text-2" id="text-orgd3ca120">
+<div class="outline-2" id="outline-container-orgc2408c1">
+<h2 id="orgc2408c1">Setup</h2>
+<div class="outline-text-2" id="text-orgc2408c1">
 <div class="highlight">
 <pre><span></span><span class="c1"># python</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
@@ -1059,9 +1106,9 @@ bar
 </pre></div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org375ca3b">
-<h2 id="org375ca3b">The Data</h2>
-<div class="outline-text-2" id="text-org375ca3b">
+<div class="outline-2" id="outline-container-org29eaff9">
+<h2 id="org29eaff9">The Data</h2>
+<div class="outline-text-2" id="text-org29eaff9">
 <div class="highlight">
 <pre><span></span><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">table_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"WORLD_HAPPINESS_TABLE"</span><span class="p">))</span>
@@ -1152,9 +1199,9 @@ bar
     <span class="n">generosity</span> <span class="o">=</span> <span class="s2">"Generosity"</span>
 </pre></div>
 </div>
-<div class="outline-3" id="outline-container-orgf65cda5">
-<h3 id="orgf65cda5">Creating a Chart</h3>
-<div class="outline-text-3" id="text-orgf65cda5">
+<div class="outline-3" id="outline-container-orgecec026">
+<h3 id="orgecec026">Creating a Chart</h3>
+<div class="outline-text-3" id="text-orgecec026">
 <div class="highlight">
 <pre><span></span><span class="n">chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">chart</span><span class="p">))</span>
@@ -1179,33 +1226,33 @@ bar
 <p><img alt="Chart Class" src="posts/introduction-to-altair/chart.png"></p>
 <p>The methods take arguments, but I believe <code>interactive</code> (which I haven't seen called with arguments) is the only method that I'll be using - all the other methods you use belong to parent classes.</p>
 </div>
-<div class="outline-4" id="outline-container-orgeadfeac">
-<h4 id="orgeadfeac">TopLevelUnitSpec</h4>
-<div class="outline-text-4" id="text-orgeadfeac">
+<div class="outline-4" id="outline-container-org0ab5a08">
+<h4 id="org0ab5a08">TopLevelUnitSpec</h4>
+<div class="outline-text-4" id="text-org0ab5a08">
 <p><img alt="nil" src="posts/introduction-to-altair/top-level-unit-spec.png"></p>
 <p>Only the top-most parent (<code>SchemaBase</code>) has a method of interest here.</p>
 </div>
 </div>
-<div class="outline-4" id="outline-container-org094d23b">
-<h4 id="org094d23b">SchemaBase</h4>
-<div class="outline-text-4" id="text-org094d23b">
+<div class="outline-4" id="outline-container-org14d9206">
+<h4 id="org14d9206">SchemaBase</h4>
+<div class="outline-text-4" id="text-org14d9206">
 <p><img alt="nil" src="posts/introduction-to-altair/schema-base.png"></p>
 <p>There are many more methods in <code>altair.utils.schemapi.SchemaBase</code> but I'm highlighting <code>copy</code> here because it gets used quite a bit by the other classes but is defined in this somewhat obscure place. The behavior is what you'd expect so I don't see a need to go over it, but it's one of those mystery methods that just pops up when you use deep inheritance like this that makes you wonder what's going on so I'll document it here, for now.</p>
 <p><b>note:</b> The details of the code probably shouldn't go into the introduction-introduction. Maybe put this stuff further down or in another post.</p>
 </div>
 </div>
-<div class="outline-4" id="outline-container-orgd252d48">
-<h4 id="orgd252d48">_EncodingMixin</h4>
-<div class="outline-text-4" id="text-orgd252d48">
+<div class="outline-4" id="outline-container-org7fbcd77">
+<h4 id="org7fbcd77">_EncodingMixin</h4>
+<div class="outline-text-4" id="text-org7fbcd77">
 <p><img alt="nil" src="posts/introduction-to-altair/encoding-mixin.png"></p>
 <p>The <code>encoding</code> method takes in whatever combination of positional and keyword arguments you pass into it and uses them along with the values that are already set in the Chart's <code>encoding</code> attribute to update the <code>encoding</code> before returning the chart (a copy so the original chart isn't changed).</p>
 <p>The <code>encoding</code> attribute is an instance of the <code>altair.vegalite.v5.schema.FacetedEncoding</code> class.</p>
 </div>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org9523f3e">
-<h3 id="org9523f3e">Making It a Bar Chart</h3>
-<div class="outline-text-3" id="text-org9523f3e">
+<div class="outline-3" id="outline-container-org9329961">
+<h3 id="org9329961">Making It a Bar Chart</h3>
+<div class="outline-text-3" id="text-org9329961">
 <div class="highlight">
 <pre><span></span><span class="n">bar_chart</span> <span class="o">=</span> <span class="n">chart</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bar_chart</span><span class="p">))</span>
@@ -1224,9 +1271,9 @@ Chart Mark: 'Undefined'
 Bart Chart Mark: 'bar'
 </pre></div>
 </div>
-<div class="outline-3" id="outline-container-org03939ca">
-<h3 id="org03939ca">Year</h3>
-<div class="outline-text-3" id="text-org03939ca">
+<div class="outline-3" id="outline-container-orgb6bc893">
+<h3 id="orgb6bc893">Year</h3>
+<div class="outline-text-3" id="text-orgb6bc893">
 <div class="highlight">
 <pre><span></span><span class="n">year_counts</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"year"</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 <span class="n">year_counts</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">year_counts</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1318,12 +1365,12 @@ Bart Chart Mark: 'bar'
 <p>This method makes a copy of the class, validates the arguments and then sets the properties on itself. The arguments are based on the JSON Schema passed to vega-lite.</p>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org4ec804a">
-<h3 id="org4ec804a">Life Ladder</h3>
-<div class="outline-text-3" id="text-org4ec804a"></div>
-<div class="outline-4" id="outline-container-orgd80cca0">
-<h4 id="orgd80cca0">By Year</h4>
-<div class="outline-text-4" id="text-orgd80cca0">
+<div class="outline-3" id="outline-container-orgcfa641d">
+<h3 id="orgcfa641d">Life Ladder</h3>
+<div class="outline-text-3" id="text-orgcfa641d"></div>
+<div class="outline-4" id="outline-container-org3256ec2">
+<h4 id="org3256ec2">By Year</h4>
+<div class="outline-text-4" id="text-org3256ec2">
 <div class="highlight">
 <pre><span></span><span class="n">boxplot</span> <span class="o">=</span> <span class="n">chart</span><span class="o">.</span><span class="n">mark_boxplot</span><span class="p">(</span><span class="n">extent</span><span class="o">=</span><span class="s2">"min-max"</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:O"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
@@ -1336,9 +1383,9 @@ Bart Chart Mark: 'bar'
 <p>Figure Missing</p>
 </object></div>
 </div>
-<div class="outline-4" id="outline-container-org3d6161a">
-<h4 id="org3d6161a">The Most Recent Year (2022)</h4>
-<div class="outline-text-4" id="text-org3d6161a">
+<div class="outline-4" id="outline-container-org1dda8fb">
+<h4 id="org1dda8fb">The Most Recent Year (2022)</h4>
+<div class="outline-text-4" id="text-org1dda8fb">
 <div class="highlight">
 <pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 </pre></div>
@@ -1364,9 +1411,9 @@ int64
 </object></div>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org19df080">
-<h3 id="org19df080">GDP</h3>
-<div class="outline-text-3" id="text-org19df080">
+<div class="outline-3" id="outline-container-orgf050026">
+<h3 id="orgf050026">GDP</h3>
+<div class="outline-text-3" id="text-orgf050026">
 <div class="highlight">
 <pre><span></span><span class="n">scatter</span> <span class="o">=</span> <span class="n">chart_2022</span><span class="o">.</span><span class="n">mark_circle</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">scatter</span><span class="o">.</span><span class="n">mark</span><span class="p">)</span>
@@ -1386,9 +1433,9 @@ circle
 <p>Figure Missing</p>
 </object></div>
 </div>
-<div class="outline-3" id="outline-container-org7123d88">
-<h3 id="org7123d88">With Generosity</h3>
-<div class="outline-text-3" id="text-org7123d88">
+<div class="outline-3" id="outline-container-org6ad2b1e">
+<h3 id="org6ad2b1e">With Generosity</h3>
+<div class="outline-text-3" id="text-org6ad2b1e">
 <div class="highlight">
 <pre><span></span><span class="n">gdp_generosity</span> <span class="o">=</span> <span class="n">scatter</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="n">Column</span><span class="o">.</span><span class="n">happiness</span><span class="p">,</span>
@@ -1405,21 +1452,21 @@ circle
 </object></div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org457b02b">
-<h2 id="org457b02b">Links</h2>
-<div class="outline-text-2" id="text-org457b02b"></div>
-<div class="outline-3" id="outline-container-org4700c4e">
-<h3 id="org4700c4e">Tutorial Sources</h3>
-<div class="outline-text-3" id="text-org4700c4e">
+<div class="outline-2" id="outline-container-org55ad1f5">
+<h2 id="org55ad1f5">Links</h2>
+<div class="outline-text-2" id="text-org55ad1f5"></div>
+<div class="outline-3" id="outline-container-orgf9a4b79">
+<h3 id="orgf9a4b79">Tutorial Sources</h3>
+<div class="outline-text-3" id="text-orgf9a4b79">
 <ul class="org-ul">
 <li><a href="https://www.coursera.org/learn/fundamentals-of-data-visualization/home/week/1"><i>Fundamentals of Visualization with Dr. Danielle Albers Szafir</i></a>: Coursera course where the original tutorial came from.</li>
 <li><a href="https://infovis.fh-potsdam.de/tutorials/">InfoVis Course from Marian Dork</a>: Iniversity of Applied Sciences Potsdam that the Coursera course cites as the source for their tutorial.</li>
 </ul>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org8bf0722">
-<h3 id="org8bf0722">The Data</h3>
-<div class="outline-text-3" id="text-org8bf0722">
+<div class="outline-3" id="outline-container-org4df18e6">
+<h3 id="org4df18e6">The Data</h3>
+<div class="outline-text-3" id="text-org4df18e6">
 <ul class="org-ul">
 <li>World Happiness Report Dataset [Internet]. [cited 2023 Dec 11]. Available from: <a href="https://www.kaggle.com/datasets/unsdsn/world-happiness">https://www.kaggle.com/datasets/unsdsn/world-happiness</a></li>
 <li>Inc G. Gallup.com. 2009 [cited 2023 Dec 11]. Understanding How Gallup Uses the Cantril Scale. Available from: <a href="https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx">https://news.gallup.com/poll/122453/Understanding-Gallup-Uses-Cantril-Scale.aspx</a></li>
@@ -1427,9 +1474,9 @@ circle
 </ul>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org9608b67">
-<h3 id="org9608b67">Altair</h3>
-<div class="outline-text-3" id="text-org9608b67">
+<div class="outline-3" id="outline-container-org3cf6f26">
+<h3 id="org3cf6f26">Altair</h3>
+<div class="outline-text-3" id="text-org3cf6f26">
 <ul class="org-ul">
 <li>Layered and Multi-View Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2023 Dec 12]. Available from: <a href="https://altair-viz.github.io/user_guide/compound_charts.html">https://altair-viz.github.io/user_guide/compound_charts.html</a></li>
 </ul>

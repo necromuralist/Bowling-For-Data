@@ -73,38 +73,42 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="index.html#orgf7d9a54">Introduction</a></li>
-<li><a href="index.html#org41ac705">Setup</a>
+<li><a href="index.html#org6644e31">Introduction</a></li>
+<li><a href="index.html#org5a88597">Setup</a>
 <ul>
-<li><a href="index.html#orge614ece">Imports</a></li>
-<li><a href="index.html#orgc56c4e0">The Output Path</a></li>
+<li><a href="index.html#org9a02ffc">Imports</a></li>
+<li><a href="index.html#org6f66d3c">The Output Path</a></li>
+<li><a href="index.html#org91e8f59">Constants</a></li>
 </ul>
 </li>
-<li><a href="index.html#org0bff84a">The Data</a></li>
-<li><a href="index.html#orgb7eed76">Counting the Years</a>
+<li><a href="index.html#orgecfc18d">The Data</a></li>
+<li><a href="index.html#orgbd29a50">Counting the Years</a>
 <ul>
-<li><a href="index.html#orge6dbf36">A Table To Show the Counts</a></li>
-<li><a href="index.html#org77e4b27">Now the Bar-Chart</a></li>
+<li><a href="index.html#orgd5a86d3">A Table To Show the Counts</a></li>
+<li><a href="index.html#orgf94dc83">Now the Bar-Chart</a></li>
 </ul>
 </li>
-<li><a href="index.html#org9a99521">And a Line Plot</a></li>
-<li><a href="index.html#org84ac4bc">The End</a></li>
-<li><a href="index.html#org99211c6">Links</a></li>
+<li><a href="index.html#org665fb0f">And a Line Plot</a></li>
+<li><a href="index.html#org4851192">The End</a></li>
+<li><a href="index.html#org816f8f0">Links</a></li>
 </ul>
 </div>
 </div>
-<div class="outline-2" id="outline-container-orgf7d9a54">
-<h2 id="orgf7d9a54">Introduction</h2>
-<div class="outline-text-2" id="text-orgf7d9a54">
+<div class="notecard" id="orgddb3b85">
+<p><b>Note:</b> This is an example to myself of a post that uses my nikola/altair setup. It isn't something generally relevant to altair itself.</p>
+</div>
+<div class="outline-2" id="outline-container-org6644e31">
+<h2 id="org6644e31">Introduction</h2>
+<div class="outline-text-2" id="text-org6644e31">
 <p>The way I've been using <a href="https://altair-viz.github.io/index.html">altair</a> is by saving the charts as HTML documents and then embedding them into the posts as pages within the page. This works, so I don't know if this is a good idea or not, but I'm going to try embedding them as HTML elements only, the way I do with p5.js. This is a check to make sure I've got the parts working so nikola will compile everything the way I'm expecting it to.</p>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org41ac705">
-<h2 id="org41ac705">Setup</h2>
-<div class="outline-text-2" id="text-org41ac705"></div>
-<div class="outline-3" id="outline-container-orge614ece">
-<h3 id="orge614ece">Imports</h3>
-<div class="outline-text-3" id="text-orge614ece">
+<div class="outline-2" id="outline-container-org5a88597">
+<h2 id="org5a88597">Setup</h2>
+<div class="outline-text-2" id="text-org5a88597"></div>
+<div class="outline-3" id="outline-container-org9a02ffc">
+<h3 id="org9a02ffc">Imports</h3>
+<div class="outline-text-3" id="text-org9a02ffc">
 <p>These initial imports are for the plotting and not really what this post is testing.</p>
 <div class="highlight">
 <pre><span></span><span class="c1"># python</span>
@@ -114,6 +118,7 @@
 
 <span class="c1"># pypi</span>
 <span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">be_true</span><span class="p">,</span> <span class="n">expect</span>
 <span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
 
 <span class="kn">import</span> <span class="nn">altair</span>
@@ -123,25 +128,42 @@
 <div class="highlight">
 <pre><span></span><span class="kn">from</span> <span class="nn">graeae.visualization.altair_helpers</span> <span class="kn">import</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">save_vega_embed</span>
 </pre></div>
-<div class="notecard" id="org30affd2">
-<p><b>Note to self:</b> Since I usually run the code to create the plot on a different machine from the one where the nikola code is being run to create this site, the <code>graeae</code> function has to be installed on the remote machine where the plots are created.</p>
+<div class="notecard" id="orgf94524f">
+<p><b>Note to self:</b> Since I usually run the code to create the plot on a different machine from the one where the nikola code is being run to create this site, the <code>graeae</code> function has to be installed on the remote machine where the plots are created, then the file(s) created need to be synced back to the nikola machine to compile the site.</p>
 </div>
 </div>
 </div>
-<div class="outline-3" id="outline-container-orgc56c4e0">
-<h3 id="orgc56c4e0">The Output Path</h3>
-<div class="outline-text-3" id="text-orgc56c4e0">
+<div class="outline-3" id="outline-container-org6f66d3c">
+<h3 id="org6f66d3c">The Output Path</h3>
+<div class="outline-text-3" id="text-org6f66d3c">
 <p>The <code>output_path</code> function takes the slug and checks if there's a folder matching it in the <code>files/posts</code> folder and creates it if it doesn't exist. Its output is a Path to that folder which we can use to tell the code where to save files for the chart.</p>
 <div class="highlight">
 <pre><span></span><span class="n">SLUG</span> <span class="o">=</span> <span class="s2">"testing-the-altair-shortcode"</span>
 <span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="n">output_path</span><span class="p">(</span><span class="n">SLUG</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="n">OUTPUT_PATH</span><span class="o">.</span><span class="n">is_dir</span><span class="p">())</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="outline-3" id="outline-container-org91e8f59">
+<h3 id="org91e8f59">Constants</h3>
+<div class="outline-text-3" id="text-org91e8f59">
+<p>These are some constants so I don't have to remember them later on.</p>
+<div class="highlight">
+<pre><span></span><span class="k">class</span> <span class="nc">Chart</span><span class="p">:</span>
+    <span class="n">year</span> <span class="o">=</span> <span class="s2">"year"</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="mi">600</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="s2">"container"</span>
+</pre></div>
+<div class="notecard" id="org8b0b88d">
+<p><b>Note:</b> The <code>width = "container"</code> attribute will tell the chart to use the entire width of the container that the chart is in. In this case it's being put into a <code>&lt;div&gt;</code> tag. To make the div fill the column the CSS is giving its HTML class (<code>altair-vega</code>) a width of 100%. By default the chart will sit flush left but this way it's centered (and big). I'll have to figure out some other solution to get smaller charts centered.</p>
+<p>See the <a href="https://vega.github.io/vega-lite/docs/size.html#specifying-responsive-width-and-height">vega-lite "Responsive Width and Height"</a> documentation</p>
 </div>
-<div class="outline-2" id="outline-container-org0bff84a">
-<h2 id="org0bff84a">The Data</h2>
-<div class="outline-text-2" id="text-org0bff84a">
+</div>
+</div>
+</div>
+<div class="outline-2" id="outline-container-orgecfc18d">
+<h2 id="orgecfc18d">The Data</h2>
+<div class="outline-text-2" id="text-orgecfc18d">
 <p>To have something to plot I'll use the United Nation's World Happiness data, which I downloaded (as excel spreadsheets) and converted to a CSV.</p>
 <div class="highlight">
 <pre><span></span><span class="n">load_dotenv</span><span class="p">(</span><span class="n">override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -158,24 +180,20 @@
 <p>This is overkill, but I had the idea to do this while in the middle of another post that uses this dataset so it was convenient to cut-and-paste the block here.</p>
 </div>
 </div>
-<div class="outline-2" id="outline-container-orgb7eed76">
-<h2 id="orgb7eed76">Counting the Years</h2>
-<div class="outline-text-2" id="text-orgb7eed76">
+<div class="outline-2" id="outline-container-orgbd29a50">
+<h2 id="orgbd29a50">Counting the Years</h2>
+<div class="outline-text-2" id="text-orgbd29a50">
 <p>The test-plot will be a bar-graph showing the number of entries (countries) for each year in the dataset. The data uses "year" as the name of the column with the years so I'll make a little name holder and then create a data-frame with the counts.</p>
-<div class="highlight">
-<pre><span></span><span class="k">class</span> <span class="nc">Column</span><span class="p">:</span>
-    <span class="n">year</span> <span class="o">=</span> <span class="s2">"year"</span>
-</pre></div>
 <div class="highlight">
 <pre><span></span><span class="n">year_counts</span> <span class="o">=</span> <span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
                <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-               <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">))</span>
+               <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">Chart</span><span class="o">.</span><span class="n">year</span><span class="p">))</span>
 </pre></div>
 <p>The <code>value_counts</code> output has the years as the index of the Series so I'm calling <code>reset_index</code> to move it into a column, giving us a two-column data-frame (with "year" and "counts" as columns).</p>
 </div>
-<div class="outline-3" id="outline-container-orge6dbf36">
-<h3 id="orge6dbf36">A Table To Show the Counts</h3>
-<div class="outline-text-3" id="text-orge6dbf36">
+<div class="outline-3" id="outline-container-orgd5a86d3">
+<h3 id="orgd5a86d3">A Table To Show the Counts</h3>
+<div class="outline-text-3" id="text-orgd5a86d3">
 <p>This is to show the values that we're going to plot.</p>
 <div class="highlight">
 <pre><span></span><span class="n">table_counts</span> <span class="o">=</span> <span class="n">year_counts</span><span class="o">.</span><span class="n">T</span>
@@ -254,10 +272,10 @@
 </table>
 </div>
 </div>
-<div class="outline-3" id="outline-container-org77e4b27">
-<h3 id="org77e4b27">Now the Bar-Chart</h3>
-<div class="outline-text-3" id="text-org77e4b27">
-<p>So, here's what we're testing.</p>
+<div class="outline-3" id="outline-container-orgf94dc83">
+<h3 id="orgf94dc83">Now the Bar-Chart</h3>
+<div class="outline-text-3" id="text-orgf94dc83">
+<p>So, here's the section where we get to what we're testing.</p>
 <p>First, we need an identifier for the HTML <code>div</code> tag so that we can tell Vega where to stick the chart.</p>
 <div class="highlight">
 <pre><span></span><span class="n">DIV_ID</span> <span class="o">=</span> <span class="s2">"value-counts-0d454587"</span>
@@ -265,56 +283,76 @@
 <p>Now we'll create the altair Chart.</p>
 <div class="highlight">
 <pre><span></span><span class="n">value_counts_chart</span> <span class="o">=</span> <span class="n">altair</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">year_counts</span><span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
-    <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:N"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Column</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
-    <span class="n">y</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">:N"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Chart</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">Chart</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">Chart</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
 </pre></div>
-<p>Now to save it. Previously I was using Altair's <code>save</code> method to save it as an HTML document and embedding the entire document within the post using an <code>&lt;object&gt;</code> tag, which seems to work kind of like a frame. I think. Anyway, this version saves the chart as a JavaScript function instead (using the name we pass in for the file-name) which then gets called by <a href="https://github.com/vega/vega-embed">vega-embed</a> to create the chart. The <code>graeae.visualization.altair_helpers.save_vega_embed</code> function is extracting the JSON schema from the chart (using Altair's <code>Chart.to_json()</code>) and adding it to a JavaScript function that I copied from the file created by Altair's <code>Chart.save</code>. The output of the <code>graeae</code> function is the shortcode to tell nikola to embed the chart here.</p>
-<div class="notecard" id="org2231a24">
+<p>Now to save it. Previously I was using Altair's <code>save</code> method to save it as an HTML document and embedding the entire document within the post using an <code>&lt;object&gt;</code> tag, which seems to work kind of like a frame. I think. Anyway, this version saves the chart as a JavaScript function instead (using the name we pass in for the file-name) which then gets called by <a href="https://github.com/vega/vega-embed">vega-embed</a> to create the chart. The <code>graeae.visualization.altair_helpers.save_vega_embed</code> function is extracting the JSON schema from the chart (using Altair's <code>Chart.to_json()</code>) and adding it to a JavaScript function that I copied from the file created by Altair's <code>Chart.save</code>. The <code>graeae</code> function prints the shortcode to tell nikola to embed the chart here and then returns a Path object pointing to the saved file.</p>
+<div class="notecard" id="orgc8f6258">
 <p><b>Note:</b> I haven't figured out how to get <code>jupyter-emacs</code> to dump python output without formatting it as a <code>#+RESULTS</code> block so it will need a little clean up after the function is called. If not, the shortcode will work, but it will also create an empty box underneath it.</p>
 </div>
 <div class="highlight">
-<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">save_vega_embed</span><span class="p">(</span><span class="n">chart</span><span class="o">=</span><span class="n">value_counts_chart</span><span class="p">,</span>
-                      <span class="n">name</span><span class="o">=</span><span class="s2">"value-counts-bar-chart"</span><span class="p">,</span>
-                      <span class="n">div_id</span><span class="o">=</span><span class="n">DIV_ID</span><span class="p">,</span>
-                      <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">))</span>
+<pre><span></span><span class="n">chart_path</span> <span class="o">=</span> <span class="n">save_vega_embed</span><span class="p">(</span><span class="n">chart</span><span class="o">=</span><span class="n">value_counts_chart</span><span class="p">,</span>
+                             <span class="n">name</span><span class="o">=</span><span class="s2">"value-counts-bar-chart"</span><span class="p">,</span>
+                             <span class="n">div_id</span><span class="o">=</span><span class="n">DIV_ID</span><span class="p">,</span>
+                             <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
 </pre></div>
 <p></p>
 <div class="altair-vega" id="value-counts-0d454587"></div>
-<script src="value-counts-bar-chart.js"></script></div>
+<script src="value-counts-bar-chart.js"></script>
+<div class="highlight">
+<pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">chart_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</pre></div>
+<pre class="example">
+value-counts-bar-chart.js
+</pre></div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org9a99521">
-<h2 id="org9a99521">And a Line Plot</h2>
-<div class="outline-text-2" id="text-org9a99521">
+<div class="outline-2" id="outline-container-org665fb0f">
+<h2 id="org665fb0f">And a Line Plot</h2>
+<div class="outline-text-2" id="text-org665fb0f">
 <p>I'm going to re-plot the data as a line chart to make sure there's nothing I created that causes them to mess each other up.</p>
 <div class="highlight">
 <pre><span></span><span class="n">line_chart</span> <span class="o">=</span> <span class="n">value_counts_chart</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">save_vega_embed</span><span class="p">(</span><span class="n">line_chart</span><span class="p">,</span>
-                      <span class="n">name</span><span class="o">=</span><span class="s2">"value-counts-line-chart"</span><span class="p">,</span>
-                      <span class="n">div_id</span><span class="o">=</span><span class="s2">"line-chart-0d454587"</span><span class="p">,</span>
-                      <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">))</span>
+<span class="n">save_vega_embed</span><span class="p">(</span><span class="n">line_chart</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">"value-counts-line-chart"</span><span class="p">,</span>
+                <span class="n">div_id</span><span class="o">=</span><span class="s2">"line-chart-0d454587"</span><span class="p">,</span>
+                <span class="n">output_path</span><span class="o">=</span><span class="n">OUTPUT_PATH</span><span class="p">)</span>
 </pre></div>
 <p></p>
 <div class="altair-vega" id="line-chart-0d454587"></div>
 <script src="value-counts-line-chart.js"></script>
-<div class="notecard" id="org1b0367b">
+<div class="notecard" id="orgdfe140c">
 <p><b>Note:</b> The <code>altairdiv</code> shortcode sets the HTML class for the chart's div to "altair-vega" in case it needs styling later.</p>
 </div>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org84ac4bc">
-<h2 id="org84ac4bc">The End</h2>
-<div class="outline-text-2" id="text-org84ac4bc">
+<div class="outline-2" id="outline-container-org4851192">
+<h2 id="org4851192">The End</h2>
+<div class="outline-text-2" id="text-org4851192">
 <p>Well, that seems to work. I was originally going to throw this away once things seemed to be all right, but I'll keep it as a future reference in case I forget how to use this stuff later.</p>
+<p>Here's the files that were updated to make this work.</p>
+<ul class="org-ul">
+<li>shortcodes/altairdiv.tmpl</li>
+<li>themes/custom-jinja/templates/
+<ul class="org-ul">
+<li>altair.tmpl</li>
+<li>altair_helper.tmpl</li>
+<li>index.tmpl</li>
+</ul>
+</li>
+</ul>
+<p>As well as <code>graeae.visualization.altair_helpers.save_vega_embed</code>.</p>
+<p>To get the post working it needs <code>.. template: altair.tmpl</code> in the meta-data and the output of the <code>save_vega_embed</code> function cleaned up (to get the shortcode to include the chart).</p>
 </div>
 </div>
-<div class="outline-2" id="outline-container-org99211c6">
-<h2 id="org99211c6">Links</h2>
-<div class="outline-text-2" id="text-org99211c6">
+<div class="outline-2" id="outline-container-org816f8f0">
+<h2 id="org816f8f0">Links</h2>
+<div class="outline-text-2" id="text-org816f8f0">
 <ul class="org-ul">
 <li>Saving Altair Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 16]. Available from: <a href="https://altair-viz.github.io/user_guide/saving_charts.html">https://altair-viz.github.io/user_guide/saving_charts.html</a></li>
 <li>vega/vega-embed [Internet]. Vega; 2024 [cited 2024 Mar 16]. Available from: <a href="https://github.com/vega/vega-embed">https://github.com/vega/vega-embed</a></li>
+<li>Vega-Lite [Internet]. [cited 2024 Mar 20]. Customizing Size. Available from: <a href="https://vega.github.io/vega-lite/docs/size.html">https://vega.github.io/vega-lite/docs/size.html</a></li>
 <li>World Happiness Report [Internet]. 2023 [cited 2023 Dec 11]. Available from: <a href="https://worldhappiness.report/">https://worldhappiness.report/</a></li>
 </ul>
 </div>
