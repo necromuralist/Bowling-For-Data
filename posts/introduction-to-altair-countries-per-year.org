@@ -164,8 +164,9 @@ value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
     x=YEAR_AS_NOMINATIVE,
     y="count").properties(height=Chart.height, width=Chart.width)
 
-VALUE_COUNTS_JS = VALUE_COUNTS_NAME + ".js"
-Chart.save(value_counts_chart, name=VALUE_COUNTS_NAME, div_id=DIV_ID)
+VALUE_COUNTS_JS = Chart.save(value_counts_chart,
+                             name=VALUE_COUNTS_NAME,
+                             div_id=DIV_ID)
 #+end_src
 
 {{% altairdiv source="value-counts-bar-chart.js" divid="value-counts-bar-chart-a897e2c7" %}}
@@ -182,12 +183,11 @@ DIV_ID = ALTAIR_COUNTS_NAME + "-" + RANDOM_HEX
 
 altair_counts_chart = altair.Chart(table).mark_bar().encode(
     x=YEAR_AS_NOMINATIVE,
-    y="count()").properties(height=HEIGHT, width=WIDTH)
+    y="count()").properties(height=Chart.height, width=Chart.width)
 
-
-ALTAIR_COUNTS_JS = ALTAIR_COUNTS_NAME + ".js"
-
-SAVE_IT(altair_counts_chart, name=ALTAIR_COUNTS_NAME, div_id=DIV_ID)
+ALTAIR_COUNTS_JS = Chart.save(altair_counts_chart,
+                              name=ALTAIR_COUNTS_NAME,
+                              div_id=DIV_ID)
 #+end_src
 
 {{% altairdiv source="altair-counts-bar-chart.js" divid="altair-counts-bar-chart-a897e2c7" %}}
@@ -205,15 +205,15 @@ So, we have two ways to make the same plot - is there a reason to prefer one ove
 The charts shown above are created by having altair create a JSON object (the chart specification) which is passed to a (javascript) function created by [[https://github.com/vega/vega-embed][~vega-embed~]] in the browser. So if we look at the file-sizes for the charts, the difference will be in the size of the JSON created for each chart.
 
 #+begin_src python :results output :exports both
-altair_counts_html = OUTPUT_PATH/(ALTAIR_COUNTS_JS)
-pandas_counts_html = OUTPUT_PATH/(VALUE_COUNTS_JS)
+altair_counts_html = ALTAIR_COUNTS_JS
+pandas_counts_html = VALUE_COUNTS_JS
 print("Altair counts(): {:,} bytes".format(altair_counts_html.stat().st_size))
 print("Pandas value_counts: {:,} bytes".format(pandas_counts_html.stat().st_size))
 #+end_src
 
 #+RESULTS:
-: Altair counts(): 684,749 bytes
-: Pandas value_counts: 1,703 bytes
+: Altair counts(): 684,757 bytes
+: Pandas value_counts: 1,711 bytes
 
 As you can see, letting altair count the data created a huge JSON object (compared to the pandas version). Altair acts as a translation layer between our python objects and vega. In the case where we tell altair that the y-axis uses ~"count()"~,  it means that altair converts our entire pandas DataFrame into JSON then passes it to the browser where vega does the counting. Even though our final chart only uses the "year" column and has one row per year, the javascript has all the original columns and rows.
 
@@ -314,6 +314,8 @@ print("{:,}".format(len(table)))
 : 2,199
 
 As expected, altair converted our entire ~table~ DataFrame to JSON and passed it to vega for the second chart, inflating the amount of text sent to the browser a bit. It might or might not make a difference in this broadband world, but it's something to be aware of if you put multiple charts into one page or have a really large data set.
+
+One thing that occurred to me is that since the data is creating one object per row, rather than mapping a column to an array (the intuitive assumption on my part was that you'd have something like ~{"column-name":[1, 2, 3]}~ rather than ~{"column-name": 1}, {"column-name": 2}, {"column-name": 3}~ ), then in the cases where the column names are longer than the data points in their column (as is the case for most of my data-frames (I like names a bit verbose)) most of the "dataset" passed to vega is made up of the column names rather than the data values. So, if nothing else, it would probably help quite a bit to get rid of columns that aren't used in the chart.
 
 See the [[https://altair-viz.github.io/user_guide/large_datasets.html][altair documentation on Large Datasets]] for more information.
 * A Chart, Part By Part
