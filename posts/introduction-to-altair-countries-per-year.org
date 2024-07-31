@@ -11,7 +11,7 @@
 #+END_COMMENT
 #+OPTIONS: ^:{}
 #+TOC: headlines 3
-#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-470e6ac6-16c0-4782-8853-e512588ce54c-ssh.json
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-d7fbe181-97a3-4039-b0ce-0c851d24a9f5-ssh.json
 
 #+BEGIN_SRC python :results none :exports none
 %load_ext autoreload
@@ -39,6 +39,7 @@ from expects import be, be_true, equal, expect
 from tabulate import tabulate
 
 # monkey
+from graeae import EmbedHoloviews
 from graeae.visualization.altair_helpers import output_path, save_vega_embed
 #+end_src
 
@@ -46,6 +47,7 @@ These are the ones that are really needed for the plotting. I installed both of 
 
 #+begin_src python :results none
 import altair
+import hvplot.pandas
 import pandas
 #+end_src
 
@@ -58,13 +60,16 @@ SLUG = "introduction-to-altair-bar-plot"
 OUTPUT_PATH = output_path(SLUG)
 
 SAVE_IT = partial(save_vega_embed, output_path=OUTPUT_PATH)
+Embed = partial(EmbedHoloviews, folder_path=OUTPUT_PATH)
 
 class Chart:
     year = "year"
+    count = "count"
     path = OUTPUT_PATH
     save = SAVE_IT
     height = 600
     width = "container"
+    embed_hvplot = Embed
 #+end_src
 
 This is to make printing out a pandas dataframe as a table a little nicer.
@@ -162,7 +167,7 @@ DIV_ID = VALUE_COUNTS_NAME + "-" + RANDOM_HEX
 
 value_counts_chart = altair.Chart(year_counts).mark_bar().encode(
     x=YEAR_AS_NOMINATIVE,
-    y="count").properties(height=Chart.height, width=Chart.width)
+    y=Chart.count).properties(height=Chart.height, width=Chart.width)
 
 VALUE_COUNTS_JS = Chart.save(value_counts_chart,
                              name=VALUE_COUNTS_NAME,
@@ -205,15 +210,14 @@ So, we have two ways to make the same plot - is there a reason to prefer one ove
 The charts shown above are created by having altair create a JSON object (the chart specification) which is passed to a (javascript) function created by [[https://github.com/vega/vega-embed][~vega-embed~]] in the browser. So if we look at the file-sizes for the charts, the difference will be in the size of the JSON created for each chart.
 
 #+begin_src python :results output :exports both
-altair_counts_html = ALTAIR_COUNTS_JS
-pandas_counts_html = VALUE_COUNTS_JS
-print("Altair counts(): {:,} bytes".format(altair_counts_html.stat().st_size))
-print("Pandas value_counts: {:,} bytes".format(pandas_counts_html.stat().st_size))
+print("Altair counts(): {:,} bytes".format(ALTAIR_COUNTS_JS.stat().st_size))
+print("Pandas value_counts: {:,} bytes".format(VALUE_COUNTS_JS.stat().st_size))
 #+end_src
 
 #+RESULTS:
 : Altair counts(): 684,757 bytes
 : Pandas value_counts: 1,711 bytes
+
 
 As you can see, letting altair count the data created a huge JSON object (compared to the pandas version). Altair acts as a translation layer between our python objects and vega. In the case where we tell altair that the y-axis uses ~"count()"~,  it means that altair converts our entire pandas DataFrame into JSON then passes it to the browser where vega does the counting. Even though our final chart only uses the "year" column and has one row per year, the javascript has all the original columns and rows.
 
@@ -594,6 +598,39 @@ expect(propertied.height).to(equal(HEIGHT))
 : 600
 
 * HVPlot
+
+#+begin_src python :results none
+plot = year_counts.hvplot.bar(x=Chart.year, y=Chart.count, height=Chart.height, width=800)
+hvplot_chart = Chart.embed_hvplot(plot=plot, file_name="hvplot-bar")
+output = hvplot_chart()
+#+end_src
+
+#+begin_src python :results output html :exports results
+print(output)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<object type="text/html" data="hvplot-bar.html" style="width:100%" height=800>
+  <p>Figure Missing</p>
+</object>
+#+end_export
+
+#+begin_src python :results output :exports both
+hvplot_path = Chart.path/"hvplot-bar.html"
+
+print("Altair counts(): {:,} bytes".format(ALTAIR_COUNTS_JS.stat().st_size))
+print("Pandas value_counts: {:,} bytes".format(VALUE_COUNTS_JS.stat().st_size))
+print("value_counts using hvplot: {:,} bytes".format(hvplot_path.stat().st_size))
+#+end_src
+
+#+RESULTS:
+: Altair counts(): 684,757 bytes
+: Pandas value_counts: 1,711 bytes
+: value_counts using hvplot: 12,082 bytes
+
+At first glance it's a little surprising that the ~hvplot~ is so much bigger than the ~altair~ plot. This might be because it's embedding the whole HTML file like I used to do with altair... That's part of it, the other is that the bokeh has more stuff. Maybe adding interactivity to the altair plot would even them up.
+
 * Links
 ** The Posts In This Series
 
@@ -611,4 +648,6 @@ expect(propertied.height).to(equal(HEIGHT))
 - Layered and Multi-View Charts — Vega-Altair 5.2.0 documentation [Internet]. [cited 2023 Dec 12]. Available from: https://altair-viz.github.io/user_guide/compound_charts.html
 - Large Datasets — Vega-Altair 5.2.0 documentation [Internet]. [cited 2024 Mar 8]. Available from: https://altair-viz.github.io/user_guide/large_datasets.html
 - vega/vega-embed [Internet]. Vega; 2024 [cited 2024 Mar 16]. Available from: https://github.com/vega/vega-embed
-  
+
+** hvPlot
+- hvPlot — hvPlot 0.9.2 documentation [Internet]. [cited 2024 Mar 22]. Available from: https://hvplot.holoviz.org/
