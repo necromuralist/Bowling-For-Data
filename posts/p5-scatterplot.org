@@ -1,0 +1,96 @@
+#+BEGIN_COMMENT
+.. title: P5 Scatterplot
+.. slug: p5-scatterplot
+.. date: 2024-07-15 18:28:35 UTC-07:00
+.. tags: p5.js,data-visualization
+.. category: P5js
+.. link: 
+.. description : Using p5.js to plot some data.
+.. type: text
+.. status: 
+.. updated: 
+#+END_COMMENT
+#+OPTIONS: ^:{}
+#+TOC: headlines 2
+#+PROPERTY: header-args :session ~/.local/share/jupyter/runtime/kernel-d89c85d6-ecab-43c5-893e-3ed07b5932e2.json
+
+#+BEGIN_SRC python :results none :exports none
+%load_ext autoreload
+%autoreload 2
+#+END_SRC
+
+The "rando-5000.csv" is a subset of citi-bike data used to illustrate [[https://github.com/CenterForSpatialResearch/dataviz_tutorials/blob/master/04_WorkingWithData_p5js.md][WorkingWithData_p5.js]].
+
+* Setup
+
+** Import
+
+#+begin_src python :results none
+# python
+from functools import partial
+
+# pypi
+from tabulate import tabulate
+import pandas
+#+end_src
+
+#+begin_src python :results none
+TABLE = partial(tabulate,
+                headers="keys",
+                tablefmt="orgtbl",
+                showindex=False)
+#+end_src
+
+* Rando 5000
+
+This file comes from the "Center For Spatial Research's" tutorial on github. The file contains data about trips taken using Citi Bikes in New York City in October 2017. For the tutorial they took a random sample of the trips from October 10, 2017 where a year of birth was given for the rider.
+
+#+begin_src python :results none
+data = pandas.read_csv("/media/irvin/datasets/bike-sharing/rando-5000.csv",
+                       index_col=0)
+#+end_src
+
+** The Columns
+
+#+begin_src python :results output :exports both
+for column in sorted(data.columns):
+    print(f" - ={column}=")
+#+end_src
+
+ - =bikeid=
+ - =birth year=
+ - =end station id=
+ - =end station latitude=
+ - =end station longitude=
+ - =end station name=
+ - =gender=
+ - =start station id=
+ - =start station latitude=
+ - =start station longitude=
+ - =start station name=
+ - =starttime=
+ - =stoptime=
+ - =tripduration=
+ - =usertype=
+
+** User Type
+
+| Value      | Meaning                    |
+|------------+----------------------------|
+| Customer   | 24-hour pass or 3-day pass |
+| Subscriber | Annual Member              |
+
+#+begin_src python :results output :exports both
+print(data.usertype.value_counts())
+#+end_src
+** Gender
+
+| Value | Meaning |
+|-------+---------|
+|     0 | Unknown |
+|     1 | Male    |
+|     2 | Female  |
+
+* Links
+ - [[https://github.com/CenterForSpatialResearch/dataviz_tutorials/blob/master/04_WorkingWithData_p5js.md][Working With Data]]: The markdown file on GitHub where I found the link to this data.
+ - [[https://citibikenyc.com/system-data][Citi Bike Trip Histories]]: This is the page for the Citi Bike data, although note that the datasets here are old while this page is for their current data (so the column names might not match)
